@@ -1,0 +1,96 @@
+// 布局切换器
+.layout-switcher
+  position: fixed
+  top: 80px
+  right: 20px
+  z-index: 100
+  display: flex
+  flex-direction: column
+  gap: 8px
+  .layout-btn
+    padding: 8px 16px
+    border: 1px solid var(--border)
+    border-radius: $border-bar
+    background-color: var(--card)
+    cursor: pointer
+    trans1 all
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1)
+    &:hover
+      background-color: var(--block)
+      transform: translateX(-2px)
+    &.active
+      background-color: var(--theme)
+      color: white
+      border-color: var(--theme)
+
+// list
+.l_main .post-list
+  margin: 1rem
+  .post-title:first-child
+    margin-top: .5rem
+
+.l_main .post-list
+  .post-title
+    font-weight: 500
+    margin: 1.25rem auto .75rem 0
+    line-height: 1.2
+    font-size: $fsh4
+    border-bottom: none
+    color: var(--text)
+    trans1 color
+    @media screen and (max-width: $device-mobile)
+      font-size: $fsh5
+      margin: 0.5rem 0
+  .wiki .post-title
+    margin-top: 0.5rem
+
+// 列表布局
+.post-list.list
+  display: grid
+  grid-template-columns: 1fr
+  gap: 1rem
+
+// 网格布局
+.post-list.grid
+  display: grid
+  grid-template-columns: repeat(3, 1fr)
+  gap: 1rem
+  @media screen and (max-width: $device-laptop)
+    grid-template-columns: repeat(2, 1fr)
+  @media screen and (max-width: $device-mobile)
+    grid-template-columns: 1fr
+
+// 紧凑布局
+.post-list.compact
+  display: grid
+  grid-template-columns: 1fr
+  gap: 0.5rem
+  .post-card
+    padding: 0.75rem
+    .post-cover
+      display: none
+
+// 仅标题布局
+.post-list.title-only
+  display: grid
+  grid-template-columns: 1fr
+  gap: 0.25rem
+  .post-card
+    padding: 0.5rem 1rem
+    border-radius: 4px
+    background: transparent
+    box-shadow: none
+    border: none
+    &:hover
+      background: var(--block)
+      transform: translateX(4px)
+    .post-cover
+      display: none
+    .excerpt
+      display: none
+    .meta
+      display: none
+    .post-title
+      margin: 0
+      font-size: 1rem
+      font-weight: 400

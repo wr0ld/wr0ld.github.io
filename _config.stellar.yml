@@ -1,0 +1,74 @@
+######## Sidebar ########
+logo:
+  avatar: '[{config.avatar}](/about/)'
+  title: '[{config.title}](/)'
+  subtitle: '{config.subtitle}'
+
+menubar:
+  columns: 4
+  items:
+    - id: post
+      theme: '#1BCDFC'
+      icon: solar:documents-bold-duotone
+      title: 博客
+      url: /
+    - id: about
+      theme: '#3DC550'
+      icon: solar:user-bold-duotone
+      title: 关于
+      url: /about/
+
+######## Main ########
+site_tree:
+  home:
+    leftbar: welcome, categories
+    rightbar: recent
+  index_blog:
+    leftbar: welcome, categories
+    rightbar: recent
+  post:
+    leftbar: categories, recent
+
+######## Article ########
+article:
+  type: tech
+  auto_cover: true
+  auto_banner: true
+  auto_excerpt: 200
+  license: '本文采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 许可协议，转载请注明出处。'
+
+######## Style ########
+style:
+  prefers_theme: dark # auto / light / dark
+  smooth_scroll: false
+
+######## Comments ########
+comments:
+  service: 
+  comment_title: 评论
+
+######## Footer ########
+footer:
+  social:
+    github:
+      icon: '<img src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/08a41b181ce68.svg"/>'
+      url: https://github.com/wr0ld
+    theme:
+      icon: default:theme
+      onclick: 'switchTheme()'
+  sitemap:
+    '博客':
+      - '[首页](/)'
+      - '[归档](/archives/)'
+    '关于':
+      - '[关于我](/about/)'
+  content: |
+
+######## Plugins ########
+plugins:
+  fancybox:
+    enable: true
+    loader: /js/plugins/fancybox-loader.js
+    js: https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js
+    css: https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css
+    selector: .md-text img:not([class]), .md-text .image img

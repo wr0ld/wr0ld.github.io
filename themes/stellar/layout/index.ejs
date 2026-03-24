@@ -1,0 +1,131 @@
+<%
+if (page.menu_id == undefined) {
+  page.menu_id = 'post';
+}
+if (page.title && page.wiki) {
+  page.robots = 'noindex,follow';
+}
+
+function layout_post_card(layout, post, content) {
+  var el = '';
+  var layout = layout;
+  if (layout == 'post' && post.cover != undefined && post.poster != undefined) {
+    layout += ' photo';
+  }
+  el += `<a class="post-card${scrollreveal(' ')} ${layout}" href="${url_for(post.link || post.path)}">`
+  el += content;
+  el += '</a>';
+  return el;
+}
+
+function layout_post_list(partial, layoutClass) {
+  var el = '';
+  el += `<div class="post-list post ${layoutClass}">`;
+  page.posts.each(function(post){
+    el += layout_post_card('post', post, partial(post));
+  })
+  el += '</div>';
+  return el;
+}
+
+// 获取所有文章数据（用于仅标题布局）
+var allPosts = [];
+site.posts.sort('date', -1).each(function(post) {
+  allPosts.push({
+    title: post.title || '无标题',
+    path: post.path,
+    link: post.link
+  });
+});
+%>
+
+<%- partial('_partial/main/navbar/nav_tabs_blog') %>
+
+<div class="layout-switcher">
+  <button class="layout-btn" data-layout="list">列表</button>
+  <button class="layout-btn active" data-layout="grid">网格</button>
+  <button class="layout-btn" data-layout="compact">紧凑</button>
+  <button class="layout-btn" data-layout="title-only">仅标题</button>
+</div>
+
+<div id="post-container">
+  <%- layout_post_list(function(post){
+    return partial('_partial/main/post_list/post_card', {post: post, layout: 'grid'})
+  }, 'grid') %>
+</div>
+
+<div id="paginator-wrapper">
+  <%- partial('_partial/main/post_list/paginator') %>
+</div>
+
+<script>
+  // 所有文章数据
+  const allPostsData = <%- JSON.stringify(allPosts) %>;
+  
+  // 布局切换功能
+  (function() {
+    const layoutButtons = document.querySelectorAll('.layout-btn');
+    const postContainer = document.getElementById('post-container');
+    const paginatorWrapper = document.getElementById('paginator-wrapper');
+    let postList = postContainer.querySelector('.post-list');
+    
+    // 保存原始HTML内容
+    const originalHTML = postContainer.innerHTML;
+    
+    // 从localStorage加载保存的布局
+    const savedLayout = localStorage.getItem('Stellar.layout') || 'grid';
+    
+    // 渲染所有文章（仅标题模式）
+    function renderAllPosts() {
+      let html = '<div class="post-list post title-only">';
+      allPostsData.forEach(function(post) {
+        html += `<a class="post-card" href="${post.link || '/' + post.path}">`;
+        html += `<div class="post-title">${post.title}</div>`;
+        html += '</a>';
+      });
+      html += '</div>';
+      postContainer.innerHTML = html;
+      postList = postContainer.querySelector('.post-list');
+    }
+    
+    // 应用保存的布局
+    function applyLayout(layout) {
+      // 更新按钮状态
+      layoutButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.layout === layout) {
+          btn.classList.add('active');
+        }
+      });
+      
+      // 如果是仅标题布局，重新渲染所有文章
+      if (layout === 'title-only') {
+        renderAllPosts();
+        paginatorWrapper.style.display = 'none';
+      } else {
+        // 恢复原始HTML
+        postContainer.innerHTML = originalHTML;
+        postList = postContainer.querySelector('.post-list');
+        
+        // 应用布局类
+        postList.classList.remove('list', 'grid', 'compact', 'title-only');
+        postList.classList.add(layout);
+        paginatorWrapper.style.display = 'block';
+      }
+      
+      // 保存布局到localStorage
+      localStorage.setItem('Stellar.layout', layout);
+    }
+    
+    // 绑定按钮点击事件
+    layoutButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const layout = this.dataset.layout;
+        applyLayout(layout);
+      });
+    });
+    
+    // 初始化布局
+    applyLayout(savedLayout);
+  })();
+</script>

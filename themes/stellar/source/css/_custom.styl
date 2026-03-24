@@ -1,0 +1,336 @@
+@require('_defines/const')
+
+// 通用主题色
+$color-theme = convert(hexo-config('style.color.theme'))
+$color-accent = convert(hexo-config('style.color.accent'))
+$color-link = convert(hexo-config('style.color.link'))
+$color-hover = convert(hexo-config('style.color.hover'))
+
+// 动态颜色
+$color-background = convert(hexo-config('style.color.background'))
+$color-block = convert(hexo-config('style.color.block'))
+$color-code = convert(hexo-config('style.color.code'))
+$color-text = convert(hexo-config('style.color.text'))
+
+$ff-body = system-ui, "Microsoft Yahei", "Segoe UI", -apple-system, Roboto, Ubuntu, "Helvetica Neue", Arial, "WenQuanYi Micro Hei", sans-serif
+$ff-codeblock = Menlo, Monaco, Consolas, system-ui, "Courier New", monospace, sans-serif
+$ff-code = $ff-codeblock
+$ff-logo = $ff-body
+
+if hexo-config('style.font-family.body')
+  $ff-body = convert(hexo-config('style.font-family.body'))
+
+if hexo-config('style.font-family.code')
+  $ff-code = convert(hexo-config('style.font-family.code'))
+
+if hexo-config('style.font-family.codeblock')
+  $ff-codeblock = convert(hexo-config('style.font-family.codeblock'))
+
+if hexo-config('style.font-family.logo')
+  $ff-logo = convert(hexo-config('style.font-family.logo'))
+
+
+// font size
+$fs-root = convert(hexo-config('style.font-size.root'))
+$fs-15 = .9375rem
+$fs-14 = .875rem
+$fs-13 = .8125rem
+$fs-12 = .75rem
+
+$fs-body = convert(hexo-config('style.font-size.body'))
+$fs-code = convert(hexo-config('style.font-size.code'))
+$fs-codeblock = convert(hexo-config('style.font-size.codeblock'))
+
+$fsh1 = 'calc(%s + 9px)' % $fs-body
+$fsh2 = 'calc(%s + 11px)' % $fs-body
+$fsh3 = 'calc(%s + 7px)' % $fs-body
+$fsh4 = 'calc(%s + 4px)' % $fs-body
+$fsh5 = 'calc(%s + 2px)' % $fs-body
+
+$fsp0 = 'calc(%s - 0px)' % $fs-body
+$fsp1 = 'calc(%s - 1px)' % $fs-body
+$fsp2 = 'calc(%s - 2px)' % $fs-body
+$fsp3 = 'calc(%s - 3px)' % $fs-body
+
+$border-card-l = convert(hexo-config('style.border-radius.card-l'))
+$border-card = convert(hexo-config('style.border-radius.card'))
+$border-bar = convert(hexo-config('style.border-radius.bar'))
+$border-image = convert(hexo-config('style.border-radius.image'))
+$border-button = 4px
+
+// 可以动态变化的属性
+:root
+  --width-main: 1000px
+  --fsp: $fs-body
+  --fsh2: 'calc(%s + 11px)' % var(--fsp)
+  --fsh3: 'calc(%s + 7px)' % var(--fsp)
+  --fsh4: 'calc(%s + 4px)' % var(--fsp)
+  
+  // 侧边栏文字内容宽度
+  --side-content-width: 224px
+  // 元素轮廓到容器边缘的间距
+  --gap-margin: 16px
+  // 元素文本内容到元素自身的轮廓的间距
+  --gap-padding: 16px
+  
+  --gap-p: 'calc(%s + 4px)' % $fs-body // gap for paragraph
+  --gap-p-compact: 'calc(%s * 0.75)' % $fs-body
+  // desktop 2k or larger
+  @media screen and (min-width: $device-2k)
+    --width-main: 1100px
+  // desktop 4k or larger
+  @media screen and (min-width: $device-4k)
+    --width-main: 1200px
+  // iPad 竖屏
+  @media screen and (max-width: $device-tablet)
+    --side-content-width: 188px
+  @media screen and (max-width: $device-mobile-max)
+    --side-content-width: 224px
+
+// 动态计算值
+:root
+  // 元素文本内容到容器边缘的间距
+  --gap-max: calc(var(--gap-margin) + var(--gap-padding))
+
+// 文章布局风格
+.l_body.story
+  --gap-p: 2rem
+  div.tag-plugin,p>img
+    margin-top: 2.4rem
+    margin-bottom: 2.4rem
+
+// shadow
+$boxshadow-card = 0 1px 2px 0px rgba(0, 0, 0, 0.1)
+$boxshadow-float = 0 4px 8px 0px rgba(0, 0, 0, 0.1)
+$boxshadow-card-float = 0 12px 16px -4px rgba(0, 0, 0, 0.2)
+$boxshadow-button = 0 0 2px 0px rgba(0, 0, 0, 0.04), 0 0 8px 0px rgba(0, 0, 0, 0.04)
+$boxshadow-block = 0 1px 4px 0px rgba(0, 0, 0, 0.02), 0 2px 8px 0px rgba(0, 0, 0, 0.02)
+$boxshadow-toast = 0 4px 8px 0px rgba(0, 0, 0, 0.1), 0 12px 16px -4px rgba(0, 0, 0, 0.2)
+
+// Live2D Widget 位置调整 - 强制右下角
+#waifu
+  position: fixed !important
+  bottom: 20px !important
+  right: 20px !important
+  left: auto !important
+  z-index: 1000 !important
+  transform: none !important
+
+#waifu #live2d
+  position: relative !important
+  transform: none !important
+
+#waifu-toolbar
+  position: relative !important
+  transform: none !important
+
+// 自定义鼠标样式 - 美化版
+*
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="1" flood-color="%23000" flood-opacity="0.3"/></filter></defs><circle cx="12" cy="12" r="5" fill="%23333" stroke="%23fff" stroke-width="2" filter="url(%23shadow)"/><circle cx="12" cy="12" r="2" fill="%23fff" opacity="0.8"/></svg>') 12 12, auto !important
+
+a, button, input[type="button"], input[type="submit"], .post-card, .layout-btn
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><defs><filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="%23000" flood-opacity="0.4"/></filter></defs><circle cx="14" cy="14" r="6" fill="%233498db" stroke="%23fff" stroke-width="2.5" filter="url(%23shadow)"/><circle cx="14" cy="14" r="2.5" fill="%23fff" opacity="0.9"/></svg>') 14 14, pointer !important
+
+// 点击效果
+.ripple
+  position: absolute
+  border-radius: 50%
+  transform: scale(0)
+  animation: ripple 0.6s linear
+  background-color: rgba(52, 152, 219, 0.4)
+  pointer-events: none
+
+@keyframes ripple
+  to
+    transform: scale(4)
+    opacity: 0
+
+// 按钮点击效果
+button, .post-card, a
+  position: relative
+  overflow: hidden
+  transition: transform 0.2s ease
+
+button:active, .post-card:active, a:active
+  transform: scale(0.95)
+
+// 悬停效果
+.post-card:hover, a:hover
+  transform: translateY(-2px)
+  box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2)
+
+// 点击波纹效果JavaScript
+.ripple-effect
+  position: relative
+  overflow: hidden
+
+// 代码块样式增强 - macOS风格
+.md-text .highlight
+  position: relative
+  padding-top: 2.5rem
+  background: #1e1e1e !important
+  border-radius: 8px
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2)
+  
+  // macOS风格三点
+  &:before
+    content: ''
+    position: absolute
+    top: 12px
+    left: 16px
+    width: 12px
+    height: 12px
+    background: #ff5f56
+    border-radius: 50%
+    box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f
+  
+  figcaption
+    background: #2d2d2d !important
+    padding: 8px 16px
+    margin-top: -2.5rem
+    border-bottom: 1px solid #3d3d3d
+  
+  .code pre
+    padding: 1rem
+    background: transparent !important
+  
+  table
+    background: transparent !important
+    
+    td
+      background: transparent !important
+  
+  .gutter
+    background: rgba(255, 255, 255, 0.05) !important
+    border-right: 1px solid rgba(255, 255, 255, 0.1)
+
+// 行内代码样式
+.md-text code:not([class])
+  background: rgba(255, 255, 255, 0.1) !important
+  padding: 0.2em 0.4em
+  border-radius: 4px
+  color: #e06c75 !important
+  font-weight: 500
+
+// 像素风格字体
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap')
+
+// 标题使用像素字体
+.logo-wrap .title .main, .navbar-container nav a
+  font-family: 'Press Start 2P', cursive !important
+  font-size: 0.9em !important
+  letter-spacing: 1px
+
+// 暗色主题所有文字改为白色
+:root[data-theme="dark"]
+  // 全局文字颜色
+  *
+    color: #ffffff !important
+  
+  // 分类标签文字
+  .widget .link
+    color: #ffffff !important
+    &:hover
+      color: var(--theme) !important
+  
+  // 侧边栏分类
+  .widget .title
+    color: #ffffff !important
+  
+  // 文章卡片内容
+  .post-card
+    .post-title
+      color: #ffffff !important
+    .excerpt
+      color: #ffffff !important
+      p
+        color: #ffffff !important
+    .meta
+      color: #ffffff !important
+      span
+        color: #ffffff !important
+  
+  // 文章详情页
+  .md-text
+    color: #ffffff !important
+    p, li, td, th
+      color: #ffffff !important
+    h1, h2, h3, h4, h5, h6
+      color: #ffffff !important
+    code
+      color: #ffffff !important
+      background: rgba(255, 255, 255, 0.1) !important
+    pre code
+      color: #ffffff !important
+  
+  // 标签页
+  .tag-plugin
+    color: #ffffff !important
+    .tag
+      color: #ffffff !important
+      background: rgba(255, 255, 255, 0.1) !important
+  
+  // 归档页
+  .archive .post-title
+    color: #ffffff !important
+  
+  // 导航栏
+  .nav-tabs
+    color: #ffffff !important
+  
+  // 搜索框
+  input[type="text"], input[type="search"], textarea
+    color: #ffffff !important
+    &::placeholder
+      color: rgba(255, 255, 255, 0.6) !important
+  
+  // 分页按钮
+  .paginator-wrap
+    .page-number
+      color: #ffffff !important
+    .current
+      color: #ffffff !important
+  
+  // 所有链接
+  a
+    color: #ffffff !important
+  
+  // 所有按钮
+  button
+    color: #ffffff !important
+  
+  // 所有输入框
+  input, textarea, select
+    color: #ffffff !important
+  
+  // 文章内容中的表格 - 白色边框（排除代码块）
+  .md-text table:not(.highlight table)
+    border: 1px solid rgba(255, 255, 255, 0.3) !important
+    border-collapse: collapse !important
+    th, td
+      color: #ffffff !important
+      border: 1px solid rgba(255, 255, 255, 0.2) !important
+      padding: 8px 12px !important
+    th
+      background: rgba(255, 255, 255, 0.1) !important
+      font-weight: bold !important
+  
+  // 所有列表
+  ul, ol, li
+    color: #ffffff !important
+  
+  // 所有标题
+  h1, h2, h3, h4, h5, h6
+    color: #ffffff !important
+  
+  // 所有段落
+  p
+    color: #ffffff !important
+  
+  // 所有span
+  span
+    color: #ffffff !important
+  
+  // 所有div
+  div
+    color: #ffffff !important

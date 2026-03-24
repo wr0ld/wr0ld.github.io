@@ -1,0 +1,137 @@
+<%
+
+function custom_inject() {
+  var el = '';
+  for (let item of (config.inject?.script || [])) {
+    el += item;
+  }
+  for (let item of (theme.inject?.script || [])) {
+    el += item;
+  }
+  for (let item of (page.inject?.script || [])) {
+    el += item;
+  }
+  return el;
+}
+
+%>
+<%- partial('scripts/defines') %>
+<%- partial('scripts/utils') %>
+<%- partial('scripts/sidebar') %>
+<%- partial('scripts/tagtree') %>
+<%- partial('scripts/lazyload') %>
+
+<!-- required -->
+<script src="<%- url_for(`${theme.stellar.main_js}?v=${stellar_info('version')}`) %>" defer></script>
+
+<%- partial('scripts/theme') %>
+
+<!-- optional -->
+<%- partial('comments/script') %>
+
+<%- partial('scripts/services') %>
+<%- partial('../_plugins/index') %>
+
+<!-- inject -->
+<%- custom_inject() %>
+
+<!-- Live2D Widget -->
+<script src="https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 - 爱心爆炸效果 -->
+<script>
+  (function() {
+    // 创建爱心元素
+    function createHeart(x, y) {
+      const heart = document.createElement('div');
+      heart.className = 'click-heart';
+      heart.innerHTML = '❤';
+      heart.style.cssText = `
+        position: fixed;
+        left: ${x - 10}px;
+        top: ${y - 10}px;
+        font-size: 20px;
+        pointer-events: none;
+        z-index: 9999;
+        animation: heartFloat 1s ease-out forwards;
+        color: ${getRandomColor()};
+      `;
+      document.body.appendChild(heart);
+      
+      setTimeout(() => {
+        heart.remove();
+      }, 1000);
+    }
+    
+    // 随机颜色
+    function getRandomColor() {
+      const colors = [
+        '#ff6b6b', '#ff8e8e', '#ffa8a8',
+        '#ff69b4', '#ff1493', '#db7093',
+        '#ff4500', '#ff6347', '#ff7f50',
+        '#ffd700', '#ffec8b', '#ffa500'
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+    
+    // 点击事件
+    document.addEventListener('click', function(e) {
+      // 排除特定元素
+      if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) {
+        return;
+      }
+      
+      // 创建多个爱心
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          const offsetX = (Math.random() - 0.5) * 40;
+          const offsetY = (Math.random() - 0.5) * 40;
+          createHeart(e.clientX + offsetX, e.clientY + offsetY);
+        }, i * 100);
+      }
+    });
+  })();
+</script>
+
+<style>
+  @keyframes heartFloat {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: translateY(-30px) scale(1.2);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-60px) scale(0.8);
+    }
+  }
+</style>

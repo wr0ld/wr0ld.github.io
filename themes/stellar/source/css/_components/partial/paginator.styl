@@ -1,0 +1,60 @@
+.paginator-wrap
+  margin: 0.25rem 1rem
+  display: flex
+  justify-content: space-between
+  align-items: center
+  font-size: 1rem
+  font-weight: 700
+  background: var(--card)
+  border-radius: $border-card-l
+  overflow: hidden
+  box-shadow: 0 2px 8px 0px rgba(0, 0, 0, 0.03)
+  color: var(--text-p3)
+  gap: 6px
+  padding: 4px
+  .page-number
+    flex: 1
+    text-align: center
+    padding: 6px 10px
+    border-radius: 10px
+    margin: 0
+    transition: all 0.2s ease
+  a.page-number
+    color: var(--text-p3)
+    &:hover
+      color: var(--text-p1)
+      background: var(--block)
+      transform: translateY(-1px)
+  .extend
+    flex: 0 0 auto
+    text-align: center
+    background-size: contain
+    width: 1.8rem
+    height: 1.8rem
+    background-origin: content-box
+    background-clip: content-box
+    border-radius: 10px
+    margin: 0
+    &.next
+      background-image: url(hexo-config('style.paginator.next'))
+    &.prev
+      background-image: url(hexo-config('style.paginator.prev'))
+  .current
+    font-family: $ff-code
+    background: var(--block)
+    color: var(--text-p1)
+    font-weight: bold
+  .extend
+    padding: 0.5rem
+    line-height: 0
+    filter: grayscale(100%)
+    img
+      height: 1rem
+    &.disable
+      pointer-events: none
+  span.extend
+    opacity: 0.25
+  a.extend:hover
+    filter: unset
+    background: var(--block)
+    transform: translateY(-1px)

