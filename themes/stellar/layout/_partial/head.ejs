@@ -111,6 +111,7 @@ function generate_canonical() {
 
 <head>
   <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
   <meta name="hexo-theme" content="<%- stellar_info('tree') %>" theme-name="<%- stellar_info('name') %>" theme-version="<%- stellar_info('version') %>">
   <%- generate_canonical() %>
   <%- generate_robots() %>
@@ -146,7 +147,7 @@ function generate_canonical() {
     <%- favicon_tag(config.favicon) %>
   <% } %>
 
-  <% if (config.highlight && config.highlight.enable == true && config.highlight.hljs == true) { %>
+  <% if (config.syntax_highlighter === 'highlight.js' && config.highlight && config.highlight.hljs == true) { %>
     <%- css(theme.style.codeblock.highlightjs_theme) %>
   <% } %>
 

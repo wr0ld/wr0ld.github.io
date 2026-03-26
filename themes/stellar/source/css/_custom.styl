@@ -115,14 +115,39 @@ $boxshadow-toast = 0 4px 8px 0px rgba(0, 0, 0, 0.1), 0 12px 16px -4px rgba(0, 0,
   left: auto !important
   z-index: 1000 !important
   transform: none !important
+  background: transparent !important
+  opacity 0
+  animation waifuFadeIn 0.5s ease forwards
+  animation-delay 0.3s
+
+@keyframes waifuFadeIn
+  to
+    opacity 1
 
 #waifu #live2d
   position: relative !important
   transform: none !important
+  background: transparent !important
 
 #waifu-toolbar
   position: relative !important
   transform: none !important
+  background: transparent !important
+
+// 看板娘canvas透明背景
+#waifu canvas
+  background: transparent !important
+
+// 看板娘提示框透明背景
+#waifu-tips
+  background-color rgba(50, 50, 50, 0.7) !important
+  border 1px solid rgba(100, 100, 100, 0.5) !important
+  color #fff !important
+  opacity 0 !important
+  transition opacity 0.3s !important
+
+#waifu-tips.waifu-tips-active
+  opacity 1 !important
 
 // 自定义鼠标样式 - 美化版
 *
@@ -159,18 +184,13 @@ button:active, .post-card:active, a:active
   transform: translateY(-2px)
   box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2)
 
-// 点击波纹效果JavaScript
-.ripple-effect
-  position: relative
-  overflow: hidden
-
 // 代码块样式增强 - macOS风格
 .md-text .highlight
   position: relative
   padding-top: 2.5rem
-  background: #1e1e1e !important
   border-radius: 8px
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2)
+  border: 1px solid rgba(255, 255, 255, 0.15)
   
   // macOS风格三点
   &:before
@@ -183,26 +203,36 @@ button:active, .post-card:active, a:active
     background: #ff5f56
     border-radius: 50%
     box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f
+    z-index: 10
   
   figcaption
-    background: #2d2d2d !important
     padding: 8px 16px
     margin-top: -2.5rem
-    border-bottom: 1px solid #3d3d3d
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1)
   
   .code pre
     padding: 1rem
-    background: transparent !important
   
   table
-    background: transparent !important
-    
     td
       background: transparent !important
   
   .gutter
-    background: rgba(255, 255, 255, 0.05) !important
     border-right: 1px solid rgba(255, 255, 255, 0.1)
+  
+  // 滚动条样式 - 针对 table
+  table
+    &::-webkit-scrollbar
+      height: 8px
+      width: 8px
+    &::-webkit-scrollbar-track-piece,
+    &::-webkit-scrollbar-corner
+      background: rgba(255, 255, 255, 0.05)
+    &::-webkit-scrollbar-thumb
+      background: rgba(255, 255, 255, 0.3)
+      border-radius: 4px
+      &:hover
+        background: rgba(255, 255, 255, 0.5)
 
 // 行内代码样式
 .md-text code:not([class])
@@ -221,12 +251,8 @@ button:active, .post-card:active, a:active
   font-size: 0.9em !important
   letter-spacing: 1px
 
-// 暗色主题所有文字改为白色
+// 暗色主题文字颜色
 :root[data-theme="dark"]
-  // 全局文字颜色
-  *
-    color: #ffffff !important
-  
   // 分类标签文字
   .widget .link
     color: #ffffff !important
@@ -253,14 +279,9 @@ button:active, .post-card:active, a:active
   // 文章详情页
   .md-text
     color: #ffffff !important
-    p, li, td, th
+    p, li
       color: #ffffff !important
     h1, h2, h3, h4, h5, h6
-      color: #ffffff !important
-    code
-      color: #ffffff !important
-      background: rgba(255, 255, 255, 0.1) !important
-    pre code
       color: #ffffff !important
   
   // 标签页
@@ -325,12 +346,4 @@ button:active, .post-card:active, a:active
   
   // 所有段落
   p
-    color: #ffffff !important
-  
-  // 所有span
-  span
-    color: #ffffff !important
-  
-  // 所有div
-  div
     color: #ffffff !important
