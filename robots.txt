@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wr0ld.github.io/sitemap.xml
+
+# Hey, you found me! 👀
+# Looking for secrets? Keep digging...
+# 
+# Hint: The answer is in the site name (lowercase)
+# Try: secret.flag("answer") in console
+#
+# <!-- hidden_easter_egg_flag: wr0ld -->

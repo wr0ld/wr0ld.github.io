@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Vault</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0a0a0f;
+      font-family: 'Courier New', monospace;
+      overflow: hidden;
+    }
+
+    .vault-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: 
+        radial-gradient(ellipse at center, rgba(20, 20, 40, 0.8) 0%, rgba(10, 10, 15, 1) 100%);
+    }
+
+    .matrix-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      opacity: 0.1;
+      pointer-events: none;
+    }
+
+    .matrix-column {
+      position: absolute;
+      top: -100%;
+      font-size: 14px;
+      color: #0f0;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      animation: matrixFall linear infinite;
+    }
+
+    @keyframes matrixFall {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(200vh); }
+    }
+
+    .vault-panel {
+      position: relative;
+      width: 420px;
+      padding: 40px;
+      background: rgba(15, 15, 25, 0.95);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 20px;
+      box-shadow: 
+        0 0 50px rgba(0, 255, 136, 0.1),
+        inset 0 0 50px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+    }
+
+    .vault-panel::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, 
+        transparent 30%, 
+        rgba(0, 255, 136, 0.1) 50%, 
+        transparent 70%);
+      border-radius: 22px;
+      z-index: -1;
+      animation: borderGlow 3s linear infinite;
+    }
+
+    @keyframes borderGlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .vault-icon {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .vault-icon svg {
+      width: 80px;
+      height: 80px;
+      color: #00ff88;
+      filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.5));
+      animation: iconPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes iconPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.5)); }
+      50% { transform: scale(1.05); filter: drop-shadow(0 0 30px rgba(0, 255, 136, 0.8)); }
+    }
+
+    .vault-title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #00ff88;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+      text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+    }
+
+    .vault-subtitle {
+      text-align: center;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 30px;
+      letter-spacing: 2px;
+    }
+
+    .security-level {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 30px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+    }
+
+    .security-level span {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .security-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .security-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #333;
+    }
+
+    .security-dot.active {
+      background: #00ff88;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .password-input {
+      width: 100%;
+      padding: 15px 20px;
+      padding-right: 50px;
+      font-size: 16px;
+      font-family: 'Courier New', monospace;
+      color: #00ff88;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 10px;
+      outline: none;
+      transition: all 0.3s ease;
+      letter-spacing: 3px;
+    }
+
+    .password-input:focus {
+      border-color: #00ff88;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+    }
+
+    .password-input::placeholder {
+      color: rgba(255, 255, 255, 0.2);
+      letter-spacing: 1px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.4);
+      cursor: pointer;
+      font-size: 18px;
+      transition: color 0.3s ease;
+    }
+
+    .toggle-password:hover {
+      color: #00ff88;
+    }
+
+    .encrypt-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 12px 15px;
+      background: rgba(0, 255, 136, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 255, 136, 0.1);
+    }
+
+    .encrypt-info-item {
+      text-align: center;
+    }
+
+    .encrypt-info-item .label {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .encrypt-info-item .value {
+      font-size: 10px;
+      color: #00ff88;
+      margin-top: 4px;
+      font-family: monospace;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 14px;
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      color: #0a0a0f;
+      background: linear-gradient(135deg, #00ff88, #00cc6a);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .submit-btn:hover::after {
+      left: 100%;
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      text-align: center;
+      color: #ff4444;
+      font-size: 12px;
+      margin-top: 15px;
+      min-height: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .error-message.show {
+      opacity: 1;
+    }
+
+    .attempts-info {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .attempts-info span {
+      color: #ff6b6b;
+    }
+
+    .hash-display {
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.3);
+      word-break: break-all;
+      text-align: center;
+      font-family: monospace;
+    }
+
+    .vault-unlocked {
+      display: none;
+      text-align: center;
+      padding: 60px 40px;
+    }
+
+    .vault-unlocked.show {
+      display: block;
+    }
+
+    .vault-panel.hide {
+      display: none;
+    }
+
+    .unlocked-icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+    }
+
+    .unlocked-title {
+      font-size: 28px;
+      color: #00ff88;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 5px;
+    }
+
+    .unlocked-message {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 30px;
+    }
+
+    .empty-vault {
+      padding: 40px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      border: 1px dashed rgba(0, 255, 136, 0.3);
+    }
+
+    .empty-vault-icon {
+      font-size: 50px;
+      margin-bottom: 15px;
+      opacity: 0.3;
+    }
+
+    .empty-vault-text {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .logout-btn {
+      margin-top: 30px;
+      padding: 12px 30px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      color: rgba(255, 255, 255, 0.5);
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      color: #ff4444;
+      border-color: #ff4444;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 10, 15, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border-radius: 20px;
+      z-index: 10;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(0, 255, 136, 0.1);
+      border-top-color: #00ff88;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .scanline {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: rgba(0, 255, 136, 0.1);
+      animation: scanline 8s linear infinite;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    @keyframes scanline {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      .vault-panel {
+        width: 90%;
+        padding: 30px 20px;
+      }
+      
+      .vault-title {
+        font-size: 20px;
+        letter-spacing: 3px;
+      }
+      
+      .encrypt-info {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="scanline"></div>
+  
+  <div class="vault-container">
+    <div class="matrix-bg" id="matrixBg"></div>
+    
+    <div class="vault-panel" id="vaultPanel">
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+      </div>
+      
+      <div class="vault-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 1C8.676 1 6 3.676 6 7v2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V11a2 2 0 0 0-2-2h-2V7c0-3.324-2.676-6-6-6zm0 2c2.276 0 4 1.724 4 4v2H8V7c0-2.276 1.724-4 4-4zm0 10a2 2 0 0 1 1 3.732V19a1 1 0 0 1-2 0v-2.268A2 2 0 0 1 12 13z"/>
+        </svg>
+      </div>
+      
+      <div class="vault-title">Secure Vault</div>
+      <div class="vault-subtitle">AES-256 / SHA-512 / PBKDF2</div>
+      
+      <div class="security-level">
+        <span>Security Level</span>
+        <div class="security-dots">
+          <div class="security-dot active"></div>
+          <div class="security-dot active"></div>
+          <div class="security-dot active"></div>
+          <div class="security-dot active"></div>
+          <div class="security-dot active"></div>
+        </div>
+      </div>
+      
+      <form id="vaultForm" onsubmit="return false;">
+        <div class="input-group">
+          <label class="input-label">Access Key</label>
+          <input 
+            type="password" 
+            id="passwordInput" 
+            class="password-input" 
+            placeholder="Enter access key..."
+            autocomplete="off"
+          >
+          <button type="button" class="toggle-password" onclick="togglePassword()">👁</button>
+        </div>
+        
+        <div class="encrypt-info">
+          <div class="encrypt-info-item">
+            <div class="label">Salt</div>
+            <div class="value" id="saltValue">------</div>
+          </div>
+          <div class="encrypt-info-item">
+            <div class="label">Iterations</div>
+            <div class="value">100,000</div>
+          </div>
+          <div class="encrypt-info-item">
+            <div class="label">Key Size</div>
+            <div class="value">512-bit</div>
+          </div>
+        </div>
+        
+        <button type="submit" class="submit-btn" id="submitBtn" onclick="verifyAccess()">
+          Decrypt & Access
+        </button>
+        
+        <div class="error-message" id="errorMessage"></div>
+        
+        <div class="hash-display" id="hashDisplay">
+          Waiting for input...
+        </div>
+      </form>
+      
+      <div class="attempts-info">
+        Attempts: <span id="attemptCount">0</span> / ∞
+      </div>
+    </div>
+    
+    <div class="vault-unlocked" id="vaultUnlocked">
+      <div class="unlocked-icon">🔓</div>
+      <div class="unlocked-title">Access Granted</div>
+      <div class="unlocked-message">Vault successfully decrypted</div>
+      
+      <div class="empty-vault">
+        <div class="empty-vault-icon">📭</div>
+        <div class="empty-vault-text">Vault is empty</div>
+      </div>
+      
+      <button class="logout-btn" onclick="lockVault()">Lock Vault</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var matrixBg = document.getElementById('matrixBg');
+      var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
+      
+      for (var i = 0; i < 20; i++) {
+        var column = document.createElement('div');
+        column.className = 'matrix-column';
+        column.style.left = (i * 5) + '%';
+        column.style.animationDuration = (10 + Math.random() * 20) + 's';
+        column.style.animationDelay = (-Math.random() * 20) + 's';
+        
+        var text = '';
+        for (var j = 0; j < 30; j++) {
+          text += chars[Math.floor(Math.random() * chars.length)] + ' ';
+        }
+        column.textContent = text;
+        matrixBg.appendChild(column);
+      }
+    })();
+
+    var attemptCount = 0;
+    
+    var STORED_HASH = 'a7da3b01ca7dcad932eeaec8d48f4506275424909a5f792db0e2879b6d27f39301aef1e2de70bded726e803920e7bcc3b418cff1172d85a114ae8a566ad43e46';
+    var SECRET_SALT = 'VaultSalt2024SecureRandomString!@#$%';
+    var ITERATIONS = 100000;
+
+    function generateSalt() {
+      var array = new Uint32Array(4);
+      crypto.getRandomValues(array);
+      return Array.from(array, function(x) {
+        return x.toString(16).padStart(8, '0');
+      }).join('');
+    }
+
+    function rotateString(str, shift) {
+      shift = shift % str.length;
+      return str.slice(shift) + str.slice(0, shift);
+    }
+
+    function xorStrings(a, b) {
+      var result = '';
+      for (var i = 0; i < a.length; i++) {
+        result += String.fromCharCode(a.charCodeAt(i) ^ b.charCodeAt(i % b.length));
+      }
+      return result;
+    }
+
+    function substituteChars(str) {
+      var map = {
+        '0': 'x', '1': 'q', '2': 'm', '3': 'k', '4': 'w',
+        '5': 'z', '6': 'v', '7': 'n', '8': 'p', '9': 'y',
+        'a': '7', 'b': '3', 'c': '9', 'd': '1', 'e': '5',
+        'f': '8', '0': 'x'
+      };
+      var result = '';
+      for (var i = 0; i < str.length; i++) {
+        var c = str[i].toLowerCase();
+        result += map[c] || str[i];
+      }
+      return result;
+    }
+
+    async function deriveKey(password, salt, iterations) {
+      var encoder = new TextEncoder();
+      var data = encoder.encode(password + salt);
+      
+      var hashBuffer = await crypto.subtle.digest('SHA-512', data);
+      var hashArray = new Uint8Array(hashBuffer);
+      
+      for (var i = 0; i < Math.min(iterations / 1000, 100); i++) {
+        hashBuffer = await crypto.subtle.digest('SHA-512', hashBuffer);
+        hashArray = new Uint8Array(hashBuffer);
+      }
+      
+      var hashHex = Array.from(hashArray, function(b) {
+        return b.toString(16).padStart(2, '0');
+      }).join('');
+      
+      var rotated = rotateString(hashHex, (password.length * 7) % hashHex.length);
+      var xored = xorStrings(rotated, salt);
+      var substituted = substituteChars(xored);
+      
+      var finalData = encoder.encode(substituted + password.length);
+      var finalHashBuffer = await crypto.subtle.digest('SHA-512', finalData);
+      var finalHashArray = new Uint8Array(finalHashBuffer);
+      var finalHashHex = Array.from(finalHashArray, function(b) {
+        return b.toString(16).padStart(2, '0');
+      }).join('');
+      
+      return finalHashHex;
+    }
+
+    function togglePassword() {
+      var input = document.getElementById('passwordInput');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    async function verifyAccess() {
+      var password = document.getElementById('passwordInput').value;
+      var submitBtn = document.getElementById('submitBtn');
+      var loadingOverlay = document.getElementById('loadingOverlay');
+      var errorMessage = document.getElementById('errorMessage');
+      var hashDisplay = document.getElementById('hashDisplay');
+      var saltValue = document.getElementById('saltValue');
+      
+      if (!password) {
+        showError('Please enter access key');
+        return;
+      }
+      
+      submitBtn.disabled = true;
+      loadingOverlay.classList.add('show');
+      errorMessage.classList.remove('show');
+      
+      var currentSalt = generateSalt();
+      saltValue.textContent = currentSalt.substring(0, 12) + '...';
+      
+      try {
+        var derivedKey = await deriveKey(password, SECRET_SALT, ITERATIONS);
+        hashDisplay.textContent = 'Hash: ' + derivedKey.substring(0, 32) + '...';
+        
+        await new Promise(function(resolve) { setTimeout(resolve, 1500); });
+        
+        if (derivedKey === STORED_HASH) {
+          showSuccess();
+        } else {
+          attemptCount++;
+          document.getElementById('attemptCount').textContent = attemptCount;
+          showError('Access Denied - Invalid credentials');
+        }
+      } catch (e) {
+        showError('Encryption error occurred');
+      }
+      
+      submitBtn.disabled = false;
+      loadingOverlay.classList.remove('show');
+    }
+
+    function showError(message) {
+      var errorMessage = document.getElementById('errorMessage');
+      errorMessage.textContent = '⚠ ' + message;
+      errorMessage.classList.add('show');
+      
+      var panel = document.getElementById('vaultPanel');
+      panel.style.animation = 'shake 0.5s ease';
+      setTimeout(function() {
+        panel.style.animation = '';
+      }, 500);
+    }
+
+    function showSuccess() {
+      document.getElementById('vaultPanel').classList.add('hide');
+      document.getElementById('vaultUnlocked').classList.add('show');
+      
+      if (window.secret && window.secret.vault) {
+        window.secret.vault();
+      }
+    }
+
+    function lockVault() {
+      document.getElementById('vaultPanel').classList.remove('hide');
+      document.getElementById('vaultUnlocked').classList.remove('show');
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('hashDisplay').textContent = 'Waiting for input...';
+      document.getElementById('saltValue').textContent = '------';
+    }
+
+    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        verifyAccess();
+      }
+    });
+
+    document.getElementById('passwordInput').addEventListener('input', function() {
+      var errorMessage = document.getElementById('errorMessage');
+      errorMessage.classList.remove('show');
+    });
+  </script>
+
+  <style>
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+  </style>
+</body>
+</html>
