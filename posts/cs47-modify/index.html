@@ -27,7 +27,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Blog">
   
-  <meta name="robots" content="noindex,follow">
+  
   <meta name="generator" content="Hexo 7.3.0">
   <meta http-equiv='x-dns-prefetch-control' content='on' />
   
@@ -39,25 +39,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>标签：反序列化 - 欢迎入侵本站</title>
+  <title>工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆 - 欢迎入侵本站</title>
 
   
-    <meta name="description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
-<meta property="og:type" content="website">
-<meta property="og:title" content="欢迎入侵本站">
-<meta property="og:url" content="https://wr0ld.github.io/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/">
+    <meta name="description" content="工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆 本文记录了对 Cobalt Strike 4.7 的一些特征修改过程，包括证书替换、Malleable C2 Profile 流量伪装、Beacon 内存特征处理、异或密钥修改等。不是什么教程，就是自己折腾的过程记录。   目录 证书替换 Malleable C2 Profile 流量混淆 修改服务端端口 CS 源码编译与个性化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆">
+<meta property="og:url" content="https://wr0ld.github.io/posts/cs47-modify/">
 <meta property="og:site_name" content="欢迎入侵本站">
-<meta property="og:description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
+<meta property="og:description" content="工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆 本文记录了对 Cobalt Strike 4.7 的一些特征修改过程，包括证书替换、Malleable C2 Profile 流量伪装、Beacon 内存特征处理、异或密钥修改等。不是什么教程，就是自己折腾的过程记录。   目录 证书替换 Malleable C2 Profile 流量混淆 修改服务端端口 CS 源码编译与个性化">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-01T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-01T12:43:11.627Z">
 <meta property="article:author" content="wr0ld">
-<meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
-<meta name="twitter:card" content="summary">
+<meta property="article:tag" content="免杀">
+<meta property="article:tag" content="Cobalt Strike">
+<meta property="article:tag" content="流量混淆">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
   
   
   
-  <meta name="keywords" content="blog, hexo, stellar, 技术, 编程">
+  <meta name="keywords" content="免杀,Cobalt Strike,流量混淆">
 
   <!-- feed -->
   
@@ -71,12 +75,12 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Website","@id":"https://wr0ld.github.io","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"name":"欢迎入侵本站","description":"wr0ld 的个人博客，记录技术学习与生活点滴","url":"https://wr0ld.github.io"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-01T12:00:00+08:00","dateModified":"2026-04-01T20:43:11+08:00","datePublished":"2026-04-01T12:00:00+08:00","description":"","headline":"工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/cs47-modify/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/cs47-modify/","keywords":"免杀, Cobalt Strike, 流量混淆","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image22.png","image":1}</script>
   
 </head>
 <body>
 
-<div class="l_body index" id="start" layout="undefined" type="undefined" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
 <header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">欢迎入侵本站</div></a></div></header>
@@ -88,173 +92,330 @@
 <div class="widgets">
 <div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
-
-
 <widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报</span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson代码审计（1.2.68 → 1.2.80）</span></div><div class="todo-item doing"><span class="todo-content">java cc链</span></div><div class="todo-item doing"><span class="todo-content">信息收集方法论</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘（脱敏）</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
 
-<header class="header mobile-only"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">欢迎入侵本站</div></a></div></header>
-
- 
 
 
 
 
-<div class="navbar top"><div class="navbar-blur"><div class="navbar-container"><nav class="post"><a href="/">近期发布</a><a href="/categories/">分类</a><a href="/archives/">归档</a><span style="flex: 1;"></span><a href="/payloader/">Payloader</a></nav></div></div></div>
-
-<div class="layout-switcher">
-  <button class="layout-toggle-btn" title="切换布局">
-    <i class="fas fa-chevron-up"></i>
-  </button>
-  <div class="layout-options">
-    <div class="options-section">
-      <div class="options-label">布局方式</div>
-      <button class="layout-btn" data-layout="list"><span>列表</span></button>
-      <button class="layout-btn active" data-layout="grid"><span>网格</span></button>
-      <button class="layout-btn" data-layout="compact"><span>紧凑</span></button>
-      <button class="layout-btn" data-layout="title-only"><span>仅标题</span></button>
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%B7%A5%E5%85%B7%E9%AD%94%E6%94%B9/">工具魔改</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-01T04:00:00.000Z">2026-04-01</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-01T12:43:11.627Z">2026-04-01</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆</span></h1>
+        
+      </div>
     </div>
+    
   </div>
+  </div><article class="md-text content"><h1 id="工具魔改-Cobalt-Strike-4-7-特征修改与流量混淆"><a href="#工具魔改-Cobalt-Strike-4-7-特征修改与流量混淆" class="headerlink" title="工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆"></a>工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆</h1><blockquote>
+<p>本文记录了对 Cobalt Strike 4.7 的一些特征修改过程，包括证书替换、Malleable C2 Profile 流量伪装、Beacon 内存特征处理、异或密钥修改等。不是什么教程，就是自己折腾的过程记录。</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ol>
+<li><a href="#%E4%B8%80%E8%AF%81%E4%B9%A6%E6%9B%BF%E6%8D%A2">证书替换</a></li>
+<li><a href="#%E4%BA%8Cmalleable-c2-profile-%E6%B5%81%E9%87%8F%E6%B7%B7%E6%B7%86">Malleable C2 Profile 流量混淆</a></li>
+<li><a href="#%E4%B8%89%E4%BF%AE%E6%94%B9%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%AB%AF%E5%8F%A3">修改服务端端口</a></li>
+<li><a href="#%E5%9B%9Bcs-%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E4%B8%AA%E6%80%A7%E5%8C%96%E4%BF%AE%E6%94%B9">CS 源码编译与个性化修改</a></li>
+<li><a href="#%E4%BA%94%E6%B0%B4%E5%8D%B0%E4%BF%AE%E6%94%B9">水印修改</a></li>
+<li><a href="#%E5%85%ADchecksum8-%E4%B8%8E-stager-%E7%89%B9%E5%BE%81">Checksum8 与 Stager 特征</a></li>
+<li><a href="#%E4%B8%83%E5%BC%82%E6%88%96%E5%AF%86%E9%92%A5%E4%BF%AE%E6%94%B9">异或密钥修改</a></li>
+<li><a href="#%E5%85%ABpowershell-%E6%B7%B7%E6%B7%86%E5%B0%9D%E8%AF%95">PowerShell 混淆尝试</a></li>
+</ol>
+<hr>
+<h2 id="一、证书替换"><a href="#一、证书替换" class="headerlink" title="一、证书替换"></a>一、证书替换</h2><p>CS 默认证书的特征非常明显，蓝队抓到 SSL 握手包直接就能识别，第一步先把证书换掉。</p>
+<h3 id="查看默认证书"><a href="#查看默认证书" class="headerlink" title="查看默认证书"></a>查看默认证书</h3><p><code>keytool.exe</code> 是 Java JRE 自带的证书管理工具，用它查看当前证书信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keytool.exe -list -v -keystore cobaltstrike.store</span><br></pre></td></tr></table></figure>
+
+<p>默认密码可以在 <code>teamserver.sh</code> 里看到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Djavax.net.ssl.keyStorePassword=123456</span><br></pre></td></tr></table></figure>
+
+<p>原本的证书信息长这样，特征很明显：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image1.png"></p>
+<h3 id="生成自定义证书"><a href="#生成自定义证书" class="headerlink" title="生成自定义证书"></a>生成自定义证书</h3><p>把证书伪装成 Microsoft 更新服务，运行以下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">keytool -genkey -<span class="built_in">alias</span> cobaltstrike -keyalg RSA -keysize 2048 \</span><br><span class="line">-storetype JKS -keystore cobaltstrike.store -validity 3650</span><br></pre></td></tr></table></figure>
+
+<p>填写信息时模仿微软：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">您的名字与姓氏是什么?      → www.microsoft.com</span><br><span class="line">您的组织单位名称是什么?    → Microsoft Corporation</span><br><span class="line">您的组织名称是什么?        → Microsoft</span><br><span class="line">您所在的城市或区域名称是什么? → Redmond</span><br><span class="line">您所在的省/市/自治区名称是什么? → Washington</span><br><span class="line">该单位的双字母国家/地区代码是什么? → US</span><br><span class="line">密钥库口令                 → 自己设一个，记住</span><br></pre></td></tr></table></figure>
+
+<p>生成完之后确认一下新证书信息：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image2.png"></p>
+<h3 id="修改启动脚本密码"><a href="#修改启动脚本密码" class="headerlink" title="修改启动脚本密码"></a>修改启动脚本密码</h3><p>打开 <code>./teamserver</code> 启动脚本，把密码改成和新证书一致：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Djavax.net.ssl.keyStorePassword=123456</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：修改后的文件需要同步到服务端。</p>
+</blockquote>
+<p>启动方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./teamserver 172.16.250.128 kali</span><br><span class="line"><span class="comment"># 格式：./teamserver [修改了密码的启动方式文件] [连接ip] [连接密码]</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="验证效果"><a href="#验证效果" class="headerlink" title="验证效果"></a>验证效果</h3><p>客户端连接时会弹出证书指纹确认框：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image3.png"></p>
+<p>这个指纹就是刚才生成证书时看到的 SHA256 值，完全一致，说明服务端用的就是自定义证书，默认的 CS 证书特征（<code>CN=Major Cobalt Strike</code>）已经没了。</p>
+<hr>
+<h2 id="二、Malleable-C2-Profile-流量混淆"><a href="#二、Malleable-C2-Profile-流量混淆" class="headerlink" title="二、Malleable C2 Profile 流量混淆"></a>二、Malleable C2 Profile 流量混淆</h2><p>证书换了之后，CS 默认的心跳流量特征还是很明显，蓝队一抓包就能识别。Malleable C2 Profile 可以把 beacon 的流量伪装成正常的业务请求。</p>
+<h3 id="下载现成的-Profile"><a href="#下载现成的-Profile" class="headerlink" title="下载现成的 Profile"></a>下载现成的 Profile</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/rsmudge/Malleable-C2-Profiles</span><br></pre></td></tr></table></figure>
+
+<p>里面有很多现成的，我用的是 <code>amazon.profile</code>，伪装成亚马逊购物流量。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> amazon.profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置项解释"><a href="#配置项解释" class="headerlink" title="配置项解释"></a>配置项解释</h3><p><strong>全局设置：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">set sleeptime &quot;5000&quot;;   # beacon 心跳间隔，5秒太频繁，建议改大</span><br><span class="line">set jitter    &quot;0&quot;;      # 心跳抖动，建议加上，避免固定频率被识别</span><br><span class="line">set maxdns    &quot;255&quot;;    # DNS 最大长度</span><br><span class="line">set useragent &quot;Mozilla/5.0 ...&quot;;  # 伪装的 UA，默认是 IE11，太老了</span><br></pre></td></tr></table></figure>
+
+<p><strong>http-get（beacon 回连拉任务）：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">uri = &quot;/s/ref=nb_sb_noss_1/...&quot;   # 伪装成亚马逊搜索请求</span><br><span class="line">header &quot;Host&quot; &quot;www.amazon.com&quot;    # Host 头伪装</span><br><span class="line">metadata → Cookie                 # beacon 元数据藏在 Cookie 里</span><br></pre></td></tr></table></figure>
+
+<p><strong>http-post（beacon 上传执行结果）：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">uri = &quot;/N4215/adj/amzn.us.sr.aps&quot;  # 伪装成亚马逊广告请求</span><br><span class="line">output → base64 → print            # 执行结果 base64 编码后发送</span><br></pre></td></tr></table></figure>
+
+<h3 id="需要修改的地方"><a href="#需要修改的地方" class="headerlink" title="需要修改的地方"></a>需要修改的地方</h3><p><strong>1. sleeptime 和 jitter（最重要）</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">set sleeptime &quot;60000&quot;;  # 改成 1 分钟</span><br><span class="line">set jitter    &quot;20&quot;;     # 加上 ±20% 随机抖动</span><br></pre></td></tr></table></figure>
+
+<p><strong>2. useragent 换新一点的</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set useragent &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36&quot;;</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 在文件末尾加上 stage 和 process-inject 块</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">stage &#123;</span><br><span class="line">    set sleep_mask  &quot;true&quot;;</span><br><span class="line">    set userwx      &quot;false&quot;;</span><br><span class="line">    set cleanup     &quot;true&quot;;</span><br><span class="line">    set stomppe     &quot;true&quot;;</span><br><span class="line">    set obfuscate   &quot;true&quot;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">process-inject &#123;</span><br><span class="line">    set startrwx         &quot;false&quot;;</span><br><span class="line">    set userwx           &quot;false&quot;;</span><br><span class="line">    set bof_reuse_memory &quot;false&quot;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="stage-块各配置解释"><a href="#stage-块各配置解释" class="headerlink" title="stage 块各配置解释"></a>stage 块各配置解释</h3><table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>sleep_mask &quot;true&quot;</code></td>
+<td>beacon 睡眠时将内存中的自身代码加密为乱码，躲避 BeaconEye 等内存扫描</td>
+</tr>
+<tr>
+<td><code>userwx &quot;false&quot;</code></td>
+<td>不申请 RWX 内存，改用 RW 写入再改为 RX 执行，规避 EDR 检测</td>
+</tr>
+<tr>
+<td><code>cleanup &quot;true&quot;</code></td>
+<td>beacon 执行完后清理自身，减少内存残留</td>
+</tr>
+<tr>
+<td><code>stomppe &quot;true&quot;</code></td>
+<td>抹掉内存里的 PE 头，让内存扫描工具找不到完整的 PE 结构</td>
+</tr>
+<tr>
+<td><code>obfuscate &quot;true&quot;</code></td>
+<td>混淆 beacon 在内存里的字符串，扫描不到明显特征</td>
+</tr>
+</tbody></table>
+<p><strong>process-inject 块</strong>控制 beacon 注入其他进程时的行为，<code>startrwx</code> 和 <code>userwx</code> 同样是为了规避 RWX 内存检测，<code>bof_reuse_memory</code> 关掉后每次重新申请内存，减少特征。</p>
+<blockquote>
+<p>注意：<code>set cleanup &quot;true&quot;</code> 在某些情况下可能导致 beacon 执行完某些操作后自动退出，如果发现 beacon 异常掉线可以把这行去掉。</p>
+</blockquote>
+<h3 id="加载-Profile-启动"><a href="#加载-Profile-启动" class="headerlink" title="加载 Profile 启动"></a>加载 Profile 启动</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./teamserver 172.16.250.128 123456 amazon.profile</span><br></pre></td></tr></table></figure>
+
+<h3 id="流量对比验证"><a href="#流量对比验证" class="headerlink" title="流量对比验证"></a>流量对比验证</h3><p>用 Wireshark 选择对应网卡抓包，过滤器输入 <code>http</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image4.png"></p>
+<p>上线后查看流量包：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image5.png"></p>
+<p><strong>原版默认流量（特征明显）：</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image6.png"></p>
+<p><strong>修改后的流量：</strong></p>
+<p>响应包：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image7.png"></p>
+<p>请求包：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image8.png"></p>
+<p>可以看到流量完全伪装成了亚马逊购物请求，URI、Host 头、响应头都模拟了亚马逊，beacon 元数据藏在 Cookie 里，UA 也换成了 Chrome&#x2F;120。</p>
+<hr>
+<h2 id="三、修改服务端端口"><a href="#三、修改服务端端口" class="headerlink" title="三、修改服务端端口"></a>三、修改服务端端口</h2><p>默认 50050 端口特征太明显，改一下：</p>
+<p>打开启动脚本，找到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Dcobaltstrike.server_port=50050</span><br></pre></td></tr></table></figure>
+
+<p>改成其他端口，比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Dcobaltstrike.server_port=54321</span><br></pre></td></tr></table></figure>
+
+<p>客户端连接时端口也要保持一致：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image9.png"></p>
+<h3 id="关于-CDN-隐匿"><a href="#关于-CDN-隐匿" class="headerlink" title="关于 CDN 隐匿"></a>关于 CDN 隐匿</h3><p>虽然用了 Profile，但流量依然是直连，蓝队还是能查到真实 IP。更进一步的做法是通过 Cloudflare 等 CDN 转发流量（域前置），让蓝队只能查到 CDN 的 IP，查不到真实的服务器 IP，把 <code>172.16.250.128</code> 换成域名上线即可。这块后续再研究。</p>
+<hr>
+<h2 id="四、CS-源码编译与个性化修改"><a href="#四、CS-源码编译与个性化修改" class="headerlink" title="四、CS 源码编译与个性化修改"></a>四、CS 源码编译与个性化修改</h2><p>接下来折腾源码层面的修改，需要把 CS 的 jar 包反编译出来重新编译。</p>
+<h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>用 Java 1.8，把原 jar 作为依赖导入：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image10.png"></p>
+<p>添加模块依赖：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image11.png"></p>
+<p>修改文件保持在 src 目录下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image12.png"></p>
+<p>添加工件（Artifact）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image13.png"></p>
+<h3 id="编译运行"><a href="#编译运行" class="headerlink" title="编译运行"></a>编译运行</h3><p>重新构建项目、构建工件后直接运行会报错：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image14.png"></p>
+<p>需要添加启动参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:ParallelGCThreads=4 -XX:+AggressiveHeap -XX:+UseParallelGC</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image15.png"></p>
+<p>然后会出现授权校验失败的问题：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image16.png"></p>
+<p>这里是因为原软件需要授权，破解过程就不记了，直接用现成的破解版跳过这步。</p>
+<p>正常启动后的界面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image17.png"></p>
+<h3 id="个性化修改路径"><a href="#个性化修改路径" class="headerlink" title="个性化修改路径"></a>个性化修改路径</h3><p>折腾了一下发现各个地方的修改路径，记录一下备用：</p>
+<table>
+<thead>
+<tr>
+<th>修改内容</th>
+<th>文件路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>标题修改</td>
+<td><code>cobaltstrike/aggressor/AggressorClient.java</code></td>
+</tr>
+<tr>
+<td>界面修改</td>
+<td><code>cobaltstrike/aggressor/dialogs/ConnectDialog.java</code></td>
+</tr>
+<tr>
+<td>介绍部分</td>
+<td><code>cobaltstrike/resources/about.html</code></td>
+</tr>
+<tr>
+<td>许可部分</td>
+<td><code>cobaltstrike/resources/credits.txt</code></td>
+</tr>
+<tr>
+<td>图标（32x32）</td>
+<td><code>cobaltstrike/resources/armitage-icon.gif</code></td>
+</tr>
+<tr>
+<td>图标（256x256）</td>
+<td><code>cobaltstrike/resources/armitage-logo.gif</code></td>
+</tr>
+<tr>
+<td>主题风格</td>
+<td><code>cobaltstrike/aggressor/Aggressor.java</code></td>
+</tr>
+<tr>
+<td>默认 Profile</td>
+<td><code>cobaltstrike/resources/default.profile</code></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="五、水印修改"><a href="#五、水印修改" class="headerlink" title="五、水印修改"></a>五、水印修改</h2><p>CS beacon 里有水印（Watermark），是授权标识，可以用于溯源到同一个 CS 授权。用 Twi1ight 大佬的脚本生成自定义水印：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 watermark.py 202466564</span><br></pre></td></tr></table></figure>
+
+<p>传入一个自定义数字（建议避开常见 ID，使用大于 624 的随机数）。</p>
+<p>输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Cobalt Strike Watermark Fucker By Twi1ight@T00ls.Net</span><br><span class="line"></span><br><span class="line">watermark: 202466564</span><br><span class="line">watermarkHash: VfOs4YF3Xp3ZAVjrMJnmhA==</span><br></pre></td></tr></table></figure>
+
+<h3 id="通过-CSAgent-修改"><a href="#通过-CSAgent-修改" class="headerlink" title="通过 CSAgent 修改"></a>通过 CSAgent 修改</h3><p>CSAgent 不需要反编译整个 <code>cobaltstrike.jar</code>，直接编辑同级目录下的 <code>CSAgent.properties</code>：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置自定义水印</span></span><br><span class="line"><span class="attr">beacon.watermark.value</span>=<span class="string">202466564</span></span><br><span class="line"><span class="attr">beacon.watermark.hash</span>=<span class="string">VfOs4YF3Xp3ZAVjrMJnmhA==</span></span><br><span class="line"><span class="comment"># 开启汉化补丁</span></span><br><span class="line"><span class="attr">need.translation</span>=<span class="string">Y</span></span><br><span class="line"><span class="comment"># 关闭&quot;仅翻译&quot;模式，启用字节码注入</span></span><br><span class="line"><span class="attr">translation.only</span>=<span class="string">N</span></span><br></pre></td></tr></table></figure>
+
+<p>修改启动参数，加入 CSAgent：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:ParallelGCThreads=4 -XX:+AggressiveHeap -XX:+UseParallelGC -javaagent:CSAgent.jar=CSAgent.properties</span><br></pre></td></tr></table></figure>
+
+<p>中文界面配置生效后：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image18.png"></p>
+<hr>
+<h2 id="六、Checksum8-与-Stager-特征"><a href="#六、Checksum8-与-Stager-特征" class="headerlink" title="六、Checksum8 与 Stager 特征"></a>六、Checksum8 与 Stager 特征</h2><p>CS 有一个比较经典的流量特征——Checksum8 算法，蓝队可以用这个识别 CS 流量。</p>
+<p><strong>Checksum8 算法：</strong> ASCII 码之和 % 256</p>
+<ul>
+<li>64 位木马的 checksum8 值为 <strong>93</strong></li>
+<li>32 位木马的 checksum8 值为 <strong>92</strong></li>
+</ul>
+<p>不管 Profile 怎么改，只要第一个数据包中 GET 请求路径的 checksum8 值是这两个，基本就能确认是 CS 的远控通道。</p>
+<p>另外两个会被捕获到的特征：</p>
+<ol>
+<li>URL 的 checksum8 规则</li>
+<li>访问 URL 下载解析 Stager 的行为</li>
+</ol>
+<p>Stager 默认通过 XOR 加密，加密密钥是固定的：</p>
+<ul>
+<li>CS 3.x：配置信息通过异或 <code>0x69</code> 解密</li>
+<li>CS 4.x：配置信息通过异或 <code>0x2e</code> 解密</li>
+</ul>
+<p>Windows Execute 模块生成的就是 Stager：运行 EXE → 自动生成并访问符合 checksum8 校验的 URI 进行远程下载 Stager → 上线。</p>
+<hr>
+<h2 id="七、异或密钥修改"><a href="#七、异或密钥修改" class="headerlink" title="七、异或密钥修改"></a>七、异或密钥修改</h2><p>Stager 文件对应 CS 目录里的 <code>sleeve/beacon.dll</code> 和 <code>sleeve/beacon64.dll</code>，这两个文件是加密的，需要先解密才能修改。</p>
+<h3 id="解密脚本"><a href="#解密脚本" class="headerlink" title="解密脚本"></a>解密脚本</h3><p>不同版本用不同的脚本：</p>
+<ul>
+<li>4.0~4.5：<a target="_blank" rel="noopener" href="https://github.com/GH-H4d35/CrackSleeve">https://github.com/GH-H4d35/CrackSleeve</a></li>
+<li>4.7：<a target="_blank" rel="noopener" href="https://github.com/kyxiaxiang/CrackSleeve4.7">https://github.com/kyxiaxiang/CrackSleeve4.7</a></li>
+<li>4.8：<a target="_blank" rel="noopener" href="https://github.com/kyxiaxiang/CrackSleeve4.8">https://github.com/kyxiaxiang/CrackSleeve4.8</a></li>
+<li>4.9：<a target="_blank" rel="noopener" href="https://github.com/kyxiaxiang/CrackSleeve4.9">https://github.com/kyxiaxiang/CrackSleeve4.9</a></li>
+</ul>
+<p>编译并解密：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">javac -encoding UTF-8 -classpath cobaltstrike.jar CrackSleeve.java</span><br><span class="line">java -classpath <span class="string">&quot;cobaltstrike.jar;./&quot;</span> CrackSleeve decode</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image19.png"></p>
+<h3 id="用-IDA-修改异或密钥"><a href="#用-IDA-修改异或密钥" class="headerlink" title="用 IDA 修改异或密钥"></a>用 IDA 修改异或密钥</h3><p>以 64 位为例，打开解密后的 <code>beacon.x64.dll</code>，按 <code>Alt+B</code> 搜索 <code>xor 0x2e</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image20.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image21.png"></p>
+<p>双击进去：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image22.png"></p>
+<p>F5 反汇编查看：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image23.png"></p>
+<p>通过 Edit → Patch program → Change byte，把 <code>2E</code> 改为自定义的值：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image24.png"></p>
+<h3 id="同步修改-Java-源码"><a href="#同步修改-Java-源码" class="headerlink" title="同步修改 Java 源码"></a>同步修改 Java 源码</h3><p>对应修改 <code>beacon/BeaconPayload.java</code>，把原本的 <code>46</code>（0x2e 的十进制）换成修改后的十进制值：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image25.png"></p>
+<h3 id="重新打包"><a href="#重新打包" class="headerlink" title="重新打包"></a>重新打包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -classpath <span class="string">&quot;cobaltstrike.jar;./&quot;</span> CrackSleeve encode</span><br></pre></td></tr></table></figure>
+
+<p>打包编译完成后替换服务端的 jar 包，测试可以正常生成和连接：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image26.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image27.png"></p>
+<hr>
+<h2 id="八、PowerShell-混淆尝试"><a href="#八、PowerShell-混淆尝试" class="headerlink" title="八、PowerShell 混淆尝试"></a>八、PowerShell 混淆尝试</h2><p>试了一下给 PowerShell payload 加混淆。</p>
+<p><strong>涉及文件：</strong></p>
+<ul>
+<li><code>resources/template.x64.ps1</code>（PS 模板）</li>
+<li><code>common/ResourceUtils.java</code>（修改生成逻辑）</li>
+</ul>
+<p>下载 AES 加密混淆脚本放到根目录：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/Chainski/AES-Encoder">https://github.com/Chainski/AES-Encoder</a></p>
+<p>生成 payload：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image28.png"></p>
+<p>效果确实很明显，混淆之后看不出原始代码。</p>
+<p>但是测试发现——<strong>经过 CS 加密的 payload 跑不起来</strong>，混淆原项目单独运行是没问题的，只要经过 CS 那层加密就不行了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image29.png"></p>
+<p>尝试了很多方法都没解决，这条路先放弃了，后续可以换其他的加密脚本再试试。</p>
+<hr>
+<blockquote>
+<p>参考项目：</p>
+<ul>
+<li>Malleable-C2-Profiles：<a target="_blank" rel="noopener" href="https://github.com/rsmudge/Malleable-C2-Profiles">https://github.com/rsmudge/Malleable-C2-Profiles</a></li>
+<li>CrackSleeve 4.7：<a target="_blank" rel="noopener" href="https://github.com/kyxiaxiang/CrackSleeve4.7">https://github.com/kyxiaxiang/CrackSleeve4.7</a></li>
+<li>AES-Encoder：<a target="_blank" rel="noopener" href="https://github.com/Chainski/AES-Encoder">https://github.com/Chainski/AES-Encoder</a></li>
+</ul>
+</blockquote>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
 </div>
 
-<div id="post-container">
-  <div class="post-list post grid"><a class="post-card post" href="/posts/cc1-transformedmap-intro/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image7.png"/></div><h2 class="post-title">代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload</h2><div class="excerpt"><p>
-学习笔记，记录自己学 CC1 链的思路历程，不是教程，有啥问题欢迎交流。
+<div class="related-wrap" id="read-next"><section class="body"><div class="item" id="prev"></div><div class="item" id="next"><div class="note">较早文章</div><a href="/posts/cc1-transformedmap-intro/">代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload</a></div></section></div>
 
 
-目录
-最终目标是什么
-通过反射调用函数
-但实际场景中没地方写代码怎么办
-方式 A：直接传输 Payload（CC 链）
-方式 B：远程类加载
 
 
-Gadget Chain 的由来
-CC1 链构造过程
-环境准备
-第一步：找到能执行命令的点 —— InvokerTransformer
-第二步：Runtime 不能序列...</p></div><div class="meta cap"><span class="cap" id="post-meta"><svg style="margin-bottom:2px" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M6.94 2c.416 0 .753.324.753.724v1.46c.668-.012 1.417-.012 2.26-.012h4.015c.842 0 1.591 0 2.259.013v-1.46c0-.4.337-.725.753-.725s.753.324.753.724V4.25c1.445.111 2.394.384 3.09 1.055c.698.67.982 1.582 1.097 2.972L22 9H2v-.724c.116-1.39.4-2.302 1.097-2.972c.697-.67 1.645-.944 3.09-1.055V2.724c0-.4.337-.724.753-.724"/><path fill="currentColor" d="M22 14v-2c0-.839-.004-2.335-.017-3H2.01c-.013.665-.01 2.161-.01 3v2c0 3.771 0 5.657 1.172 6.828C4.343 22 6.228 22 10 22h4c3.77 0 5.656 0 6.828-1.172C22 19.658 22 17.772 22 14" opacity=".5"/><path fill="currentColor" d="M18 17a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-5 4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-5 4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><time datetime="2026-03-31T02:00:00.000Z">2026-03-31</time></span><span class="cap breadcrumb"><svg style="margin-bottom:1px" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 6.95c0-.883 0-1.324.07-1.692A4 4 0 0 1 5.257 2.07C5.626 2 6.068 2 6.95 2c.386 0 .58 0 .766.017a4 4 0 0 1 2.18.904c.144.119.28.255.554.529L11 4c.816.816 1.224 1.224 1.712 1.495a4 4 0 0 0 .848.352C14.098 6 14.675 6 15.828 6h.374c2.632 0 3.949 0 4.804.77c.079.07.154.145.224.224c.77.855.77 2.172.77 4.804V14c0 3.771 0 5.657-1.172 6.828C19.657 22 17.771 22 14 22h-4c-3.771 0-5.657 0-6.828-1.172C2 19.657 2 17.771 2 14z" opacity=".5"/><path fill="currentColor" d="M20 6.238c0-.298-.005-.475-.025-.63a3 3 0 0 0-2.583-2.582C17.197 3 16.965 3 16.5 3H9.988c.116.104.247.234.462.45L11 4c.816.816 1.224 1.224 1.712 1.495a4 4 0 0 0 .849.352C14.098 6 14.675 6 15.829 6h.373c1.78 0 2.957 0 3.798.238"/><path fill="currentColor" fill-rule="evenodd" d="M12.25 10a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5h-5a.75.75 0 0 1-.75-.75" clip-rule="evenodd"/></svg><span>代码审计</span></span></div></article>
-</a><a class="post-card post" href="/posts/a1b2c3d4/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image2.png"/></div><h2 class="post-title">代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析</h2><div class="excerpt"><p>
-1.2.47 的缓存绕过不需要开任何开关，默认配置就能打，危害最大。
 
 
-目录
-环境准备
-漏洞概述
-Payload 结构解析
-源码跟踪：一步步看绕过过程
-第一阶段：处理字段 a，预热缓存
-第二阶段：处理字段 b，命中缓存绕过检测
-
-
-总结
-
-
-环境准备版本：1.2.47
-使用 Maven 管理依赖，在 pom.xml 里改一下版本号就行。
-
-
-漏洞概述先看一下 Payload 的样子：
-1...</p></div><div class="meta cap"><span class="cap" id="post-meta"><svg style="margin-bottom:2px" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M6.94 2c.416 0 .753.324.753.724v1.46c.668-.012 1.417-.012 2.26-.012h4.015c.842 0 1.591 0 2.259.013v-1.46c0-.4.337-.725.753-.725s.753.324.753.724V4.25c1.445.111 2.394.384 3.09 1.055c.698.67.982 1.582 1.097 2.972L22 9H2v-.724c.116-1.39.4-2.302 1.097-2.972c.697-.67 1.645-.944 3.09-1.055V2.724c0-.4.337-.724.753-.724"/><path fill="currentColor" d="M22 14v-2c0-.839-.004-2.335-.017-3H2.01c-.013.665-.01 2.161-.01 3v2c0 3.771 0 5.657 1.172 6.828C4.343 22 6.228 22 10 22h4c3.77 0 5.656 0 6.828-1.172C22 19.658 22 17.772 22 14" opacity=".5"/><path fill="currentColor" d="M18 17a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-5 4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-5 4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><time datetime="2026-03-26T02:00:00.000Z">2026-03-26</time></span><span class="cap breadcrumb"><svg style="margin-bottom:1px" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 6.95c0-.883 0-1.324.07-1.692A4 4 0 0 1 5.257 2.07C5.626 2 6.068 2 6.95 2c.386 0 .58 0 .766.017a4 4 0 0 1 2.18.904c.144.119.28.255.554.529L11 4c.816.816 1.224 1.224 1.712 1.495a4 4 0 0 0 .848.352C14.098 6 14.675 6 15.828 6h.374c2.632 0 3.949 0 4.804.77c.079.07.154.145.224.224c.77.855.77 2.172.77 4.804V14c0 3.771 0 5.657-1.172 6.828C19.657 22 17.771 22 14 22h-4c-3.771 0-5.657 0-6.828-1.172C2 19.657 2 17.771 2 14z" opacity=".5"/><path fill="currentColor" d="M20 6.238c0-.298-.005-.475-.025-.63a3 3 0 0 0-2.583-2.582C17.197 3 16.965 3 16.5 3H9.988c.116.104.247.234.462.45L11 4c.816.816 1.224 1.224 1.712 1.495a4 4 0 0 0 .849.352C14.098 6 14.675 6 15.829 6h.373c1.78 0 2.957 0 3.798.238"/><path fill="currentColor" fill-rule="evenodd" d="M12.25 10a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5h-5a.75.75 0 0 1-.75-.75" clip-rule="evenodd"/></svg><span>代码审计</span></span></div></article>
-</a><a class="post-card post" href="/posts/86d6dbe4/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/25%2042%2043_image6.png"/></div><h2 class="post-title">代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43</h2><div class="excerpt"><p>
-个人学习记录，记录一下这三个版本的绕过思路和调试过程。这三个版本有个共同点：都需要 autoTypeSupport=true 才能利用，算是一条贯穿始终的主线。
-
-
-目录
-环境准备
-1.2.25 —— checkAutoType 机制引入
-源码变化对比
-为什么要开启 autoTypeSupport
-调试过程 1225
-
-
-1.2.42 —— 双写绕过
-Payload 变化
-checkAut...</p></div><div class="meta cap"><span class="cap" id="post-meta"><svg style="margin-bottom:2px" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M6.94 2c.416 0 .753.324.753.724v1.46c.668-.012 1.417-.012 2.26-.012h4.015c.842 0 1.591 0 2.259.013v-1.46c0-.4.337-.725.753-.725s.753.324.753.724V4.25c1.445.111 2.394.384 3.09 1.055c.698.67.982 1.582 1.097 2.972L22 9H2v-.724c.116-1.39.4-2.302 1.097-2.972c.697-.67 1.645-.944 3.09-1.055V2.724c0-.4.337-.724.753-.724"/><path fill="currentColor" d="M22 14v-2c0-.839-.004-2.335-.017-3H2.01c-.013.665-.01 2.161-.01 3v2c0 3.771 0 5.657 1.172 6.828C4.343 22 6.228 22 10 22h4c3.77 0 5.656 0 6.828-1.172C22 19.658 22 17.772 22 14" opacity=".5"/><path fill="currentColor" d="M18 17a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-5 4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m-5 4a1 1 0 1 1-2 0a1 1 0 0 1 2 0m0-4a1 1 0 1 1-2 0a1 1 0 0 1 2 0"/></svg><time datetime="2026-03-25T02:00:00.000Z">2026-03-25</time></span><span class="cap breadcrumb"><svg style="margin-bottom:1px" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 6.95c0-.883 0-1.324.07-1.692A4 4 0 0 1 5.257 2.07C5.626 2 6.068 2 6.95 2c.386 0 .58 0 .766.017a4 4 0 0 1 2.18.904c.144.119.28.255.554.529L11 4c.816.816 1.224 1.224 1.712 1.495a4 4 0 0 0 .848.352C14.098 6 14.675 6 15.828 6h.374c2.632 0 3.949 0 4.804.77c.079.07.154.145.224.224c.77.855.77 2.172.77 4.804V14c0 3.771 0 5.657-1.172 6.828C19.657 22 17.771 22 14 22h-4c-3.771 0-5.657 0-6.828-1.172C2 19.657 2 17.771 2 14z" opacity=".5"/><path fill="currentColor" d="M20 6.238c0-.298-.005-.475-.025-.63a3 3 0 0 0-2.583-2.582C17.197 3 16.965 3 16.5 3H9.988c.116.104.247.234.462.45L11 4c.816.816 1.224 1.224 1.712 1.495a4 4 0 0 0 .849.352C14.098 6 14.675 6 15.829 6h.373c1.78 0 2.957 0 3.798.238"/><path fill="currentColor" fill-rule="evenodd" d="M12.25 10a.75.75 0 0 1 .75-.75h5a.75.75 0 0 1 0 1.5h-5a.75.75 0 0 1-.75-.75" clip-rule="evenodd"/></svg><span>代码审计</span></span></div></article>
-</a></div>
-</div>
-
-<div id="paginator-wrapper">
-  
-
-</div>
-
-<script>
-  // 所有文章数据（用于仅标题布局）
-  const allPostsData = [{"title":"工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆","path":"posts/cs47-modify/"},{"title":"代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload","path":"posts/cc1-transformedmap-intro/"},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","path":"posts/e90faa78/"},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— TemplatesImpl 链分析","path":"posts/f70df821/"},{"title":"代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析","path":"posts/a1b2c3d4/"},{"title":"代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43","path":"posts/86d6dbe4/"},{"title":"代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析","path":"posts/3035988a/"},{"title":"THP-CSK 靶场 Linux 内网横向渗透全流程","path":"posts/5532e4a/"},{"title":"工具魔改 | 魔改哥斯拉 - 反编译重打包与Webshell免杀对抗","path":"posts/55d71cb8/"},{"title":"工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展","path":"posts/e39557c4/"},{"title":"工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗","path":"posts/5ddd3711/"},{"title":"笔记 | 常见Linux权限提升笔记","path":"posts/a6c6e02f/"},{"title":"笔记 | CTF 伪协议","path":"posts/58685328/"},{"title":"VulnHub DC-9 靶机渗透测试笔记","path":"posts/f10adb67/"},{"title":"VulnHub DC-8 靶机渗透测试笔记","path":"posts/16177df0/"},{"title":"VulnHub DC-7 靶机渗透测试笔记","path":"posts/9bfd2b6a/"},{"title":"VulnHub DC-6 靶机渗透测试笔记","path":"posts/7ce08dfd/"},{"title":"VulnHub DC-5 靶机渗透测试笔记","path":"posts/8eb76005/"},{"title":"VulnHub DC-4 靶机渗透测试笔记","path":"posts/69aac692/"},{"title":"VulnHub DC-3 靶机渗透测试笔记","path":"posts/b169bdb4/"},{"title":"VulnHub DC-2 靶机渗透测试笔记","path":"posts/56741b23/"},{"title":"VulnHub DC-1 靶机渗透测试笔记","path":"posts/a423f6db/"},{"title":"DVWA 靶场实验报告 (High Level)","path":"posts/f46202bc/"},{"title":"DVWA 靶场实验报告 (Medium Level)","path":"posts/fab7f2d4/"},{"title":"DVWA 靶场实验报告 (Low Level)","path":"posts/f02c2786/"},{"title":"Pikachu 靶场通关笔记","path":"posts/31fdd992/"}];
-  
-  // 布局切换功能
-  (function() {
-    const layoutButtons = document.querySelectorAll('.layout-btn[data-layout]');
-    const postContainer = document.getElementById('post-container');
-    const paginatorWrapper = document.getElementById('paginator-wrapper');
-    
-    // 保存原始分页HTML
-    const originalHTML = postContainer.innerHTML;
-    
-    // 从localStorage加载保存的布局
-    const savedLayout = localStorage.getItem('Stellar.layout') || 'grid';
-    
-    // 渲染所有文章（仅标题模式）
-    function renderAllPosts() {
-      let html = '<div class="post-list post title-only">';
-      allPostsData.forEach(function(post) {
-        html += `<a class="post-card" href="${post.link || '/' + post.path}">`;
-        html += `<div class="post-title">${post.title}</div>`;
-        html += '</a>';
-      });
-      html += '</div>';
-      postContainer.innerHTML = html;
-    }
-    
-    // 应用布局
-    function applyLayout(layout) {
-      // 更新按钮状态
-      layoutButtons.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.layout === layout) {
-          btn.classList.add('active');
-        }
-      });
-      
-      // 仅标题布局：显示所有文章
-      if (layout === 'title-only') {
-        renderAllPosts();
-        paginatorWrapper.style.display = 'none';
-      } else {
-        // 其他布局：恢复原始分页HTML
-        postContainer.innerHTML = originalHTML;
-        let postList = postContainer.querySelector('.post-list');
-        postList.classList.remove('list', 'grid', 'compact', 'title-only');
-        postList.classList.add(layout);
-        paginatorWrapper.style.display = 'block';
-      }
-      
-      // 保存布局到localStorage
-      localStorage.setItem('Stellar.layout', layout);
-    }
-    
-    // 绑定布局按钮点击事件
-    layoutButtons.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const layout = this.dataset.layout;
-        applyLayout(layout);
-      });
-    });
-    
-    // 初始化
-    applyLayout(savedLayout);
-  })();
-</script>
 <footer class="page-footer footnote"><hr><div class="text"></div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E9%AD%94%E6%94%B9-Cobalt-Strike-4-7-%E7%89%B9%E5%BE%81%E4%BF%AE%E6%94%B9%E4%B8%8E%E6%B5%81%E9%87%8F%E6%B7%B7%E6%B7%86"><span class="toc-text">工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%AF%81%E4%B9%A6%E6%9B%BF%E6%8D%A2"><span class="toc-text">一、证书替换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9F%A5%E7%9C%8B%E9%BB%98%E8%AE%A4%E8%AF%81%E4%B9%A6"><span class="toc-text">查看默认证书</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E8%87%AA%E5%AE%9A%E4%B9%89%E8%AF%81%E4%B9%A6"><span class="toc-text">生成自定义证书</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC%E5%AF%86%E7%A0%81"><span class="toc-text">修改启动脚本密码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E6%95%88%E6%9E%9C"><span class="toc-text">验证效果</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Malleable-C2-Profile-%E6%B5%81%E9%87%8F%E6%B7%B7%E6%B7%86"><span class="toc-text">二、Malleable C2 Profile 流量混淆</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8B%E8%BD%BD%E7%8E%B0%E6%88%90%E7%9A%84-Profile"><span class="toc-text">下载现成的 Profile</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E9%A1%B9%E8%A7%A3%E9%87%8A"><span class="toc-text">配置项解释</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9C%80%E8%A6%81%E4%BF%AE%E6%94%B9%E7%9A%84%E5%9C%B0%E6%96%B9"><span class="toc-text">需要修改的地方</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#stage-%E5%9D%97%E5%90%84%E9%85%8D%E7%BD%AE%E8%A7%A3%E9%87%8A"><span class="toc-text">stage 块各配置解释</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A0%E8%BD%BD-Profile-%E5%90%AF%E5%8A%A8"><span class="toc-text">加载 Profile 启动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%81%E9%87%8F%E5%AF%B9%E6%AF%94%E9%AA%8C%E8%AF%81"><span class="toc-text">流量对比验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E4%BF%AE%E6%94%B9%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%AB%AF%E5%8F%A3"><span class="toc-text">三、修改服务端端口</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E-CDN-%E9%9A%90%E5%8C%BF"><span class="toc-text">关于 CDN 隐匿</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81CS-%E6%BA%90%E7%A0%81%E7%BC%96%E8%AF%91%E4%B8%8E%E4%B8%AA%E6%80%A7%E5%8C%96%E4%BF%AE%E6%94%B9"><span class="toc-text">四、CS 源码编译与个性化修改</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%96%E8%AF%91%E8%BF%90%E8%A1%8C"><span class="toc-text">编译运行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AA%E6%80%A7%E5%8C%96%E4%BF%AE%E6%94%B9%E8%B7%AF%E5%BE%84"><span class="toc-text">个性化修改路径</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%B0%B4%E5%8D%B0%E4%BF%AE%E6%94%B9"><span class="toc-text">五、水印修改</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%9A%E8%BF%87-CSAgent-%E4%BF%AE%E6%94%B9"><span class="toc-text">通过 CSAgent 修改</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81Checksum8-%E4%B8%8E-Stager-%E7%89%B9%E5%BE%81"><span class="toc-text">六、Checksum8 与 Stager 特征</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E5%BC%82%E6%88%96%E5%AF%86%E9%92%A5%E4%BF%AE%E6%94%B9"><span class="toc-text">七、异或密钥修改</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%AF%86%E8%84%9A%E6%9C%AC"><span class="toc-text">解密脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8-IDA-%E4%BF%AE%E6%94%B9%E5%BC%82%E6%88%96%E5%AF%86%E9%92%A5"><span class="toc-text">用 IDA 修改异或密钥</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E4%BF%AE%E6%94%B9-Java-%E6%BA%90%E7%A0%81"><span class="toc-text">同步修改 Java 源码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E6%96%B0%E6%89%93%E5%8C%85"><span class="toc-text">重新打包</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81PowerShell-%E6%B7%B7%E6%B7%86%E5%B0%9D%E8%AF%95"><span class="toc-text">八、PowerShell 混淆尝试</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+
 <widget class="widget-wrapper linklist collapsible-widget"><div class="widget-header dis-select"><span class="name">文章分类</span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="linklist left style-1" style="grid-template-columns:repeat(1,1fr);"><a class="link" title="代码审计" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"><div class="flex"><span>代码审计</span><span class="count">6</span></div></a><a class="link" title="笔记" href="/categories/%E7%AC%94%E8%AE%B0/"><div class="flex"><span>笔记</span><span class="count">2</span></div></a><a class="link" title="vulnhub-DC" href="/categories/vulnhub-DC/"><div class="flex"><span>vulnhub-DC</span><span class="count">9</span></div></a><a class="link" title="DVWA" href="/categories/DVWA/"><div class="flex"><span>DVWA</span><span class="count">3</span></div></a><a class="link" title="靶机渗透" href="/categories/%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/"><div class="flex"><span>靶机渗透</span><span class="count">1</span></div></a><a class="link" title="工具魔改" href="/categories/%E5%B7%A5%E5%85%B7%E9%AD%94%E6%94%B9/"><div class="flex"><span>工具魔改</span><span class="count">4</span></div></a><a class="link" title="靶场" href="/categories/%E9%9D%B6%E5%9C%BA/"><div class="flex"><span>靶场</span><span class="count">1</span></div></a></div></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
