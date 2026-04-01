@@ -1,1 +1,153 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My Room in 3D</title><meta itemprop="name" content="My Room in 3D — Experiment"><meta itemprop="description" content="Creative WebGL experiment with Three.js"><meta itemprop="image" content="https://my-room-in-3d.vercel.app/social/share-1200x630.png"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="My Room in 3D — Experiment"><meta name="twitter:description" content="Creative WebGL experiment with Three.js"><meta name="twitter:image" content="https://my-room-in-3d.vercel.app/social/share-1200x630.png"><meta property="og:site_name" content="My Room in 3D — Experiment"><meta property="og:type" content="website"><meta property="og:url" content="https://my-room-in-3d.vercel.app"><meta property="og:title" content="My Room in 3D — Experiment"><meta property="og:description" content="Creative WebGL experiment with Three.js"><meta property="og:image" content="https://my-room-in-3d.vercel.app/social/share-1200x630.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet"><script defer="defer" src="/lab/my-room-in-3d/bundle.14aa604b3af31ef9808e.js"></script><link href="/lab/my-room-in-3d/main.css" rel="stylesheet"></head><body><div class="experience"></div><div class="credits">My Room in 3D by <a href="https://bruno-simon.com" target="_blank">Bruno Simon</a> (<a href="https://github.com/brunosimon/my-room-in-3d" target="_blank">Source code</a>)</div></body></html>
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>My Room in 3D</title>
+  <meta itemprop="name" content="My Room in 3D — Experiment">
+  <meta itemprop="description" content="Creative WebGL experiment with Three.js">
+  <meta itemprop="image" content="https://my-room-in-3d.vercel.app/social/share-1200x630.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="My Room in 3D — Experiment">
+  <meta name="twitter:description" content="Creative WebGL experiment with Three.js">
+  <meta name="twitter:image" content="https://my-room-in-3d.vercel.app/social/share-1200x630.png">
+  <meta property="og:site_name" content="My Room in 3D — Experiment">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://my-room-in-3d.vercel.app">
+  <meta property="og:title" content="My Room in 3D — Experiment">
+  <meta property="og:description" content="Creative WebGL experiment with Three.js">
+  <meta property="og:image" content="https://my-room-in-3d.vercel.app/social/share-1200x630.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+  <script defer="defer" src="/lab/my-room-in-3d/bundle.14aa604b3af31ef9808e.js"></script>
+  <link href="/lab/my-room-in-3d/main.css" rel="stylesheet">
+  <style>
+    .lil-gui .title { font-family: "Microsoft YaHei", "PingFang SC", sans-serif !important; }
+    .lil-gui .controller .name { font-family: "Microsoft YaHei", "PingFang SC", sans-serif !important; }
+  </style>
+</head>
+<body>
+  <div class="experience"></div>
+  <div class="credits">My Room in 3D by <a href="https://bruno-simon.com" target="_blank">Bruno Simon</a> (<a href="https://github.com/brunosimon/my-room-in-3d" target="_blank">源代码</a>)</div>
+  <script>
+    const translations = {
+      'Camera': '相机',
+      'Light': '灯光',
+      'Shadows': '阴影',
+      'Practicals': '实光源',
+      'Environment': '环境',
+      'Resolution': '分辨率',
+      'Intensity': '强度',
+      'Distance': '距离',
+      'Angle': '角度',
+      'Fov': '视野',
+      'Start': '起始',
+      'End': '结束',
+      'Day': '白天',
+      'Night': '夜晚',
+      'Neutral': '中性',
+      'Enabled': '启用',
+      'Disabled': '禁用',
+      'true': '是',
+      'false': '否',
+      'Close': '关闭',
+      'Open': '打开',
+      'Reset': '重置',
+      'Settings': '设置',
+      'Controls': '控制',
+      'Position': '位置',
+      'Rotation': '旋转',
+      'Scale': '缩放',
+      'X': 'X',
+      'Y': 'Y',
+      'Z': 'Z',
+      'Color': '颜色',
+      'Opacity': '透明度',
+      'Visible': '可见',
+      'Speed': '速度',
+      'Size': '大小',
+      'Width': '宽度',
+      'Height': '高度',
+      'Quality': '质量',
+      'Debug': '调试',
+      'Helper': '辅助',
+      'Show': '显示',
+      'Hide': '隐藏',
+      'baked': '烘焙光照',
+      'uNightMix': '夜晚混合',
+      'uNeutralMix': '中性混合',
+      'tv': '电视',
+      'uLightTvStrength': '电视灯光强度',
+      'desk': '桌面',
+      'uLightDeskStrength': '桌面灯光强度',
+      'pc': '电脑',
+      'uLightPcStrength': '电脑灯光强度',
+      'googleLeds': 'Google LED',
+      'loupedeckButtons': '控制台按钮',
+      'coffeeSteam': '咖啡蒸汽',
+      'bouncingLogo': '弹跳 Logo'
+    };
+
+    function translateText(text) {
+      if (!text) return text;
+      let result = text;
+      for (const [en, zh] of Object.entries(translations)) {
+        const regex = new RegExp('\\b' + en + '\\b', 'gi');
+        result = result.replace(regex, zh);
+      }
+      return result;
+    }
+
+    function translateGUI() {
+      const guiElements = document.querySelectorAll('.lil-gui');
+      if (guiElements.length === 0) return;
+      
+      guiElements.forEach(gui => {
+        const titles = gui.querySelectorAll('.title');
+        titles.forEach(title => {
+          if (title.dataset.translated !== 'true') {
+            title.textContent = translateText(title.textContent);
+            title.dataset.translated = 'true';
+          }
+        });
+        
+        const names = gui.querySelectorAll('.controller .name');
+        names.forEach(name => {
+          if (name.dataset.translated !== 'true') {
+            const originalText = name.textContent;
+            const translatedText = translateText(originalText);
+            name.textContent = translatedText;
+            name.dataset.translated = 'true';
+          }
+        });
+
+        const displays = gui.querySelectorAll('.controller .display');
+        displays.forEach(display => {
+          const text = display.textContent.trim();
+          if (translations[text]) {
+            display.textContent = translations[text];
+          }
+        });
+      });
+    }
+
+    function waitForGUI() {
+      const check = setInterval(() => {
+        const gui = document.querySelector('.lil-gui');
+        if (gui) {
+          clearInterval(check);
+          translateGUI();
+          setInterval(translateGUI, 300);
+        }
+      }, 100);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', waitForGUI);
+    } else {
+      waitForGUI();
+    }
+  </script>
+</body>
+</html>
