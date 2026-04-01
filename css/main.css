@@ -538,8 +538,8 @@ html.reverse-both * {
   text-decoration: line-through;
 }
 .todo-widget .todo-item.doing {
-  background: rgba(52,152,219,0.1);
-  border-left: 3px solid var(--theme, #3498db);
+  background: rgba(255,255,255,0.03);
+  border-left: 3px solid rgba(255,255,255,0.3);
 }
 .post-list .post-card .post-title {
   font-weight: 600 !important;
