@@ -728,16 +728,16 @@ html.reverse-both * {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.15);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .widget-wrapper.collapsible-widget .widget-header .collapse-toggle i {
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 12px;
+  font-size: 10px;
   color: var(--text-p2);
 }
 .widget-wrapper.collapsible-widget .widget-header:hover .collapse-toggle {
@@ -7891,7 +7891,7 @@ details.toc[open] >div.body section .header+.doc_tree {
   width: 100%;
   display: grid;
   margin: 8px 0;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   grid-gap: 8px;
 }
 .nav-area .menu::-webkit-scrollbar {
