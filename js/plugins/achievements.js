@@ -686,6 +686,51 @@
         obtainTime: null,
         progress: 0,
         target: 5
+      },
+      'lab_visitor': {
+        name: '实验室访客',
+        desc: '访问前端实验室',
+        icon: '🔬',
+        rarity: 'common',
+        flavor: '探索前沿技术的实验场',
+        obtained: false,
+        obtainTime: null
+      },
+      'bruno_folio_visitor': {
+        name: '3D探索者',
+        desc: '体验Bruno Simon 3D作品集',
+        icon: '🚗',
+        rarity: 'rare',
+        flavor: '驾驶汽车探索3D世界',
+        obtained: false,
+        obtainTime: null
+      },
+      'my_room_visitor': {
+        name: '房间访客',
+        desc: '参观3D房间场景',
+        icon: '🏠',
+        rarity: 'common',
+        flavor: '欢迎来到我的小窝',
+        obtained: false,
+        obtainTime: null
+      },
+      'style_switcher': {
+        name: '风格切换者',
+        desc: '切换分类页面样式',
+        icon: '🎨',
+        rarity: 'common',
+        flavor: '换个风格，换种心情',
+        obtained: false,
+        obtainTime: null
+      },
+      'layout_switcher': {
+        name: '布局大师',
+        desc: '切换文章布局方式',
+        icon: '📐',
+        rarity: 'common',
+        flavor: '布局随心变',
+        obtained: false,
+        obtainTime: null
       }
     },
     
@@ -1031,6 +1076,14 @@
         self.incrementProgress('ripple_master');
       };
       
+      window.secret.styleSwitch = function() {
+        self.obtainCard('style_switcher');
+      };
+      
+      window.secret.layoutSwitch = function() {
+        self.obtainCard('layout_switcher');
+      };
+      
       window.secret.incrementEasterEgg = function() {
         self.incrementEasterEgg();
       };
@@ -1321,6 +1374,18 @@
       if (href === '/robots.txt') {
         this.obtainCard('robots_txt');
         this.incrementEasterEgg();
+      }
+      
+      if (href.includes('/lab') || href === '/lab/') {
+        this.obtainCard('lab_visitor');
+      }
+      
+      if (href.includes('/lab/bruno-simon-folio')) {
+        this.obtainCard('bruno_folio_visitor');
+      }
+      
+      if (href.includes('/lab/my-room-in-3d')) {
+        this.obtainCard('my_room_visitor');
       }
     },
     

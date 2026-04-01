@@ -50,8 +50,8 @@
 <meta property="og:description" content="⚙️ 网站设置           🛠️ 没用的工具            🔮 占卜       进入占卜                 🔢 计算器       打开计算器                   🎨 主题设置            深色模式                🌙         切换主题                          📖 阅读设置">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-04-01T14:41:32.451Z">
-<meta property="article:modified_time" content="2026-04-01T14:41:32.451Z">
+<meta property="article:published_time" content="2026-04-01T15:57:54.904Z">
+<meta property="article:modified_time" content="2026-04-01T15:57:54.904Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -102,7 +102,7 @@
   <span class="sep"></span>
   <a class="cap breadcrumb" href="/settings/">设置</a>
   </div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-01T14:41:32.451Z">2026-04-01</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-01T14:41:32.451Z">2026-04-01</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-01T15:57:54.904Z">2026-04-01</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-01T15:57:54.904Z">2026-04-01</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -859,6 +859,9 @@ function setCategoriesStyle(style) {
   localStorage.setItem('Stellar.categoriesStyle', style);
   if (window.applyCategoriesStyle) {
     window.applyCategoriesStyle(style);
+  }
+  if (window.secret && window.secret.styleSwitch) {
+    window.secret.styleSwitch();
   }
 }
 
