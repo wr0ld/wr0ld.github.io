@@ -784,10 +784,10 @@ html.reverse-both * {
   margin-left: 6px;
   padding: 2px 8px;
   border-radius: 10px;
-  background: rgba(77,163,255,0.15);
-  color: var(--text-a100, #4da3ff);
+  background: rgba(77,163,255,0.25);
+  color: #4da3ff;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   vertical-align: middle;
 }
 .linklist.left.style-2 .link {
