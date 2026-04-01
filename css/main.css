@@ -779,6 +779,17 @@ html.reverse-both * {
 .widget-wrapper.todo-widget .widget-body::-webkit-scrollbar-thumb:hover {
   background: rgba(255,255,255,0.3);
 }
+.widget-wrapper.todo-widget .todo-count {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(77,163,255,0.15);
+  color: var(--text-a100, #4da3ff);
+  font-size: 12px;
+  font-weight: 500;
+  vertical-align: middle;
+}
 .linklist.left.style-2 .link {
   border-radius: 8px;
   transition: all 0.2s ease;
