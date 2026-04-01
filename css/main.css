@@ -792,6 +792,9 @@ html.reverse-both * {
   border-left: 3px solid var(--theme);
   font-weight: 500;
 }
+.nav-area .menu {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
 @-moz-keyframes waifuFadeIn {
   to {
     opacity: 1;
