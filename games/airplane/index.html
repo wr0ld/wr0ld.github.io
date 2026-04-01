@@ -50,8 +50,8 @@
 <meta property="og:description" content="✈️ 飞机大战            开始游戏       暂停                 得分: 0       最高分: 0       生命: 3                               游戏结束!       得分: 0       重新开始                   游戏说明            使用方向键或WASD控制飞机移动">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-03-31T15:48:34.743Z">
-<meta property="article:modified_time" content="2026-03-26T05:44:23.975Z">
+<meta property="article:published_time" content="2026-04-01T03:14:34.827Z">
+<meta property="article:modified_time" content="2026-04-01T03:14:34.827Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -102,7 +102,7 @@
   <span class="sep"></span>
   <a class="cap breadcrumb" href="/games/airplane/">飞机大战</a>
   </div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-31T15:48:34.743Z">2026-03-31</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-26T05:44:23.975Z">2026-03-26</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-01T03:14:34.827Z">2026-04-01</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-01T03:14:34.827Z">2026-04-01</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -285,7 +285,7 @@
   let gameLoop = null;
   let isPaused = false;
   let enemySpawnTimer = 0;
-  
+
   document.getElementById('highScore').textContent = highScore;
   
   function drawPlayer() {
@@ -427,6 +427,7 @@
     bullets = [];
     enemies = [];
     enemySpawnTimer = 0;
+    isPaused = false;
     player.x = 240;
     player.y = 580;
     
@@ -435,6 +436,7 @@
     
     document.getElementById('startBtn').disabled = true;
     document.getElementById('pauseBtn').disabled = false;
+    document.getElementById('pauseBtn').textContent = '暂停';
     document.getElementById('gameOver').classList.add('hidden');
     
     if (gameLoop) {
@@ -452,10 +454,12 @@
   function gameOver() {
     cancelAnimationFrame(gameLoop);
     gameLoop = null;
+    isPaused = false;
     document.getElementById('finalScore').textContent = score;
     document.getElementById('gameOver').classList.remove('hidden');
     document.getElementById('startBtn').disabled = false;
     document.getElementById('pauseBtn').disabled = true;
+    document.getElementById('pauseBtn').textContent = '暂停';
   }
   
   function restartGame() {

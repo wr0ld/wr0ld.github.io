@@ -50,8 +50,8 @@
 <meta property="og:description" content="🎲 3D魔方   点击魔方面并拖动来旋转层，拖动空白区域旋转视角！                 🔀 打乱     🔄 重置                     旋转次数       0                 游戏时间       00:00                   🎮 操作说明            🖱️ 点击魔方面并拖动来旋转该层       🔄">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-03-31T15:48:34.743Z">
-<meta property="article:modified_time" content="2026-03-28T12:47:07.204Z">
+<meta property="article:published_time" content="2026-04-01T03:12:45.780Z">
+<meta property="article:modified_time" content="2026-04-01T03:12:45.780Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -102,7 +102,7 @@
   <span class="sep"></span>
   <a class="cap breadcrumb" href="/games/rubiks/">魔方</a>
   </div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-31T15:48:34.743Z">2026-03-31</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-28T12:47:07.204Z">2026-03-28</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-01T03:12:45.780Z">2026-04-01</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-01T03:12:45.780Z">2026-04-01</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -481,10 +481,12 @@
       
       if (this.isRotatingLayer && this.selectedCube && this.selectedFace) {
         if (Math.abs(deltaX) > 20 || Math.abs(deltaY) > 20) {
+          var selectedCube = this.selectedCube;
+          var selectedFace = this.selectedFace;
           this.isRotatingLayer = false;
           this.selectedCube = null;
           this.selectedFace = null;
-          this.startLayerRotation(deltaX, deltaY);
+          this.startLayerRotation(deltaX, deltaY, selectedCube, selectedFace);
         }
       } else {
         this.cubeGroup.rotation.y += deltaX * 0.01;
@@ -501,11 +503,9 @@
       this.selectedFace = null;
     },
     
-    startLayerRotation: function(deltaX, deltaY) {
+    startLayerRotation: function(deltaX, deltaY, cube, face) {
       if (this.isAnimating) return;
-      
-      var face = this.selectedFace;
-      var cube = this.selectedCube;
+      if (!cube || !face) return;
       
       var faceNormal = face.normal.clone();
       faceNormal.applyQuaternion(cube.quaternion);
@@ -698,19 +698,35 @@
       var layers = [-1, 0, 1];
       var directions = [-1, 1];
       var moves = 15;
-      var currentMove = 0;
+      var queue = [];
+      
+      for (var i = 0; i < moves; i++) {
+        queue.push({
+          axis: axes[Math.floor(Math.random() * 3)],
+          layer: layers[Math.floor(Math.random() * 3)],
+          direction: directions[Math.floor(Math.random() * 2)]
+        });
+      }
       
       function doMove() {
-        if (currentMove >= moves) return;
-        currentMove++;
+        if (!queue.length) return;
+        if (self.isAnimating) {
+          requestAnimationFrame(doMove);
+          return;
+        }
         
-        var axis = axes[Math.floor(Math.random() * 3)];
-        var layer = layers[Math.floor(Math.random() * 3)];
-        var direction = directions[Math.floor(Math.random() * 2)];
+        var move = queue.shift();
+        self.executeRotation(move.axis, move.layer, move.direction);
         
-        self.executeRotation(axis, layer, direction);
+        function waitForAnimationEnd() {
+          if (self.isAnimating) {
+            requestAnimationFrame(waitForAnimationEnd);
+            return;
+          }
+          doMove();
+        }
         
-        setTimeout(doMove, 300);
+        requestAnimationFrame(waitForAnimationEnd);
       }
       
       doMove();
