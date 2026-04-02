@@ -254,16 +254,16 @@
                 engineTypes: 1
             },
             camera = T3.ObjectManager.get('camera-cube'),
-            folder = gui.addFolder('Car Mesh');
+            folder = gui.addFolder('汽车网格');
         folder
             .add(me, 'visible')
-            .name('Show mesh')
+            .name('显示网格')
             .onFinishChange(function (value) {
                 me.setVisible(value);
             });
         folder
             .add({shadow: false}, 'shadow')
-            .name('Show shadows')
+            .name('显示阴影')
             .onFinishChange(function (value) {
                 me.body.real.castShadow = value;
                 me.windows.real.castShadow = value;

@@ -672,20 +672,20 @@
 
             // dat.gui
             function initDatGui(gui) {
-                var out = gui.addFolder('Postprocessing'),
+                var out = gui.addFolder('后处理'),
                     controller,
                     $dom;
 
                 //<debug>
                 // copy shader
-                var radialShaderFolder = out.addFolder('Radial Blur');
+                var radialShaderFolder = out.addFolder('径向模糊');
                 radialShaderFolder
                     .add(radialShader, 'enabled')
-                    .name('Enabled');
+                    .name('启用');
 
                 controller = radialShaderFolder
                     .add(radialShader.uniforms.sampleDist, 'value', 0.0, 1.0)
-                    .name('Distance (Read only)')
+                    .name('距离 (只读)')
                     .listen();
                 radialShader.maxStrength = 1.5;
                 $dom = $(controller.domElement);
@@ -696,7 +696,7 @@
 
                 radialShaderFolder
                     .add(radialShader, 'maxStrength', 0.0, 4.0)
-                    .name('Strength');
+                    .name('强度');
 //                radialShaderFolder
 //                    .add(radialShader.uniforms.sampleStrength, 'value', 0.0, 5.0)
 //                    .name('Strength');

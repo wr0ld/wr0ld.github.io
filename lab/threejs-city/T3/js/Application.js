@@ -311,10 +311,10 @@ T3.Application = {
     var scope = angular.element($('body')).scope();
     T3.AssetLoader.load(function () {
         scope = angular.element($('body')).scope();
-        scope.$apply(function () { scope.loading = 'Loading Sounds'; });
+        scope.$apply(function () { scope.loading = '加载音效中'; });
         T3.SoundLoader.load(function () {
             scope = angular.element($('body')).scope();
-            scope.$apply(function () { scope.loading = 'Generating City'; });
+            scope.$apply(function () { scope.loading = '生成城市中'; });
             setTimeout (function () {
                 T3.Application.launch();
             }, 10);
