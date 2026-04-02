@@ -77,8 +77,14 @@
 
     .lab-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 24px;
+    }
+
+    @media (max-width: 1100px) {
+      .lab-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .lab-card {
@@ -224,6 +230,7 @@
       .hero { padding: 24px; border-radius: 22px; }
       .lab-preview { height: 190px; }
       .lab-actions { flex-direction: column; }
+      .lab-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
