@@ -238,7 +238,7 @@
     <section class="lab-grid">
       <article class="lab-card">
         <div class="lab-preview">
-          <iframe src="/lab/pretext/" loading="lazy" title="Pretext 排版引擎实验"></iframe>
+          <iframe src="/lab/pretext/" loading="lazy" title="Pretext 排版引擎实验" allow="autoplay 'none'"></iframe>
         </div>
         <div class="lab-info">
           <h2 class="lab-card-title">Pretext 官方 Demos</h2>
@@ -258,7 +258,7 @@
 
       <article class="lab-card">
         <div class="lab-preview">
-          <iframe src="/lab/login-animation/" loading="lazy" title="卡通角色登录动画"></iframe>
+          <iframe src="/lab/login-animation/" loading="lazy" title="卡通角色登录动画" allow="autoplay 'none'"></iframe>
         </div>
         <div class="lab-info">
           <h2 class="lab-card-title">卡通角色登录动画</h2>
@@ -278,7 +278,7 @@
 
       <article class="lab-card">
         <div class="lab-preview">
-          <iframe src="/lab/my-room-in-3d/" loading="lazy" title="3D 房间展示"></iframe>
+          <iframe src="/lab/my-room-in-3d/" loading="lazy" title="3D 房间展示" allow="autoplay 'none'"></iframe>
         </div>
         <div class="lab-info">
           <h2 class="lab-card-title">My Room in 3D</h2>
@@ -298,7 +298,7 @@
 
       <article class="lab-card">
         <div class="lab-preview" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
-          <iframe src="/lab/bruno-simon-folio/" loading="lazy" title="Bruno Simon 3D Portfolio"></iframe>
+          <iframe src="/lab/bruno-simon-folio/" loading="lazy" title="Bruno Simon 3D Portfolio" allow="autoplay 'none'"></iframe>
         </div>
         <div class="lab-info">
           <h2 class="lab-card-title">Bruno Simon 3D Portfolio</h2>
@@ -312,6 +312,26 @@
           <div class="lab-actions">
             <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/bruno-simon-folio/', 'Bruno Simon 3D Portfolio')">全屏预览</button>
             <a class="lab-btn lab-btn-secondary" href="/lab/bruno-simon-folio/" target="_blank" rel="noopener noreferrer">新标签打开</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="lab-card">
+        <div class="lab-preview" style="background: linear-gradient(135deg, #2d3436, #636e72);">
+          <iframe src="/lab/threejs-city/" loading="lazy" title="Three.js City" allow="autoplay 'none'"></iframe>
+        </div>
+        <div class="lab-info">
+          <h2 class="lab-card-title">Three.js City</h2>
+          <p class="lab-card-desc">3D 城市驾驶模拟器，使用 WASD 控制汽车在随机生成的城市中行驶，支持雨滴效果、多摄像机视角和后处理特效。</p>
+          <div class="lab-tags">
+            <span class="lab-tag">Three.js</span>
+            <span class="lab-tag">City</span>
+            <span class="lab-tag">Driving</span>
+            <span class="lab-tag">WebGL</span>
+          </div>
+          <div class="lab-actions">
+            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/threejs-city/', 'Three.js City')">全屏预览</button>
+            <a class="lab-btn lab-btn-secondary" href="/lab/threejs-city/" target="_blank" rel="noopener noreferrer">新标签打开</a>
           </div>
         </div>
       </article>
@@ -355,6 +375,24 @@
         closeLabModal();
       }
     });
+
+    // 静音整个页面的媒体元素
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('audio, video').forEach(function(el) {
+        el.muted = true;
+        el.pause();
+      });
+    });
+
+    // 全屏预览时恢复正常（有声音）
+    var originalOpenLabModal = openLabModal;
+    window.openLabModal = function(url, title) {
+      document.getElementById("labModalTitle").textContent = title;
+      var modalIframe = document.getElementById("labModalIframe");
+      modalIframe.src = url;
+      document.getElementById("labModal").classList.add("active");
+      document.body.style.overflow = "hidden";
+    };
   </script>
 </body>
 </html>

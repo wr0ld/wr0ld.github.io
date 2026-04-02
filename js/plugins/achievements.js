@@ -731,6 +731,15 @@
         flavor: '布局随心变',
         obtained: false,
         obtainTime: null
+      },
+      'city_driver': {
+        name: '城市驾驶员',
+        desc: '在Three.js城市中驾驶汽车',
+        icon: '🏙️',
+        rarity: 'rare',
+        flavor: '霓虹灯下的午夜狂飙',
+        obtained: false,
+        obtainTime: null
       }
     },
     
@@ -1386,6 +1395,10 @@
       
       if (href.includes('/lab/my-room-in-3d')) {
         this.obtainCard('my_room_visitor');
+      }
+      
+      if (href.includes('/lab/threejs-city')) {
+        this.obtainCard('city_driver');
       }
     },
     
