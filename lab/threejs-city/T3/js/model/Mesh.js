@@ -108,35 +108,35 @@
 
         folder
             .add(me.materialOptions, 'wireframe')
-            .name('Wireframe')
+            .name('线框模式')
             .onChange(function (value) {
                 me.real.material.wireframe = value;
             });
 
         folder
             .addColor(me.materialOptions, 'ambient')
-            .name('Ambient')
+            .name('环境色')
             .onChange(function (value) {
                 me.real.material.ambient.setHex(parseInt(value.substr(1), 16));
             });
     
         folder
             .addColor(me.materialOptions, 'color')
-            .name('Color')
+            .name('颜色')
             .onChange(function (value) {
                 me.real.material.color.setHex(parseInt(value.substr(1), 16));
             });
     
         folder
             .addColor(me.materialOptions, 'specular')
-            .name('Specular')
+            .name('高光色')
             .onChange(function (value) {
                 me.real.material.specular.setHex(parseInt(value.substr(1), 16));
             });
     
         folder
             .add(me.materialOptions, 'shininess', 0, 128)
-            .name('Shininess')
+            .name('光泽度')
             .onChange(function (value) {
                 me.real.material.shininess = value;
             });

@@ -129,10 +129,10 @@
             }
 
             function initDatGui(gui) {
-                var folder = gui.addFolder('Music');
+                var folder = gui.addFolder('音乐');
                 folder
                     .add(options, 'enabled')
-                    .name('Enabled')
+                    .name('启用')
                     .onFinishChange(function (value) {
                         if (value) {
                             music = T3.SoundLoader.playSound('music-1');
@@ -142,13 +142,13 @@
                     });
                 folder
                     .add(options, 'loop')
-                    .name('Loop')
+                    .name('循环')
                     .onChange(function (value) {
                         music.node.loop = value;
                     });
                 folder
                     .add(options, 'volume', 0, 1)
-                    .name('Volume')
+                    .name('音量')
                     .onChange(function (value) {
                         music.volume(value);
                     });
@@ -456,11 +456,11 @@
             particleSystem = new THREE.ParticleSystem(geometry, material);
             particleSystem.initDatGui = function(gui) {
                 var me = this,
-                    folder = gui.addFolder('Lamps');
+                    folder = gui.addFolder('路灯');
 
                 folder
                     .add(me, 'visible')
-                    .name('Visible')
+                    .name('可见')
                     .onFinishChange(function (value) {
                         me.visible = value;
                     });
@@ -518,11 +518,11 @@
             }
 
             function initDatGui(gui) {
-                var folder = gui.addFolder('Wires');
+                var folder = gui.addFolder('电线');
 
                 folder
                     .add({visible: true}, 'visible')
-                    .name('Visible')
+                    .name('可见')
                     .onChange(function (value) {
                         var len = wires.length;
                         while (len--) {

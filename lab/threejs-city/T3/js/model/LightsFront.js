@@ -40,7 +40,7 @@
             folder = LightsFront.superclass.initDatGui.call(this, gui);
         folder
             .add(me.materialOptions, 'opacity', 0.0, 1.0)
-            .name('Opacity')
+            .name('不透明度')
             .onChange(function (value) {
                 me.real.material.opacity = value;
             });

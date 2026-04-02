@@ -55,20 +55,20 @@
             var me = this,
                 folder;
 
-            folder = gui.addFolder('Grid display');
-            folder.add(me.gui, 'gridX').name('Show XZ grid').onFinishChange(function (value) {
+            folder = gui.addFolder('网格显示');
+            folder.add(me.gui, 'gridX').name('显示 XZ 网格').onFinishChange(function (value) {
                 scene[value ? 'add' : 'remove'](me.ref.gridX);
             });
-            folder.add(me.gui, 'gridY').name('Show YZ grid').onFinishChange(function (value) {
+            folder.add(me.gui, 'gridY').name('显示 YZ 网格').onFinishChange(function (value) {
                 scene[value ? 'add' : 'remove'](me.ref.gridY);
             });
-            folder.add(me.gui, 'gridZ').name('Show XY grid').onFinishChange(function (value) {
+            folder.add(me.gui, 'gridZ').name('显示 XY 网格').onFinishChange(function (value) {
                 scene[value ? 'add' : 'remove'](me.ref.gridZ);
             });
-            folder.add(me.gui, 'ground').name('Show ground').onFinishChange(function (value) {
+            folder.add(me.gui, 'ground').name('显示地面').onFinishChange(function (value) {
                 scene[value ? 'add' : 'remove'](me.ref.ground);
             });
-            folder.add(me.gui, 'axes').name('Show axes').onFinishChange(function (value) {
+            folder.add(me.gui, 'axes').name('显示坐标轴').onFinishChange(function (value) {
                 scene[value ? 'add' : 'remove'](me.ref.axes);
             });
         }

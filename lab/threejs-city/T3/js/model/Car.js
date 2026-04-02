@@ -146,7 +146,7 @@
 
         me.body = new T3.model.Body({
             name: 'car-body',
-            folder: 'Car body',
+            folder: '汽车车身',
             originalParent: me,
             geometryConfig: { initialized: T3.AssetLoader.get('car-body-geometry').geometry },
             materialConfig: { options: {side: THREE.DoubleSide} }
@@ -154,35 +154,35 @@
 
         me.exhaust = new T3.model.Exhaust({
             name: 'car-exhaust',
-            folder: 'Car exhaust and dummy front',
+            folder: '排气管和前保险杠',
             originalParent: me,
             geometryConfig: { initialized: T3.AssetLoader.get('car-exhaust-geometry').geometry }
         });
 
         me.windows = new T3.model.Window({
             name: 'car-windows',
-            folder: 'Car windows',
+            folder: '车窗',
             originalParent: me,
             geometryConfig: { initialized: T3.AssetLoader.get('car-windows-geometry').geometry }
         });
 
         me.interior = new T3.model.Interior({
             name: 'car-interior',
-            folder: 'Car interior',
+            folder: '汽车内饰',
             originalParent: me,
             geometryConfig: { initialized: T3.AssetLoader.get('car-interior-geometry').geometry }
         });
 
         me.lightsFront = new T3.model.LightsFront({
             name: 'car-lights-front',
-            folder: 'Car lights - front',
+            folder: '前车灯',
             originalParent: me,
             geometryConfig: { initialized: T3.AssetLoader.get('car-lights-front-geometry').geometry }
         });
 
         me.lightsBack = new T3.model.LightsBack({
             name: 'car-lights-back',
-            folder: 'Car lights - back',
+            folder: '后车灯',
             originalParent: me,
             geometryConfig: { initialized: T3.AssetLoader.get('car-lights-back-geometry').geometry }
         });
@@ -274,13 +274,13 @@
             });
         folder
             .add(me, 'enableCubeMap')
-            .name('Enable cube map')
+            .name('启用立方体贴图')
             .onFinishChange(function (value) {
                 me.body.updateMaterial(value);
             });
         folder
             .add(soundOptions, 'engineSound')
-            .name('Engine sound')
+            .name('引擎声音')
             .onFinishChange(function (value) {
                 if (value) {
                     me.engineSound = T3.SoundLoader.playSound('sound-engine-3', {
@@ -294,12 +294,12 @@
             });
         folder
             .add(soundOptions, 'engineTypes', {
-                'Engine type 1': 1,
-                'Engine type 2': 2,
-                'Engine type 3': 3,
-                'Engine type 4': 4,
+                '引擎类型 1': 1,
+                '引擎类型 2': 2,
+                '引擎类型 3': 3,
+                '引擎类型 4': 4,
             })
-            .name('Engine types')
+            .name('引擎类型')
             .onChange(function (value) {
                 var newEngine = 'sound-engine-' + value;
                 if (me.engineSound) {
@@ -313,7 +313,7 @@
 
         folder
             .add(soundOptions, 'volume', 0, 0.3)
-            .name('Volume')
+            .name('音量')
             .onChange(function (value) {
                 if (me.engineSound) {
                     me.engineSound.sound.volume(value);

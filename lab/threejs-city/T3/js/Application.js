@@ -223,14 +223,14 @@ T3.Application = {
 
     initDatGui: function () {
         var gui = this.datGUI;
-        var folder = gui.addFolder('World');
+        var folder = gui.addFolder('世界');
 
         folder
             .add(T3.ObjectManager.get('directional-light-3'), 'shadowCameraVisible')
-            .name('Shadow camera');
+            .name('阴影相机');
         folder
             .add(scene.fog, 'visible')
-            .name('Fog visibility')
+            .name('雾可见性')
             .onFinishChange(this.toggleFogStatus);
         return this;
     },

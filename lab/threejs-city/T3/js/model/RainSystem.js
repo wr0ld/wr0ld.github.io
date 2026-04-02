@@ -185,12 +185,12 @@
      */
     RainSystem.prototype.initDatGui = function (gui) {
         var me = this,
-            folder = gui.addFolder('Rain');
+            folder = gui.addFolder('雨天效果');
 
 //        me.visible = false;
         folder
             .add(me, 'visible')
-            .name('Visible')
+            .name('可见')
             .onFinishChange(function (value) {
                 me.visible = value;
                 me.rainParticleSystem.visible = value;
@@ -198,14 +198,14 @@
 
         folder
             .add(me, 'particleCount', 0, me.maxParticleCount)
-            .name('Raindrops');
+            .name('雨滴数量');
 
         folder
             .add(me, 'textureUsed', {
-                White: 'images/raindrop_backup.png',
-                Dark: 'images/raindrop_2.png'
+                '白色': 'images/raindrop_backup.png',
+                '深色': 'images/raindrop_2.png'
             })
-            .name('Raindrop texture')
+            .name('雨滴纹理')
             .onFinishChange(function (value) {
                 me.rainParticleSystem.material.map =
                     THREE.ImageUtils.loadTexture(value);
@@ -214,7 +214,7 @@
 
         folder
             .add(me, 'speed', 2, 5)
-            .name('Speed');
+            .name('下落速度');
     };
 
     /**
