@@ -325,10 +325,31 @@
     },
     
     download: function() {
-      var link = document.createElement('a');
-      link.href = this.img.src;
-      link.download = this.img.src.split('/').pop() || 'image.jpg';
-      link.click();
+      var self = this;
+      var imgUrl = this.img.src;
+      var filename = imgUrl.split('/').pop().split('?')[0] || 'image.jpg';
+      
+      fetch(imgUrl, { mode: 'cors' })
+        .then(function(response) {
+          return response.blob();
+        })
+        .then(function(blob) {
+          var blobUrl = URL.createObjectURL(blob);
+          var link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(blobUrl);
+        })
+        .catch(function() {
+          var link = document.createElement('a');
+          link.href = imgUrl;
+          link.download = filename;
+          link.target = '_blank';
+          link.click();
+        });
     }
   };
   
