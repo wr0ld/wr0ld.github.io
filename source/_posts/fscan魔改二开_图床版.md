@@ -1,5 +1,5 @@
 ---
-title: Fscan 魔改二开 - 特征消除与功能扩展
+title: 工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展
 cover: https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image3.png
 categories:
   - 工具魔改
@@ -9,7 +9,9 @@ tags:
   - 内网扫描
   - fscan
 abbrlink: e39557c4
-date: 2026-03-22 12:00:00# 🔧 安全工具 | Fscan 魔改二开 · 特征消除与功能扩展
+date: 2026-03-22 12:00:00
+---
+# 🔧 安全工具 | Fscan 魔改二开 · 特征消除与功能扩展
 
 > 📌 原fscan项目地址：https://github.com/shadow1ng/fscan
 >

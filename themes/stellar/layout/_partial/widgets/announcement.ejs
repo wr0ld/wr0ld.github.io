@@ -1,0 +1,57 @@
+<%
+function layoutDiv() {
+  var el = '';
+  var announcement = site.data.announcement;
+  
+  if (!announcement || !announcement.enabled) {
+    return el;
+  }
+  
+  var typeColors = {
+    'info': 'var(--text-p1)',
+    'warning': '#f59e0b',
+    'success': '#10b981',
+    'error': '#ef4444'
+  };
+  
+  var typeIcons = {
+    'info': 'ℹ️',
+    'warning': '⚠️',
+    'success': '✅',
+    'error': '❌'
+  };
+  
+  el += `<widget class="widget-wrapper${scrollreveal(' ')} announcement">`
+  
+  if (announcement.title) {
+    el += '<div class="widget-header dis-select">';
+    el += '<span class="name">' + (announcement.icon || '📢') + ' ' + announcement.title + '</span>';
+    el += '</div>';
+  }
+  
+  el += '<div class="widget-body fs14">';
+  el += '<div class="announcement-list">';
+  
+  if (announcement.items && announcement.items.length > 0) {
+    announcement.items.forEach(function(item) {
+      var borderColor = typeColors[item.type] || typeColors['info'];
+      el += '<div class="announcement-item" style="border-left: 3px solid ' + borderColor + ';">';
+      if (item.date) {
+        el += '<div class="announcement-date">' + item.date + '</div>';
+      }
+      el += '<div class="announcement-content">' + markdown(item.content) + '</div>';
+      el += '</div>';
+    });
+  } else if (announcement.content) {
+    el += '<div class="announcement-item">';
+    el += '<div class="announcement-content">' + markdown(announcement.content) + '</div>';
+    el += '</div>';
+  }
+  
+  el += '</div>';
+  el += '</div>';
+  el += '</widget>';
+  return el;
+}
+%>
+<%- layoutDiv() %>

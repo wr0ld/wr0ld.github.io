@@ -15,6 +15,13 @@ ghissues:
   labels: # 过滤只显示具有某些标签的issues
 
 # 将其覆盖设置为空，可删除一个默认组件，例如 welcome:
+# 文章分类组件
+categories:
+  layout: categories
+  title: 文章分类
+  show_count: true
+  columns: 1
+
 # Recent update
 recent:
   layout: recent
@@ -82,3 +89,11 @@ tagtree:
   expand_all: false # 是否展开所有节点
   expand_active: true # 是否展开当前节点
   show_tagcon: true # 是否显示标签 icon
+
+# 游戏目录组件
+games-toc:
+  layout: games-toc
+
+# 任务简报组件
+todo:
+  layout: todo

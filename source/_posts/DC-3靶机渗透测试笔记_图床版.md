@@ -2,7 +2,7 @@
 cover: /images/VulnHub.jpg
 title: VulnHub DC-3 靶机渗透测试笔记
 categories:
-  - vulnhub-DC
+  - [linux, vulnhub-DC]
 tags:
   - 靶机渗透
   - VulnHub
@@ -10,7 +10,9 @@ tags:
   - Joomla
   - 提权
 abbrlink: b169bdb4
-date: 2026-03-12 12:00:00# VulnHub DC-3 靶机渗透测试笔记
+date: 2026-03-12 12:00:00
+---
+# VulnHub DC-3 靶机渗透测试笔记
 
 > **靶机信息**
 >

@@ -1,0 +1,147 @@
+# 游戏配置文件
+# 添加新游戏只需在此文件添加配置即可
+
+games:
+  - id: snake
+    title: 贪吃蛇
+    icon: 🐍
+    description: 经典贪吃蛇游戏，控制蛇吃食物，不要撞墙和自己！
+    tags:
+      - 经典
+      - 休闲
+
+  - id: snake-battle
+    title: 贪吃蛇大作战
+    icon: ⚔️
+    description: 与AI对战，争夺食物和生存空间！
+    tags:
+      - 对战
+      - 竞技
+
+  - id: tetris
+    title: 俄罗斯方块
+    icon: 🧱
+    description: 经典俄罗斯方块，消除方块，挑战高分！
+    tags:
+      - 经典
+      - 益智
+
+  - id: "2048"
+    title: "2048"
+    icon: 🎯
+    description: 数字合并游戏，挑战2048方块！
+    tags:
+      - 益智
+      - 数字
+
+  - id: breakout
+    title: 弹球
+    icon: 🎱
+    description: 经典打砖块游戏，用挡板反弹小球消除砖块！
+    tags:
+      - 经典
+      - 动作
+
+  - id: minesweeper
+    title: 扫雷
+    icon: 💣
+    description: 经典扫雷游戏，找出所有地雷！
+    tags:
+      - 经典
+      - 策略
+
+  - id: gobang
+    title: 五子棋
+    icon: ⚫
+    description: 经典五子棋对战，AI难度可选，挑战最强AI！
+    tags:
+      - 经典
+      - 策略
+
+  - id: memory
+    title: 记忆翻牌
+    icon: 🃏
+    description: 翻开卡片找出配对，考验记忆力！
+    tags:
+      - 益智
+      - 记忆
+
+  - id: airplane
+    title: 飞机大战
+    icon: ✈️
+    description: 经典射击游戏，击落敌机得分！
+    tags:
+      - 动作
+      - 射击
+
+  - id: sokoban
+    title: 推箱子
+    icon: 📦
+    description: 经典益智游戏，将箱子推到目标位置！
+    tags:
+      - 益智
+      - 策略
+
+  - id: puzzle
+    title: 数字华容道
+    icon: 🔢
+    description: 滑块拼图游戏，将数字按顺序排列！
+    tags:
+      - 益智
+      - 拼图
+
+  - id: jump
+    title: 跳一跳
+    icon: 🎯
+    description: 蓄力跳跃，精准落在方块上得分！
+    tags:
+      - 休闲
+      - 技巧
+
+  - id: match3
+    title: 消消乐
+    icon: 💎
+    description: 三消游戏，消除相同颜色的方块得分！
+    tags:
+      - 休闲
+      - 益智
+
+  - id: whack
+    title: 打地鼠
+    icon: 🔨
+    description: 快速点击冒出的地鼠，考验反应速度！
+    tags:
+      - 休闲
+      - 反应
+
+  - id: catch
+    title: 接金币
+    icon: 💰
+    description: 移动篮子接住掉落的金币，避开炸弹！
+    tags:
+      - 休闲
+      - 技巧
+
+  - id: xiuxian
+    title: 修仙模拟器
+    icon: ☯️
+    description: 大型修仙游戏，修炼、探索、炼丹、突破境界！
+    tags:
+      - 大型
+      - RPG
+
+  - id: magictower
+    title: 魔塔
+    icon: 🗼
+    description: 经典魔塔复刻，8层塔楼，策略数值战斗！
+    tags:
+      - 大型
+      - 经典
+
+  - id: rubiks
+    title: 3D魔方
+    icon: 🎲
+    description: 3D魔方模拟器，支持旋转、打乱和重置！
+    tags:
+      - 3D
+      - 益智

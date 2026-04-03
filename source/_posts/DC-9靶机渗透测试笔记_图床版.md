@@ -2,7 +2,7 @@
 cover: /images/VulnHub.jpg
 title: VulnHub DC-9 靶机渗透测试笔记
 categories:
-  - vulnhub-DC
+  - [linux, vulnhub-DC]
 tags:
   - 靶机渗透
   - VulnHub
@@ -10,7 +10,9 @@ tags:
   - 提权 SQL注入
   - 提权
 abbrlink: f10adb67
-date: 2026-03-18 12:00:00# VulnHub DC-9 靶机渗透测试笔记
+date: 2026-03-18 12:00:00
+---
+# VulnHub DC-9 靶机渗透测试笔记
 
 > **靶机信息**
 >

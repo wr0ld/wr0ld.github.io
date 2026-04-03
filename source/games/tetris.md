@@ -230,7 +230,7 @@ layout: page
   let isPaused = false;
   let dropInterval = 1000;
   let lastDrop = 0;
-  
+
   document.getElementById('highScore').textContent = highScore;
   
   function initBoard() {
@@ -458,6 +458,8 @@ layout: page
     lines = 0;
     dropInterval = 1000;
     lastDrop = 0;
+    isPaused = false;
+
     
     document.getElementById('score').textContent = score;
     document.getElementById('level').textContent = level;
@@ -468,6 +470,7 @@ layout: page
     
     document.getElementById('startBtn').disabled = true;
     document.getElementById('pauseBtn').disabled = false;
+    document.getElementById('pauseBtn').textContent = '暂停';
     document.getElementById('gameOver').classList.add('hidden');
     
     if (gameLoop) {
@@ -486,10 +489,12 @@ layout: page
   function gameOver() {
     cancelAnimationFrame(gameLoop);
     gameLoop = null;
+    isPaused = false;
     document.getElementById('finalScore').textContent = score;
     document.getElementById('gameOver').classList.remove('hidden');
     document.getElementById('startBtn').disabled = false;
     document.getElementById('pauseBtn').disabled = true;
+    document.getElementById('pauseBtn').textContent = '暂停';
   }
   
   function restartGame() {
@@ -498,7 +503,17 @@ layout: page
   
   // 键盘控制
   document.addEventListener('keydown', (e) => {
-    if (!currentPiece || isPaused) return;
+    if (!currentPiece) return;
+
+    if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      if (gameLoop) {
+        togglePause();
+      }
+      return;
+    }
+
+    if (isPaused) return;
     
     switch(e.key) {
       case 'ArrowLeft':

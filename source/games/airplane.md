@@ -175,7 +175,7 @@ layout: page
   let gameLoop = null;
   let isPaused = false;
   let enemySpawnTimer = 0;
-  
+
   document.getElementById('highScore').textContent = highScore;
   
   function drawPlayer() {
@@ -317,6 +317,7 @@ layout: page
     bullets = [];
     enemies = [];
     enemySpawnTimer = 0;
+    isPaused = false;
     player.x = 240;
     player.y = 580;
     
@@ -325,6 +326,7 @@ layout: page
     
     document.getElementById('startBtn').disabled = true;
     document.getElementById('pauseBtn').disabled = false;
+    document.getElementById('pauseBtn').textContent = '暂停';
     document.getElementById('gameOver').classList.add('hidden');
     
     if (gameLoop) {
@@ -342,10 +344,12 @@ layout: page
   function gameOver() {
     cancelAnimationFrame(gameLoop);
     gameLoop = null;
+    isPaused = false;
     document.getElementById('finalScore').textContent = score;
     document.getElementById('gameOver').classList.remove('hidden');
     document.getElementById('startBtn').disabled = false;
     document.getElementById('pauseBtn').disabled = true;
+    document.getElementById('pauseBtn').textContent = '暂停';
   }
   
   function restartGame() {

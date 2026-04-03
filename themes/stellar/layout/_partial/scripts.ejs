@@ -35,8 +35,32 @@ function custom_inject() {
 <!-- inject -->
 <%- custom_inject() %>
 
-<!-- Live2D Widget -->
-<script src="https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script>
+<!-- Custom Image Viewer -->
+<script src="<%- url_for('/js/plugins/image-viewer.js') %>"></script>
+
+<!-- Custom Context Menu -->
+<script src="<%- url_for('/js/plugins/custom-context-menu.js') %>"></script>
+
+<!-- Glitch Effect -->
+<script src="<%- url_for('/js/plugins/glitch-effect.js') %>"></script>
+
+<!-- Terminal Copy -->
+<script src="<%- url_for('/js/plugins/terminal-copy.js') %>"></script>
+
+<!-- Hotkeys -->
+<script src="<%- url_for('/js/plugins/hotkeys.js') %>"></script>
+
+<!-- Achievements / Card System -->
+<script src="<%- url_for('/js/plugins/achievements.js') %>"></script>
+
+<!-- Music Player -->
+<script src="<%- url_for('/js/plugins/music-player.js') %>"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="<%- url_for('/js/plugins/offline-vault.js') %>"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="<%- url_for('/live2d-widget/dist/autoload.js') %>"></script>
 
 <!-- Live2D Widget 位置调整和默认显示 -->
 <style>
@@ -64,74 +88,150 @@ function custom_inject() {
   }
 </style>
 
-<!-- 点击特效 - 爱心爆炸效果 -->
+<!-- 点击特效 -->
 <script>
-  (function() {
-    // 创建爱心元素
-    function createHeart(x, y) {
-      const heart = document.createElement('div');
-      heart.className = 'click-heart';
-      heart.innerHTML = '❤';
-      heart.style.cssText = `
-        position: fixed;
-        left: ${x - 10}px;
-        top: ${y - 10}px;
-        font-size: 20px;
-        pointer-events: none;
-        z-index: 9999;
-        animation: heartFloat 1s ease-out forwards;
-        color: ${getRandomColor()};
-      `;
-      document.body.appendChild(heart);
-      
-      setTimeout(() => {
-        heart.remove();
-      }, 1000);
-    }
+(function() {
+  var clickEffects = {
+    current: null,
     
-    // 随机颜色
-    function getRandomColor() {
-      const colors = [
-        '#ff6b6b', '#ff8e8e', '#ffa8a8',
-        '#ff69b4', '#ff1493', '#db7093',
-        '#ff4500', '#ff6347', '#ff7f50',
-        '#ffd700', '#ffec8b', '#ffa500'
-      ];
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
     
-    // 点击事件
-    document.addEventListener('click', function(e) {
-      // 排除特定元素
-      if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) {
-        return;
-      }
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
       
-      // 创建多个爱心
-      for (let i = 0; i < 3; i++) {
-        setTimeout(() => {
-          const offsetX = (Math.random() - 0.5) * 40;
-          const offsetY = (Math.random() - 0.5) * 40;
-          createHeart(e.clientX + offsetX, e.clientY + offsetY);
-        }, i * 100);
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
       }
-    });
-  })();
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
 </script>
 
 <style>
-  @keyframes heartFloat {
-    0% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-    50% {
-      opacity: 0.8;
-      transform: translateY(-30px) scale(1.2);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-60px) scale(0.8);
-    }
-  }
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
 </style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+

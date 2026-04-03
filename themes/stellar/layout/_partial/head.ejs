@@ -113,6 +113,10 @@ function generate_canonical() {
   <meta charset="utf-8">
   <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
   <meta name="hexo-theme" content="<%- stellar_info('tree') %>" theme-name="<%- stellar_info('name') %>" theme-version="<%- stellar_info('version') %>">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
   <%- generate_canonical() %>
   <%- generate_robots() %>
   <%- meta_generator() %>
@@ -140,7 +144,7 @@ function generate_canonical() {
     <%- feed_tag(config.feed.path, {title: config.title}) %>
   <% } %>
 
-  <link rel="stylesheet" href="<%- url_for(`${theme.stellar.main_css}?v=${stellar_info('version')}`) %>">
+  <link rel="stylesheet" href="<%- url_for(`${theme.stellar.main_css}?v=${css_version()}`) %>">
 
 
   <% if (config.favicon) { %>

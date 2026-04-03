@@ -305,8 +305,10 @@ layout: page
   
   function startGame() {
     initGame();
+    isPaused = false;
     document.getElementById('startBtn').disabled = true;
     document.getElementById('pauseBtn').disabled = false;
+    document.getElementById('pauseBtn').textContent = '暂停';
     document.getElementById('gameOver').classList.add('hidden');
     
     if (gameLoop) {
@@ -325,10 +327,12 @@ layout: page
   function gameOver() {
     clearInterval(gameLoop);
     gameLoop = null;
+    isPaused = false;
     document.getElementById('finalScore').textContent = score;
     document.getElementById('gameOver').classList.remove('hidden');
     document.getElementById('startBtn').disabled = false;
     document.getElementById('pauseBtn').disabled = true;
+    document.getElementById('pauseBtn').textContent = '暂停';
   }
   
   function restartGame() {

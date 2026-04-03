@@ -138,6 +138,18 @@ $boxshadow-toast = 0 4px 8px 0px rgba(0, 0, 0, 0.1), 0 12px 16px -4px rgba(0, 0,
 #waifu canvas
   background: transparent !important
 
+// 看板娘工具栏透明
+#waifu-tool
+  background: transparent !important
+
+// 看板娘加载状态透明
+#waifu.waifu-loading
+  background: transparent !important
+
+// 看板娘所有子元素透明背景
+#waifu *
+  background-color: transparent !important
+
 // 看板娘提示框透明背景
 #waifu-tips
   background-color rgba(50, 50, 50, 0.7) !important
@@ -192,6 +204,11 @@ button:active, .post-card:active, a:active
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2)
   border: 1px solid rgba(255, 255, 255, 0.15)
   
+  // 增大代码字体
+  pre, code
+    font-size: 15px !important
+    line-height: 1.6 !important
+  
   // macOS风格三点
   &:before
     content: ''
@@ -223,16 +240,16 @@ button:active, .post-card:active, a:active
   // 滚动条样式 - 针对 table
   table
     &::-webkit-scrollbar
-      height: 8px
-      width: 8px
+      height: 6px
+      width: 6px
     &::-webkit-scrollbar-track-piece,
     &::-webkit-scrollbar-corner
-      background: rgba(255, 255, 255, 0.05)
+      background: transparent
     &::-webkit-scrollbar-thumb
-      background: rgba(255, 255, 255, 0.3)
-      border-radius: 4px
+      background: rgba(120, 120, 120, 0.3)
+      border-radius: 3px
       &:hover
-        background: rgba(255, 255, 255, 0.5)
+        background: rgba(120, 120, 120, 0.5)
 
 // 行内代码样式
 .md-text code:not([class])
@@ -347,3 +364,592 @@ button:active, .post-card:active, a:active
   // 所有段落
   p
     color: #ffffff !important
+
+// 博客反转模式样式
+html.reverse-vertical
+  transform: scaleY(-1)
+  *
+    transform: scaleY(-1)
+
+html.reverse-horizontal
+  transform: scaleX(-1)
+  *
+    transform: scaleX(-1)
+
+html.reverse-both
+  transform: scale(-1, -1)
+  *
+    transform: scale(-1, -1)
+
+// 自定义右键菜单样式
+.custom-context-menu
+  position: fixed
+  background: var(--card, #2a2a2a)
+  border: 1px solid var(--border, #444)
+  border-radius: 8px
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3)
+  padding: 8px 0
+  min-width: 200px
+  z-index: 10000
+  display: none
+  font-size: 14px
+  
+  &.visible
+    display: block
+    animation: menuFadeIn 0.15s ease
+  
+  .menu-item
+    display: flex
+    align-items: center
+    padding: 10px 16px
+    cursor: pointer
+    transition: background 0.2s
+    color: var(--text, #fff)
+    
+    &:hover
+      background: var(--theme, #3498db)
+      color: #fff
+    
+    .menu-icon
+      margin-right: 10px
+      font-size: 16px
+    
+    .menu-text
+      flex: 1
+  
+  .menu-divider
+    height: 1px
+    background: var(--border, #444)
+    margin: 6px 0
+
+@keyframes menuFadeIn
+  from
+    opacity: 0
+    transform: scale(0.95)
+  to
+    opacity: 1
+    transform: scale(1)
+
+// Raw Payload Modal
+.raw-payload-modal
+  position: fixed
+  top: 0
+  left: 0
+  width: 100%
+  height: 100%
+  z-index: 10001
+  display: flex
+  align-items: center
+  justify-content: center
+  
+  .modal-overlay
+    position: absolute
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+    background: rgba(0, 0, 0, 0.7)
+  
+  .modal-content
+    position: relative
+    background: var(--card, #2a2a2a)
+    border: 1px solid var(--border, #444)
+    border-radius: 12px
+    padding: 20px
+    max-width: 80%
+    max-height: 80%
+    overflow: auto
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4)
+    
+  .modal-header
+    display: flex
+    justify-content: space-between
+    align-items: center
+    margin-bottom: 16px
+    
+    h3
+      margin: 0
+      color: var(--text, #fff)
+    
+    .modal-close
+      background: none
+      border: none
+      color: var(--text, #fff)
+      font-size: 24px
+      cursor: pointer
+      padding: 0
+      line-height: 1
+      
+      &:hover
+        color: var(--theme, #3498db)
+  
+  .modal-body
+    textarea
+      width: 100%
+      min-height: 200px
+      background: var(--block, #1a1a1a)
+      border: 1px solid var(--border, #444)
+      border-radius: 8px
+      padding: 12px
+      color: var(--text, #fff)
+      font-family: monospace
+      font-size: 13px
+      resize: vertical
+      
+      &:focus
+        outline: none
+        border-color: var(--theme, #3498db)
+  
+  .modal-footer
+    margin-top: 16px
+    display: flex
+    justify-content: flex-end
+    gap: 10px
+    
+    button
+      padding: 8px 16px
+      border-radius: 6px
+      border: none
+      cursor: pointer
+      font-size: 14px
+      transition: all 0.2s
+      
+    .copy-btn
+      background: var(--theme, #3498db)
+      color: #fff
+      
+      &:hover
+        background: lighten(#3498db, 10%)
+    
+    .close-btn
+      background: var(--block, #333)
+      color: var(--text, #fff)
+      
+      &:hover
+        background: lighten(#333, 10%)
+
+// Toast 通知
+.context-menu-toast
+  position: fixed
+  bottom: 80px
+  right: 20px
+  background: var(--theme, #3498db)
+  color: #fff
+  padding: 12px 20px
+  border-radius: 8px
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3)
+  z-index: 10002
+  animation: toastSlideIn 0.3s ease
+  
+  &.fade-out
+    animation: toastFadeOut 0.3s ease forwards
+
+@keyframes toastSlideIn
+  from
+    opacity: 0
+    transform: translateX(100%)
+  to
+    opacity: 1
+    transform: translateX(0)
+
+@keyframes toastFadeOut
+  from
+    opacity: 1
+    transform: translateX(0)
+  to
+    opacity: 0
+    transform: translateX(100%)
+
+// 游戏目录样式
+.games-toc-widget
+  position: sticky
+  top: 20px
+  
+  .games-toc-list
+    display: flex
+    flex-direction: column
+    gap: 4px
+  
+  .games-toc-item
+    display: flex
+    align-items: center
+    padding: 8px 12px
+    border-radius: 8px
+    text-decoration: none
+    color: var(--text, #fff)
+    background: var(--block, #1a1a1a)
+    transition: all 0.2s
+    font-size: 14px
+    
+    &:hover
+      background: var(--theme, #3498db)
+      color: #fff
+      transform: translateX(4px)
+    
+    .games-toc-icon
+      margin-right: 8px
+      font-size: 16px
+    
+    .games-toc-title
+      flex: 1
+      overflow: hidden
+      text-overflow: ellipsis
+      white-space: nowrap
+      color: var(--text, #fff)
+      font-size: 14px
+
+// 归档页面年份颜色修复
+.post-list #archive .archive-header
+  color: var(--theme, #3498db) !important
+
+// 任务简报样式
+.todo-widget
+  .todo-list
+    display: flex
+    flex-direction: column
+    gap: 8px
+  
+  .todo-item
+    display: flex
+    align-items: flex-start
+    padding: 10px 12px
+    border-radius: 8px
+    background: var(--block, #1a1a1a)
+    transition: all 0.2s
+    
+    &:hover
+      background: var(--block-hover, #2a2a2a)
+    
+    .todo-status
+      margin-right: 10px
+      font-size: 14px
+      flex-shrink: 0
+    
+    .todo-content
+      flex: 1
+      font-size: 13px
+      line-height: 1.5
+      color: var(--text, #fff)
+    
+    &.done
+      .todo-content
+        color: var(--text-p3, #888)
+        text-decoration: line-through
+    
+    &.doing
+      background: rgba(255, 255, 255, 0.03)
+      border-left: 3px solid rgba(255, 255, 255, 0.3)
+
+// 文章标题突出显示
+.post-list .post-card
+  .post-title
+    font-weight: 600 !important
+    font-size: 1.1em !important
+    color: var(--text, #fff) !important
+    transition: all 0.2s
+  
+  &:hover .post-title
+    color: var(--theme, #3498db) !important
+
+.post-list.list .post-title,
+.post-list.grid .post-title,
+.post-list.compact .post-title
+  font-weight: 600 !important
+  font-size: 1.05em !important
+
+// 全局滚动条美化
+::-webkit-scrollbar
+  width: 6px
+  height: 6px
+
+::-webkit-scrollbar-track
+  background: transparent
+  border-radius: 3px
+
+::-webkit-scrollbar-thumb
+  background: rgba(120, 120, 120, 0.3)
+  border-radius: 3px
+  transition: background 0.3s
+
+::-webkit-scrollbar-thumb:hover
+  background: rgba(120, 120, 120, 0.5)
+
+::-webkit-scrollbar-corner
+  background: transparent
+
+// Firefox滚动条
+*
+  scrollbar-width: thin
+  scrollbar-color: rgba(120, 120, 120, 0.3) transparent
+
+// 隐藏不必要的滚动条
+.navbar-container
+  overflow: visible !important
+
+.post-list
+  overflow: visible !important
+
+.l_main
+  overflow: visible !important
+
+// 导航栏 Payloader 按钮靠右
+.navbar nav.post
+  display: flex !important
+  width: 100% !important
+  justify-content: flex-start !important
+
+// 文章页面右侧目录显示修复
+.l_body[layout="post"] .l_right
+  display: block !important
+  visibility: visible !important
+  opacity: 1 !important
+
+.l_body[layout="post"] .l_right .widgets
+  display: block !important
+  visibility: visible !important
+
+.l_body[layout="post"] .l_right .widget-wrapper.toc
+  display: block !important
+  visibility: visible !important
+
+// 大屏幕下文章目录始终显示在右侧
+@media screen and (min-width: 1181px)
+  .l_body[layout="post"] .l_right
+    position: sticky !important
+    position: -webkit-sticky !important
+    top: calc(var(--gap-margin) * 2) !important
+    transform: none !important
+    right: auto !important
+    max-height: calc(100vh - var(--gap-margin) * 4) !important
+    overflow-y: auto !important
+
+// 小屏幕下文章目录通过按钮切换显示
+@media screen and (max-width: 1180px)
+  .l_body[layout="post"] .l_right
+    position: fixed !important
+    transform: translateX(320px) !important
+    transition: transform 0.38s ease-out !important
+    right: 8px !important
+    top: calc(var(--gap-margin) * 2) !important
+    max-height: calc(100vh - var(--gap-margin) * 2 - 96px) !important
+    z-index: 10 !important
+    background: var(--card) !important
+    border-radius: 24px !important
+    padding: 16px !important
+  
+  .l_body[layout="post"][rightbar] .l_right
+    transform: translateX(0) !important
+
+// 分类数量显示样式
+.linklist.left .link .flex
+  display: flex
+  justify-content: space-between
+  align-items: center
+  width: 100%
+
+.linklist.left .link .count
+  font-size: 0.85em
+  color: var(--text-p3)
+  background: var(--bg-a50)
+  padding: 2px 8px
+  border-radius: 10px
+  margin-left: auto
+
+// 分类样式1 - 简洁风格
+.linklist.left.style-1 .link
+  background: transparent
+  border-radius: 6px
+  padding: 6px 10px
+  transition: background 0.2s ease
+  
+  &:hover
+    background: var(--bg-a50)
+  
+  &.active
+    background: var(--bg-a100)
+    color: var(--theme)
+
+// Widget Header 玻璃液态折叠效果
+.widget-wrapper.collapsible-widget
+  padding-bottom: 16px
+  
+  .widget-header
+    cursor: pointer
+    position: relative
+    padding: 12px var(--gap-padding)
+    margin: 0
+    margin-bottom: 8px
+    border-radius: 16px
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1)
+    backdrop-filter: blur(12px)
+    -webkit-backdrop-filter: blur(12px)
+    overflow: hidden
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%)
+    border: 1px solid rgba(255, 255, 255, 0.35)
+    
+    &::before
+      content: ''
+      position: absolute
+      top: 0
+      left: 0
+      right: 0
+      bottom: 0
+      border-radius: 12px
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)
+      border: 1px solid rgba(255, 255, 255, 0.06)
+      opacity: 0
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1)
+      pointer-events: none
+    
+    &::after
+      content: ''
+      position: absolute
+      top: 0
+      left: -100%
+      width: 100%
+      height: 100%
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)
+      transition: left 0.5s ease
+      pointer-events: none
+    
+    &:hover::before
+      opacity: 1
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)
+      border-color: rgba(255, 255, 255, 0.15)
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1) inset, 0 1px 0 rgba(255, 255, 255, 0.15) inset
+    
+    &:hover::after
+      left: 100%
+    
+    &:active::before
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%)
+      transform: scale(0.98)
+    
+    .name
+      position: relative
+      z-index: 1
+      transition: all 0.3s ease
+      font-weight: 500
+      color: #fff !important
+    
+    .collapse-toggle
+      position: relative
+      z-index: 1
+      display: flex
+      align-items: center
+      justify-content: center
+      width: 20px
+      height: 20px
+      border-radius: 6px
+      background: rgba(255, 255, 255, 0.1)
+      border: 1px solid rgba(255, 255, 255, 0.15)
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1)
+      
+      i
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)
+        font-size: 10px
+        color: var(--text-p2)
+    
+    &:hover .collapse-toggle
+      background: rgba(255, 255, 255, 0.15)
+      border-color: rgba(255, 255, 255, 0.2)
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1)
+      
+      i
+        color: var(--text-p1)
+        transform: translateY(1px)
+  
+  &.collapsed
+    .widget-header .collapse-toggle i
+      transform: rotate(-90deg)
+    
+    .widget-header:hover .collapse-toggle i
+      transform: rotate(-90deg) translateY(1px)
+    
+    .widget-body
+      display: none
+  
+  .widget-body
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1)
+    overflow: hidden
+    background: rgba(255, 255, 255, 0.1)
+    border-radius: 12px
+    padding: 8px
+
+// 任务简报widget限制最大高度
+.widget-wrapper.todo-widget
+  .widget-body
+    max-height: 300px
+    overflow-y: auto
+    
+    &::-webkit-scrollbar
+      width: 4px
+    
+    &::-webkit-scrollbar-track
+      background: transparent
+    
+    &::-webkit-scrollbar-thumb
+      background: rgba(255, 255, 255, 0.2)
+      border-radius: 2px
+      
+      &:hover
+        background: rgba(255, 255, 255, 0.3)
+  
+  .todo-count
+    display: inline-block
+    margin-left: 6px
+    padding: 2px 8px
+    border-radius: 10px
+    background: rgba(100, 100, 100, 0.2)
+    color: #ccc
+    font-size: 12px
+    font-weight: 600
+    vertical-align: middle
+
+// 分类样式2 - 带方框颜色特效（默认）
+.linklist.left.style-2 .link
+  border-radius: 8px
+  transition: all 0.2s ease
+  &:hover
+    background: var(--bg-a100)
+    transform: translateX(2px)
+  &.active
+    background: rgba(52, 152, 219, 0.1)
+    border-left: 3px solid var(--theme)
+    font-weight: 500
+
+// 导航栏强制3列布局
+.nav-area .menu
+  grid-template-columns: repeat(3, 1fr) !important
+
+// Widget header name 白色
+.widget-header .name
+  color: #fff !important
+
+// 文章详情页 meta 信息样式
+#post-meta
+  display: flex
+  flex-wrap: wrap
+  gap: 12px
+  align-items: center
+  
+  .text, time, span
+    color: #fff !important
+    
+  .sep
+    margin: 0 4px
+
+// 文章详情页标题蓝色
+.article.banner .title
+  color: #3498db !important
+  
+  span
+    color: #3498db !important
+
+// 首页文章卡片 meta 信息间距
+.post-card .meta.cap
+  gap: 20px
+  
+  .cap
+    margin-right: 8px
+    padding: 4px 8px

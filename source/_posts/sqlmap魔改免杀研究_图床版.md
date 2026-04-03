@@ -1,5 +1,5 @@
 ---
-title: sqlmap 魔改研究 - 从流量特征到 WAF 对抗
+title: 工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗
 cover: https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180841876.png
 categories:
   - 工具魔改
@@ -9,7 +9,9 @@ tags:
   - SQL注入
   - WAF绕过
 abbrlink: 5ddd3711
-date: 2026-03-21 12:00:00# 🔧 sqlmap 魔改研究 —— 从流量特征到 WAF 对抗
+date: 2026-03-21 12:00:00
+---
+# 🔧 sqlmap 魔改研究 —— 从流量特征到 WAF 对抗
 
 > 本文记录了对 sqlmap 进行源码级魔改的完整过程，目标是通过修改流量特征、请求头、payload 混淆等手段，降低被 OWASP ModSecurity CRS 规则集检测到的概率。所有测试均在本地靶场（DVWA）环境下进行，仅用于学习和安全研究。
 >

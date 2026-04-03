@@ -2,7 +2,7 @@
 cover: /images/DVWA.jpg
 title: DVWA 靶场实验报告 (High Level)
 categories:
-  - DVWA
+  - [web, DVWA]
 tags:
   - 靶场练习
   - DVWA
@@ -10,7 +10,9 @@ tags:
   - SQL注入
   - CSRF
 abbrlink: f46202bc
-date: 2026-03-09 12:00:00# DVWA 靶场实验报告 (High Level)
+date: 2026-03-09 12:00:00
+---
+# DVWA 靶场实验报告 (High Level)
 
 > **难度等级**：High
 > **报告说明**：本文为 DVWA 靶场 High 难度下**17个漏洞**的详细渗透测试步骤，包含漏洞原理、利用方法、工具操作及核心Payload，全程基于Burp Suite、Sqlmap等工具实现，所有操作步骤均配套实操截图

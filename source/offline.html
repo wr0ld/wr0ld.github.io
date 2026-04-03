@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>离线 - wr0ld's Blog</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    
+    .offline-container {
+      text-align: center;
+      padding: 40px;
+      max-width: 500px;
+    }
+    
+    .offline-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+    
+    .offline-title {
+      font-size: 28px;
+      margin-bottom: 16px;
+      color: #e74c3c;
+    }
+    
+    .offline-message {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #bdc3c7;
+      margin-bottom: 30px;
+    }
+    
+    .offline-code {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #3498db;
+      margin-bottom: 30px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .retry-btn {
+      background: #3498db;
+      color: #fff;
+      border: none;
+      padding: 12px 32px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .retry-btn:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+    
+    .cache-info {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">📡</div>
+    <h1 class="offline-title">[!] Connection Lost</h1>
+    <div class="offline-code">Accessing local cache...</div>
+    <p class="offline-message">
+      您当前处于离线状态，部分内容可能无法正常显示。<br>
+      请检查您的网络连接后重试。
+    </p>
+    <button class="retry-btn" onclick="location.reload()">🔄 重新连接</button>
+    <p class="cache-info">
+      💡 提示：您之前访问过的页面已被缓存，可以离线浏览。
+    </p>
+  </div>
+  
+  <script>
+    window.addEventListener('online', function() {
+      location.reload();
+    });
+  </script>
+</body>
+</html>

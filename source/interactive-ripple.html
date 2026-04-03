@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交互涟漪 - Interactive Ripple</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --anthropic-dark: #141413;
+            --anthropic-light: #faf9f5;
+            --anthropic-mid-gray: #b0aea5;
+            --anthropic-light-gray: #e8e6dc;
+            --anthropic-orange: #d97757;
+            --anthropic-blue: #6a9bcc;
+            --anthropic-green: #788c5d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--anthropic-light) 0%, #f5f3ee 100%);
+            min-height: 100vh;
+            color: var(--anthropic-dark);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20, 20, 19, 0.1);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar h1 {
+            font-family: 'Lora', serif;
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--anthropic-dark);
+            margin-bottom: 8px;
+        }
+
+        .sidebar .subtitle {
+            color: var(--anthropic-mid-gray);
+            font-size: 14px;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        .control-section {
+            margin-bottom: 32px;
+        }
+
+        .control-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--anthropic-dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-section h3::before {
+            content: '•';
+            color: var(--anthropic-orange);
+            font-weight: bold;
+        }
+
+        .seed-input {
+            width: 100%;
+            background: var(--anthropic-light);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-bottom: 12px;
+            border: 1px solid var(--anthropic-light-gray);
+            text-align: center;
+        }
+
+        .seed-input:focus {
+            outline: none;
+            border-color: var(--anthropic-orange);
+            box-shadow: 0 0 0 2px rgba(217, 119, 87, 0.1);
+            background: white;
+        }
+
+        .seed-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--anthropic-dark);
+            margin-bottom: 6px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--anthropic-light-gray);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--anthropic-orange);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .value-display {
+            font-size: 12px;
+            color: var(--anthropic-mid-gray);
+            font-family: 'Courier New', monospace;
+            text-align: right;
+            margin-top: 4px;
+        }
+
+        button {
+            background: var(--anthropic-dark);
+            color: var(--anthropic-light);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: var(--anthropic-orange);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #canvas-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20, 20, 19, 0.1);
+            overflow: hidden;
+        }
+
+        #canvas-container canvas {
+            display: block;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: var(--anthropic-mid-gray);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h1>交互涟漪</h1>
+            <p class="subtitle">鼠标点击产生涟漪，滑动留下流动轨迹</p>
+            
+            <div class="control-section">
+                <h3>种子</h3>
+                <input type="text" class="seed-input" id="seed-input" value="12345" oninput="updateSeed()">
+                <div class="seed-controls">
+                    <button onclick="previousSeed()">上一个</button>
+                    <button onclick="nextSeed()">下一个</button>
+                </div>
+                <div class="seed-controls">
+                    <button onclick="randomSeedAndUpdate()">随机</button>
+                    <button onclick="regenerate()">重新生成</button>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>参数</h3>
+                <div class="control-group">
+                    <label>粒子数量</label>
+                    <input type="range" id="particleCount" min="50" max="500" value="200" oninput="updateParam('particleCount', this.value)">
+                    <span class="value-display" id="particleCount-value">200</span>
+                </div>
+                <div class="control-group">
+                    <label>流动速度</label>
+                    <input type="range" id="flowSpeed" min="0.5" max="3" value="1.5" oninput="updateParam('flowSpeed', this.value)">
+                    <span class="value-display" id="flowSpeed-value">1.5</span>
+                </div>
+                <div class="control-group">
+                    <label>涟漪强度</label>
+                    <input type="range" id="rippleStrength" min="0.3" max="2" value="1" oninput="updateParam('rippleStrength', this.value)">
+                    <span class="value-display" id="rippleStrength-value">1.0</span>
+                </div>
+                <div class="control-group">
+                    <label>轨迹长度</label>
+                    <input type="range" id="trailLength" min="20" max="150" value="80" oninput="updateParam('trailLength', this.value)">
+                    <span class="value-display" id="trailLength-value">80</span>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>颜色</h3>
+                <div class="control-group">
+                    <label>涟漪颜色</label>
+                    <input type="color" id="color1" value="#d97757" oninput="updateColor('color1', this.value)">
+                    <span class="value-display" id="color1-value">#d97757</span>
+                </div>
+                <div class="control-group">
+                    <label>背景颜色</label>
+                    <input type="color" id="color2" value="#1a3a5a" oninput="updateColor('color2', this.value)">
+                    <span class="value-display" id="color2-value">#1a3a5a</span>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>操作</h3>
+                <button onclick="regenerate()">重新生成</button>
+                <button onclick="resetParameters()">重置参数</button>
+                <button onclick="downloadImage()">下载图片</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div id="canvas-container">
+                <p class="loading">正在生成...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 参数配置
+        let params = {
+            seed: 12345,
+            particleCount: 200,
+            flowSpeed: 1.5,
+            rippleStrength: 1.0,
+            trailLength: 80,
+            colorPalette: ['#d97757', '#1a3a5a']
+        };
+
+        const defaultParams = {...params};
+
+        // 粒子系统
+        let particles = [];
+        let flowField = [];
+
+        // 流场分辨率
+        const scl = 10;
+
+        function setup() {
+            let canvas = createCanvas(1200, 1200);
+            canvas.parent('canvas-container');
+            
+            initializeSystem();
+            
+            document.querySelector('.loading').style.display = 'none';
+        }
+
+        function initializeSystem() {
+            randomSeed(params.seed);
+            noiseSeed(params.seed);
+            
+            particles = [];
+            flowField = [];
+            
+            for (let i = 0; i < params.particleCount; i++) {
+                particles.push(new Particle());
+            }
+            
+            generateFlowField();
+        }
+
+        function generateFlowField() {
+            flowField = [];
+            for (let y = 0; y < scl; y++) {
+                flowField[y] = [];
+                for (let x = 0; x < scl; x++) {
+                    let angle = noise(x * 0.1, y * 0.1) * TWO_PI;
+                    flowField[y][x] = p5.Vector.fromAngle(angle).mult(params.flowSpeed);
+                }
+            }
+        }
+
+        class Particle {
+            constructor() {
+                this.pos = createVector(random(width), random(height));
+                this.vel = createVector(0, 0);
+                this.prevPos = this.pos.copy();
+                this.trail = [];
+                this.color = params.colorPalette[0];
+            }
+
+            update() {
+                let x = floor(this.pos.x / scl);
+                let y = floor(this.pos.y / scl);
+                
+                if (x >= 0 && x < scl && y >= 0 && y < scl) {
+                    let flow = flowField[y][x];
+                    this.vel.lerp(flow, params.rippleStrength);
+                }
+                
+                this.prevPos = this.pos.copy();
+                this.pos.add(this.vel);
+                
+                this.trail.push(this.prevPos.copy());
+                if (this.trail.length > params.trailLength) {
+                    this.trail.shift();
+                }
+            }
+
+            draw() {
+                noFill();
+                stroke(this.color);
+                strokeWeight(1.5);
+                
+                beginShape();
+                for (let i = 0; i < this.trail.length; i++) {
+                    let p = this.trail[i];
+                    vertex(p.x, p.y);
+                }
+                endShape();
+            }
+        }
+
+        function draw() {
+            background(params.colorPalette[1]);
+            
+            for (let particle of particles) {
+                particle.update();
+                particle.draw();
+            }
+        }
+
+        // UI控制函数
+        function updateParam(paramName, value) {
+            params[paramName] = parseFloat(value);
+            document.getElementById(paramName + '-value').textContent = value;
+            
+            if (paramName === 'particleCount') {
+                initializeSystem();
+            } else if (paramName === 'seed') {
+                params.seed = parseInt(value);
+                initializeSystem();
+            }
+        }
+
+        function updateColor(colorId, value) {
+            const index = parseInt(colorId.replace('color', '')) - 1;
+            params.colorPalette[index] = value;
+            document.getElementById(colorId + '-value').textContent = value;
+        }
+
+        function updateSeedDisplay() {
+            document.getElementById('seed-input').value = params.seed;
+        }
+
+        function updateSeed() {
+            let input = document.getElementById('seed-input');
+            let newSeed = parseInt(input.value);
+            if (newSeed && newSeed > 0) {
+                params.seed = newSeed;
+                initializeSystem();
+            } else {
+                updateSeedDisplay();
+            }
+        }
+
+        function previousSeed() {
+            params.seed = Math.max(1, params.seed - 1);
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function nextSeed() {
+            params.seed = params.seed + 1;
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function randomSeedAndUpdate() {
+            params.seed = Math.floor(Math.random() * 999999) + 1;
+            updateSeedDisplay();
+            initializeSystem();
+        }
+
+        function regenerate() {
+            initializeSystem();
+        }
+
+        function resetParameters() {
+            params = {...defaultParams};
+            
+            document.getElementById('particleCount').value = params.particleCount;
+            document.getElementById('particleCount-value').textContent = params.particleCount;
+            document.getElementById('flowSpeed').value = params.flowSpeed;
+            document.getElementById('flowSpeed-value').textContent = params.flowSpeed;
+            document.getElementById('rippleStrength').value = params.rippleStrength;
+            document.getElementById('rippleStrength-value').textContent = params.rippleStrength;
+            document.getElementById('trailLength').value = params.trailLength;
+            document.getElementById('trailLength-value').textContent = params.trailLength;
+            document.getElementById('color1').value = params.colorPalette[0];
+            document.getElementById('color1-value').textContent = params.colorPalette[0];
+            document.getElementById('color2').value = params.colorPalette[1];
+            document.getElementById('color2-value').textContent = params.colorPalette[1];
+            
+            initializeSystem();
+        }
+
+        function downloadImage() {
+            saveCanvas('interactive-ripple-' + params.seed + '.png');
+        }
+    </script>
+</body>
+</html>

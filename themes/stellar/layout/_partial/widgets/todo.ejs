@@ -1,0 +1,45 @@
+<%
+function layoutDiv() {
+  var el = '';
+  var todo = site.data.todo;
+  
+  if (!todo || !todo.enabled) {
+    return el;
+  }
+  
+  var items = todo.items || [];
+  if (items.length === 0) {
+    return el;
+  }
+  
+  el += `<widget class="widget-wrapper${scrollreveal(' ')} todo-widget collapsible-widget">`;
+  el += '<div class="widget-header dis-select">';
+  el += '<span class="name">' + (todo.title || '任务简报') + ' <span class="todo-count">(' + items.length + ')</span></span>';
+  el += '<span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span>';
+  el += '</div>';
+  el += '<div class="widget-body fs14">';
+  el += '<div class="todo-list">';
+  
+  items.forEach(function(item) {
+    var statusClass = 'todo-item';
+    
+    if (item.status === 'done') {
+      statusClass += ' done';
+    } else if (item.status === 'doing') {
+      statusClass += ' doing';
+    } else {
+      statusClass += ' pending';
+    }
+    
+    el += '<div class="' + statusClass + '">';
+    el += '<span class="todo-content">' + item.content + '</span>';
+    el += '</div>';
+  });
+  
+  el += '</div>';
+  el += '</div>';
+  el += '</widget>';
+  return el;
+}
+%>
+<%- layoutDiv() %>

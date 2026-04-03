@@ -4,20 +4,570 @@ if (page.menu_id == undefined) {
   page.menu_id = 'post';
 }
 %>
-<% if (site.categories.length) { %>
-  <% page.title = __('btn.categories'); %>
-  <% page.layout = 'categories'; %>
-  <%- partial('_partial/main/navbar/nav_tabs_blog') %>
-  <div class='post-list'>
-    <article class='<%- scrollreveal("") %>' id='cats'>
-      <% site.categories.sort('path').each(function(category){ %>
-        <div>
-          <a class="<%= category.parent ? 'cat child' : 'cat'%>" href="<%= pretty_url(category.path) %>">
-            <span class='name'><%- icon('default:category') %><%- category.name %></span>
-            <span class='badge'>(<%- category.posts.length %>)</span>
-          </a>
+<%- partial('_partial/main/navbar/nav_tabs_blog') %>
+<div class='post-list categories-page' id="categories-container">
+  <article class='<%- scrollreveal("") %>' id='cats'>
+    <div class="timeline-header">
+      <h1 class="timeline-title">文章分类</h1>
+      <p class="timeline-subtitle">共 <span><%= site.categories.length %></span> 个分类，<span><%= site.posts.length %></span> 篇文章</p>
+    </div>
+    
+    <%
+    var categoryIcons = {
+      'web': '🌐',
+      'linux': '🐧',
+      'windows': '🪟',
+      '代码审计': '🔍',
+      '工具魔改': '🔧',
+      '笔记': '📝'
+    };
+    
+    var customOrder = ['代码审计', 'web', 'linux', 'windows', '工具魔改', '笔记'];
+    
+    var rootCategories = [];
+    site.categories.each(function(cat) {
+      if (!cat.parent) {
+        rootCategories.push(cat);
+      }
+    });
+    
+    rootCategories.sort(function(a, b) {
+      var indexA = customOrder.indexOf(a.name);
+      var indexB = customOrder.indexOf(b.name);
+      if (indexA === -1) indexA = 999;
+      if (indexB === -1) indexB = 999;
+      return indexA - indexB;
+    });
+    
+    function getChildCategories(parentCat) {
+      var children = [];
+      site.categories.each(function(cat) {
+        if (cat.parent && cat.parent === parentCat._id) {
+          children.push(cat);
+        }
+      });
+      return children;
+    }
+    
+    function getPostCount(cat) {
+      if (cat.posts) {
+        if (typeof cat.posts.length === 'number') {
+          return cat.posts.length;
+        } else if (cat.posts.count) {
+          return cat.posts.count;
+        } else if (cat.posts.toArray) {
+          return cat.posts.toArray().length;
+        }
+      }
+      return 0;
+    }
+    %>
+    
+    <div class="categories-style-1" id="style-1-container">
+      <div class="categories-grid">
+        <% rootCategories.forEach(function(parentCat){ 
+          var icon = categoryIcons[parentCat.name] || '📁';
+          var children = getChildCategories(parentCat);
+          var hasChildren = children.length > 0;
+        %>
+          <div class="category-card">
+            <div class="card-header">
+              <h2 class="card-title"><%- parentCat.name %></h2>
+              <span class="card-count"><%- getPostCount(parentCat) %></span>
+            </div>
+            <% if (hasChildren) { %>
+              <% children.forEach(function(childCat) { %>
+                <div class="child-category">
+                  <div class="child-header">
+                    <span class="child-name"><%- childCat.name %></span>
+                    <span class="child-count"><%- getPostCount(childCat) %></span>
+                  </div>
+                  <div class="card-articles">
+                    <% childCat.posts.sort('-date').each(function(post){ %>
+                      <a href="<%= url_for(post.path) %>" class="card-article-link">
+                        <span class="article-title-text"><%- post.title %></span>
+                      </a>
+                    <% }) %>
+                  </div>
+                </div>
+              <% }) %>
+            <% } else { %>
+              <div class="card-articles">
+                <% parentCat.posts.sort('-date').each(function(post){ %>
+                  <a href="<%= url_for(post.path) %>" class="card-article-link">
+                    <span class="article-title-text"><%- post.title %></span>
+                  </a>
+                <% }) %>
+              </div>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+    
+    <div class="categories-style-2" id="style-2-container" style="display: none;">
+      <div class="timeline-container">
+        <div class="timeline-axis"></div>
+        <div class="timeline-items">
+          <%
+          var index = 0;
+          rootCategories.forEach(function(parentCat){
+            var icon = categoryIcons[parentCat.name] || '📁';
+            var children = getChildCategories(parentCat);
+            var hasChildren = children.length > 0;
+            var position = index % 2 === 0 ? 'left' : 'right';
+          %>
+            <div class="timeline-item <%= position %>">
+              <div class="timeline-connector"></div>
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="category-header">
+                  <span class="category-icon"><%= icon %></span>
+                  <h2 class="category-name"><%- parentCat.name %></h2>
+                  <span class="category-count"><%- getPostCount(parentCat) %> 篇</span>
+                </div>
+                <div class="category-articles">
+                  <% if (hasChildren) { %>
+                    <% children.forEach(function(childCat) { %>
+                      <div class="child-section">
+                        <div class="child-title"><%- childCat.name %> (<%- getPostCount(childCat) %>)</div>
+                        <% childCat.posts.sort('-date').limit(3).each(function(post){ %>
+                          <a href="<%= url_for(post.path) %>" class="article-link">
+                            <span class="article-bullet"></span>
+                            <span class="article-title"><%- post.title %></span>
+                          </a>
+                        <% }) %>
+                      </div>
+                    <% }) %>
+                  <% } else { %>
+                    <% parentCat.posts.sort('-date').limit(5).each(function(post){ %>
+                      <a href="<%= url_for(post.path) %>" class="article-link">
+                        <span class="article-bullet"></span>
+                        <span class="article-title"><%- post.title %></span>
+                        <span class="article-date"><%= date(post.date, 'YYYY-MM-DD') %></span>
+                      </a>
+                    <% }) %>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          <%
+            index++;
+          }) %>
         </div>
-      <% }) %>
-    </article>
-  </div>
-<% } %>
+      </div>
+    </div>
+  </article>
+</div>
+
+<script>
+(function() {
+  var savedStyle = localStorage.getItem('Stellar.categoriesStyle') || '1';
+  applyCategoriesStyle(savedStyle);
+  
+  function applyCategoriesStyle(style) {
+    var style1 = document.getElementById('style-1-container');
+    var style2 = document.getElementById('style-2-container');
+    
+    if (style === '1') {
+      if (style1) style1.style.display = 'block';
+      if (style2) style2.style.display = 'none';
+    } else {
+      if (style1) style1.style.display = 'none';
+      if (style2) style2.style.display = 'block';
+    }
+    localStorage.setItem('Stellar.categoriesStyle', style);
+  }
+  
+  window.applyCategoriesStyle = applyCategoriesStyle;
+  
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'Stellar.categoriesStyle') {
+      applyCategoriesStyle(e.newValue);
+    }
+  });
+})();
+</script>
+
+<style>
+.categories-page {
+  padding: 20px 0;
+  min-height: 100vh;
+}
+
+.timeline-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 10px 0;
+}
+
+.timeline-title {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text, #fff);
+}
+
+.timeline-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-p3, #888);
+}
+
+.timeline-subtitle span {
+  color: var(--text-p2, #aaa);
+  font-weight: 500;
+}
+
+/* ========== 样式1: 简约列表布局 ========== */
+.categories-style-1 .categories-grid {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.categories-style-1 .category-card {
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border, #2a2a3e);
+  padding-bottom: 16px;
+}
+
+.categories-style-1 .category-card:last-child {
+  border-bottom: none;
+}
+
+.categories-style-1 .card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.categories-style-1 .card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text, #fff);
+  flex: 1;
+}
+
+.categories-style-1 .card-count {
+  font-size: 12px;
+  color: #fff;
+}
+
+.categories-style-1 .child-category {
+  margin-left: 16px;
+  margin-bottom: 12px;
+}
+
+.categories-style-1 .child-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  border-left: 2px solid var(--border, #2a2a3e);
+  padding-left: 10px;
+  margin-bottom: 6px;
+}
+
+.categories-style-1 .child-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  flex: 1;
+}
+
+.categories-style-1 .child-count {
+  font-size: 11px;
+  color: #fff;
+}
+
+.categories-style-1 .card-articles {
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.categories-style-1 .card-article-link {
+  display: block;
+  padding: 4px 0;
+  text-decoration: none;
+  color: var(--text-p2, #aaa);
+  font-size: 13px;
+  transition: color 0.2s;
+}
+
+.categories-style-1 .card-article-link:hover {
+  color: var(--theme, #3498db);
+}
+
+.categories-style-1 .article-title-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ========== 样式2: 时间轴布局 ========== */
+.categories-style-2 .timeline-container {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.categories-style-2 .timeline-axis {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, 
+    transparent 0%,
+    var(--theme, #3498db) 5%,
+    var(--theme, #3498db) 95%,
+    transparent 100%
+  );
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.categories-style-2 .timeline-items {
+  position: relative;
+}
+
+.categories-style-2 .timeline-item {
+  position: relative;
+  display: flex;
+  margin-bottom: 60px;
+  width: 50%;
+}
+
+.categories-style-2 .timeline-item.left {
+  justify-content: flex-end;
+  padding-right: 0px;
+  margin-left: -80px;
+  width: calc(50% + 80px);
+}
+
+.categories-style-2 .timeline-item.right {
+  margin-left: 50%;
+  padding-left: 80px;
+}
+
+.categories-style-2 .timeline-connector {
+  position: absolute;
+  top: 28px;
+  width: 60px;
+  height: 2px;
+}
+
+.categories-style-2 .timeline-item.left .timeline-connector {
+  right: 0px;
+  width: 80px;
+  background: linear-gradient(90deg, transparent 0%, var(--theme, #3498db) 100%);
+}
+
+.categories-style-2 .timeline-item.right .timeline-connector {
+  left: 20px;
+  background: linear-gradient(90deg, var(--theme, #3498db) 0%, transparent 100%);
+}
+
+.categories-style-2 .timeline-dot {
+  position: absolute;
+  top: 21px;
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle at 30% 30%, #fff 0%, var(--theme, #3498db) 50%);
+  border-radius: 50%;
+  border: 3px solid var(--card, #1a1a2e);
+  z-index: 2;
+}
+
+.categories-style-2 .timeline-item.left .timeline-dot {
+  right: -8px;
+}
+
+.categories-style-2 .timeline-item.left .timeline-content {
+  margin-right: 80px;
+}
+
+.categories-style-2 .timeline-item.right .timeline-dot {
+  left: -8px;
+}
+
+.categories-style-2 .timeline-content {
+  background: var(--card, #1a1a2e);
+  border: 1px solid var(--border, #2a2a3e);
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 450px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.categories-style-2 .timeline-content:hover {
+  transform: translateY(-5px);
+  border-color: var(--theme, #3498db);
+}
+
+.categories-style-2 .category-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--theme, #3498db) 15%, transparent),
+    transparent
+  );
+  border-bottom: 1px solid var(--border, #2a2a3e);
+}
+
+.categories-style-2 .category-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.categories-style-2 .category-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text, #fff);
+  flex: 1;
+}
+
+.categories-style-2 .category-count {
+  font-size: 12px;
+  color: var(--theme, #3498db);
+  background: color-mix(in srgb, var(--theme, #3498db) 15%, transparent);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.categories-style-2 .category-articles {
+  padding: 16px 20px;
+}
+
+.categories-style-2 .child-section {
+  margin-bottom: 12px;
+}
+
+.categories-style-2 .child-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-p1, #ddd);
+  margin-bottom: 8px;
+  padding-left: 8px;
+  border-left: 2px solid var(--theme, #3498db);
+}
+
+.categories-style-2 .article-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text, #fff);
+  background: var(--block, #0d0d1a);
+  transition: all 0.2s ease;
+  margin-bottom: 6px;
+}
+
+.categories-style-2 .article-link:hover {
+  background: var(--theme, #3498db);
+  color: #fff;
+  transform: translateX(5px);
+}
+
+.categories-style-2 .article-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--theme, #3498db);
+  flex-shrink: 0;
+}
+
+.categories-style-2 .article-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categories-style-2 .article-date {
+  font-size: 11px;
+  color: var(--text-p3, #666);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .categories-style-2 .timeline-axis {
+    left: 30px;
+  }
+  
+  .categories-style-2 .timeline-item {
+    width: 100%;
+    padding-left: 90px !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+  }
+  
+  .categories-style-2 .timeline-item.left,
+  .categories-style-2 .timeline-item.right {
+    justify-content: flex-start;
+    margin-left: 0;
+  }
+  
+  .categories-style-2 .timeline-connector {
+    left: 30px !important;
+    right: auto !important;
+    width: 50px;
+    background: linear-gradient(90deg, var(--theme, #3498db) 0%, transparent 100%) !important;
+  }
+  
+  .categories-style-2 .timeline-dot {
+    left: 22px !important;
+    right: auto !important;
+  }
+  
+  .categories-style-2 .timeline-content {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .timeline-header {
+    padding: 25px 15px;
+    margin-bottom: 40px;
+  }
+  
+  .categories-style-2 .timeline-container {
+    padding: 0 10px;
+  }
+  
+  .categories-style-2 .timeline-axis {
+    left: 20px;
+  }
+  
+  .categories-style-2 .timeline-item {
+    padding-left: 70px !important;
+  }
+  
+  .categories-style-2 .timeline-dot {
+    left: 12px !important;
+  }
+  
+  .categories-style-2 .timeline-connector {
+    left: 20px !important;
+    width: 40px;
+  }
+  
+  .categories-style-1 .categories-grid {
+    padding: 0 10px;
+  }
+}
+</style>

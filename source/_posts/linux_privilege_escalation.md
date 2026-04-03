@@ -1,6 +1,6 @@
 ---
-cover: https://picsum.photos/seed/linux/800/400
-title: 常见Linux权限提升笔记
+cover: https://www.loliapi.com/acg/pc/?seed=linux
+title: 笔记 | 常见Linux权限提升笔记
 categories:
   - 笔记
 tags:
@@ -9,7 +9,9 @@ tags:
   - Linux
   - 权限提升
 abbrlink: a6c6e02f
-date: 2026-03-20 12:00:00# 常见Linux权限提升笔记
+date: 2026-03-20 12:00:00
+---
+# 常见Linux权限提升笔记
 
 > 本文系统介绍Linux系统中常见的权限提升技术，包括检测方法和利用方式，适用于渗透测试和安全加固场景。
 

@@ -1,0 +1,46 @@
+# 待办事项配置
+# 在此文件中编辑待办内容，保存后自动更新到网站
+
+# 是否显示待办栏
+enabled: true
+
+# 标题
+title: 任务简报
+
+# 图标
+icon: 📋
+
+# 待办列表
+# status: pending(待办) / doing(进行中) / done(已完成)
+items:
+  - content: 小迪vpc1-5 Windows系统web内网横向域内
+    status: doing
+    
+  - content: rootkit 的 shellcode 嵌入
+    status: doing
+    
+  - content: fastjson代码审计（1.2.68 → 1.2.80）
+    status: doing
+  
+  - content: java cc链
+    status: doing
+
+  - content: Shiro 反序列化
+    status: doing
+  
+  - content: 信息收集方法论
+    status: doing
+  
+  - content: PHP反序列化 + Pop Chain构造
+    status: doing
+
+  - content: EDUSRC实战漏洞挖掘复盘（脱敏）
+    status: doing
+
+  - content: 云上服务
+    status: doing
+
+  - content: docker容器逃逸 
+    status: doing
+# 你也可以添加带优先级的待办
+# priority: high(高) / medium(中) / low(低)

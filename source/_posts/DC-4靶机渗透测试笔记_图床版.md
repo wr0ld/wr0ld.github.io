@@ -2,14 +2,16 @@
 cover: /images/VulnHub.jpg
 title: VulnHub DC-4 靶机渗透测试笔记
 categories:
-  - vulnhub-DC
+  - [linux, vulnhub-DC]
 tags:
   - 靶机渗透
   - VulnHub
   - vulnhub-DC
   - 提权
 abbrlink: 69aac692
-date: 2026-03-13 12:00:00# VulnHub DC-4 靶机渗透测试笔记
+date: 2026-03-13 12:00:00
+---
+# VulnHub DC-4 靶机渗透测试笔记
 
 > **靶机信息**
 > - 靶机名称：DC-4

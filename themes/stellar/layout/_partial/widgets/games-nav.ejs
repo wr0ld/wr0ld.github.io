@@ -1,0 +1,34 @@
+<%
+function layoutDiv() {
+  var el = '';
+  var games = site.data.games && site.data.games.games ? site.data.games.games : [];
+  
+  if (games.length === 0) {
+    return el;
+  }
+  
+  el += `<widget class="widget-wrapper${scrollreveal(' ')} games-nav-widget">`;
+  el += '<div class="widget-header dis-select">';
+  el += '<span class="name">🎮 游戏目录</span>';
+  el += '</div>';
+  el += '<div class="widget-body fs14">';
+  el += '<div class="games-nav-list">';
+  
+  games.forEach(function(game) {
+    var gameId = game.id || '';
+    var gameUrl = '/games/' + gameId + '/';
+    var isActive = (page && page.path && page.path.indexOf('games/' + gameId) !== -1);
+    
+    el += '<a href="' + gameUrl + '" class="games-nav-item' + (isActive ? ' active' : '') + '">';
+    el += '<span class="games-nav-icon">' + (game.icon || '🎮') + '</span>';
+    el += '<span class="games-nav-title">' + game.title + '</span>';
+    el += '</a>';
+  });
+  
+  el += '</div>';
+  el += '</div>';
+  el += '</widget>';
+  return el;
+}
+%>
+<%- layoutDiv() %>

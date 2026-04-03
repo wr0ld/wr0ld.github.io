@@ -1,0 +1,29 @@
+# 公告栏配置
+# 在此文件中编辑公告内容，保存后自动更新到网站
+
+# 是否显示公告栏
+enabled: true
+
+# 公告标题
+title: 公告
+
+# 公告图标（支持emoji或图片URL）
+icon: 📢
+
+# 公告内容（支持Markdown格式）
+# 可以添加多条公告，每条公告会自动显示
+items:
+  - content: |
+      欢迎访问我的博客！这里记录了我的技术学习和生活点滴。
+    type: info        # info / warning / success / error
+    date: 2026-03-24  # 可选，显示日期
+
+  - content: |
+      **新文章已发布**：[FastJson 1.2.24 反序列化 RCE 漏洞分析](/posts/fastjson-1.2.24-rce/)
+    type: success
+    date: 2026-03-24
+
+# 你也可以只使用单条公告（注释掉上面的items，取消注释下面的content）
+# content: |
+#   这里写公告内容，支持 **Markdown** 格式。
+#   可以写多行。

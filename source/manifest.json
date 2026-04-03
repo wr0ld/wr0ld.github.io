@@ -1,0 +1,17 @@
+{
+  "name": "Blog - 安全技术博客",
+  "short_name": "Blog",
+  "description": "CTF、渗透测试、代码审计技术博客",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#1BCDFC",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/avatar.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

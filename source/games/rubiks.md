@@ -1,0 +1,696 @@
+---
+title: 魔方
+layout: page
+---
+
+<div class="rubiks-game-container">
+  <h1>🎲 3D魔方</h1>
+  <p class="game-desc">点击魔方面并拖动来旋转层，拖动空白区域旋转视角！</p>
+  
+  <div id="rubiks-game-canvas"></div>
+  
+  <div class="game-controls">
+    <button onclick="RubiksGame.shuffle()" class="control-btn">🔀 打乱</button>
+    <button onclick="RubiksGame.reset()" class="control-btn">🔄 重置</button>
+  </div>
+  
+  <div class="game-stats">
+    <div class="stat-item">
+      <span class="stat-label">旋转次数</span>
+      <span class="stat-value" id="rotateCount">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">游戏时间</span>
+      <span class="stat-value" id="gameTime">00:00</span>
+    </div>
+  </div>
+  
+  <div class="game-tips">
+    <h3>🎮 操作说明</h3>
+    <ul>
+      <li>🖱️ 点击魔方面并拖动来旋转该层</li>
+      <li>🔄 在空白区域拖动旋转整体视角</li>
+      <li>📱 支持触屏操作</li>
+      <li>🎯 将魔方还原为初始状态获胜！</li>
+    </ul>
+  </div>
+</div>
+
+<style>
+.rubiks-game-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.rubiks-game-container h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+}
+
+.game-desc {
+  color: var(--text-p3, #666);
+  margin-bottom: 30px;
+}
+
+#rubiks-game-canvas {
+  width: 100%;
+  height: 450px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 15px;
+  margin-bottom: 30px;
+  overflow: hidden;
+  cursor: grab;
+}
+
+#rubiks-game-canvas:active {
+  cursor: grabbing;
+}
+
+.game-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.control-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  border: none;
+  border-radius: 25px;
+  background: var(--theme, #3498db);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.control-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.control-btn:active {
+  transform: translateY(-1px);
+}
+
+.game-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  color: var(--text-p3, #666);
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--theme, #3498db);
+}
+
+.game-tips {
+  background: var(--card, #fff);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: left;
+  border: 1px solid var(--border, #e0e0e0);
+}
+
+.game-tips h3 {
+  margin-bottom: 15px;
+  color: var(--text, #333);
+}
+
+.game-tips ul {
+  list-style: none;
+  padding: 0;
+}
+
+.game-tips li {
+  padding: 8px 0;
+  color: var(--text-p2, #555);
+}
+
+@media (max-width: 600px) {
+  #rubiks-game-canvas {
+    height: 350px;
+  }
+  
+  .game-stats {
+    gap: 20px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js"></script>
+<script>
+(function() {
+  'use strict';
+  
+  var rotateCount = 0;
+  var gameStartTime = Date.now();
+  var timerInterval = null;
+  
+  window.RubiksGame = {
+    scene: null,
+    camera: null,
+    renderer: null,
+    cubes: [],
+    cubeGroup: null,
+    container: null,
+    isAnimating: false,
+    raycaster: null,
+    mouse: null,
+    
+    isDragging: false,
+    isRotatingLayer: false,
+    selectedFace: null,
+    selectedCube: null,
+    dragStart: { x: 0, y: 0 },
+    layerCubes: [],
+    rotationAxis: null,
+    rotationLayer: null,
+    rotationDirection: null,
+    pivot: null,
+    
+    initialized: false,
+    
+    init: function() {
+      if (this.initialized) return;
+      this.initialized = true;
+      
+      this.container = document.getElementById('rubiks-game-canvas');
+      if (!this.container) return;
+      
+      this.raycaster = new THREE.Raycaster();
+      this.mouse = new THREE.Vector2();
+      
+      try {
+        this.createScene();
+        this.createCamera();
+        this.createRenderer();
+        this.createLights();
+        this.createRubiksCube();
+        this.bindEvents();
+        this.animate();
+        this.startTimer();
+      } catch(e) {
+        console.error('RubiksGame init error:', e);
+      }
+    },
+    
+    createScene: function() {
+      this.scene = new THREE.Scene();
+    },
+    
+    createCamera: function() {
+      var width = this.container.offsetWidth || 400;
+      var height = this.container.offsetHeight || 450;
+      this.camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
+      this.camera.position.set(6, 6, 6);
+      this.camera.lookAt(0, 0, 0);
+    },
+    
+    createRenderer: function() {
+      this.renderer = new THREE.WebGLRenderer({ 
+        alpha: true, 
+        antialias: true 
+      });
+      var width = this.container.offsetWidth || 400;
+      var height = this.container.offsetHeight || 450;
+      this.renderer.setSize(width, height);
+      this.renderer.setClearColor(0x000000, 0);
+      this.container.appendChild(this.renderer.domElement);
+    },
+    
+    createLights: function() {
+      var ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      this.scene.add(ambientLight);
+      
+      var directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(5, 5, 5);
+      this.scene.add(directionalLight);
+      
+      var directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+      directionalLight2.position.set(-5, -5, -5);
+      this.scene.add(directionalLight2);
+    },
+    
+    createRubiksCube: function() {
+      var size = 0.95;
+      var gap = 0.05;
+      var totalSize = size + gap;
+      
+      var colors = {
+        front: 0xff0000,
+        back: 0xff8c00,
+        top: 0xffffff,
+        bottom: 0xffff00,
+        right: 0x0000ff,
+        left: 0x00ff00
+      };
+      
+      this.cubeGroup = new THREE.Group();
+      this.cubes = [];
+      
+      for (var x = -1; x <= 1; x++) {
+        for (var y = -1; y <= 1; y++) {
+          for (var z = -1; z <= 1; z++) {
+            var geometry = new THREE.BoxGeometry(size, size, size);
+            
+            var materials = [
+              new THREE.MeshPhongMaterial({ color: x === 1 ? colors.right : 0x1a1a1a }),
+              new THREE.MeshPhongMaterial({ color: x === -1 ? colors.left : 0x1a1a1a }),
+              new THREE.MeshPhongMaterial({ color: y === 1 ? colors.top : 0x1a1a1a }),
+              new THREE.MeshPhongMaterial({ color: y === -1 ? colors.bottom : 0x1a1a1a }),
+              new THREE.MeshPhongMaterial({ color: z === 1 ? colors.front : 0x1a1a1a }),
+              new THREE.MeshPhongMaterial({ color: z === -1 ? colors.back : 0x1a1a1a })
+            ];
+            
+            var cube = new THREE.Mesh(geometry, materials);
+            cube.position.set(x * totalSize, y * totalSize, z * totalSize);
+            
+            this.cubeGroup.add(cube);
+            this.cubes.push(cube);
+          }
+        }
+      }
+      
+      this.scene.add(this.cubeGroup);
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      var canvas = this.renderer.domElement;
+      
+      canvas.addEventListener('mousedown', function(e) {
+        self.onPointerDown(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('mousemove', function(e) {
+        self.onPointerMove(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('mouseup', function(e) {
+        self.onPointerUp();
+      });
+      
+      canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        var touch = e.touches[0];
+        self.onPointerDown(touch.clientX, touch.clientY);
+      }, { passive: false });
+      
+      canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        var touch = e.touches[0];
+        self.onPointerMove(touch.clientX, touch.clientY);
+      }, { passive: false });
+      
+      canvas.addEventListener('touchend', function(e) {
+        self.onPointerUp();
+      });
+      
+      window.addEventListener('resize', function() {
+        if (self.container && self.renderer && self.camera) {
+          var width = self.container.offsetWidth || 400;
+          var height = self.container.offsetHeight || 450;
+          self.camera.aspect = width / height;
+          self.camera.updateProjectionMatrix();
+          self.renderer.setSize(width, height);
+        }
+      });
+    },
+    
+    onPointerDown: function(clientX, clientY) {
+      if (this.isAnimating) return;
+      
+      var rect = this.container.getBoundingClientRect();
+      this.mouse.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      this.mouse.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      
+      this.raycaster.setFromCamera(this.mouse, this.camera);
+      var intersects = this.raycaster.intersectObjects(this.cubes);
+      
+      this.dragStart.x = clientX;
+      this.dragStart.y = clientY;
+      
+      if (intersects.length > 0) {
+        this.isRotatingLayer = true;
+        this.selectedCube = intersects[0].object;
+        this.selectedFace = intersects[0].face;
+      } else {
+        this.isRotatingLayer = false;
+      }
+      
+      this.isDragging = true;
+    },
+    
+    onPointerMove: function(clientX, clientY) {
+      if (!this.isDragging || this.isAnimating) return;
+      
+      var deltaX = clientX - this.dragStart.x;
+      var deltaY = clientY - this.dragStart.y;
+      
+      if (this.isRotatingLayer && this.selectedCube && this.selectedFace) {
+        if (Math.abs(deltaX) > 20 || Math.abs(deltaY) > 20) {
+          var selectedCube = this.selectedCube;
+          var selectedFace = this.selectedFace;
+          this.isRotatingLayer = false;
+          this.selectedCube = null;
+          this.selectedFace = null;
+          this.startLayerRotation(deltaX, deltaY, selectedCube, selectedFace);
+        }
+      } else {
+        this.cubeGroup.rotation.y += deltaX * 0.01;
+        this.cubeGroup.rotation.x += deltaY * 0.01;
+        this.dragStart.x = clientX;
+        this.dragStart.y = clientY;
+      }
+    },
+    
+    onPointerUp: function() {
+      this.isDragging = false;
+      this.isRotatingLayer = false;
+      this.selectedCube = null;
+      this.selectedFace = null;
+    },
+    
+    startLayerRotation: function(deltaX, deltaY, cube, face) {
+      if (this.isAnimating) return;
+      if (!cube || !face) return;
+      
+      var faceNormal = face.normal.clone();
+      faceNormal.applyQuaternion(cube.quaternion);
+      
+      var worldPos = new THREE.Vector3();
+      cube.getWorldPosition(worldPos);
+      
+      var cubePos = {
+        x: Math.round(worldPos.x),
+        y: Math.round(worldPos.y),
+        z: Math.round(worldPos.z)
+      };
+      
+      var axis, layer, direction;
+      
+      if (Math.abs(faceNormal.x) > 0.9) {
+        layer = cubePos.x;
+        if (Math.abs(deltaY) > Math.abs(deltaX)) {
+          axis = 'z';
+          direction = deltaY > 0 ? -1 : 1;
+          if (layer > 0) direction *= -1;
+        } else {
+          axis = 'y';
+          direction = deltaX > 0 ? 1 : -1;
+          if (layer > 0) direction *= -1;
+        }
+      } else if (Math.abs(faceNormal.y) > 0.9) {
+        layer = cubePos.y;
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          axis = 'z';
+          direction = deltaX > 0 ? 1 : -1;
+          if (layer < 0) direction *= -1;
+        } else {
+          axis = 'x';
+          direction = deltaY > 0 ? -1 : 1;
+          if (layer < 0) direction *= -1;
+        }
+      } else {
+        layer = cubePos.z;
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          axis = 'y';
+          direction = deltaX > 0 ? 1 : -1;
+          if (layer > 0) direction *= -1;
+        } else {
+          axis = 'x';
+          direction = deltaY > 0 ? 1 : -1;
+          if (layer > 0) direction *= -1;
+        }
+      }
+      
+      this.executeRotation(axis, layer, direction);
+    },
+    
+    executeRotation: function(axis, layer, direction) {
+      this.isAnimating = true;
+      var self = this;
+      
+      rotateCount++;
+      document.getElementById('rotateCount').textContent = rotateCount;
+      
+      this.pivot = new THREE.Group();
+      this.cubeGroup.add(this.pivot);
+      
+      this.layerCubes = [];
+      var threshold = 0.5;
+      
+      this.cubes.forEach(function(cube) {
+        var pos = cube.position;
+        var coord;
+        
+        if (axis === 'x') coord = pos.x;
+        else if (axis === 'y') coord = pos.y;
+        else coord = pos.z;
+        
+        if (Math.abs(coord - layer) < threshold) {
+          self.layerCubes.push(cube);
+        }
+      });
+      
+      this.layerCubes.forEach(function(cube) {
+        self.pivot.attach(cube);
+      });
+      
+      var targetRotation = Math.PI / 2 * direction;
+      var currentRotation = 0;
+      var rotationSpeed = 0.2;
+      
+      function animateRotation() {
+        if (currentRotation >= Math.abs(targetRotation)) {
+          self.layerCubes.forEach(function(cube) {
+            self.cubeGroup.attach(cube);
+          });
+          
+          self.cubeGroup.remove(self.pivot);
+          self.normalizeCubePositions();
+          self.isAnimating = false;
+          
+          if (self.checkSolved()) {
+            setTimeout(function() {
+              alert('🎉 恭喜你还原了魔方！');
+            }, 100);
+          }
+          return;
+        }
+        
+        var step = Math.min(rotationSpeed, Math.abs(targetRotation) - currentRotation);
+        currentRotation += step;
+        
+        if (axis === 'x') self.pivot.rotation.x = currentRotation * direction;
+        else if (axis === 'y') self.pivot.rotation.y = currentRotation * direction;
+        else self.pivot.rotation.z = currentRotation * direction;
+        
+        requestAnimationFrame(animateRotation);
+      }
+      
+      animateRotation();
+    },
+    
+    normalizeCubePositions: function() {
+      var totalSize = 1.0;
+      
+      this.cubes.forEach(function(cube) {
+        cube.position.x = Math.round(cube.position.x / totalSize) * totalSize;
+        cube.position.y = Math.round(cube.position.y / totalSize) * totalSize;
+        cube.position.z = Math.round(cube.position.z / totalSize) * totalSize;
+        
+        cube.rotation.x = Math.round(cube.rotation.x / (Math.PI / 2)) * (Math.PI / 2);
+        cube.rotation.y = Math.round(cube.rotation.y / (Math.PI / 2)) * (Math.PI / 2);
+        cube.rotation.z = Math.round(cube.rotation.z / (Math.PI / 2)) * (Math.PI / 2);
+      });
+    },
+    
+    checkSolved: function() {
+      var colors = {
+        front: 0xff0000,
+        back: 0xff8c00,
+        top: 0xffffff,
+        bottom: 0xffff00,
+        right: 0x0000ff,
+        left: 0x00ff00
+      };
+      
+      var faces = [
+        { axis: 'z', layer: 1, materialIndex: 4, expected: colors.front },
+        { axis: 'z', layer: -1, materialIndex: 5, expected: colors.back },
+        { axis: 'y', layer: 1, materialIndex: 2, expected: colors.top },
+        { axis: 'y', layer: -1, materialIndex: 3, expected: colors.bottom },
+        { axis: 'x', layer: 1, materialIndex: 0, expected: colors.right },
+        { axis: 'x', layer: -1, materialIndex: 1, expected: colors.left }
+      ];
+      
+      for (var f = 0; f < faces.length; f++) {
+        var face = faces[f];
+        var faceColor = null;
+        
+        for (var i = 0; i < this.cubes.length; i++) {
+          var cube = this.cubes[i];
+          var pos = cube.position;
+          var coord;
+          
+          if (face.axis === 'x') coord = pos.x;
+          else if (face.axis === 'y') coord = pos.y;
+          else coord = pos.z;
+          
+          if (Math.abs(coord - face.layer) < 0.5) {
+            var material = cube.material[face.materialIndex];
+            var color = material.color.getHex();
+            
+            if (faceColor === null) {
+              faceColor = color;
+            } else if (faceColor !== color) {
+              return false;
+            }
+          }
+        }
+        
+        if (faceColor !== face.expected) {
+          return false;
+        }
+      }
+      
+      return true;
+    },
+    
+    shuffle: function() {
+      if (this.isAnimating) return;
+      
+      var self = this;
+      var axes = ['x', 'y', 'z'];
+      var layers = [-1, 0, 1];
+      var directions = [-1, 1];
+      var moves = 15;
+      var queue = [];
+      
+      for (var i = 0; i < moves; i++) {
+        queue.push({
+          axis: axes[Math.floor(Math.random() * 3)],
+          layer: layers[Math.floor(Math.random() * 3)],
+          direction: directions[Math.floor(Math.random() * 2)]
+        });
+      }
+      
+      function doMove() {
+        if (!queue.length) return;
+        if (self.isAnimating) {
+          requestAnimationFrame(doMove);
+          return;
+        }
+        
+        var move = queue.shift();
+        self.executeRotation(move.axis, move.layer, move.direction);
+        
+        function waitForAnimationEnd() {
+          if (self.isAnimating) {
+            requestAnimationFrame(waitForAnimationEnd);
+            return;
+          }
+          doMove();
+        }
+        
+        requestAnimationFrame(waitForAnimationEnd);
+      }
+      
+      doMove();
+    },
+    
+    reset: function() {
+      var self = this;
+      
+      if (this.cubeGroup) {
+        this.cubes.forEach(function(cube) {
+          cube.geometry.dispose();
+          cube.material.forEach(function(m) { m.dispose(); });
+        });
+        
+        this.scene.remove(this.cubeGroup);
+      }
+      
+      this.cubes = [];
+      this.cubeGroup = null;
+      this.createRubiksCube();
+      
+      rotateCount = 0;
+      document.getElementById('rotateCount').textContent = '0';
+      
+      gameStartTime = Date.now();
+    },
+    
+    animate: function() {
+      var self = this;
+      
+      function loop() {
+        requestAnimationFrame(loop);
+        if (self.renderer && self.scene && self.camera) {
+          self.renderer.render(self.scene, self.camera);
+        }
+      }
+      
+      loop();
+    },
+    
+    startTimer: function() {
+      var self = this;
+      
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+      
+      timerInterval = setInterval(function() {
+        var elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+        var minutes = Math.floor(elapsed / 60);
+        var seconds = elapsed % 60;
+        
+        var timeEl = document.getElementById('gameTime');
+        if (timeEl) {
+          timeEl.textContent = 
+            (minutes < 10 ? '0' : '') + minutes + ':' + 
+            (seconds < 10 ? '0' : '') + seconds;
+        }
+      }, 1000);
+    }
+  };
+  
+  function initGame() {
+    if (window.THREE) {
+      RubiksGame.init();
+    } else {
+      setTimeout(initGame, 100);
+    }
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGame);
+  } else {
+    initGame();
+  }
+})();
+</script>

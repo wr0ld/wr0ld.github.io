@@ -5,13 +5,28 @@ logo:
   subtitle: '{config.subtitle}'
 
 menubar:
-  columns: 4
+  columns: 3
   items:
     - id: post
       theme: '#1BCDFC'
       icon: solar:documents-bold-duotone
       title: 博客
       url: /
+    - id: lab
+      theme: '#F39C12'
+      icon: solar:programming-bold-duotone
+      title: 实验室
+      url: /lab/
+    - id: games
+      theme: '#FF6B6B'
+      icon: solar:gamepad-bold-duotone
+      title: 游戏
+      url: /games/
+    - id: settings
+      theme: '#9B59B6'
+      icon: solar:settings-bold-duotone
+      title: 设置
+      url: /settings/
     - id: about
       theme: '#3DC550'
       icon: solar:user-bold-duotone
@@ -21,13 +36,26 @@ menubar:
 ######## Main ########
 site_tree:
   home:
-    leftbar: welcome, categories
-    rightbar: recent
+    leftbar: welcome, todo
+    rightbar: categories
   index_blog:
-    leftbar: welcome, categories
-    rightbar: recent
+    leftbar: welcome, todo
+    rightbar: categories
   post:
-    leftbar: categories, recent
+    leftbar: todo
+    rightbar: toc
+  archives:
+    leftbar: welcome, todo
+    rightbar: categories
+  category:
+    leftbar: welcome, todo
+    rightbar: categories
+  tag:
+    leftbar: welcome, todo
+    rightbar: categories
+  page:
+    leftbar: 
+    rightbar: toc
 
 ######## Article ########
 article:
@@ -41,6 +69,11 @@ article:
 style:
   prefers_theme: dark # auto / light / dark
   smooth_scroll: false
+  leftbar:
+    background-image: url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.13/image/sidebar-bg1@small.jpg)
+    blur-px: 100px
+    blur-bg: var(--bg-a60)
+    background-opacity: 0.8
 
 ######## Comments ########
 comments:
@@ -49,13 +82,6 @@ comments:
 
 ######## Footer ########
 footer:
-  social:
-    github:
-      icon: '<img src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/08a41b181ce68.svg"/>'
-      url: https://github.com/wr0ld
-    theme:
-      icon: default:theme
-      onclick: 'switchTheme()'
   sitemap:
     '博客':
       - '[首页](/)'
@@ -67,7 +93,7 @@ footer:
 ######## Plugins ########
 plugins:
   fancybox:
-    enable: true
+    enable: false
     loader: /js/plugins/fancybox-loader.js
     js: https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js
     css: https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css

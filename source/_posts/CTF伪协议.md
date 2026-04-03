@@ -1,6 +1,6 @@
 ---
-cover: https://picsum.photos/seed/ctf/800/400
-title: CTF 伪协议
+cover: https://www.loliapi.com/acg/pc/?seed=ctf
+title: 笔记 | CTF 伪协议
 categories:
   - 笔记
 tags:
@@ -9,7 +9,9 @@ tags:
   - 文件包含
   - 伪协议
 abbrlink: '58685328'
-date: 2026-03-19 12:00:00# CTF 伪协议
+date: 2026-03-19 12:00:00
+---
+# CTF 伪协议
 
 ## 一、常见伪协议
 

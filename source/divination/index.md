@@ -1,0 +1,503 @@
+---
+title: 占卜
+layout: page
+menu_id: divination
+---
+
+{% raw %}
+<div class="divination-container">
+  <h1>🔮 神秘占卜</h1>
+  
+  <div class="divination-types">
+    <div class="divination-card" onclick="startDivination('code')">
+      <div class="card-icon">💻</div>
+      <h3>代码占卜</h3>
+      <p>极简主义，终端风格命运解读</p>
+    </div>
+    
+    <div class="divination-card" onclick="startDivination('tarot')">
+      <div class="card-icon">🃏</div>
+      <h3>塔罗牌占卜</h3>
+      <p>探索命运的指引，解读未来的奥秘</p>
+    </div>
+    
+    <div class="divination-card" onclick="startDivination('fortune')">
+      <div class="card-icon">🎋</div>
+      <h3>每日运势</h3>
+      <p>查看今日运势，把握每一天</p>
+    </div>
+    
+    <div class="divination-card" onclick="startDivination('ball')">
+      <div class="card-icon">🎱</div>
+      <h3>魔法球</h3>
+      <p>问是或否，魔法球会给你答案</p>
+    </div>
+    
+    <div class="divination-card" onclick="startDivination('lucky')">
+      <div class="card-icon">🍀</div>
+      <h3>幸运指数</h3>
+      <p>测试今天的幸运值</p>
+    </div>
+  </div>
+  
+  <div class="divination-result" id="divinationResult" style="display: none;">
+    <div class="result-content" id="resultContent"></div>
+    <button class="retry-btn" onclick="hideResult()">重新占卜</button>
+  </div>
+</div>
+
+<style>
+.divination-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.divination-container h1 {
+  text-align: center;
+  font-size: 2.5em;
+  margin-bottom: 40px;
+  color: var(--theme, #3498db);
+}
+
+.divination-types {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 15px;
+  margin-bottom: 30px;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .divination-types {
+    flex-wrap: wrap;
+  }
+  .divination-card {
+    flex: 1 1 calc(45% - 15px) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .divination-card {
+    flex: 1 1 100% !important;
+  }
+}
+
+.divination-card {
+  flex: 1;
+  min-width: 0;
+  background: var(--card, #1a1a2e);
+  border: 2px solid var(--border, #2a2a3e);
+  border-radius: 16px;
+  padding: 20px 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.divination-card:hover {
+  border-color: var(--theme, #3498db);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(52, 152, 219, 0.2);
+}
+
+.card-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.divination-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.3em;
+  color: var(--text, #fff);
+}
+
+.divination-card p {
+  margin: 0;
+  color: var(--text-p3, #888);
+  font-size: 0.9em;
+}
+
+.divination-result {
+  background: var(--card, #1a1a2e);
+  border: 2px solid var(--theme, #3498db);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.result-content {
+  margin-bottom: 30px;
+}
+
+.result-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.result-title {
+  font-size: 1.5em;
+  color: var(--theme, #3498db);
+  margin-bottom: 15px;
+}
+
+.result-text {
+  font-size: 1.1em;
+  color: var(--text, #fff);
+  line-height: 1.6;
+}
+
+.retry-btn {
+  background: var(--theme, #3498db);
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.retry-btn:hover {
+  background: #2980b9;
+  transform: scale(1.05);
+}
+
+/* 代码占卜样式 */
+.code-divination {
+  background: #0d1117;
+  border-radius: 12px;
+  overflow: hidden;
+  text-align: left;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.code-header {
+  background: #161b22;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #30363d;
+}
+
+.code-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.code-dot.red { background: #ff5f56; }
+.code-dot.yellow { background: #ffbd2e; }
+.code-dot.green { background: #27c93f; }
+
+.code-title {
+  margin-left: 12px;
+  color: #8b949e;
+  font-size: 13px;
+}
+
+.code-body {
+  padding: 20px;
+  color: #c9d1d9;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.code-line {
+  margin: 4px 0;
+}
+
+.code-comment { color: #8b949e; }
+.code-keyword { color: #ff7b72; }
+.code-string { color: #a5d6ff; }
+.code-function { color: #d2a8ff; }
+.code-variable { color: #ffa657; }
+.code-number { color: #79c0ff; }
+.code-operator { color: #ff7b72; }
+
+.code-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 18px;
+  background: #58a6ff;
+  animation: blink 1s infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.code-output {
+  margin-top: 16px;
+  padding: 12px;
+  background: #161b22;
+  border-radius: 6px;
+  border-left: 3px solid #3fb950;
+}
+
+.code-output-line {
+  color: #3fb950;
+  margin: 4px 0;
+}
+
+.code-output-line.warning {
+  color: #d29922;
+}
+
+.code-output-line.info {
+  color: #58a6ff;
+}
+
+.daily-notice {
+  background: rgba(255, 193, 7, 0.2);
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  color: #ffc107;
+  font-size: 14px;
+  text-align: center;
+}
+</style>
+
+<script>
+var codeFortunes = [
+  {
+    fortune: '大吉',
+    advice: '今日代码编译一次通过，Bug自动修复',
+    lucky: ['VSCode', 'Chrome DevTools', 'Stack Overflow'],
+    avoid: ['IE浏览器', '旧版jQuery', '过度优化']
+  },
+  {
+    fortune: '中吉',
+    advice: '今日适合重构代码，技术债务将减少',
+    lucky: ['Git', 'Docker', '单元测试'],
+    avoid: ['复制粘贴代码', '忽略警告', '跳过测试']
+  },
+  {
+    fortune: '小吉',
+    advice: '今日适合学习新技术，文档将清晰易懂',
+    lucky: ['官方文档', 'GitHub Issues', '技术博客'],
+    avoid: ['闭门造车', '忽视版本号', '盲目追新']
+  },
+  {
+    fortune: '吉',
+    advice: '今日适合写文档，团队协作顺畅',
+    lucky: ['Markdown', '代码审查', '敏捷开发'],
+    avoid: ['临时需求', '需求变更', '紧急上线']
+  },
+  {
+    fortune: '末吉',
+    advice: '今日需谨慎提交，建议多写测试用例',
+    lucky: ['回滚代码', '备份', 'Code Review'],
+    avoid: ['周五部署', '删库跑路', 'rm -rf']
+  },
+  {
+    fortune: '凶',
+    advice: '今日不宜写核心代码，建议只做代码审查',
+    lucky: ['摸鱼', '喝咖啡', '看文档'],
+    avoid: ['修改生产环境', '重构核心模块', '信任用户输入']
+  }
+];
+
+var tarotCards = [
+  { name: '愚者', meaning: '新的开始，无限可能，冒险精神', icon: '🃏' },
+  { name: '魔术师', meaning: '创造力，技能，自信', icon: '🎩' },
+  { name: '女祭司', meaning: '直觉，神秘，智慧', icon: '🌙' },
+  { name: '女皇', meaning: '丰饶，母性，创造', icon: '👑' },
+  { name: '皇帝', meaning: '权威，领导，稳定', icon: '⚔️' },
+  { name: '教皇', meaning: '传统，信仰，指引', icon: '📿' },
+  { name: '恋人', meaning: '爱情，选择，和谐', icon: '💕' },
+  { name: '战车', meaning: '胜利，意志，决心', icon: '🏎️' },
+  { name: '力量', meaning: '勇气，耐心，内在力量', icon: '🦁' },
+  { name: '隐士', meaning: '内省，寻求，智慧', icon: '🏔️' },
+  { name: '命运之轮', meaning: '变化，机遇，转折', icon: '🎡' },
+  { name: '正义', meaning: '公正，真相，因果', icon: '⚖️' },
+  { name: '倒吊人', meaning: '牺牲，等待，新视角', icon: '🔄' },
+  { name: '死神', meaning: '结束，转变，重生', icon: '💀' },
+  { name: '节制', meaning: '平衡，调和，耐心', icon: '⚗️' },
+  { name: '恶魔', meaning: '诱惑，束缚，物质', icon: '😈' },
+  { name: '高塔', meaning: '突变，觉醒，毁灭', icon: '🗼' },
+  { name: '星星', meaning: '希望，灵感，平静', icon: '⭐' },
+  { name: '月亮', meaning: '幻觉，恐惧，潜意识', icon: '🌙' },
+  { name: '太阳', meaning: '成功，活力，快乐', icon: '☀️' },
+  { name: '审判', meaning: '觉醒，重生，召唤', icon: '📯' },
+  { name: '世界', meaning: '完成，成就，圆满', icon: '🌍' }
+];
+
+var fortunes = [
+  { level: '大吉', text: '今日运势极佳，万事顺遂！把握机会，大胆行动！', color: '#ff6b6b' },
+  { level: '中吉', text: '今日运势良好，适合开展新计划。保持积极心态！', color: '#ffa502' },
+  { level: '小吉', text: '今日运势平稳，小心行事可获小成。', color: '#ffd700' },
+  { level: '吉', text: '今日运势尚可，稳中求进为上策。', color: '#2ed573' },
+  { level: '末吉', text: '今日运势一般，需谨慎行事，避免冲动。', color: '#3498db' },
+  { level: '凶', text: '今日运势欠佳，宜静不宜动，多加小心。', color: '#9b59b6' }
+];
+
+var ballAnswers = [
+  '是的，毫无疑问',
+  '绝对是这样',
+  '很有可能',
+  '前景看好',
+  '是的',
+  '迹象指向是',
+  '不确定，再问一次',
+  '现在不好说',
+  '无法预测',
+  '暂时不是',
+  '我的回答是否定的',
+  '不太可能',
+  '前景不太乐观',
+  '不是',
+  '绝对不是'
+];
+
+function startDivination(type) {
+  var today = new Date().toDateString();
+  var lastDivination = localStorage.getItem('divination_' + type + '_date');
+  
+  if (lastDivination === today) {
+    var lastResult = localStorage.getItem('divination_' + type + '_result');
+    if (lastResult) {
+      document.getElementById('resultContent').innerHTML = lastResult;
+      document.getElementById('divinationResult').style.display = 'block';
+      
+      var notice = document.createElement('div');
+      notice.className = 'daily-notice';
+      notice.innerHTML = '⚠️ 今日已占卜，结果不变';
+      document.getElementById('resultContent').prepend(notice);
+      return;
+    }
+  }
+  
+  var result = '';
+  
+  switch(type) {
+    case 'code':
+      result = drawCodeFortune();
+      break;
+    case 'tarot':
+      result = drawTarot();
+      break;
+    case 'fortune':
+      result = drawFortune();
+      break;
+    case 'ball':
+      result = drawBall();
+      break;
+    case 'lucky':
+      result = drawLucky();
+      break;
+  }
+  
+  localStorage.setItem('divination_' + type + '_date', today);
+  localStorage.setItem('divination_' + type + '_result', result);
+  
+  document.getElementById('resultContent').innerHTML = result;
+  document.getElementById('divinationResult').style.display = 'block';
+}
+
+function drawCodeFortune() {
+  var fortune = codeFortunes[Math.floor(Math.random() * codeFortunes.length)];
+  var now = new Date();
+  var timestamp = now.getFullYear() + '-' + 
+    String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+    String(now.getDate()).padStart(2, '0') + ' ' + 
+    String(now.getHours()).padStart(2, '0') + ':' + 
+    String(now.getMinutes()).padStart(2, '0') + ':' + 
+    String(now.getSeconds()).padStart(2, '0');
+  
+  return `
+    <div class="code-divination">
+      <div class="code-header">
+        <span class="code-dot red"></span>
+        <span class="code-dot yellow"></span>
+        <span class="code-dot green"></span>
+        <span class="code-title">destiny.sh — bash</span>
+      </div>
+      <div class="code-body">
+        <div class="code-line"><span class="code-comment">#!/bin/bash</span></div>
+        <div class="code-line"><span class="code-comment"># 命运解析脚本 v1.0</span></div>
+        <div class="code-line"><span class="code-comment"># ${timestamp}</span></div>
+        <div class="code-line"></div>
+        <div class="code-line"><span class="code-variable">FORTUNE</span><span class="code-operator">=</span><span class="code-string">"${fortune.fortune}"</span></div>
+        <div class="code-line"><span class="code-variable">ADVICE</span><span class="code-operator">=</span><span class="code-string">"${fortune.advice}"</span></div>
+        <div class="code-line"></div>
+        <div class="code-line"><span class="code-keyword">echo</span> <span class="code-string">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span></div>
+        <div class="code-line"><span class="code-keyword">echo</span> <span class="code-string">"今日运势: $FORTUNE"</span></div>
+        <div class="code-line"><span class="code-keyword">echo</span> <span class="code-string">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span></div>
+        <div class="code-line"></div>
+        <div class="code-line"><span class="code-comment"># 幸运工具</span></div>
+        <div class="code-line"><span class="code-variable">LUCKY_TOOLS</span><span class="code-operator">=</span>(<span class="code-string">"${fortune.lucky.join('" "')}"</span>)</div>
+        <div class="code-line"></div>
+        <div class="code-line"><span class="code-comment"># 需避免</span></div>
+        <div class="code-line"><span class="code-variable">AVOID</span><span class="code-operator">=</span>(<span class="code-string">"${fortune.avoid.join('" "')}"</span>)</div>
+        <div class="code-line"></div>
+        <div class="code-output">
+          <div class="code-output-line">[+] 运势解析完成</div>
+          <div class="code-output-line">[+] 建议: ${fortune.advice}</div>
+          <div class="code-output-line info">[i] 幸运工具: ${fortune.lucky.join(', ')}</div>
+          <div class="code-output-line warning">[!] 需避免: ${fortune.avoid.join(', ')}</div>
+        </div>
+        <div class="code-line"><span class="code-cursor"></span></div>
+      </div>
+    </div>
+  `;
+}
+
+function drawTarot() {
+  var card = tarotCards[Math.floor(Math.random() * tarotCards.length)];
+  return `
+    <div class="result-icon">${card.icon}</div>
+    <div class="result-title">你抽到了：${card.name}</div>
+    <div class="result-text">${card.meaning}</div>
+  `;
+}
+
+function drawFortune() {
+  var fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
+  return `
+    <div class="result-icon">🎋</div>
+    <div class="result-title" style="color: ${fortune.color}">${fortune.level}</div>
+    <div class="result-text">${fortune.text}</div>
+  `;
+}
+
+function drawBall() {
+  var answer = ballAnswers[Math.floor(Math.random() * ballAnswers.length)];
+  return `
+    <div class="result-icon">🎱</div>
+    <div class="result-title">魔法球的回答</div>
+    <div class="result-text">${answer}</div>
+  `;
+}
+
+function drawLucky() {
+  var lucky = Math.floor(Math.random() * 100) + 1;
+  var stars = '';
+  for (var i = 0; i < Math.ceil(lucky / 10); i++) {
+    stars += '⭐';
+  }
+  return `
+    <div class="result-icon">🍀</div>
+    <div class="result-title">今日幸运值</div>
+    <div class="result-text" style="font-size: 2em; color: #ffd700;">${lucky}%</div>
+    <div class="result-text">${stars}</div>
+  `;
+}
+
+function hideResult() {
+  document.getElementById('divinationResult').style.display = 'none';
+}
+</script>
+{% endraw %}

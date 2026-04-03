@@ -1,0 +1,135 @@
+<%
+function layoutDiv() {
+  var el = '';
+  var categories = site.categories;
+  if (categories.length == 0) {
+    return el;
+  }
+  
+  var style = item.style || '1';
+  var styleClass = 'style-' + style;
+
+  // 收集所有子分类的名称
+  var childNames = {};
+  categories.each(function(cat) {
+    if (cat.parent) {
+      // 找到父分类
+      var parentCat = categories.findOne({_id: cat.parent});
+      if (parentCat) {
+        if (!childNames[parentCat.name]) {
+          childNames[parentCat.name] = [];
+        }
+        childNames[parentCat.name].push(cat.name);
+      }
+    }
+  });
+
+  // 收集所有顶级分类（没有父分类的分类）
+  var rootCategories = [];
+  categories.each(function(cat) {
+    if (!cat.parent) {
+      rootCategories.push(cat);
+    }
+  });
+
+  // 自定义排序
+  var customOrder = ['web', 'linux', '代码审计', 'windows', '工具魔改', '笔记', '靶机渗透', '靶场'];
+  rootCategories.sort(function(a, b) {
+    var indexA = customOrder.indexOf(a.name);
+    var indexB = customOrder.indexOf(b.name);
+    if (indexA === -1) indexA = 999;
+    if (indexB === -1) indexB = 999;
+    return indexA - indexB;
+  });
+
+  el += '<widget class="widget-wrapper' + scrollreveal(' ') + ' linklist collapsible-widget">';
+  if (item.title) {
+    el += '<div class="widget-header dis-select">';
+    el += '<span class="name">' + item.title + '</span>';
+    el += '<span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span>';
+    el += '</div>';
+  }
+  el += '<div class="widget-body fs14">';
+  el += '<div class="linklist left ' + styleClass + '" style="grid-template-columns:repeat(' + (item.columns || 1) + ',1fr);">';
+  
+  function getPostCount(cat) {
+    if (cat.posts) {
+      if (typeof cat.posts.length === 'number') {
+        return cat.posts.length;
+      } else if (cat.posts.count) {
+        return cat.posts.count;
+      } else if (cat.posts.toArray) {
+        return cat.posts.toArray().length;
+      }
+    }
+    return 0;
+  }
+
+  function getChildCategories(parentName) {
+    var children = [];
+    categories.each(function(cat) {
+      if (cat.parent) {
+        var parentCat = categories.findOne({_id: cat.parent});
+        if (parentCat && parentCat.name === parentName) {
+          children.push(cat);
+        }
+      }
+    });
+    return children;
+  }
+
+  function renderCategory(cat, isChild) {
+    var isActive = '';
+    if (page.category && page.category === cat.name) {
+      isActive = ' active';
+    }
+    
+    var postCount = getPostCount(cat);
+    var catPath = url_for(cat.path);
+    
+    if (isChild) {
+      el += '<a class="link child-link' + isActive + '" title="' + cat.name + '" href="' + catPath + '">';
+      el += '<div class="flex">';
+      el += '<span>' + cat.name + '</span>';
+      if (item.show_count !== false) {
+        el += '<span class="count">' + postCount + '</span>';
+      }
+      el += '</div>';
+      el += '</a>';
+    } else {
+      el += '<a class="link' + isActive + '" title="' + cat.name + '" href="' + catPath + '">';
+      el += '<div class="flex">';
+      el += '<span>' + cat.name + '</span>';
+      if (item.show_count !== false) {
+        el += '<span class="count">' + postCount + '</span>';
+      }
+      el += '</div>';
+      el += '</a>';
+    }
+  }
+
+  rootCategories.forEach(function(parentCat) {
+    var children = getChildCategories(parentCat.name);
+    var hasChildren = children.length > 0;
+    
+    if (hasChildren) {
+      el += '<div class="category-group">';
+      renderCategory(parentCat, false);
+      el += '<div class="children-list">';
+      children.forEach(function(child) {
+        renderCategory(child, true);
+      });
+      el += '</div>';
+      el += '</div>';
+    } else {
+      renderCategory(parentCat, false);
+    }
+  });
+  
+  el += '</div>';
+  el += '</div>';
+  el += '</widget>';
+  return el;
+}
+%>
+<%- layoutDiv() %>

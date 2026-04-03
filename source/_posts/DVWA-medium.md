@@ -2,7 +2,7 @@
 cover: /images/DVWA.jpg
 title: DVWA 靶场实验报告 (Medium Level)
 categories:
-  - DVWA
+  - [web, DVWA]
 tags:
   - 靶场练习
   - DVWA
@@ -10,7 +10,9 @@ tags:
   - SQL注入
   - CSRF
 abbrlink: fab7f2d4
-date: 2026-03-08 12:00:00# DVWA 靶场实验报告 (Medium Level)
+date: 2026-03-08 12:00:00
+---
+# DVWA 靶场实验报告 (Medium Level)
 
 **难度等级：** Medium (中级)
 **报告说明：** 本报告基于 DVWA 靶场中等级别安全设置。相比于低等级，中等级别加入了基础的防御机制（如后缀检查、简单的字符串过滤及 CSRF Token 验证），本报告详细记录了 17 项漏洞的**绕过技巧**与复现过程。

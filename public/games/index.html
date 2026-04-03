@@ -1,9 +1,31 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
 
 <!DOCTYPE html><html lang="zh-CN" data-theme="dark">
 
 <head>
   <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
   <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
   
   
   <meta name="generator" content="Hexo 7.3.0">
@@ -28,8 +50,8 @@
 <meta property="og:description" content="🎮 小游戏中心                  🐍       贪吃蛇       经典贪吃蛇游戏，控制蛇吃食物，不要撞墙和自己！                经典         休闲                             🧱       俄罗斯方块       经典俄罗斯方块，消除方块，挑战高分！                经典         益智">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-03-24T05:29:19.339Z">
-<meta property="article:modified_time" content="2026-03-24T05:29:19.339Z">
+<meta property="article:published_time" content="2026-03-31T15:48:34.743Z">
+<meta property="article:modified_time" content="2026-03-28T12:47:07.204Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -42,9 +64,11 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=1.33.1">
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
 
 
+  
+    <link rel="shortcut icon" href="/avatar.png">
   
 
   
@@ -61,14 +85,10 @@
 
 <div class="nav-area">
 
-<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+<nav class="menu dis-select"><a class="nav-item" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item active" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
 </div>
-<div class="widgets">
-<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+<div class="widgets"></div>
 
-<widget class="widget-wrapper recent post-list"><div class="widget-header dis-select"><span class="name">最近更新</span></div><div class="widget-body fs14"><a class="item title" href="/posts/58685328/"><span class="title">CTF 伪协议</span></a><a class="item title" href="/posts/31fdd992/"><span class="title">Pikachu 靶场通关笔记</span></a><a class="item title" href="/posts/a6c6e02f/"><span class="title">常见Linux权限提升笔记</span></a><a class="item title" href="/posts/f10adb67/"><span class="title">VulnHub DC-9 靶机渗透测试笔记</span></a><a class="item title" href="/posts/16177df0/"><span class="title">VulnHub DC-8 靶机渗透测试笔记</span></a><a class="item title" href="/posts/9bfd2b6a/"><span class="title">VulnHub DC-7 靶机渗透测试笔记</span></a><a class="item title" href="/posts/7ce08dfd/"><span class="title">VulnHub DC-6 靶机渗透测试笔记</span></a><a class="item title" href="/posts/8eb76005/"><span class="title">VulnHub DC-5 靶机渗透测试笔记</span></a><a class="item title" href="/posts/69aac692/"><span class="title">VulnHub DC-4 靶机渗透测试笔记</span></a><a class="item title" href="/posts/b169bdb4/"><span class="title">VulnHub DC-3 靶机渗透测试笔记</span></a></div></widget>
-</div>
-<footer class="footer dis-select"><div class="social-wrap"><a class="social" href="https://github.com/wr0ld" target="_blank" rel="external nofollow noopener noreferrer"><img src="https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/social/08a41b181ce68.svg"/></a><a class="social" onclick="switchTheme()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" fill-rule="evenodd" d="M582.4 326.4c-140.8 0-256 115.2-256 256s115.2 256 256 256 256-115.2 256-256-115.2-256-256-256z m0 448c-70.4 0-131.2-36.8-164.8-92.8 12.8 3.2 27.2 4.8 40 4.8 121.6 0 219.2-99.2 219.2-219.2 0-17.6-1.6-35.2-6.4-52.8 60.8 32 102.4 96 102.4 169.6 1.6 104-84.8 190.4-190.4 190.4zM582.4 262.4c17.6 0 32-14.4 32-32v-128c0-17.6-14.4-32-32-32s-32 14.4-32 32v128c0 17.6 14.4 32 32 32zM262.4 582.4c0-17.6-14.4-32-32-32h-128c-17.6 0-32 14.4-32 32s14.4 32 32 32h128c17.6 0 32-14.4 32-32zM310.4 356.8c6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6 12.8-12.8 12.8-32 0-44.8l-91.2-91.2c-12.8-12.8-32-12.8-44.8 0-12.8 12.8-12.8 32 0 44.8l91.2 91.2zM944 220.8c-12.8-12.8-32-12.8-44.8 0l-91.2 91.2c-12.8 12.8-12.8 32 0 44.8 6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6l91.2-91.2c12.8-12.8 12.8-33.6 0-44.8zM310.4 808l-91.2 91.2c-12.8 12.8-12.8 32 0 44.8 6.4 6.4 14.4 9.6 22.4 9.6 8 0 16-3.2 22.4-9.6l91.2-91.2c12.8-12.8 12.8-32 0-44.8-11.2-11.2-32-11.2-44.8 0z"></path></svg></a></div></footer>
 </div></aside><div class="l_main" id="main">
 
 
@@ -82,7 +102,7 @@
   <span class="sep"></span>
   <a class="cap breadcrumb" href="/games/">小游戏</a>
   </div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-24T05:29:19.339Z">2026-03-24</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-03-24T05:29:19.339Z">2026-03-24</time></span></div></div></div>
+</div></div>
     
     <div class="bottom only-title">
       
@@ -98,7 +118,7 @@
   <h1>🎮 小游戏中心</h1>
   
   <div class="games-grid">
-    <a href="/games/snake/" class="game-card">
+    <a href="/games/snake/" class="game-card" id="game-snake">
       <div class="game-icon">🐍</div>
       <h2>贪吃蛇</h2>
       <p>经典贪吃蛇游戏，控制蛇吃食物，不要撞墙和自己！</p>
@@ -108,7 +128,7 @@
       </div>
     </a>
     
-    <a href="/games/tetris/" class="game-card">
+    <a href="/games/tetris/" class="game-card" id="game-tetris">
       <div class="game-icon">🧱</div>
       <h2>俄罗斯方块</h2>
       <p>经典俄罗斯方块，消除方块，挑战高分！</p>
@@ -118,7 +138,7 @@
       </div>
     </a>
     
-    <a href="/games/2048/" class="game-card">
+    <a href="/games/2048/" class="game-card" id="game-2048">
       <div class="game-icon">🎯</div>
       <h2>2048</h2>
       <p>数字合并游戏，挑战2048方块！</p>
@@ -128,7 +148,7 @@
       </div>
     </a>
     
-    <a href="/games/breakout/" class="game-card">
+    <a href="/games/breakout/" class="game-card" id="game-breakout">
       <div class="game-icon">⚡</div>
       <h2>打砖块</h2>
       <p>经典打砖块游戏，用球击碎所有砖块！</p>
@@ -138,7 +158,7 @@
       </div>
     </a>
     
-    <a href="/games/minesweeper/" class="game-card">
+    <a href="/games/minesweeper/" class="game-card" id="game-minesweeper">
       <div class="game-icon">💣</div>
       <h2>扫雷</h2>
       <p>经典扫雷游戏，找出所有地雷！</p>
@@ -148,7 +168,7 @@
       </div>
     </a>
     
-    <a href="/games/gobang/" class="game-card">
+    <a href="/games/gobang/" class="game-card" id="game-gobang">
       <div class="game-icon">⚫</div>
       <h2>五子棋</h2>
       <p>经典五子棋对战，先连成五子获胜！</p>
@@ -158,7 +178,7 @@
       </div>
     </a>
     
-    <a href="/games/memory/" class="game-card">
+    <a href="/games/memory/" class="game-card" id="game-memory">
       <div class="game-icon">🃏</div>
       <h2>记忆翻牌</h2>
       <p>翻开卡片找出配对，考验记忆力！</p>
@@ -168,7 +188,7 @@
       </div>
     </a>
     
-    <a href="/games/airplane/" class="game-card">
+    <a href="/games/airplane/" class="game-card" id="game-airplane">
       <div class="game-icon">✈️</div>
       <h2>飞机大战</h2>
       <p>经典射击游戏，击落敌机得分！</p>
@@ -178,7 +198,7 @@
       </div>
     </a>
     
-    <a href="/games/sokoban/" class="game-card">
+    <a href="/games/sokoban/" class="game-card" id="game-sokoban">
       <div class="game-icon">📦</div>
       <h2>推箱子</h2>
       <p>经典益智游戏，将箱子推到目标位置！</p>
@@ -188,7 +208,7 @@
       </div>
     </a>
     
-    <a href="/games/puzzle/" class="game-card">
+    <a href="/games/puzzle/" class="game-card" id="game-puzzle">
       <div class="game-icon">🔢</div>
       <h2>数字华容道</h2>
       <p>滑块拼图游戏，将数字按顺序排列！</p>
@@ -197,34 +217,103 @@
         <span class="tag">拼图</span>
       </div>
     </a>
+    
+    <a href="/games/jump/" class="game-card" id="game-jump">
+      <div class="game-icon">🦘</div>
+      <h2>跳一跳</h2>
+      <p>控制小人跳跃，精准落在平台上！</p>
+      <div class="game-tags">
+        <span class="tag">休闲</span>
+        <span class="tag">反应</span>
+      </div>
+    </a>
+    
+    <a href="/games/match3/" class="game-card" id="game-match3">
+      <div class="game-icon">💎</div>
+      <h2>消消乐</h2>
+      <p>三消游戏，交换宝石消除得分！</p>
+      <div class="game-tags">
+        <span class="tag">休闲</span>
+        <span class="tag">益智</span>
+      </div>
+    </a>
+    
+    <a href="/games/whack/" class="game-card" id="game-whack">
+      <div class="game-icon">🔨</div>
+      <h2>打地鼠</h2>
+      <p>快速敲打冒出的地鼠，考验反应速度！</p>
+      <div class="game-tags">
+        <span class="tag">休闲</span>
+        <span class="tag">反应</span>
+      </div>
+    </a>
+    
+    <a href="/games/catch/" class="game-card" id="game-catch">
+      <div class="game-icon">🪙</div>
+      <h2>接金币</h2>
+      <p>控制角色接住掉落的金币，躲避炸弹！</p>
+      <div class="game-tags">
+        <span class="tag">休闲</span>
+        <span class="tag">反应</span>
+      </div>
+    </a>
+    
+    <a href="/games/xiuxian/" class="game-card" id="game-xiuxian">
+      <div class="game-icon">☯️</div>
+      <h2>修仙模拟器</h2>
+      <p>大型修仙游戏，修炼、探索、炼丹、突破境界！</p>
+      <div class="game-tags">
+        <span class="tag">大型</span>
+        <span class="tag">RPG</span>
+      </div>
+    </a>
+    
+    <a href="/games/magictower/" class="game-card" id="game-magictower">
+      <div class="game-icon">🗼</div>
+      <h2>魔塔</h2>
+      <p>经典魔塔复刻，8层塔楼，策略数值战斗！</p>
+      <div class="game-tags">
+        <span class="tag">大型</span>
+        <span class="tag">经典</span>
+      </div>
+    </a>
+    
+    <a href="/games/rubiks/" class="game-card" id="game-rubiks">
+      <div class="game-icon">🎲</div>
+      <h2>3D魔方</h2>
+      <p>3D魔方模拟器，支持旋转、打乱和重置！</p>
+      <div class="game-tags">
+        <span class="tag">3D</span>
+        <span class="tag">益智</span>
+      </div>
+    </a>
   </div>
 </div>
 
 <style>
   .games-container {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 20px;
   }
   
   .games-container h1 {
     text-align: center;
     font-size: 2.5em;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
   }
   
   .games-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    margin-top: 30px;
+    gap: 25px;
   }
   
   .game-card {
     display: block;
     background: var(--card, #fff);
     border-radius: 15px;
-    padding: 30px;
+    padding: 25px;
     text-decoration: none;
     color: inherit;
     transition: all 0.3s ease;
@@ -244,39 +333,40 @@
   }
   
   .game-icon {
-    font-size: 4em;
+    font-size: 3.5em;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     transition: all 0.3s ease;
   }
   
   .game-card h2 {
-    font-size: 1.5em;
-    margin-bottom: 15px;
+    font-size: 1.4em;
+    margin-bottom: 12px;
     text-align: center;
     color: var(--text, #333);
   }
   
   .game-card p {
     color: var(--text-p3, #666);
-    line-height: 1.6;
-    margin-bottom: 20px;
+    line-height: 1.5;
+    margin-bottom: 15px;
     text-align: center;
+    font-size: 0.95em;
   }
   
   .game-tags {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
   }
   
   .tag {
     background: var(--theme, #3498db);
     color: white;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.85em;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8em;
     font-weight: 500;
   }
   
@@ -295,15 +385,33 @@
   }
 </style>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var tocLinks = document.querySelectorAll('.games-toc-item');
+  tocLinks.forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var targetId = this.getAttribute('href').substring(1);
+      var targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    });
+  });
+});
+</script>
+
 </article>
 
 
 
-<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
-
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-text">🎮 小游戏中心</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">贪吃蛇</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">俄罗斯方块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">2048</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">打砖块</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">扫雷</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">五子棋</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">记忆翻牌</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">飞机大战</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">推箱子</span></a></li><li class="toc-item toc-level-2"><a class="toc-link"><span class="toc-text">数字华容道</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+<widget class="widget-wrapper games-toc-widget"><div class="widget-header dis-select"><span class="name">🎮 游戏目录</span></div><div class="widget-body fs14"><div class="games-toc-list"><a href="#game-snake" class="games-toc-item"><span class="games-toc-icon">🐍</span><span class="games-toc-title">贪吃蛇</span></a><a href="#game-snake-battle" class="games-toc-item"><span class="games-toc-icon">⚔️</span><span class="games-toc-title">贪吃蛇大作战</span></a><a href="#game-tetris" class="games-toc-item"><span class="games-toc-icon">🧱</span><span class="games-toc-title">俄罗斯方块</span></a><a href="#game-2048" class="games-toc-item"><span class="games-toc-icon">🎯</span><span class="games-toc-title">2048</span></a><a href="#game-breakout" class="games-toc-item"><span class="games-toc-icon">🎱</span><span class="games-toc-title">弹球</span></a><a href="#game-minesweeper" class="games-toc-item"><span class="games-toc-icon">💣</span><span class="games-toc-title">扫雷</span></a><a href="#game-gobang" class="games-toc-item"><span class="games-toc-icon">⚫</span><span class="games-toc-title">五子棋</span></a><a href="#game-memory" class="games-toc-item"><span class="games-toc-icon">🃏</span><span class="games-toc-title">记忆翻牌</span></a><a href="#game-airplane" class="games-toc-item"><span class="games-toc-icon">✈️</span><span class="games-toc-title">飞机大战</span></a><a href="#game-sokoban" class="games-toc-item"><span class="games-toc-icon">📦</span><span class="games-toc-title">推箱子</span></a><a href="#game-puzzle" class="games-toc-item"><span class="games-toc-icon">🔢</span><span class="games-toc-title">数字华容道</span></a><a href="#game-jump" class="games-toc-item"><span class="games-toc-icon">🎯</span><span class="games-toc-title">跳一跳</span></a><a href="#game-match3" class="games-toc-item"><span class="games-toc-icon">💎</span><span class="games-toc-title">消消乐</span></a><a href="#game-whack" class="games-toc-item"><span class="games-toc-icon">🔨</span><span class="games-toc-title">打地鼠</span></a><a href="#game-catch" class="games-toc-item"><span class="games-toc-icon">💰</span><span class="games-toc-title">接金币</span></a><a href="#game-xiuxian" class="games-toc-item"><span class="games-toc-icon">☯️</span><span class="games-toc-title">修仙模拟器</span></a><a href="#game-magictower" class="games-toc-item"><span class="games-toc-icon">🗼</span><span class="games-toc-title">魔塔</span></a><a href="#game-rubiks" class="games-toc-item"><span class="games-toc-icon">🎲</span><span class="games-toc-title">3D魔方</span></a></div></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
@@ -902,42 +1010,6 @@
   };
 </script>
 <script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
-  ctx.fancybox = {
-    selector: `.md-text img:not([class]), .md-text .image img`,
-    css: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css`,
-    js: `https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js`
-  };
-  var selector = '[data-fancybox]:not(.error), .with-fancybox .atk-content img:not([atk-emoticon])';
-  if (ctx.fancybox.selector) {
-    selector += `, ${ctx.fancybox.selector}`
-  }
-  var needFancybox = document.querySelectorAll(selector).length !== 0;
-  if (!needFancybox) {
-    const memos = document.getElementsByClassName('ds-memos');
-    if (memos != undefined && memos.length > 0) {
-      needFancybox = true;
-    }
-    const fancybox = document.getElementsByClassName('with-fancybox');
-    if (fancybox != undefined && fancybox.length > 0) {
-      needFancybox = true;
-    }
-  }
-  if (needFancybox) {
-    utils.css(ctx.fancybox.css);
-    utils.js(ctx.fancybox.js, { defer: true }).then(function () {
-      Fancybox.bind(selector, {
-        hideScrollbar: false,
-        Thumbs: {
-          autoStart: false,
-        },
-        caption: (fancybox, slide) => {
-          return slide.triggerEl.alt || slide.triggerEl.dataset.caption || null
-        }
-      });
-    })
-  }
-</script>
-<script>
   window.addEventListener('DOMContentLoaded', (event) => {
     const swiper_api = document.getElementById('swiper-api');
     if (swiper_api != undefined) {
@@ -981,8 +1053,32 @@
 <!-- inject -->
 
 
-<!-- Live2D Widget -->
-<script src="https://cdn.jsdelivr.net/gh/stevenjoezhang/live2d-widget@latest/autoload.js"></script>
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
 
 <!-- Live2D Widget 位置调整和默认显示 -->
 <style>
@@ -1010,74 +1106,151 @@
   }
 </style>
 
-<!-- 点击特效 - 爱心爆炸效果 -->
+<!-- 点击特效 -->
 <script>
-  (function() {
-    // 创建爱心元素
-    function createHeart(x, y) {
-      const heart = document.createElement('div');
-      heart.className = 'click-heart';
-      heart.innerHTML = '❤';
-      heart.style.cssText = `
-        position: fixed;
-        left: ${x - 10}px;
-        top: ${y - 10}px;
-        font-size: 20px;
-        pointer-events: none;
-        z-index: 9999;
-        animation: heartFloat 1s ease-out forwards;
-        color: ${getRandomColor()};
-      `;
-      document.body.appendChild(heart);
-      
-      setTimeout(() => {
-        heart.remove();
-      }, 1000);
-    }
+(function() {
+  var clickEffects = {
+    current: null,
     
-    // 随机颜色
-    function getRandomColor() {
-      const colors = [
-        '#ff6b6b', '#ff8e8e', '#ffa8a8',
-        '#ff69b4', '#ff1493', '#db7093',
-        '#ff4500', '#ff6347', '#ff7f50',
-        '#ffd700', '#ffec8b', '#ffa500'
-      ];
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
     
-    // 点击事件
-    document.addEventListener('click', function(e) {
-      // 排除特定元素
-      if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) {
-        return;
-      }
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
       
-      // 创建多个爱心
-      for (let i = 0; i < 3; i++) {
-        setTimeout(() => {
-          const offsetX = (Math.random() - 0.5) * 40;
-          const offsetY = (Math.random() - 0.5) * 40;
-          createHeart(e.clientX + offsetX, e.clientY + offsetY);
-        }, i * 100);
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
       }
-    });
-  })();
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
 </script>
 
 <style>
-  @keyframes heartFloat {
-    0% {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-    50% {
-      opacity: 0.8;
-      transform: translateY(-30px) scale(1.2);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-60px) scale(0.8);
-    }
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
   }
-</style></div></body></html>
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>

@@ -2,7 +2,7 @@
 cover: /images/pikachu.png
 title: Pikachu 靶场通关笔记
 categories:
-  - 靶场
+  - [web, pikachu]
 tags:
   - 靶场
   - Pikachu
@@ -10,7 +10,9 @@ tags:
   - SQL注入
   - CSRF
 abbrlink: 31fdd992
-date: 2026-03-05 12:00:00# 🐾 Pikachu 靶场通关笔记
+date: 2026-03-05 12:00:00
+---
+# 🐾 Pikachu 靶场通关笔记
 
 > 📌 本文记录 Pikachu 靶场各类 Web 漏洞的实战练习过程，涵盖 XSS、CSRF、SQL注入、文件操作、越权、序列化、XXE、SSRF 等常见漏洞类型。
 >

@@ -2,7 +2,7 @@
 cover: /images/THP.png
 title: THP-CSK 靶场 Linux 内网横向渗透全流程
 categories:
-  - 靶机渗透
+  - [linux, 靶机渗透]
 tags:
   - 靶机渗透
   - 内网渗透
@@ -10,7 +10,9 @@ tags:
   - Jenkins
   - 提权
 abbrlink: 5532e4a
-date: 2026-03-24 12:00:00# 🛡️ THP-CSK 靶场 · Linux 内网横向渗透全流程
+date: 2026-03-24 12:00:00
+---
+# 🛡️ THP-CSK 靶场 · Linux 内网横向渗透全流程
 
 > **靶场编号：** #189 · **难度方向：** Web DMZ → 内网横向  
 > **涉及技术：** Struts2 RCE · 内核提权 · SSH 密钥复用 · SOCKS 代理穿透 · Jenkins 凭据解密

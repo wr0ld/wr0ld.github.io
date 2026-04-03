@@ -9,6 +9,7 @@ description: 'wr0ld 的个人博客，记录技术学习与生活点滴'
 keywords: blog, hexo, stellar, 技术, 编程
 author: wr0ld
 avatar: /avatar.png
+favicon: /avatar.png
 language: zh-CN
 timezone: 'Asia/Shanghai'
 
@@ -33,6 +34,16 @@ category_dir: categories
 code_dir: downloads/code
 i18n_dir: :lang
 skip_render:
+  - manifest.json
+  - sw.js
+  - vault/**
+  - 404.html
+  - lab/index.html
+  - lab/login-animation/**
+  - lab/pretext/**
+  - lab/my-room-in-3d/**
+  - lab/bruno-simon-folio/**
+  - lab/threejs-city/**
 
 # Writing
 new_post_name: :title.md # File name of new posts
@@ -108,3 +119,7 @@ deploy:
   type: git
   repo: https://github.com/wr0ld/wr0ld.github.io.git
   branch: main
+
+
+
+

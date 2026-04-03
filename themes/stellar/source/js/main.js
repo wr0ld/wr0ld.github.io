@@ -265,3 +265,31 @@ init.sidebar()
 init.relativeDate(document.querySelectorAll('#post-meta time'))
 init.registerTabsTag()
 init.canonicalCheck()
+
+// Widget折叠功能
+document.addEventListener('DOMContentLoaded', function() {
+  const collapsibleWidgets = document.querySelectorAll('.widget-wrapper.collapsible-widget');
+  
+  collapsibleWidgets.forEach(widget => {
+    const header = widget.querySelector('.widget-header');
+    
+    if (header) {
+      header.addEventListener('click', function(e) {
+        e.preventDefault();
+        widget.classList.toggle('collapsed');
+        
+        // 保存折叠状态到localStorage
+        const widgetId = widget.querySelector('.name')?.textContent || 'widget';
+        const isCollapsed = widget.classList.contains('collapsed');
+        localStorage.setItem('Stellar.widget.' + widgetId + '.collapsed', isCollapsed);
+      });
+      
+      // 从localStorage恢复折叠状态
+      const widgetId = header.querySelector('.name')?.textContent || 'widget';
+      const isCollapsed = localStorage.getItem('Stellar.widget.' + widgetId + '.collapsed');
+      if (isCollapsed === 'true') {
+        widget.classList.add('collapsed');
+      }
+    }
+  });
+});

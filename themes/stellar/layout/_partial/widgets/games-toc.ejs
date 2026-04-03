@@ -1,0 +1,33 @@
+<%
+function layoutDiv() {
+  var el = '';
+  var games = site.data.games && site.data.games.games ? site.data.games.games : [];
+  
+  if (games.length === 0) {
+    return el;
+  }
+  
+  el += `<widget class="widget-wrapper${scrollreveal(' ')} games-toc-widget">`;
+  el += '<div class="widget-header dis-select">';
+  el += '<span class="name">🎮 游戏目录</span>';
+  el += '</div>';
+  el += '<div class="widget-body fs14">';
+  el += '<div class="games-toc-list">';
+  
+  games.forEach(function(game) {
+    var gameId = game.id || '';
+    var anchorId = '#game-' + gameId;
+    
+    el += '<a href="' + anchorId + '" class="games-toc-item">';
+    el += '<span class="games-toc-icon">' + (game.icon || '🎮') + '</span>';
+    el += '<span class="games-toc-title">' + game.title + '</span>';
+    el += '</a>';
+  });
+  
+  el += '</div>';
+  el += '</div>';
+  el += '</widget>';
+  return el;
+}
+%>
+<%- layoutDiv() %>

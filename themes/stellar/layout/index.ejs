@@ -28,9 +28,10 @@ function layout_post_list(partial, layoutClass) {
   return el;
 }
 
-// 获取所有文章数据（用于仅标题布局）
+// 获取所有文章数据（用于仅标题布局显示全部文章）
 var allPosts = [];
-site.posts.sort('date', -1).each(function(post) {
+var postsSource = page.category ? site.categories.findOne({name: page.category}).posts : site.posts;
+postsSource.sort('date', -1).each(function(post) {
   allPosts.push({
     title: post.title || '无标题',
     path: post.path,
@@ -42,10 +43,18 @@ site.posts.sort('date', -1).each(function(post) {
 <%- partial('_partial/main/navbar/nav_tabs_blog') %>
 
 <div class="layout-switcher">
-  <button class="layout-btn" data-layout="list">列表</button>
-  <button class="layout-btn active" data-layout="grid">网格</button>
-  <button class="layout-btn" data-layout="compact">紧凑</button>
-  <button class="layout-btn" data-layout="title-only">仅标题</button>
+  <button class="layout-toggle-btn" title="切换布局">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+  <div class="layout-options">
+    <div class="options-section">
+      <div class="options-label">布局方式</div>
+      <button class="layout-btn" data-layout="list"><span>列表</span></button>
+      <button class="layout-btn active" data-layout="grid"><span>网格</span></button>
+      <button class="layout-btn" data-layout="compact"><span>紧凑</span></button>
+      <button class="layout-btn" data-layout="title-only"><span>仅标题</span></button>
+    </div>
+  </div>
 </div>
 
 <div id="post-container">
@@ -59,17 +68,16 @@ site.posts.sort('date', -1).each(function(post) {
 </div>
 
 <script>
-  // 所有文章数据
+  // 所有文章数据（用于仅标题布局）
   const allPostsData = <%- JSON.stringify(allPosts) %>;
   
   // 布局切换功能
   (function() {
-    const layoutButtons = document.querySelectorAll('.layout-btn');
+    const layoutButtons = document.querySelectorAll('.layout-btn[data-layout]');
     const postContainer = document.getElementById('post-container');
     const paginatorWrapper = document.getElementById('paginator-wrapper');
-    let postList = postContainer.querySelector('.post-list');
     
-    // 保存原始HTML内容
+    // 保存原始分页HTML
     const originalHTML = postContainer.innerHTML;
     
     // 从localStorage加载保存的布局
@@ -85,10 +93,9 @@ site.posts.sort('date', -1).each(function(post) {
       });
       html += '</div>';
       postContainer.innerHTML = html;
-      postList = postContainer.querySelector('.post-list');
     }
     
-    // 应用保存的布局
+    // 应用布局
     function applyLayout(layout) {
       // 更新按钮状态
       layoutButtons.forEach(btn => {
@@ -98,16 +105,14 @@ site.posts.sort('date', -1).each(function(post) {
         }
       });
       
-      // 如果是仅标题布局，重新渲染所有文章
+      // 仅标题布局：显示所有文章
       if (layout === 'title-only') {
         renderAllPosts();
         paginatorWrapper.style.display = 'none';
       } else {
-        // 恢复原始HTML
+        // 其他布局：恢复原始分页HTML
         postContainer.innerHTML = originalHTML;
-        postList = postContainer.querySelector('.post-list');
-        
-        // 应用布局类
+        let postList = postContainer.querySelector('.post-list');
         postList.classList.remove('list', 'grid', 'compact', 'title-only');
         postList.classList.add(layout);
         paginatorWrapper.style.display = 'block';
@@ -115,9 +120,14 @@ site.posts.sort('date', -1).each(function(post) {
       
       // 保存布局到localStorage
       localStorage.setItem('Stellar.layout', layout);
+      
+      // 触发成就
+      if (window.secret && window.secret.layoutSwitch) {
+        window.secret.layoutSwitch();
+      }
     }
     
-    // 绑定按钮点击事件
+    // 绑定布局按钮点击事件
     layoutButtons.forEach(btn => {
       btn.addEventListener('click', function() {
         const layout = this.dataset.layout;
@@ -125,7 +135,7 @@ site.posts.sort('date', -1).each(function(post) {
       });
     });
     
-    // 初始化布局
+    // 初始化
     applyLayout(savedLayout);
   })();
 </script>

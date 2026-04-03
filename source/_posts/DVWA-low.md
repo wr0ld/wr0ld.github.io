@@ -2,7 +2,7 @@
 cover: /images/DVWA.jpg
 title: DVWA 靶场实验报告 (Low Level)
 categories:
-  - DVWA
+  - [web, DVWA]
 tags:
   - 靶场练习
   - DVWA
@@ -10,7 +10,9 @@ tags:
   - SQL注入
   - CSRF
 abbrlink: f02c2786
-date: 2026-03-07 12:00:00# DVWA 靶场实验报告 (Low Level)
+date: 2026-03-07 12:00:00
+---
+# DVWA 靶场实验报告 (Low Level)
 
 > **难度等级**：Low
 > **报告说明**：本报告涵盖了 DVWA 靶场在低安全等级下的 17 项漏洞复现过程。

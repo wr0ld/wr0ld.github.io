@@ -7,22 +7,10 @@ welcome:
 
 # 文章分类
 categories:
-  layout: linklist
+  layout: categories
   title: 文章分类
-  columns: 1
-  items:
-    - title: 工具魔改
-      url: /categories/工具魔改/
-    - title: 笔记
-      url: /categories/笔记/
-    - title: 靶场
-      url: /categories/靶场/
-    - title: 靶机渗透
-      url: /categories/靶机渗透/
-    - title: vulnhub-DC
-      url: /categories/vulnhub-DC/
-    - title: DVWA
-      url: /categories/DVWA/
+  show_count: true
+  style: 1  # 可选值: 1(简洁无特效), 2(带方框颜色特效)
 
 # 最近更新
 recent:

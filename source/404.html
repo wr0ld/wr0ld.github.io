@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal - Connection Error</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #0c0c0c;
+      min-height: 100vh;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      color: #00ff88;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .terminal {
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 900px;
+      box-shadow: 0 0 50px rgba(0, 255, 136, 0.1);
+      overflow: hidden;
+    }
+    .terminal-header {
+      background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
+      padding: 12px 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid #333;
+    }
+    .terminal-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    .terminal-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .terminal-btn.close { background: #ff5f56; }
+    .terminal-btn.minimize { background: #ffbd2e; }
+    .terminal-btn.maximize { background: #27ca40; }
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+    }
+    .terminal-body {
+      padding: 20px;
+      min-height: 500px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .line {
+      margin: 3px 0;
+      word-wrap: break-word;
+    }
+    .prompt {
+      color: #00ff88;
+    }
+    .path {
+      color: #00aaff;
+    }
+    .command {
+      color: #fff;
+    }
+    .error {
+      color: #ff4444;
+    }
+    .warning {
+      color: #ffaa00;
+    }
+    .success {
+      color: #00ff88;
+    }
+    .info {
+      color: #00aaff;
+    }
+    .dim {
+      color: #666;
+    }
+    .input-line {
+      display: flex;
+      align-items: center;
+      margin-top: 5px;
+    }
+    .terminal-input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: inherit;
+      font-size: inherit;
+      flex: 1;
+      outline: none;
+      caret-color: #00ff88;
+    }
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 16px;
+      background: #00ff88;
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .ascii-art {
+      color: #ff0066;
+      font-size: 10px;
+      line-height: 1.1;
+      margin: 15px 0;
+      text-shadow: 0 0 10px rgba(255, 0, 102, 0.5);
+    }
+    @media (max-width: 600px) {
+      .terminal-body {
+        font-size: 12px;
+        padding: 15px;
+      }
+      .ascii-art {
+        font-size: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal">
+    <div class="terminal-header">
+      <div class="terminal-buttons">
+        <div class="terminal-btn close"></div>
+        <div class="terminal-btn minimize"></div>
+        <div class="terminal-btn maximize"></div>
+      </div>
+      <div class="terminal-title">root@server:~ -- bash</div>
+      <div class="terminal-buttons" style="visibility: hidden;">
+        <div class="terminal-btn"></div>
+        <div class="terminal-btn"></div>
+        <div class="terminal-btn"></div>
+      </div>
+    </div>
+    <div class="terminal-body" id="terminal">
+    </div>
+  </div>
+
+  <script>
+    var terminal = document.getElementById('terminal');
+    var commandHistory = [];
+    var historyIndex = -1;
+    var currentDir = '~';
+
+    var fileSystem = {
+      '~': {
+        type: 'dir',
+        children: ['documents', 'downloads', '.bashrc', '.secret', '.history', 'flag.txt']
+      },
+      '~/documents': {
+        type: 'dir',
+        children: ['readme.txt', 'notes.md', 'passwords.txt']
+      },
+      '~/downloads': {
+        type: 'dir',
+        children: ['exploit.py', 'shell.sh']
+      },
+      '~/.bashrc': {
+        type: 'file',
+        content: '# ~/.bashrc\n# Hint: Use "ls -la" to see hidden files\n# Try "cat .secret" for a surprise\nexport PS1="\\u@server:\\w$ "\nalias ll="ls -la"'
+      },
+      '~/.secret': {
+        type: 'file',
+        content: 'flag{h1dd3n_f1l3_4cc3ss_gr4nt3d}'
+      },
+      '~/.history': {
+        type: 'file',
+        content: 'ls\ncat readme.txt\ncd documents\nls -la\ncat .secret\nexit'
+      },
+      '~/flag.txt': {
+        type: 'file',
+        content: 'Nice try! But the real flag is hidden.\nHint: Look for hidden files with "ls -la"'
+      },
+      '~/documents/readme.txt': {
+        type: 'file',
+        content: 'Welcome to the server!\n\nThis is a CTF challenge.\nFind all the flags hidden in the system.\n\nAvailable commands: help, ls, cd, cat, pwd, whoami, sudo, exit'
+      },
+      '~/documents/notes.md': {
+        type: 'file',
+        content: '# Notes\n\n- SQL Injection: Try \' OR \'1\'=\'1\n- Hidden files start with .\n- sudo can give you more power\n- Check command history for hints'
+      },
+      '~/documents/passwords.txt': {
+        type: 'file',
+        content: 'admin:********\nguest:guest123\ntest:test456\n\nHint: Passwords are masked for security.'
+      },
+      '~/downloads/exploit.py': {
+        type: 'file',
+        content: '#!/usr/bin/env python3\n# Simple SQL Injection payload\n\npayload = "\' OR \'1\'=\'1"\nprint(f"Try: {payload}")'
+      },
+      '~/downloads/shell.sh': {
+        type: 'file',
+        content: '#!/bin/bash\n# Reverse shell script\necho "Access denied."'
+      }
+    };
+
+    function print(text, className) {
+      var line = document.createElement('div');
+      line.className = 'line ' + (className || '');
+      line.innerHTML = text;
+      terminal.appendChild(line);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    function printAscii() {
+      var art = '<pre class="ascii-art">' +
+'    ██╗  ██╗ █████╗  ██████╗██╗  ██╗███████╗██████╗ \n' +
+'    ██║  ██║██╔══██╗██╔════╝██║ ██╔╝██╔════╝██╔══██╗\n' +
+'    ███████║███████║██║     █████╔╝ █████╗  ██████╔╝\n' +
+'    ██╔══██║██╔══██║██║     ██╔═██╗ ██╔══╝  ██╔══██╗\n' +
+'    ██║  ██║██║  ██║╚██████╗██║  ██╗███████╗██║  ██║\n' +
+'    ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝</pre>';
+      print(art);
+    }
+
+    function showPrompt() {
+      var inputLine = document.createElement('div');
+      inputLine.className = 'line input-line';
+      inputLine.innerHTML = '<span class="prompt">root@server</span>:<span class="path">' + currentDir + '</span>$ <input type="text" class="terminal-input" id="input" autofocus>';
+      terminal.appendChild(inputLine);
+      
+      var input = document.getElementById('input');
+      input.focus();
+      input.addEventListener('keydown', handleInput);
+    }
+
+    function handleInput(e) {
+      if (e.key === 'Enter') {
+        var input = document.getElementById('input');
+        var cmd = input.value.trim();
+        
+        input.parentElement.innerHTML = '<span class="prompt">root@server</span>:<span class="path">' + currentDir + '</span>$ <span class="command">' + cmd + '</span>';
+        
+        if (cmd) {
+          commandHistory.push(cmd);
+          historyIndex = commandHistory.length;
+          executeCommand(cmd);
+        }
+        
+        showPrompt();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (historyIndex > 0) {
+          historyIndex--;
+          document.getElementById('input').value = commandHistory[historyIndex];
+        }
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (historyIndex < commandHistory.length - 1) {
+          historyIndex++;
+          document.getElementById('input').value = commandHistory[historyIndex];
+        } else {
+          historyIndex = commandHistory.length;
+          document.getElementById('input').value = '';
+        }
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        tabComplete();
+      }
+    }
+
+    function tabComplete() {
+      var input = document.getElementById('input');
+      var parts = input.value.split(' ');
+      var lastPart = parts[parts.length - 1];
+      
+      var files = fileSystem[currentDir];
+      if (files && files.children) {
+        var matches = files.children.filter(function(f) {
+          return f.startsWith(lastPart);
+        });
+        if (matches.length === 1) {
+          parts[parts.length - 1] = matches[0];
+          input.value = parts.join(' ');
+        }
+      }
+    }
+
+    function executeCommand(cmd) {
+      var parts = cmd.split(' ');
+      var command = parts[0].toLowerCase();
+      var args = parts.slice(1);
+      
+      if (window.parent && window.parent.CardSystem) {
+        window.parent.CardSystem.incrementProgress('terminal_master');
+      }
+      if (window.secret && window.secret.terminalCommand) {
+        window.secret.terminalCommand();
+      }
+
+      switch (command) {
+        case 'help':
+          print('');
+          print('Available commands:', 'info');
+          print('  help          - Show this help message');
+          print('  ls [-la]      - List directory contents');
+          print('  cd <dir>      - Change directory');
+          print('  cat <file>    - Display file contents');
+          print('  pwd           - Print working directory');
+          print('  whoami        - Display current user');
+          print('  id            - Display user ID');
+          print('  uname [-a]    - System information');
+          print('  history       - Command history');
+          print('  clear         - Clear terminal');
+          print('  sudo <cmd>    - Execute as superuser');
+          print('  sql           - Enter SQL mode');
+          print('  exit          - Exit terminal');
+          print('');
+          print('Hints:', 'warning');
+          print('  - Use "ls -la" to see hidden files');
+          print('  - Try SQL injection techniques');
+          print('  - Check for privilege escalation');
+          print('');
+          break;
+
+        case 'ls':
+          listFiles(args);
+          break;
+
+        case 'cd':
+          changeDir(args[0]);
+          break;
+
+        case 'cat':
+          catFile(args[0]);
+          break;
+
+        case 'pwd':
+          print(currentDir);
+          break;
+
+        case 'whoami':
+          print('root');
+          break;
+
+        case 'id':
+          print('uid=0(root) gid=0(root) groups=0(root)');
+          break;
+
+        case 'uname':
+          if (args.includes('-a')) {
+            print('Linux server 5.4.0-80-generic #90-Ubuntu SMP Fri Jul 9 22:49:44 UTC 2024 x86_64 GNU/Linux');
+          } else if (args.includes('-m')) {
+            print('x86_64');
+          } else if (args.includes('-r')) {
+            print('5.4.0-80-generic');
+          } else if (args.includes('-s')) {
+            print('Linux');
+          } else if (args.includes('-n')) {
+            print('server');
+          } else {
+            print('Linux');
+          }
+          break;
+
+        case 'history':
+          commandHistory.forEach(function(cmd, i) {
+            print('  ' + (i + 1) + '  ' + cmd, 'dim');
+          });
+          break;
+
+        case 'clear':
+          terminal.innerHTML = '';
+          break;
+
+        case 'sudo':
+          sudoCommand(args);
+          break;
+
+        case 'sql':
+          enterSqlMode();
+          break;
+
+        case 'exit':
+          print('');
+          print('Connection closed by remote host.', 'warning');
+          print('');
+          setTimeout(function() {
+            location.href = '/';
+          }, 1500);
+          break;
+
+        case '':
+          break;
+
+        default:
+          print('bash: ' + command + ': command not found', 'error');
+      }
+    }
+
+    function listFiles(args) {
+      var showHidden = args.includes('-a') || args.includes('-la') || args.includes('-al');
+      var showLong = args.includes('-l') || args.includes('-la') || args.includes('-al');
+      
+      var files = fileSystem[currentDir];
+      if (!files || !files.children) {
+        print('ls: cannot access directory', 'error');
+        return;
+      }
+
+      var list = files.children;
+      if (!showHidden) {
+        list = list.filter(function(f) { return !f.startsWith('.'); });
+      }
+
+      if (showLong) {
+        print('total ' + list.length);
+        list.forEach(function(f) {
+          var isDir = f.indexOf('.') === -1 || fileSystem[currentDir + '/' + f];
+          var perms = isDir ? 'drwxr-xr-x' : '-rw-r--r--';
+          var size = isDir ? '4096' : '512';
+          var color = f.startsWith('.') ? 'warning' : '';
+          print(perms + ' 1 root root ' + size + ' Jan 1 00:00 ' + f, color);
+        });
+      } else {
+        var output = list.map(function(f) {
+          return f.startsWith('.') ? '<span class="warning">' + f + '</span>' : f;
+        }).join('  ');
+        print(output);
+      }
+    }
+
+    function changeDir(dir) {
+      if (!dir || dir === '~') {
+        currentDir = '~';
+        return;
+      }
+      
+      if (dir === '..') {
+        if (currentDir !== '~') {
+          currentDir = currentDir.substring(0, currentDir.lastIndexOf('/')) || '~';
+        }
+        return;
+      }
+
+      var newPath = currentDir === '~' ? '~/' + dir : currentDir + '/' + dir;
+      if (fileSystem[newPath] && fileSystem[newPath].type === 'dir') {
+        currentDir = newPath;
+      } else {
+        print('bash: cd: ' + dir + ': No such file or directory', 'error');
+      }
+    }
+
+    function catFile(filename) {
+      if (!filename) {
+        print('cat: missing operand', 'error');
+        return;
+      }
+
+      var filePath = currentDir + '/' + filename;
+      var file = fileSystem[filePath];
+      
+      if (!file) {
+        print('cat: ' + filename + ': No such file or directory', 'error');
+        return;
+      }
+
+      if (file.type !== 'file') {
+        print('cat: ' + filename + ': Is a directory', 'error');
+        return;
+      }
+
+      var content = file.content;
+      content.split('\n').forEach(function(line) {
+        print(line);
+      });
+
+      if (filename === '.secret') {
+        print('');
+        print('🎉 FLAG FOUND: ' + file.content, 'success');
+        print('');
+        if (window.secret && window.secret.terminalFlag) {
+          window.secret.terminalFlag('hidden_file');
+        }
+      }
+    }
+
+    function sudoCommand(args) {
+      if (args.length === 0) {
+        print('usage: sudo command');
+        return;
+      }
+
+      var cmd = args.join(' ');
+      
+      if (cmd === 'cat /root/flag.txt' || cmd === 'cat /etc/shadow') {
+        print('flag{sudo_pr1v1l3g3_3sc4l4t10n}', 'success');
+        print('');
+        print('🎉 FLAG FOUND!', 'success');
+        if (window.secret && window.secret.terminalFlag) {
+          window.secret.terminalFlag('sudo');
+        }
+      } else if (cmd.includes('sql') || cmd.includes('mysql')) {
+        print('[sudo] password for root: ');
+        print('mysql: command not found. Try "sql" command instead.', 'warning');
+      } else {
+        print('[sudo] password for root: ********');
+        print('Sorry, user root is not allowed to execute \'' + cmd + '\' as root.', 'error');
+      }
+    }
+
+    function enterSqlMode() {
+      print('');
+      print('Welcome to MySQL monitor. Commands end with ;', 'info');
+      print('Type \'help\' for help.', 'dim');
+      print('');
+      
+      var sqlInput = document.createElement('div');
+      sqlInput.className = 'line input-line';
+      sqlInput.innerHTML = 'mysql> <input type="text" class="terminal-input" id="sql-input" autofocus>';
+      terminal.appendChild(sqlInput);
+      
+      var input = document.getElementById('sql-input');
+      input.focus();
+      input.addEventListener('keydown', handleSqlInput);
+    }
+
+    function handleSqlInput(e) {
+      if (e.key === 'Enter') {
+        var input = document.getElementById('sql-input');
+        var query = input.value.trim();
+        
+        input.parentElement.innerHTML = 'mysql> ' + query;
+        
+        if (query.toLowerCase() === 'exit' || query.toLowerCase() === 'quit') {
+          print('Bye', 'dim');
+          showPrompt();
+          return;
+        }
+
+        processSqlQuery(query);
+        
+        var sqlInput = document.createElement('div');
+        sqlInput.className = 'line input-line';
+        sqlInput.innerHTML = 'mysql> <input type="text" class="terminal-input" id="sql-input" autofocus>';
+        terminal.appendChild(sqlInput);
+        document.getElementById('sql-input').focus();
+        document.getElementById('sql-input').addEventListener('keydown', handleSqlInput);
+      }
+    }
+
+    function processSqlQuery(query) {
+      var lower = query.toLowerCase();
+
+      if (lower === 'help') {
+        print('');
+        print('List of all MySQL commands:', 'info');
+        print('  SELECT ...     Query data');
+        print('  SHOW TABLES    Show tables');
+        print('  DESCRIBE tbl   Show table structure');
+        print('  EXIT           Exit MySQL');
+        print('');
+        return;
+      }
+
+      if (lower === 'show tables') {
+        print('+------------------+');
+        print('| Tables_in_db     |');
+        print('+------------------+');
+        print('| users            |');
+        print('| secrets          |');
+        print('+------------------+');
+        return;
+      }
+
+      if (lower.includes('describe users') || lower === 'desc users') {
+        print('+----------+-------------+------+-----+---------+');
+        print('| Field    | Type        | Null | Key | Default |');
+        print('+----------+-------------+------+-----+---------+');
+        print('| id       | int         | NO   | PRI | NULL    |');
+        print('| username | varchar(50) | NO   |     | NULL    |');
+        print('| password | varchar(50) | NO   |     | NULL    |');
+        print('+----------+-------------+------+-----+---------+');
+        return;
+      }
+
+      if (lower.includes('describe secrets') || lower === 'desc secrets') {
+        print('+-------+-------------+------+-----+---------+');
+        print('| Field | Type        | Null | Key | Default |');
+        print('+-------+-------------+------+-----+---------+');
+        print('| id    | int         | NO   | PRI | NULL    |');
+        print('| flag  | varchar(100)| NO   |     | NULL    |');
+        print('+-------+-------------+------+-----+---------+');
+        return;
+      }
+
+      if (lower.includes('select') && lower.includes('from users')) {
+        if (lower.includes("' or '1'='1") || lower.includes('" or "1"="1') ||
+            lower.includes("' or 1=1") || lower.includes('1=1--') ||
+            lower.includes("'='") || lower.includes("' or ''='")) {
+          print('+----+----------+----------------------------------+-------+');
+          print('| id | username | password                         | role  |');
+          print('+----+----------+----------------------------------+-------+');
+          print('| 1  | admin    | flag{sql_1nj3ct10n_m4st3r_2024}  | admin |', 'success');
+          print('| 2  | guest    | guest123                         | user  |');
+          print('| 3  | test     | test456                          | user  |');
+          print('+----+----------+----------------------------------+-------+');
+          print('');
+          print('🎉 FLAG FOUND!', 'success');
+          if (window.secret && window.secret.terminalFlag) {
+            window.secret.terminalFlag('sql_injection');
+          }
+        } else if (lower.includes('admin')) {
+          print('+----+----------+----------+-------+');
+          print('| id | username | password | role  |');
+          print('+----+----------+----------+-------+');
+          print('| 1  | admin    | ******** | admin |');
+          print('+----+----------+----------+-------+');
+          print('');
+          print('Hint: Password is hidden. Try SQL injection!', 'warning');
+        } else {
+          print('Empty set (0.00 sec)', 'dim');
+        }
+        return;
+      }
+
+      if (lower.includes('select') && lower.includes('from secrets')) {
+        print('+----+--------------------------------+', 'success');
+        print('| id | flag                           |', 'success');
+        print('+----+--------------------------------+', 'success');
+        print('| 1  | flag{h1dd3n_t4bl3_f0und}       |', 'success');
+        print('+----+--------------------------------+', 'success');
+        print('');
+        print('🎉 FLAG FOUND!', 'success');
+        if (window.secret && window.secret.terminalFlag) {
+          window.secret.terminalFlag('hidden_table');
+        }
+        return;
+      }
+
+      print('ERROR 1064 (42000): You have an error in your SQL syntax', 'error');
+    }
+
+    function boot() {
+      print('Connecting to server...', 'dim');
+      setTimeout(function() {
+        print('Connection established.', 'success');
+        print('');
+        print('Last login: ' + new Date().toUTCString() + ' from 192.168.1.1', 'dim');
+        print('');
+        print('Welcome to Ubuntu 20.04.4 LTS (GNU/Linux 5.4.0-80-generic x86_64)', 'info');
+        print('');
+        print(' * Documentation:  https://help.ubuntu.com', 'dim');
+        print(' * Management:     https://landscape.canonical.com', 'dim');
+        print(' * Support:        https://ubuntu.com/advantage', 'dim');
+        print('');
+        print('  System information as of ' + new Date().toLocaleDateString(), 'dim');
+        print('');
+        print('  Program break in 3 days', 'warning');
+        print('');
+        printAscii();
+        print('');
+        print('<span class="error">ERROR 404: Page not found</span>', 'error');
+        print('');
+        print('The requested URL was not found on this server.', 'dim');
+        print('This is not an error. This is a challenge.', 'warning');
+        print('');
+        print('Type <span class="info">help</span> to see available commands.', 'info');
+        print('');
+        showPrompt();
+      }, 500);
+    }
+
+    boot();
+  </script>
+</body>
+</html>

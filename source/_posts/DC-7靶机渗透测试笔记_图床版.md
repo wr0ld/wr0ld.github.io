@@ -2,7 +2,7 @@
 cover: /images/VulnHub.jpg
 title: VulnHub DC-7 靶机渗透测试笔记
 categories:
-  - vulnhub-DC
+  - [linux, vulnhub-DC]
 tags:
   - 靶机渗透
   - VulnHub
@@ -10,7 +10,9 @@ tags:
   - 提权 Drupal
   - 提权
 abbrlink: 9bfd2b6a
-date: 2026-03-16 12:00:00# VulnHub DC-7 靶机渗透测试笔记
+date: 2026-03-16 12:00:00
+---
+# VulnHub DC-7 靶机渗透测试笔记
 
 > **靶机系列**：DC Series | **难度**：中等 | **核心漏洞**：GitHub OSINT 信息泄露 + Drupal PHP Filter RCE + PATH 劫持提权
 

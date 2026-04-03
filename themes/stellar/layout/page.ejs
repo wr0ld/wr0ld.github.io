@@ -16,6 +16,8 @@ if (page.menu_id == null) {
     page.menu_id = theme.site_tree.wiki.menu_id
   } else if (page.topic?.length > 0) {
     page.menu_id = theme.site_tree.topic.menu_id
+  } else if (page.path && page.path.startsWith('lab/')) {
+    page.menu_id = 'lab'
   } else {
     page.menu_id = theme.site_tree.post.menu_id
   }
@@ -53,9 +55,6 @@ function layoutDiv() {
   el += `</article>`
   if (layout === 'post' || page.wiki || notebook) {
     el += partial('_partial/main/article/article_footer')
-  }
-  if (layout === 'post' || page.wiki) {
-    el += partial('_partial/main/article/read_next')
   }
   if (layout === 'post') {
     el += partial('_partial/main/article/related_posts')

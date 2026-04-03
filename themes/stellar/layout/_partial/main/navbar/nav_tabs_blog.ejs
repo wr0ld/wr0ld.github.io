@@ -37,13 +37,6 @@ function layoutDiv() {
     }
   }
   
-  // 游戏链接
-  if (page.path && page.path.startsWith('games/')) {
-    el += '<a class="active" href="/games/">🎮 游戏</a>';
-  } else {
-    el += '<a href="/games/">🎮 游戏</a>';
-  }
-  
   const { nav_tabs } = theme.site_tree.index_blog
   if (nav_tabs) {
     for (let key of Object.keys(nav_tabs)) {
@@ -56,6 +49,9 @@ function layoutDiv() {
       }
     }
   }
+  
+  el += '<span style="flex: 1;"></span>';
+  el += '<a href="/payloader/">Payloader</a>';
 
   el += '</nav>';
   el += '</div>';

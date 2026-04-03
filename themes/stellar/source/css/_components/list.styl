@@ -1,27 +1,122 @@
 // 布局切换器
 .layout-switcher
   position: fixed
-  top: 80px
-  right: 20px
+  bottom: 10px
+  left: 10px
   z-index: 100
   display: flex
-  flex-direction: column
+  flex-direction: column-reverse
   gap: 8px
-  .layout-btn
-    padding: 8px 16px
-    border: 1px solid var(--border)
-    border-radius: $border-bar
-    background-color: var(--card)
+  align-items: stretch
+  .layout-toggle-btn
+    width: 100%
+    height: 8px
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    border-radius: 8px
+    background: rgba(255, 255, 255, 0.05)
     cursor: pointer
-    trans1 all
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1)
+    display: flex
+    align-items: center
+    justify-content: center
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)
+    color: rgba(255, 255, 255, 0.7)
+    font-size: 14px
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)
+    position: relative
+    backdrop-filter: blur(12px)
+    -webkit-backdrop-filter: blur(12px)
     &:hover
-      background-color: var(--block)
-      transform: translateX(-2px)
-    &.active
-      background-color: var(--theme)
-      color: white
-      border-color: var(--theme)
+      transform: translateY(-2px)
+      background: rgba(255, 255, 255, 0.1)
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)
+      color: rgba(255, 255, 255, 0.95)
+    i
+      transition: transform 0.3s ease
+      position: relative
+      z-index: 1
+  .layout-options
+    display: flex
+    flex-direction: column
+    gap: 8px
+    padding: 16px
+    background: rgba(255, 255, 255, 0.08)
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    border-radius: 16px
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)
+    opacity: 0
+    transform: translateY(10px) scale(0.95)
+    pointer-events: none
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1)
+    transform-origin: bottom left
+    backdrop-filter: blur(16px)
+    -webkit-backdrop-filter: blur(16px)
+    min-width: 100px
+    .options-section
+      display: flex
+      flex-direction: column
+      gap: 6px
+    .options-label
+      font-size: 11px
+      color: rgba(255, 255, 255, 0.5)
+      padding: 0 4px
+      margin-bottom: 2px
+      text-transform: uppercase
+      letter-spacing: 0.5px
+    .options-divider
+      height: 1px
+      background: rgba(255, 255, 255, 0.1)
+      margin: 4px 0
+    .layout-btn
+      padding: 8px 12px
+      border: 1px solid rgba(255, 255, 255, 0.1)
+      border-radius: 10px
+      background: rgba(255, 255, 255, 0.05)
+      cursor: pointer
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1)
+      white-space: nowrap
+      font-size: 13px
+      color: rgba(255, 255, 255, 0.8)
+      position: relative
+      overflow: hidden
+      backdrop-filter: blur(8px)
+      -webkit-backdrop-filter: blur(8px)
+      span
+        position: relative
+        z-index: 1
+      &:hover
+        background: rgba(255, 255, 255, 0.12)
+        border-color: rgba(255, 255, 255, 0.2)
+        transform: translateX(4px)
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)
+      &.active
+        background: rgba(255, 255, 255, 0.15)
+        color: white
+        border-color: rgba(255, 255, 255, 0.25)
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)
+        &:hover
+          transform: translateX(4px) scale(1.02)
+  &:hover
+    .layout-toggle-btn i
+      transform: rotate(180deg)
+    .layout-options
+      opacity: 1
+      transform: translateY(0) scale(1)
+      pointer-events: auto
+  @media screen and (max-width: $device-mobile)
+    bottom: 70px
+    left: 8px
+    .layout-toggle-btn
+      width: 44px
+      height: 28px
+      font-size: 12px
+    .layout-options
+      padding: 12px
+      min-width: 140px
+      .layout-btn
+        padding: 8px 12px
+        font-size: 12px
+      .options-label
+        font-size: 10px
 
 // list
 .l_main .post-list
@@ -59,6 +154,9 @@
     grid-template-columns: repeat(2, 1fr)
   @media screen and (max-width: $device-mobile)
     grid-template-columns: 1fr
+  .post-card
+    .excerpt
+      display: none
 
 // 紧凑布局
 .post-list.compact
@@ -92,5 +190,5 @@
       display: none
     .post-title
       margin: 0
-      font-size: 1rem
+      font-size: 0.5rem
       font-weight: 400
