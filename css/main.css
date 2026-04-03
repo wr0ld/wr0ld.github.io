@@ -9939,6 +9939,9 @@ details.toc[open] >div.body section .header+.doc_tree {
     grid-template-columns: 1fr;
   }
 }
+.post-list.grid .post-card .excerpt {
+  display: none;
+}
 .post-list.compact {
   display: grid;
   grid-template-columns: 1fr;
@@ -9977,7 +9980,7 @@ details.toc[open] >div.body section .header+.doc_tree {
 }
 .post-list.title-only .post-card .post-title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.5rem;
   font-weight: 400;
 }
 .l_main {

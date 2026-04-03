@@ -43,6 +43,9 @@ T3.SoundLoader = (function () {
                 .load(queue[index].url, function (sound) {
                     sounds[queue[index].name] = sound;
                     execute(index + 1);
+                }, function () {
+                    console.warn('Failed to load sound: ' + queue[index].url);
+                    execute(index + 1);
                 });
         }
     };

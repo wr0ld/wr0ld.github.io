@@ -565,10 +565,12 @@
             // PHYSICS ENGINE
             var objects = me.simulatedObjects,
                 rigidBody;
-            for (var i = -1; ++i < objects.length;) {
-                rigidBody = objects[i];
-                rigidBody.body.integrate(delta);
-                rigidBody.calculateInternals();
+            if (delta > 0) {
+                for (var i = -1; ++i < objects.length;) {
+                    rigidBody = objects[i];
+                    rigidBody.body.integrate(delta);
+                    rigidBody.calculateInternals();
+                }
             }
 
             // game update logic goes here

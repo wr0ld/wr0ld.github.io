@@ -711,15 +711,23 @@ WebAudio.Sound.prototype._loadAndDecodeSound	= function(url, onLoad, onError){
 	var request	= new XMLHttpRequest();
 	request.open('GET', url, true);
 	request.responseType	= 'arraybuffer';
-	// Decode asynchronously
+	request.onerror	= function() {
+		console.warn("Network error loading sound: " + url);
+		onError && onError();
+	};
 	request.onload	= function() {
+		if (request.status !== 200) {
+			console.warn("HTTP error " + request.status + " loading sound: " + url);
+			onError && onError();
+			return;
+		}
 		context.decodeAudioData(request.response, function(buffer) {
 			onLoad && onLoad(buffer);
 		}, function(){
+			console.warn("Decode error for sound: " + url);
 			onError && onError();
 		});
 	};
-	// actually start the request
 	request.send();
 }
 /**

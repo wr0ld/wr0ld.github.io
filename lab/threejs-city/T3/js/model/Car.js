@@ -83,17 +83,17 @@
          * Max speed of the car
          * @type {number}
          */
-        this.maxSpeed = 150;
+        this.maxSpeed = 350;
         /**
          * Min speed of the car
          * @type {number}
          */
-        this.minSpeed = -50;
+        this.minSpeed = -100;
         /**
          * Car acceleration factor
          * @type {number}
          */
-        this.acceleration = this.maxSpeed / 5;
+        this.acceleration = this.maxSpeed / 3;
         /**
          * Current speed of the car
          * @type {number}
