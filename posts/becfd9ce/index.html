@@ -39,14 +39,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload - 欢迎入侵本站</title>
+  <title>代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload - blog</title>
 
   
     <meta name="description" content="学习笔记，记录自己学 CC1 链的思路历程，不是教程，有啥问题欢迎交流。   目录 最终目标是什么 通过反射调用函数 但实际场景中没地方写代码怎么办 方式 A：直接传输 Payload（CC 链） 方式 B：远程类加载   Gadget Chain 的由来 CC1 链构造过程 环境准备 第一步：找到能执行命令的点 —— InvokerTransformer 第二步：Runtime 不能序列化怎么">
 <meta property="og:type" content="article">
 <meta property="og:title" content="代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload">
 <meta property="og:url" content="https://wr0ld.github.io/posts/becfd9ce/">
-<meta property="og:site_name" content="欢迎入侵本站">
+<meta property="og:site_name" content="blog">
 <meta property="og:description" content="学习笔记，记录自己学 CC1 链的思路历程，不是教程，有啥问题欢迎交流。   目录 最终目标是什么 通过反射调用函数 但实际场景中没地方写代码怎么办 方式 A：直接传输 Payload（CC 链） 方式 B：远程类加载   Gadget Chain 的由来 CC1 链构造过程 环境准备 第一步：找到能执行命令的点 —— InvokerTransformer 第二步：Runtime 不能序列化怎么">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
@@ -84,7 +84,7 @@
 <div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">欢迎入侵本站</div></a></div></header>
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
 
 <div class="nav-area">
 
@@ -106,7 +106,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/cc/">cc</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-31T02:00:00.000Z">2026-03-31</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-03T08:30:39.394Z">2026-04-03</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-31T02:00:00.000Z">2026-03-31</time></span><span class="sep"></span><span class="text word-count">字数：8608</span><span class="sep"></span><span class="text img-count">图片：19</span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -314,7 +314,7 @@
 
 
 
-<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
 

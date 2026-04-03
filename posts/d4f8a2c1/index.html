@@ -39,14 +39,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>代码审计 | CC1 LazyMap 链 —— 动态代理 - 欢迎入侵本站</title>
+  <title>代码审计 | CC1 LazyMap 链 —— 动态代理 - blog</title>
 
   
     <meta name="description" content="代码审计 | CC1 LazyMap 链 —— 动态代理 学习笔记，记录自己学 CC1 LazyMap 版的思路历程 前置：已经看完 TransformedMap 版，Transformer 链那部分这里就不重复了，直接从”触发点不同”讲起。   目录 和 TransformedMap 版有什么区别 第一步：LazyMap 的触发机制 第二步：谁来调用 LazyMap.get() Annotati">
 <meta property="og:type" content="article">
 <meta property="og:title" content="代码审计 | CC1 LazyMap 链 —— 动态代理">
 <meta property="og:url" content="https://wr0ld.github.io/posts/d4f8a2c1/">
-<meta property="og:site_name" content="欢迎入侵本站">
+<meta property="og:site_name" content="blog">
 <meta property="og:description" content="代码审计 | CC1 LazyMap 链 —— 动态代理 学习笔记，记录自己学 CC1 LazyMap 版的思路历程 前置：已经看完 TransformedMap 版，Transformer 链那部分这里就不重复了，直接从”触发点不同”讲起。   目录 和 TransformedMap 版有什么区别 第一步：LazyMap 的触发机制 第二步：谁来调用 LazyMap.get() Annotati">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
@@ -85,7 +85,7 @@
 <div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">欢迎入侵本站</div></a></div></header>
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
 
 <div class="nav-area">
 
@@ -107,7 +107,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/cc/">cc</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-02T05:00:00.000Z">2026-04-02</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-03T08:30:39.382Z">2026-04-03</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-02T05:00:00.000Z">2026-04-02</time></span><span class="sep"></span><span class="text word-count">字数：8672</span><span class="sep"></span><span class="text img-count">图片：8</span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -284,7 +284,7 @@
 
 
 
-<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
 

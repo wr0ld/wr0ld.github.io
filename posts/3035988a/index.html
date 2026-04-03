@@ -39,14 +39,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析 - 欢迎入侵本站</title>
+  <title>代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析 - blog</title>
 
   
     <meta name="description" content="本文从环境搭建出发，一步一步分析 FastJson 反序列化 RCE 的完整利用链，并结合调试断点深入分析底层代码执行逻辑。   目录 漏洞背景 环境准备 搭建 Maven 项目 FastJson @type 机制初探（User 例子） parseObject 两种调用方式的本质区别 PoC 复现：JdbcRowSetImpl 利用链 底层代码调试分析 完整漏洞链路总结 修复建议   一、漏洞背">
 <meta property="og:type" content="article">
 <meta property="og:title" content="代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析">
 <meta property="og:url" content="https://wr0ld.github.io/posts/3035988a/">
-<meta property="og:site_name" content="欢迎入侵本站">
+<meta property="og:site_name" content="blog">
 <meta property="og:description" content="本文从环境搭建出发，一步一步分析 FastJson 反序列化 RCE 的完整利用链，并结合调试断点深入分析底层代码执行逻辑。   目录 漏洞背景 环境准备 搭建 Maven 项目 FastJson @type 机制初探（User 例子） parseObject 两种调用方式的本质区别 PoC 复现：JdbcRowSetImpl 利用链 底层代码调试分析 完整漏洞链路总结 修复建议   一、漏洞背">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
@@ -84,7 +84,7 @@
 <div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
-<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">欢迎入侵本站</div></a></div></header>
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
 
 <div class="nav-area">
 
@@ -106,7 +106,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/fastjson/">fastjson</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-24T06:00:00.000Z">2026-03-24</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-03T04:33:37.400Z">2026-04-03</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-24T06:00:00.000Z">2026-03-24</time></span><span class="sep"></span><span class="text word-count">字数：7146</span><span class="sep"></span><span class="text img-count">图片：30</span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -352,7 +352,7 @@
 
 
 
-<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
 

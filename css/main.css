@@ -721,6 +721,7 @@ html.reverse-both * {
   z-index: 1;
   transition: all 0.3s ease;
   font-weight: 500;
+  color: #fff !important;
 }
 .widget-wrapper.collapsible-widget .widget-header .collapse-toggle {
   position: relative;
@@ -805,6 +806,36 @@ html.reverse-both * {
 }
 .nav-area .menu {
   grid-template-columns: repeat(3, 1fr) !important;
+}
+.widget-header .name {
+  color: #fff !important;
+}
+#post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+#post-meta .text,
+#post-meta time,
+#post-meta span {
+  color: #fff !important;
+}
+#post-meta .sep {
+  margin: 0 4px;
+}
+.article.banner .title {
+  color: #3498db !important;
+}
+.article.banner .title span {
+  color: #3498db !important;
+}
+.post-card .meta.cap {
+  gap: 20px;
+}
+.post-card .meta.cap .cap {
+  margin-right: 8px;
+  padding: 4px 8px;
 }
 @-moz-keyframes waifuFadeIn {
   to {
