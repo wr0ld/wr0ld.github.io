@@ -3257,8 +3257,9 @@ div.toast.show {
   display: none;
 }
 .article-footer .header {
-  font-weight: 500;
-  font-size: calc(17px + 2px);
+  font-weight: 600;
+  font-size: calc(17px + 4px);
+  color: var(--text-p1);
 }
 .article-footer .body {
   --fsp: calc(17px - 2px);
@@ -3269,11 +3270,13 @@ div.toast.show {
   opacity: 0;
 }
 .article-footer .body p {
-  color: var(--text-p2);
+  color: var(--text-p1);
   margin: 0.5rem 0;
+  font-size: 0.9375rem;
 }
 .article-footer .body p a {
   font-weight: unset;
+  color: var(--theme);
 }
 .article-footer .body ul {
   margin: 0;
