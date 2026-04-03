@@ -2086,4 +2086,24 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
 </div></body></html>

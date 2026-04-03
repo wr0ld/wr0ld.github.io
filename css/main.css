@@ -675,8 +675,8 @@ html.reverse-both * {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%);
+  border: 1px solid rgba(255,255,255,0.35);
 }
 .widget-wrapper.collapsible-widget .widget-header::before {
   content: '';
@@ -762,6 +762,9 @@ html.reverse-both * {
 .widget-wrapper.collapsible-widget .widget-body {
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 8px;
 }
 .widget-wrapper.todo-widget .widget-body {
   max-height: 300px;
