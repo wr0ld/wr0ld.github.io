@@ -3259,7 +3259,7 @@ div.toast.show {
 .article-footer .header {
   font-weight: 600;
   font-size: calc(17px + 4px);
-  color: var(--text-p1);
+  color: #fff;
 }
 .article-footer .body {
   --fsp: calc(17px - 2px);
@@ -3270,7 +3270,7 @@ div.toast.show {
   opacity: 0;
 }
 .article-footer .body p {
-  color: var(--text-p1);
+  color: #fff;
   margin: 0.5rem 0;
   font-size: 0.9375rem;
 }
@@ -8320,6 +8320,25 @@ details.toc[open] >div.body section .header+.doc_tree {
 }
 .linklist .link:hover svg {
   filter: unset;
+}
+.linklist .child-link {
+  font-size: 0.9em;
+  color: var(--text-p3);
+  padding-left: 8px !important;
+  min-height: 28px;
+}
+.linklist .child-link:hover {
+  color: var(--theme);
+}
+.linklist .category-group {
+  width: 100%;
+  margin-bottom: 4px;
+}
+.linklist .children-list {
+  margin-left: 12px;
+  border-left: 2px solid var(--block-border);
+  padding-left: 8px;
+  margin-top: 2px;
 }
 .widget-wrapper.ghrepo .repo {
   display: block;
