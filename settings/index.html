@@ -50,8 +50,8 @@
 <meta property="og:description" content="⚙️ 网站设置           🛠️ 没用的工具            🔮 占卜       进入占卜                 🔢 计算器       打开计算器                   🎨 主题设置            深色模式                🌙         切换主题                          📖 阅读设置">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-04-03T04:15:41.620Z">
-<meta property="article:modified_time" content="2026-04-03T04:15:41.620Z">
+<meta property="article:published_time" content="2026-04-03T08:03:20.347Z">
+<meta property="article:modified_time" content="2026-04-03T08:03:20.347Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -102,7 +102,7 @@
   <span class="sep"></span>
   <a class="cap breadcrumb" href="/settings/">设置</a>
   </div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-03T04:15:41.620Z">2026-04-03</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-03T04:15:41.620Z">2026-04-03</time></span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-03T08:03:20.347Z">2026-04-03</time></span><span class="sep updated"></span><span class="text updated">更新于：<time datetime="2026-04-03T08:03:20.347Z">2026-04-03</time></span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -1951,19 +1951,25 @@ function searchQQ(keyword) {
   var url = 'https://api.cenguigui.cn/api/tencent/?type=search&keyword=' + encodeURIComponent(keyword);
   
   fetch(url)
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-      if (data.code === 200 && data.data) {
-        var item = data.data;
-        var results = [{
-          name: item.song_name || item.name,
-          artist: item.artist || item.singer,
-          url: item.play_url || item.url,
-          cover: item.img || item.cover
-        }];
-        musicSearchResults = results;
-        renderMusicResults(results);
-      } else {
+    .then(function(response) { return response.text(); })
+    .then(function(text) {
+      try {
+        var data = JSON.parse(text);
+        if (data.code === 200 && data.data) {
+          var item = data.data;
+          var results = [{
+            name: item.song_name || item.name,
+            artist: item.artist || item.singer,
+            url: item.play_url || item.url,
+            cover: item.img || item.cover
+          }];
+          musicSearchResults = results;
+          renderMusicResults(results);
+        } else {
+          searchKuwo(keyword);
+        }
+      } catch(e) {
+        console.error('QQ音乐解析错误:', text);
         searchKuwo(keyword);
       }
     })
@@ -1978,19 +1984,25 @@ function searchKuwo(keyword) {
   var url = 'https://api.cenguigui.cn/api/kuwo/?type=search&keyword=' + encodeURIComponent(keyword);
   
   fetch(url)
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-      if (data.code === 200 && data.data) {
-        var item = data.data;
-        var results = [{
-          name: item.song_name || item.name,
-          artist: item.artist || item.singer,
-          url: item.play_url || item.url,
-          cover: item.img || item.cover
-        }];
-        musicSearchResults = results;
-        renderMusicResults(results);
-      } else {
+    .then(function(response) { return response.text(); })
+    .then(function(text) {
+      try {
+        var data = JSON.parse(text);
+        if (data.code === 200 && data.data) {
+          var item = data.data;
+          var results = [{
+            name: item.song_name || item.name,
+            artist: item.artist || item.singer,
+            url: item.play_url || item.url,
+            cover: item.img || item.cover
+          }];
+          musicSearchResults = results;
+          renderMusicResults(results);
+        } else {
+          searchKugou(keyword);
+        }
+      } catch(e) {
+        console.error('酷我音乐解析错误:', text);
         searchKugou(keyword);
       }
     })
@@ -2005,19 +2017,25 @@ function searchKugou(keyword) {
   var url = 'https://api.cenguigui.cn/api/kugou/?type=search&keyword=' + encodeURIComponent(keyword);
   
   fetch(url)
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-      if (data.code === 200 && data.data) {
-        var item = data.data;
-        var results = [{
-          name: item.song_name || item.name,
-          artist: item.artist || item.singer,
-          url: item.play_url || item.url,
-          cover: item.img || item.cover
-        }];
-        musicSearchResults = results;
-        renderMusicResults(results);
-      } else {
+    .then(function(response) { return response.text(); })
+    .then(function(text) {
+      try {
+        var data = JSON.parse(text);
+        if (data.code === 200 && data.data) {
+          var item = data.data;
+          var results = [{
+            name: item.song_name || item.name,
+            artist: item.artist || item.singer,
+            url: item.play_url || item.url,
+            cover: item.img || item.cover
+          }];
+          musicSearchResults = results;
+          renderMusicResults(results);
+        } else {
+          searchMigu(keyword);
+        }
+      } catch(e) {
+        console.error('酷狗音乐解析错误:', text);
         searchMigu(keyword);
       }
     })
@@ -2032,20 +2050,26 @@ function searchMigu(keyword) {
   var url = 'https://api.cenguigui.cn/api/migu/?type=search&keyword=' + encodeURIComponent(keyword);
   
   fetch(url)
-    .then(function(response) { return response.json(); })
-    .then(function(data) {
-      if (data.code === 200 && data.data) {
-        var item = data.data;
-        var results = [{
-          name: item.song_name || item.name,
-          artist: item.artist || item.singer,
-          url: item.play_url || item.url,
-          cover: item.img || item.cover
-        }];
-        musicSearchResults = results;
-        renderMusicResults(results);
-      } else {
-        resultsContainer.innerHTML = '<div class="music-loading">未找到相关音乐</div>';
+    .then(function(response) { return response.text(); })
+    .then(function(text) {
+      try {
+        var data = JSON.parse(text);
+        if (data.code === 200 && data.data) {
+          var item = data.data;
+          var results = [{
+            name: item.song_name || item.name,
+            artist: item.artist || item.singer,
+            url: item.play_url || item.url,
+            cover: item.img || item.cover
+          }];
+          musicSearchResults = results;
+          renderMusicResults(results);
+        } else {
+          resultsContainer.innerHTML = '<div class="music-loading">未找到相关音乐</div>';
+        }
+      } catch(e) {
+        console.error('咪咕音乐解析错误:', text);
+        resultsContainer.innerHTML = '<div class="music-loading">搜索失败，请稍后重试</div>';
       }
     })
     .catch(function(error) {
