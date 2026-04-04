@@ -740,6 +740,72 @@
         flavor: '霓虹灯下的午夜狂飙',
         obtained: false,
         obtainTime: null
+      },
+      'infinite_world_explorer': {
+        name: '无限世界探索者',
+        desc: '探索无限程序化生成的3D世界',
+        icon: '🌍',
+        rarity: 'rare',
+        flavor: '在无尽的世界中自由奔跑',
+        obtained: false,
+        obtainTime: null
+      },
+      'black_hole_observer': {
+        name: '黑洞观测者',
+        desc: '观测WebGL黑洞可视化效果',
+        icon: '🕳️',
+        rarity: 'epic',
+        flavor: '凝视深渊，深渊也在凝视你',
+        obtained: false,
+        obtainTime: null
+      },
+      'win11_explorer': {
+        name: 'Windows体验官',
+        desc: '体验React复刻的Windows 11',
+        icon: '🪟',
+        rarity: 'rare',
+        flavor: '在浏览器中重温经典系统',
+        obtained: false,
+        obtainTime: null
+      },
+      'terminal_lover': {
+        name: '终端爱好者',
+        desc: '体验LiveTerm终端风格网站',
+        icon: '💻',
+        rarity: 'common',
+        flavor: '命令行是程序员的浪漫',
+        obtained: false,
+        obtainTime: null
+      },
+      'login_animator': {
+        name: '动画鉴赏家',
+        desc: '体验卡通角色登录动画',
+        icon: '🐱',
+        rarity: 'common',
+        flavor: '可爱的动画让人心情愉悦',
+        obtained: false,
+        obtainTime: null
+      },
+      'pretext_tester': {
+        name: '文本布局测试员',
+        desc: '体验Pretext文本布局实验',
+        icon: '📝',
+        rarity: 'common',
+        flavor: '文本排版也是一门艺术',
+        obtained: false,
+        obtainTime: null
+      },
+      'lab_master': {
+        name: '实验室大师',
+        desc: '体验所有实验室项目',
+        icon: '🔬',
+        rarity: 'legendary',
+        flavor: '探索精神永不止步',
+        obtained: false,
+        obtainTime: null,
+        progress: 0,
+        target: 9,
+        visitedLabs: []
       }
     },
     
@@ -1391,14 +1457,61 @@
       
       if (href.includes('/lab/bruno-simon-folio')) {
         this.obtainCard('bruno_folio_visitor');
+        this.trackLabVisit('bruno-simon-folio');
       }
       
       if (href.includes('/lab/my-room-in-3d')) {
         this.obtainCard('my_room_visitor');
+        this.trackLabVisit('my-room-in-3d');
       }
       
       if (href.includes('/lab/threejs-city')) {
         this.obtainCard('city_driver');
+        this.trackLabVisit('threejs-city');
+      }
+      
+      if (href.includes('/lab/infinite-world')) {
+        this.obtainCard('infinite_world_explorer');
+        this.trackLabVisit('infinite-world');
+      }
+      
+      if (href.includes('/lab/black-hole')) {
+        this.obtainCard('black_hole_observer');
+        this.trackLabVisit('black-hole');
+      }
+      
+      if (href.includes('/lab/win11react')) {
+        this.obtainCard('win11_explorer');
+        this.trackLabVisit('win11react');
+      }
+      
+      if (href.includes('/lab/liveterm')) {
+        this.obtainCard('terminal_lover');
+        this.trackLabVisit('liveterm');
+      }
+      
+      if (href.includes('/lab/login-animation')) {
+        this.obtainCard('login_animator');
+        this.trackLabVisit('login-animation');
+      }
+      
+      if (href.includes('/lab/pretext')) {
+        this.obtainCard('pretext_tester');
+        this.trackLabVisit('pretext');
+      }
+    },
+    
+    trackLabVisit: function(labId) {
+      if (!this.cards.lab_master.visitedLabs) {
+        this.cards.lab_master.visitedLabs = [];
+      }
+      if (!this.cards.lab_master.visitedLabs.includes(labId)) {
+        this.cards.lab_master.visitedLabs.push(labId);
+        this.cards.lab_master.progress = this.cards.lab_master.visitedLabs.length;
+        if (this.cards.lab_master.progress >= this.cards.lab_master.target) {
+          this.obtainCard('lab_master');
+        }
+        this.saveProgress();
       }
     },
     
