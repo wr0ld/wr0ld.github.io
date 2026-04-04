@@ -125,41 +125,27 @@
 
     .lab-preview {
       position: relative;
-      height: 200px;
+      height: 240px;
       overflow: hidden;
       border-bottom: 1px solid var(--border);
       background: linear-gradient(135deg, #121f35, #1d2940);
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
-    .lab-preview-icon {
-      font-size: 48px;
-      opacity: 0.6;
+    .lab-preview iframe {
+      width: 200%;
+      height: 200%;
+      border: 0;
+      transform: scale(0.5);
+      transform-origin: top left;
+      pointer-events: none;
     }
 
-    .lab-preview-gradient {
+    .lab-preview::after {
+      content: "";
       position: absolute;
       inset: 0;
-      opacity: 0.5;
-    }
-
-    .lab-preview-content {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-    }
-
-    .lab-preview-content .icon {
-      font-size: 56px;
-      margin-bottom: 8px;
-    }
-
-    .lab-preview-content .hint {
-      font-size: 12px;
-      color: var(--text-soft);
-      opacity: 0.7;
+      background: linear-gradient(180deg, transparent 55%, rgba(8, 17, 31, 0.3) 100%);
+      pointer-events: none;
     }
 
     .lab-info { padding: 20px; }
@@ -367,7 +353,7 @@
       .mobile-notice { display: block; }
       .shell { width: min(100vw - 24px, 1400px); padding: 24px 0 40px; }
       .hero { padding: 24px; border-radius: 22px; }
-      .lab-preview { height: 160px; }
+      .lab-preview { height: 190px; }
       .lab-actions { flex-direction: column; }
       .lab-shortcuts { display: none; }
       .hero-tips { display: none; }
@@ -436,8 +422,6 @@
         title: 'Pretext 官方 Demos',
         desc: '多语言文本测量与布局实验集合，展示不依赖 DOM 实时测量的段落高度预测、瀑布流、富文本和障碍物绕排等能力。',
         url: '/lab/pretext/',
-        gradient: 'linear-gradient(135deg, #667eea, #764ba2)',
-        icon: '📝',
         tags: ['TypeScript', 'Text Layout', 'Performance'],
         shortcuts: [],
         version: '2025-01',
@@ -448,8 +432,6 @@
         title: '卡通角色登录动画',
         desc: 'Vue 3 登录页面，包含卡通角色联动、眼睛跟随鼠标、随机眨眼和输入反馈。',
         url: '/lab/login-animation/',
-        gradient: 'linear-gradient(135deg, #f093fb, #f5576c)',
-        icon: '🐱',
         tags: ['Vue 3', 'Animation', 'Interactive'],
         shortcuts: ['鼠标移动控制眼睛'],
         version: '2025-01',
@@ -460,8 +442,6 @@
         title: 'My Room in 3D',
         desc: 'Three.js 构建的交互式 3D 房间场景，支持日夜切换、鼠标拖拽旋转和滚轮缩放。',
         url: '/lab/my-room-in-3d/',
-        gradient: 'linear-gradient(135deg, #4facfe, #00f2fe)',
-        icon: '🏠',
         tags: ['Three.js', 'WebGL', '3D'],
         shortcuts: ['🖱️ 拖拽旋转', '⚙️ 滚轮缩放', '🌙 日夜切换'],
         version: '2025-01',
@@ -472,8 +452,6 @@
         title: 'Bruno Simon 3D Portfolio',
         desc: 'Three.js 大神经典作品集，可驾驶汽车在 3D 场景中探索，包含物理引擎和音效系统。',
         url: '/lab/bruno-simon-folio/',
-        gradient: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-        icon: '🚗',
         tags: ['Three.js', 'Cannon.js', 'Physics'],
         shortcuts: ['W/A/S/D 移动', 'Space 跳跃', '🖱️ 控制方向'],
         version: '2025-01',
@@ -484,8 +462,6 @@
         title: 'Three.js City',
         desc: '3D 城市驾驶模拟器，在随机生成的城市中行驶，支持雨滴效果和多摄像机视角。',
         url: '/lab/threejs-city/',
-        gradient: 'linear-gradient(135deg, #2d3436, #636e72)',
-        icon: '🏙️',
         tags: ['Three.js', 'City', 'Driving'],
         shortcuts: ['W/A/S/D 驾驶', 'C 切换视角', 'R 雨效果'],
         version: '2025-01',
@@ -496,8 +472,6 @@
         title: 'Windows 11 in React',
         desc: 'React 复刻的 Windows 11 桌面体验，包含开始菜单、任务栏、窗口拖拽、终端等。',
         url: '/lab/win11react/',
-        gradient: 'linear-gradient(135deg, #0078d4, #00bcf2)',
-        icon: '🪟',
         tags: ['React', 'Redux', 'Windows 11'],
         shortcuts: ['🖱️ 点击交互', '拖拽窗口'],
         version: '2025-01',
@@ -508,8 +482,6 @@
         title: 'LiveTerm',
         desc: '终端风格的网站模板，支持命令行交互、多主题切换、Tab补全等功能。',
         url: '/lab/liveterm/',
-        gradient: 'linear-gradient(135deg, #2E3440, #3B4252)',
-        icon: '💻',
         tags: ['Next.js', 'Terminal UI', 'Tailwind'],
         shortcuts: ['Tab 补全', 'help 查看命令'],
         version: '2025-01',
@@ -520,8 +492,6 @@
         title: 'Infinite World',
         desc: '无限程序化生成的 3D 世界，支持日夜循环、草地渲染、水面效果、第三人称控制。',
         url: '/lab/infinite-world/',
-        gradient: 'linear-gradient(135deg, #11998e, #38ef7d)',
-        icon: '🌍',
         tags: ['Three.js', 'WebGL', '程序化生成'],
         shortcuts: ['W/A/S/D 移动', 'Space 跳跃', '🖱️ 控制视角'],
         version: '2025-03',
@@ -532,8 +502,6 @@
         title: 'WebGL Black Hole',
         desc: 'Three.js 实现的黑洞可视化效果，包含引力透镜、吸积盘、粒子系统和星空背景。',
         url: '/lab/black-hole/',
-        gradient: 'linear-gradient(135deg, #0a0a0a, #1a1a2e)',
-        icon: '🕳️',
         tags: ['Three.js', 'WebGL', 'Shaders'],
         shortcuts: ['🖱️ 旋转视角', '滚轮缩放', '调试面板调参'],
         version: '2025-04',
@@ -559,11 +527,8 @@
         }
 
         html += '<article class="lab-card">' +
-          '<div class="lab-preview" style="background: ' + project.gradient + ';">' +
-            '<div class="lab-preview-content">' +
-              '<div class="icon">' + project.icon + '</div>' +
-              '<div class="hint">点击预览</div>' +
-            '</div>' +
+          '<div class="lab-preview">' +
+            '<iframe src="' + project.url + '" loading="lazy" title="' + project.title + '" allow="autoplay \'none\'"></iframe>' +
           '</div>' +
           '<div class="lab-info">' +
             '<div class="lab-card-header">' +
@@ -659,6 +624,54 @@
     };
 
     renderProjects();
+    
+    if (window.CardSystem) {
+      CardSystem.obtainCard('lab_visitor');
+    }
+    
+    var originalOpenLabModal = window.openLabModal;
+    window.openLabModal = function(url, title) {
+      if (window.CardSystem) {
+        if (url.includes('/lab/bruno-simon-folio')) {
+          CardSystem.obtainCard('bruno_folio_visitor');
+          CardSystem.trackLabVisit('bruno-simon-folio');
+        }
+        if (url.includes('/lab/my-room-in-3d')) {
+          CardSystem.obtainCard('my_room_visitor');
+          CardSystem.trackLabVisit('my-room-in-3d');
+        }
+        if (url.includes('/lab/threejs-city')) {
+          CardSystem.obtainCard('city_driver');
+          CardSystem.trackLabVisit('threejs-city');
+        }
+        if (url.includes('/lab/infinite-world')) {
+          CardSystem.obtainCard('infinite_world_explorer');
+          CardSystem.trackLabVisit('infinite-world');
+        }
+        if (url.includes('/lab/black-hole')) {
+          CardSystem.obtainCard('black_hole_observer');
+          CardSystem.trackLabVisit('black-hole');
+        }
+        if (url.includes('/lab/win11react')) {
+          CardSystem.obtainCard('win11_explorer');
+          CardSystem.trackLabVisit('win11react');
+        }
+        if (url.includes('/lab/liveterm')) {
+          CardSystem.obtainCard('terminal_lover');
+          CardSystem.trackLabVisit('liveterm');
+        }
+        if (url.includes('/lab/login-animation')) {
+          CardSystem.obtainCard('login_animator');
+          CardSystem.trackLabVisit('login-animation');
+        }
+        if (url.includes('/lab/pretext')) {
+          CardSystem.obtainCard('pretext_tester');
+          CardSystem.trackLabVisit('pretext');
+        }
+      }
+      originalOpenLabModal(url, title);
+    };
   </script>
+  <script src="/js/plugins/achievements.js"></script>
 </body>
 </html>
