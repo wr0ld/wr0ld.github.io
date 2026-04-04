@@ -67,12 +67,31 @@
       line-height: 1.02;
     }
 
-    .hero p {
-      max-width: 720px;
-      margin: 0;
+    .hero-tips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .hero-tip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
       color: var(--text-soft);
-      font-size: 16px;
-      line-height: 1.8;
+    }
+
+    .hero-tip kbd {
+      padding: 2px 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 12px;
     }
 
     .lab-grid {
@@ -82,9 +101,11 @@
     }
 
     @media (max-width: 1100px) {
-      .lab-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .lab-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .lab-grid { grid-template-columns: 1fr; }
     }
 
     .lab-card {
@@ -104,57 +125,100 @@
 
     .lab-preview {
       position: relative;
-      height: 240px;
+      height: 200px;
       overflow: hidden;
       border-bottom: 1px solid var(--border);
       background: linear-gradient(135deg, #121f35, #1d2940);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .lab-preview iframe {
-      width: 200%;
-      height: 200%;
-      border: 0;
-      transform: scale(0.5);
-      transform-origin: top left;
-      pointer-events: none;
+    .lab-preview-icon {
+      font-size: 48px;
+      opacity: 0.6;
     }
 
-    .lab-preview::after {
-      content: "";
+    .lab-preview-gradient {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, transparent 55%, rgba(8, 17, 31, 0.3) 100%);
+      opacity: 0.5;
     }
 
-    .lab-info { padding: 24px; }
-    .lab-card-title { margin: 0 0 10px; font-size: 22px; }
+    .lab-preview-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .lab-preview-content .icon {
+      font-size: 56px;
+      margin-bottom: 8px;
+    }
+
+    .lab-preview-content .hint {
+      font-size: 12px;
+      color: var(--text-soft);
+      opacity: 0.7;
+    }
+
+    .lab-info { padding: 20px; }
+    .lab-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+    .lab-card-title { margin: 0; font-size: 20px; }
+    .lab-card-version { font-size: 11px; color: var(--text-soft); opacity: 0.6; }
 
     .lab-card-desc {
-      margin: 0 0 16px;
+      margin: 0 0 12px;
       color: var(--text-soft);
-      font-size: 14px;
-      line-height: 1.8;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .lab-shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+
+    .lab-shortcut {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .lab-shortcut kbd {
+      padding: 2px 5px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 10px;
     }
 
     .lab-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 18px;
+      gap: 6px;
+      margin-bottom: 14px;
     }
 
     .lab-tag {
-      padding: 6px 10px;
+      padding: 4px 8px;
       border: 1px solid rgba(140, 180, 255, 0.14);
       border-radius: 999px;
       color: #c6d3ea;
-      font-size: 12px;
+      font-size: 11px;
       background: rgba(255, 255, 255, 0.04);
     }
 
     .lab-actions {
       display: flex;
-      gap: 12px;
+      gap: 10px;
     }
 
     .lab-btn {
@@ -162,11 +226,11 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 44px;
-      padding: 0 16px;
-      border-radius: 12px;
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 10px;
       border: 1px solid transparent;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       transition: transform 0.2s ease, opacity 0.2s ease, border-color 0.2s ease, background 0.2s ease;
@@ -198,39 +262,129 @@
       border-radius: 24px;
       background: #09111f;
       box-shadow: var(--shadow);
+      position: relative;
     }
 
     .lab-modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 64px;
-      padding: 0 18px 0 20px;
+      height: 56px;
+      padding: 0 16px;
       border-bottom: 1px solid var(--border);
     }
 
-    .lab-modal-title { font-size: 16px; font-weight: 600; }
+    .lab-modal-title { font-size: 15px; font-weight: 600; }
 
     .lab-modal-close {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border: 0;
-      border-radius: 12px;
+      border-radius: 10px;
       background: rgba(255, 255, 255, 0.06);
       color: var(--text);
-      font-size: 22px;
+      font-size: 20px;
       cursor: pointer;
     }
 
-    .lab-modal-body { height: calc(100% - 64px); }
-    .lab-modal-body iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+    .lab-modal-body { 
+      height: calc(100% - 56px); 
+      position: relative;
+    }
+
+    .lab-modal-body iframe { 
+      width: 100%; 
+      height: 100%; 
+      border: 0; 
+      background: #fff; 
+    }
+
+    .lab-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #09111f;
+      z-index: 10;
+      transition: opacity 0.3s ease;
+    }
+
+    .lab-loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .lab-loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .lab-loading-text {
+      margin-top: 16px;
+      color: var(--text-soft);
+      font-size: 14px;
+    }
+
+    .lab-error {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #09111f;
+      z-index: 20;
+    }
+
+    .lab-error.active { display: flex; }
+
+    .lab-error-icon { font-size: 48px; margin-bottom: 16px; }
+    .lab-error-title { font-size: 18px; margin-bottom: 8px; }
+    .lab-error-desc { color: var(--text-soft); font-size: 14px; text-align: center; max-width: 300px; }
+
+    .mobile-notice {
+      display: none;
+      padding: 12px 16px;
+      background: rgba(255, 193, 7, 0.1);
+      border: 1px solid rgba(255, 193, 7, 0.3);
+      border-radius: 12px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: #ffc107;
+    }
 
     @media (max-width: 768px) {
+      .mobile-notice { display: block; }
       .shell { width: min(100vw - 24px, 1400px); padding: 24px 0 40px; }
       .hero { padding: 24px; border-radius: 22px; }
-      .lab-preview { height: 190px; }
+      .lab-preview { height: 160px; }
       .lab-actions { flex-direction: column; }
-      .lab-grid { grid-template-columns: 1fr; }
+      .lab-shortcuts { display: none; }
+      .hero-tips { display: none; }
+    }
+
+    .lab-source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--accent);
+      opacity: 0.7;
+      margin-top: 8px;
+    }
+
+    .lab-source-link:hover {
+      opacity: 1;
     }
   </style>
 </head>
@@ -239,184 +393,18 @@
     <section class="hero">
       <span class="eyebrow">Frontend Lab</span>
       <h1>前端实验室</h1>
+      <div class="hero-tips">
+        <span class="hero-tip"><kbd>ESC</kbd> 退出全屏预览</span>
+        <span class="hero-tip">点击「全屏预览」在当前页面查看</span>
+        <span class="hero-tip">推荐使用桌面端浏览器访问</span>
+      </div>
     </section>
 
-    <section class="lab-grid">
-      <article class="lab-card">
-        <div class="lab-preview">
-          <iframe src="/lab/pretext/" loading="lazy" title="Pretext 排版引擎实验" allow="autoplay 'none'"></iframe>
-        </div>
-        <div class="lab-info">
-          <h2 class="lab-card-title">Pretext 官方 Demos</h2>
-          <p class="lab-card-desc">多语言文本测量与布局实验集合，展示不依赖 DOM 实时测量的段落高度预测、瀑布流、富文本和障碍物绕排等能力。</p>
-          <div class="lab-tags">
-            <span class="lab-tag">TypeScript</span>
-            <span class="lab-tag">Text Layout</span>
-            <span class="lab-tag">Performance</span>
-            <span class="lab-tag">Demos</span>
-          </div>
-          <div class="lab-actions">
-            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/pretext/', 'Pretext 官方 Demos')">全屏预览</button>
-            <a class="lab-btn lab-btn-secondary" href="/lab/pretext/" target="_blank" rel="noopener noreferrer">新标签打开</a>
-          </div>
-        </div>
-      </article>
+    <div class="mobile-notice">
+      ⚠️ 部分项目在移动端体验不佳，建议使用桌面端浏览器访问以获得最佳体验。
+    </div>
 
-      <article class="lab-card">
-        <div class="lab-preview">
-          <iframe src="/lab/login-animation/" loading="lazy" title="卡通角色登录动画" allow="autoplay 'none'"></iframe>
-        </div>
-        <div class="lab-info">
-          <h2 class="lab-card-title">卡通角色登录动画</h2>
-          <p class="lab-card-desc">一个 Vue 3 登录页面，包含卡通角色联动、眼睛跟随鼠标、随机眨眼和输入反馈。这个作品现在作为独立静态页面展示，不再被博客主题包裹。</p>
-          <div class="lab-tags">
-            <span class="lab-tag">Vue 3</span>
-            <span class="lab-tag">TypeScript</span>
-            <span class="lab-tag">Animation</span>
-            <span class="lab-tag">Interactive UI</span>
-          </div>
-          <div class="lab-actions">
-            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/login-animation/', '卡通角色登录动画')">全屏预览</button>
-            <a class="lab-btn lab-btn-secondary" href="/lab/login-animation/" target="_blank" rel="noopener noreferrer">新标签打开</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="lab-card">
-        <div class="lab-preview">
-          <iframe src="/lab/my-room-in-3d/" loading="lazy" title="3D 房间展示" allow="autoplay 'none'"></iframe>
-        </div>
-        <div class="lab-info">
-          <h2 class="lab-card-title">My Room in 3D</h2>
-          <p class="lab-card-desc">使用 Three.js 构建的交互式 3D 房间场景，包含桌椅、电脑、咖啡杯等物品，支持日夜切换、鼠标拖拽旋转和滚轮缩放。</p>
-          <div class="lab-tags">
-            <span class="lab-tag">Three.js</span>
-            <span class="lab-tag">WebGL</span>
-            <span class="lab-tag">3D</span>
-            <span class="lab-tag">Interactive</span>
-          </div>
-          <div class="lab-actions">
-            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/my-room-in-3d/', 'My Room in 3D')">全屏预览</button>
-            <a class="lab-btn lab-btn-secondary" href="/lab/my-room-in-3d/" target="_blank" rel="noopener noreferrer">新标签打开</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="lab-card">
-        <div class="lab-preview" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
-          <iframe src="/lab/bruno-simon-folio/" loading="lazy" title="Bruno Simon 3D Portfolio" allow="autoplay 'none'"></iframe>
-        </div>
-        <div class="lab-info">
-          <h2 class="lab-card-title">Bruno Simon 3D Portfolio</h2>
-          <p class="lab-card-desc">Three.js 大神 Bruno Simon 的经典作品集网站，可驾驶汽车在 3D 场景中探索，包含物理引擎、音效系统和精美后处理效果。</p>
-          <div class="lab-tags">
-            <span class="lab-tag">Three.js</span>
-            <span class="lab-tag">Cannon.js</span>
-            <span class="lab-tag">Physics</span>
-            <span class="lab-tag">WebGL</span>
-          </div>
-          <div class="lab-actions">
-            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/bruno-simon-folio/', 'Bruno Simon 3D Portfolio')">全屏预览</button>
-            <a class="lab-btn lab-btn-secondary" href="/lab/bruno-simon-folio/" target="_blank" rel="noopener noreferrer">新标签打开</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="lab-card">
-        <div class="lab-preview" style="background: linear-gradient(135deg, #2d3436, #636e72);">
-          <iframe src="/lab/threejs-city/" loading="lazy" title="Three.js City" allow="autoplay 'none'"></iframe>
-        </div>
-        <div class="lab-info">
-          <h2 class="lab-card-title">Three.js City</h2>
-          <p class="lab-card-desc">3D 城市驾驶模拟器，使用 WASD 控制汽车在随机生成的城市中行驶，支持雨滴效果、多摄像机视角和后处理特效。</p>
-          <div class="lab-tags">
-            <span class="lab-tag">Three.js</span>
-            <span class="lab-tag">City</span>
-            <span class="lab-tag">Driving</span>
-            <span class="lab-tag">WebGL</span>
-          </div>
-          <div class="lab-actions">
-            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/threejs-city/', 'Three.js City')">全屏预览</button>
-            <a class="lab-btn lab-btn-secondary" href="/lab/threejs-city/" target="_blank" rel="noopener noreferrer">新标签打开</a>
-          </div>
-        </div>
-      </article>
-      <article class="lab-card">
-        <div class="lab-preview" style="background: linear-gradient(135deg, #0078d4, #00bcf2);">
-          <iframe src="/lab/win11react/" loading="lazy" title="Windows 11 in React" allow="autoplay 'none'"></iframe>
-        </div>
-        <div class="lab-info">
-          <h2 class="lab-card-title">Windows 11 in React</h2>
-          <p class="lab-card-desc">使用 React 复刻的 Windows 11 桌面体验，包含开始菜单、任务栏、窗口拖拽、终端、浏览器、设置等完整功能。</p>
-          <div class="lab-tags">
-            <span class="lab-tag">React</span>
-            <span class="lab-tag">Redux</span>
-            <span class="lab-tag">Windows 11</span>
-            <span class="lab-tag">Desktop UI</span>
-          </div>
-          <div class="lab-actions">
-            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/win11react/', 'Windows 11 in React')">全屏预览</button>
-            <a class="lab-btn lab-btn-secondary" href="/lab/win11react/" target="_blank" rel="noopener noreferrer">新标签打开</a>
-          </div>
-        </div>
-      </article>
-      <article class="lab-card">
-        <div class="lab-preview" style="background: linear-gradient(135deg, #2E3440, #3B4252);">
-          <iframe src="/lab/liveterm/" loading="lazy" title="LiveTerm 终端风格网站" allow="autoplay 'none'"></iframe>
-        </div>
-        <div class="lab-info">
-          <h2 class="lab-card-title">LiveTerm</h2>
-          <p class="lab-card-desc">终端风格的网站模板，使用 Next.js 构建。支持命令行交互、多主题切换、Tab补全等功能，可定制个人网站或项目展示页。</p>
-          <div class="lab-tags">
-            <span class="lab-tag">Next.js</span>
-            <span class="lab-tag">TypeScript</span>
-            <span class="lab-tag">Terminal UI</span>
-            <span class="lab-tag">Tailwind</span>
-          </div>
-          <div class="lab-actions">
-            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/liveterm/', 'LiveTerm')">全屏预览</button>
-            <a class="lab-btn lab-btn-secondary" href="/lab/liveterm/" target="_blank" rel="noopener noreferrer">新标签打开</a>
-          </div>
-        </div>
-      </article>
-      <article class="lab-card">
-        <div class="lab-preview" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
-          <iframe src="/lab/infinite-world/" loading="lazy" title="Infinite World 无限世界" allow="autoplay 'none'"></iframe>
-        </div>
-        <div class="lab-info">
-          <h2 class="lab-card-title">Infinite World</h2>
-          <p class="lab-card-desc">无限程序化生成的 3D 世界，使用 Three.js 和 WebGL 构建。支持日夜循环、草地渲染、水面效果、第三人称相机控制等功能。</p>
-          <div class="lab-tags">
-            <span class="lab-tag">Three.js</span>
-            <span class="lab-tag">WebGL</span>
-            <span class="lab-tag">程序化生成</span>
-            <span class="lab-tag">Vite</span>
-          </div>
-          <div class="lab-actions">
-            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/infinite-world/', 'Infinite World')">全屏预览</button>
-            <a class="lab-btn lab-btn-secondary" href="/lab/infinite-world/" target="_blank" rel="noopener noreferrer">新标签打开</a>
-          </div>
-        </div>
-      </article>
-      <article class="lab-card">
-        <div class="lab-preview" style="background: linear-gradient(135deg, #0a0a0a, #1a1a2e);">
-          <iframe src="/lab/black-hole/" loading="lazy" title="WebGL Black Hole 黑洞" allow="autoplay 'none'"></iframe>
-        </div>
-        <div class="lab-info">
-          <h2 class="lab-card-title">WebGL Black Hole</h2>
-          <p class="lab-card-desc">使用 Three.js 实现的黑洞可视化效果，包含引力透镜、吸积盘、粒子系统和星空背景。支持调试面板调整参数。</p>
-          <div class="lab-tags">
-            <span class="lab-tag">Three.js</span>
-            <span class="lab-tag">WebGL</span>
-            <span class="lab-tag">Black Hole</span>
-            <span class="lab-tag">Shaders</span>
-          </div>
-          <div class="lab-actions">
-            <button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal('/lab/black-hole/', 'WebGL Black Hole')">全屏预览</button>
-            <a class="lab-btn lab-btn-secondary" href="/lab/black-hole/" target="_blank" rel="noopener noreferrer">新标签打开</a>
-          </div>
-        </div>
-      </article>
+    <section class="lab-grid" id="labGrid">
     </section>
   </main>
 
@@ -427,22 +415,208 @@
         <button class="lab-modal-close" type="button" onclick="closeLabModal()" aria-label="关闭">&times;</button>
       </div>
       <div class="lab-modal-body">
+        <div class="lab-loading" id="labLoading">
+          <div class="lab-loading-spinner"></div>
+          <div class="lab-loading-text">正在加载项目...</div>
+        </div>
+        <div class="lab-error" id="labError">
+          <div class="lab-error-icon">⚠️</div>
+          <div class="lab-error-title">加载失败</div>
+          <div class="lab-error-desc">项目加载失败，请尝试在新标签页中打开，或检查网络连接。</div>
+        </div>
         <iframe id="labModalIframe" src="" title="实验预览"></iframe>
       </div>
     </div>
   </div>
 
   <script>
+    var projects = [
+      {
+        id: 'pretext',
+        title: 'Pretext 官方 Demos',
+        desc: '多语言文本测量与布局实验集合，展示不依赖 DOM 实时测量的段落高度预测、瀑布流、富文本和障碍物绕排等能力。',
+        url: '/lab/pretext/',
+        gradient: 'linear-gradient(135deg, #667eea, #764ba2)',
+        icon: '📝',
+        tags: ['TypeScript', 'Text Layout', 'Performance'],
+        shortcuts: [],
+        version: '2025-01',
+        source: ''
+      },
+      {
+        id: 'login-animation',
+        title: '卡通角色登录动画',
+        desc: 'Vue 3 登录页面，包含卡通角色联动、眼睛跟随鼠标、随机眨眼和输入反馈。',
+        url: '/lab/login-animation/',
+        gradient: 'linear-gradient(135deg, #f093fb, #f5576c)',
+        icon: '🐱',
+        tags: ['Vue 3', 'Animation', 'Interactive'],
+        shortcuts: ['鼠标移动控制眼睛'],
+        version: '2025-01',
+        source: ''
+      },
+      {
+        id: 'my-room-in-3d',
+        title: 'My Room in 3D',
+        desc: 'Three.js 构建的交互式 3D 房间场景，支持日夜切换、鼠标拖拽旋转和滚轮缩放。',
+        url: '/lab/my-room-in-3d/',
+        gradient: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+        icon: '🏠',
+        tags: ['Three.js', 'WebGL', '3D'],
+        shortcuts: ['🖱️ 拖拽旋转', '⚙️ 滚轮缩放', '🌙 日夜切换'],
+        version: '2025-01',
+        source: ''
+      },
+      {
+        id: 'bruno-simon-folio',
+        title: 'Bruno Simon 3D Portfolio',
+        desc: 'Three.js 大神经典作品集，可驾驶汽车在 3D 场景中探索，包含物理引擎和音效系统。',
+        url: '/lab/bruno-simon-folio/',
+        gradient: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+        icon: '🚗',
+        tags: ['Three.js', 'Cannon.js', 'Physics'],
+        shortcuts: ['W/A/S/D 移动', 'Space 跳跃', '🖱️ 控制方向'],
+        version: '2025-01',
+        source: 'https://github.com/brunosimon/folio'
+      },
+      {
+        id: 'threejs-city',
+        title: 'Three.js City',
+        desc: '3D 城市驾驶模拟器，在随机生成的城市中行驶，支持雨滴效果和多摄像机视角。',
+        url: '/lab/threejs-city/',
+        gradient: 'linear-gradient(135deg, #2d3436, #636e72)',
+        icon: '🏙️',
+        tags: ['Three.js', 'City', 'Driving'],
+        shortcuts: ['W/A/S/D 驾驶', 'C 切换视角', 'R 雨效果'],
+        version: '2025-01',
+        source: ''
+      },
+      {
+        id: 'win11react',
+        title: 'Windows 11 in React',
+        desc: 'React 复刻的 Windows 11 桌面体验，包含开始菜单、任务栏、窗口拖拽、终端等。',
+        url: '/lab/win11react/',
+        gradient: 'linear-gradient(135deg, #0078d4, #00bcf2)',
+        icon: '🪟',
+        tags: ['React', 'Redux', 'Windows 11'],
+        shortcuts: ['🖱️ 点击交互', '拖拽窗口'],
+        version: '2025-01',
+        source: 'https://github.com/blueedgetechno/win11React'
+      },
+      {
+        id: 'liveterm',
+        title: 'LiveTerm',
+        desc: '终端风格的网站模板，支持命令行交互、多主题切换、Tab补全等功能。',
+        url: '/lab/liveterm/',
+        gradient: 'linear-gradient(135deg, #2E3440, #3B4252)',
+        icon: '💻',
+        tags: ['Next.js', 'Terminal UI', 'Tailwind'],
+        shortcuts: ['Tab 补全', 'help 查看命令'],
+        version: '2025-01',
+        source: 'https://github.com/rajshekhar26/cleanfolio'
+      },
+      {
+        id: 'infinite-world',
+        title: 'Infinite World',
+        desc: '无限程序化生成的 3D 世界，支持日夜循环、草地渲染、水面效果、第三人称控制。',
+        url: '/lab/infinite-world/',
+        gradient: 'linear-gradient(135deg, #11998e, #38ef7d)',
+        icon: '🌍',
+        tags: ['Three.js', 'WebGL', '程序化生成'],
+        shortcuts: ['W/A/S/D 移动', 'Space 跳跃', '🖱️ 控制视角'],
+        version: '2025-03',
+        source: ''
+      },
+      {
+        id: 'black-hole',
+        title: 'WebGL Black Hole',
+        desc: 'Three.js 实现的黑洞可视化效果，包含引力透镜、吸积盘、粒子系统和星空背景。',
+        url: '/lab/black-hole/',
+        gradient: 'linear-gradient(135deg, #0a0a0a, #1a1a2e)',
+        icon: '🕳️',
+        tags: ['Three.js', 'WebGL', 'Shaders'],
+        shortcuts: ['🖱️ 旋转视角', '滚轮缩放', '调试面板调参'],
+        version: '2025-04',
+        source: 'https://github.com/brunosimon/webgl-black-hole'
+      }
+    ];
+
+    function renderProjects() {
+      var grid = document.getElementById('labGrid');
+      var html = '';
+
+      projects.forEach(function(project) {
+        var shortcutsHtml = '';
+        if (project.shortcuts && project.shortcuts.length > 0) {
+          project.shortcuts.forEach(function(s) {
+            shortcutsHtml += '<span class="lab-shortcut">' + s + '</span>';
+          });
+        }
+
+        var sourceHtml = '';
+        if (project.source) {
+          sourceHtml = '<a class="lab-source-link" href="' + project.source + '" target="_blank" rel="noopener noreferrer">🔗 源代码</a>';
+        }
+
+        html += '<article class="lab-card">' +
+          '<div class="lab-preview" style="background: ' + project.gradient + ';">' +
+            '<div class="lab-preview-content">' +
+              '<div class="icon">' + project.icon + '</div>' +
+              '<div class="hint">点击预览</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="lab-info">' +
+            '<div class="lab-card-header">' +
+              '<h2 class="lab-card-title">' + project.title + '</h2>' +
+              '<span class="lab-card-version">' + project.version + '</span>' +
+            '</div>' +
+            '<p class="lab-card-desc">' + project.desc + '</p>' +
+            (shortcutsHtml ? '<div class="lab-shortcuts">' + shortcutsHtml + '</div>' : '') +
+            '<div class="lab-tags">' +
+              project.tags.map(function(t) { return '<span class="lab-tag">' + t + '</span>'; }).join('') +
+            '</div>' +
+            '<div class="lab-actions">' +
+              '<button class="lab-btn lab-btn-primary" type="button" onclick="openLabModal(\'' + project.url + '\', \'' + project.title + '\')">全屏预览</button>' +
+              '<a class="lab-btn lab-btn-secondary" href="' + project.url + '" target="_blank" rel="noopener noreferrer">新标签打开</a>' +
+            '</div>' +
+            sourceHtml +
+          '</div>' +
+        '</article>';
+      });
+
+      grid.innerHTML = html;
+    }
+
     function openLabModal(url, title) {
+      var modal = document.getElementById("labModal");
+      var loading = document.getElementById("labLoading");
+      var error = document.getElementById("labError");
+      var iframe = document.getElementById("labModalIframe");
+
       document.getElementById("labModalTitle").textContent = title;
-      document.getElementById("labModalIframe").src = url;
-      document.getElementById("labModal").classList.add("active");
+      
+      loading.classList.remove('hidden');
+      error.classList.remove('active');
+      iframe.src = '';
+      
+      modal.classList.add("active");
       document.body.style.overflow = "hidden";
+
+      setTimeout(function() {
+        iframe.src = url;
+      }, 100);
     }
 
     function closeLabModal() {
-      document.getElementById("labModal").classList.remove("active");
-      document.getElementById("labModalIframe").src = "";
+      var modal = document.getElementById("labModal");
+      var iframe = document.getElementById("labModalIframe");
+      var loading = document.getElementById("labLoading");
+      var error = document.getElementById("labError");
+
+      modal.classList.remove("active");
+      iframe.src = "";
+      loading.classList.remove('hidden');
+      error.classList.remove('active');
       document.body.style.overflow = "";
     }
 
@@ -458,25 +632,33 @@
       }
     });
 
-    // 静音整个页面的媒体元素
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('audio, video').forEach(function(el) {
-        el.muted = true;
-        el.pause();
-      });
+    var labModalIframe = document.getElementById("labModalIframe");
+    var labLoading = document.getElementById("labLoading");
+    var labError = document.getElementById("labError");
+
+    labModalIframe.addEventListener("load", function() {
+      labLoading.classList.add('hidden');
     });
 
-    // 全屏预览时恢复正常（有声音）
+    labModalIframe.addEventListener("error", function() {
+      labLoading.classList.add('hidden');
+      labError.classList.add('active');
+    });
+
+    var loadTimeout;
     var originalOpenLabModal = openLabModal;
     window.openLabModal = function(url, title) {
-      document.getElementById("labModalTitle").textContent = title;
-      var modalIframe = document.getElementById("labModalIframe");
-      modalIframe.src = url;
-      document.getElementById("labModal").classList.add("active");
-      document.body.style.overflow = "hidden";
+      clearTimeout(loadTimeout);
+      originalOpenLabModal(url, title);
+      
+      loadTimeout = setTimeout(function() {
+        if (!labLoading.classList.contains('hidden')) {
+          labLoading.querySelector('.lab-loading-text').textContent = '加载时间较长，请耐心等待...';
+        }
+      }, 5000);
     };
+
+    renderProjects();
   </script>
 </body>
 </html>
-
-
