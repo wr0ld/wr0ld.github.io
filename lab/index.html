@@ -614,23 +614,7 @@
     var originalOpenLabModal = openLabModal;
     window.openLabModal = function(url, title) {
       clearTimeout(loadTimeout);
-      originalOpenLabModal(url, title);
       
-      loadTimeout = setTimeout(function() {
-        if (!labLoading.classList.contains('hidden')) {
-          labLoading.querySelector('.lab-loading-text').textContent = '加载时间较长，请耐心等待...';
-        }
-      }, 5000);
-    };
-
-    renderProjects();
-    
-    if (window.CardSystem) {
-      CardSystem.obtainCard('lab_visitor');
-    }
-    
-    var originalOpenLabModal = window.openLabModal;
-    window.openLabModal = function(url, title) {
       if (window.CardSystem) {
         if (url.includes('/lab/bruno-simon-folio')) {
           CardSystem.obtainCard('bruno_folio_visitor');
@@ -669,8 +653,21 @@
           CardSystem.trackLabVisit('pretext');
         }
       }
+      
       originalOpenLabModal(url, title);
+      
+      loadTimeout = setTimeout(function() {
+        if (!labLoading.classList.contains('hidden')) {
+          labLoading.querySelector('.lab-loading-text').textContent = '加载时间较长，请耐心等待...';
+        }
+      }, 5000);
     };
+
+    renderProjects();
+    
+    if (window.CardSystem) {
+      CardSystem.obtainCard('lab_visitor');
+    }
   </script>
   <script src="/js/plugins/achievements.js"></script>
 </body>
