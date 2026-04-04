@@ -50,8 +50,8 @@
 <meta property="og:description" content="🛠️ 没用的工具            🔮 占卜       进入占卜                 🔢 计算器       打开计算器                   🎨 主题设置            深色模式                🌙         切换主题                          📖 阅读设置">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-04-03T13:51:58.354Z">
-<meta property="article:modified_time" content="2026-04-03T13:51:58.354Z">
+<meta property="article:published_time" content="2026-04-04T13:22:04.978Z">
+<meta property="article:modified_time" content="2026-04-04T13:22:04.978Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -141,12 +141,12 @@
   <div id="reading" class="settings-section">
     <h2>📖 阅读设置</h2>
     <div class="setting-item">
-      <span>文章布局</span>
+      <span>文章布局 <span class="default-layout-hint">(默认: 网格)</span></span>
       <div class="layout-options">
-        <button onclick="localStorage.setItem('Stellar.layout', 'grid'); location.reload();">网格</button>
-        <button onclick="localStorage.setItem('Stellar.layout', 'list'); location.reload();">列表</button>
-        <button onclick="localStorage.setItem('Stellar.layout', 'compact'); location.reload();">紧凑</button>
-        <button onclick="localStorage.setItem('Stellar.layout', 'title-only'); location.reload();">仅标题</button>
+        <button class="layout-btn" data-layout="grid" onclick="setLayout('grid')">网格</button>
+        <button class="layout-btn" data-layout="list" onclick="setLayout('list')">列表</button>
+        <button class="layout-btn" data-layout="compact" onclick="setLayout('compact')">紧凑</button>
+        <button class="layout-btn" data-layout="title-only" onclick="setLayout('title-only')">仅标题</button>
       </div>
     </div>
     <div class="setting-item">
@@ -212,37 +212,26 @@
       <span>鼠标样式</span>
       <div class="cursor-options">
         <button class="cursor-btn" data-cursor="default" onclick="setCursor('default')">默认</button>
-        <button class="cursor-btn" data-cursor="sparkle" onclick="setCursor('sparkle')">✨ 闪烁</button>
-        <button class="cursor-btn" data-cursor="trail" onclick="setCursor('trail')">🌈 拖尾</button>
-        <button class="cursor-btn" data-cursor="heart" onclick="setCursor('heart')">❤️ 爱心</button>
-        <button class="cursor-btn" data-cursor="star" onclick="setCursor('star')">⭐ 星星</button>
+        <button class="cursor-btn" data-cursor="glow" onclick="setCursor('glow')">光环</button>
+        <button class="cursor-btn" data-cursor="ring" onclick="setCursor('ring')">圆环</button>
+        <button class="cursor-btn" data-cursor="crosshair" onclick="setCursor('crosshair')">十字</button>
       </div>
     </div>
     <div class="setting-item">
       <span>点击特效</span>
       <div class="click-effect-options">
         <button class="click-btn" data-click="none" onclick="setClickEffect('none')">无</button>
-        <button class="click-btn" data-click="ripple" onclick="setClickEffect('ripple')">💧 涟漪</button>
-        <button class="click-btn" data-click="firework" onclick="setClickEffect('firework')">🎆 烟花</button>
-        <button class="click-btn" data-click="particles" onclick="setClickEffect('particles')">✨ 粒子</button>
-        <button class="click-btn" data-click="text" onclick="setClickEffect('text')">📝 文字</button>
+        <button class="click-btn" data-click="burst" onclick="setClickEffect('burst')">爆发</button>
+        <button class="click-btn" data-click="ring" onclick="setClickEffect('ring')">圆环</button>
+        <button class="click-btn" data-click="sparkle" onclick="setClickEffect('sparkle')">闪光</button>
       </div>
     </div>
     <div class="setting-item">
       <span>滑动特效</span>
       <div class="slide-effect-options">
         <button class="slide-btn" data-slide="none" onclick="setSlideEffect('none')">无</button>
-        <button class="slide-btn" data-slide="stars" onclick="setSlideEffect('stars')">⭐ 星光</button>
-        <button class="slide-btn" data-slide="bubbles" onclick="setSlideEffect('bubbles')">🫧 气泡</button>
-        <button class="slide-btn" data-slide="snow" onclick="setSlideEffect('snow')">❄️ 雪花</button>
-        <button class="slide-btn" data-slide="sakura" onclick="setSlideEffect('sakura')">🌸 樱花</button>
-      </div>
-    </div>
-    <div class="setting-item">
-      <span>特效强度</span>
-      <div class="intensity-slider">
-        <input type="range" id="effectIntensity" min="1" max="10" value="5" onchange="setEffectIntensity(this.value)">
-        <span id="intensity-value">5</span>
+        <button class="slide-btn" data-slide="dust" onclick="setSlideEffect('dust')">尘埃</button>
+        <button class="slide-btn" data-slide="trace" onclick="setSlideEffect('trace')">痕迹</button>
       </div>
     </div>
   </div>
@@ -324,6 +313,39 @@
     </div>
   </div>
   
+  <div id="seo" class="settings-section">
+    <h2>🔍 SEO优化</h2>
+    <div class="setting-item">
+      <span>Open Graph标签</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="seoOpenGraph" checked disabled>
+        <span class="slider"></span>
+      </label>
+      <span class="setting-desc">自动生成社交媒体分享标签</span>
+    </div>
+    <div class="setting-item">
+      <span>Canonical URL</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="seoCanonical" checked disabled>
+        <span class="slider"></span>
+      </label>
+      <span class="setting-desc">规范链接，防止重复内容</span>
+    </div>
+    <div class="setting-item">
+      <span>自动摘要</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="seoExcerpt" checked disabled>
+        <span class="slider"></span>
+      </label>
+      <span class="setting-desc">自动截取文章前128字作为摘要</span>
+    </div>
+    <div class="setting-item seo-info">
+      <span>💡 提示</span>
+      <p class="seo-tip">SEO优化功能由主题配置文件控制，以上功能已默认启用。修改配置请编辑 <code>_config.yml</code> 文件。</p>
+      <p class="seo-tip">这些优化不会改变博客的布局或功能，仅影响搜索引擎收录效果。</p>
+    </div>
+  </div>
+  
   <div id="data" class="settings-section">
     <h2>📊 数据管理</h2>
     <div class="setting-item">
@@ -341,13 +363,18 @@
   </div>
   
   <div id="ranking" class="settings-section">
-    <h2>🏆 文章排行榜</h2>
-    <div class="ranking-tabs">
-      <button class="ranking-tab active" data-type="words" onclick="switchRankingTab('words')">📝 字数排行</button>
-      <button class="ranking-tab" data-type="images" onclick="switchRankingTab('images')">🖼️ 图片排行</button>
-    </div>
-    <div id="ranking-list" class="ranking-list">
-      <div class="ranking-loading">加载中...</div>
+    <h2 class="collapsible-header" onclick="toggleRanking()">
+      🏆 文章排行榜
+      <span class="toggle-icon" id="ranking-toggle-icon">▼</span>
+    </h2>
+    <div class="collapsible-content" id="ranking-content" style="display:none;">
+      <div class="ranking-tabs">
+        <button class="ranking-tab active" data-type="words" onclick="switchRankingTab('words')">📝 字数排行</button>
+        <button class="ranking-tab" data-type="images" onclick="switchRankingTab('images')">🖼️ 图片排行</button>
+      </div>
+      <div id="ranking-list" class="ranking-list">
+        <div class="ranking-loading">加载中...</div>
+      </div>
     </div>
   </div>
 </div>
@@ -394,6 +421,36 @@
   border-bottom: 1px solid var(--border, #e0e0e0);
 }
 
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+  padding: 8px 12px;
+  margin: -8px -12px 20px -12px;
+  border-radius: 8px;
+}
+
+.collapsible-header:hover {
+  background: var(--card-hover, rgba(0,0,0,0.05));
+}
+
+.toggle-icon {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.collapsible-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .setting-item {
   display: flex;
   justify-content: space-between;
@@ -404,6 +461,32 @@
 
 .setting-item:last-child {
   border-bottom: none;
+}
+
+.setting-desc {
+  font-size: 12px;
+  color: var(--text-p3, #888);
+  margin-left: 10px;
+}
+
+.seo-info {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.seo-tip {
+  font-size: 13px;
+  color: var(--text-p3, #888);
+  margin: 4px 0;
+  line-height: 1.6;
+}
+
+.seo-tip code {
+  background: var(--card, #f5f5f5);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
 }
 
 .setting-item span {
@@ -464,6 +547,27 @@ button:hover {
 .layout-options button {
   padding: 6px 12px;
   font-size: 0.85em;
+}
+
+.layout-btn {
+  padding: 6px 12px;
+  border: 2px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  background: var(--card, #fff);
+  transition: all 0.2s;
+  color: var(--text-p1);
+}
+
+.layout-btn:hover {
+  transform: scale(1.05);
+}
+
+.layout-btn.active {
+  border-color: var(--theme, #3498db);
+  box-shadow: 0 0 8px var(--theme, #3498db);
+  background: color-mix(in srgb, var(--theme, #3498db) 15%, transparent);
 }
 
 .category-style-options {
@@ -1308,7 +1412,6 @@ function initMouseEffects() {
   var cursor = localStorage.getItem('cursor_style') || 'default';
   var clickEffect = localStorage.getItem('click_effect') || 'none';
   var slideEffect = localStorage.getItem('slide_effect') || 'none';
-  var intensity = localStorage.getItem('effect_intensity') || '5';
   
   document.querySelectorAll('.cursor-btn').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.cursor === cursor);
@@ -1319,8 +1422,6 @@ function initMouseEffects() {
   document.querySelectorAll('.slide-btn').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.slide === slideEffect);
   });
-  document.getElementById('effectIntensity').value = intensity;
-  document.getElementById('intensity-value').textContent = intensity;
 }
 
 function setCursor(type) {
@@ -1347,25 +1448,38 @@ function setSlideEffect(type) {
   applyMouseEffects();
 }
 
-function setEffectIntensity(value) {
-  localStorage.setItem('effect_intensity', value);
-  document.getElementById('intensity-value').textContent = value;
-}
-
 function applyMouseEffects() {
-  var cursor = localStorage.getItem('cursor_style') || 'default';
+  var cursorStyle = localStorage.getItem('cursor_style') || 'default';
   var clickEffect = localStorage.getItem('click_effect') || 'none';
   var slideEffect = localStorage.getItem('slide_effect') || 'none';
-  var intensity = parseInt(localStorage.getItem('effect_intensity') || '5');
   
-  // 移除旧的特效
   var oldCanvas = document.getElementById('mouse-effect-canvas');
   if (oldCanvas) oldCanvas.remove();
   
-  // 创建特效画布
+  var oldCursor = document.getElementById('custom-cursor');
+  if (oldCursor) oldCursor.remove();
+  
+  document.body.style.cursor = cursorStyle === 'default' ? 'default' : 'none';
+  
+  if (cursorStyle !== 'default') {
+    var cursorEl = document.createElement('div');
+    cursorEl.id = 'custom-cursor';
+    cursorEl.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;transition:transform 0.1s ease;';
+    document.body.appendChild(cursorEl);
+    
+    var cursorStyles = {
+      'glow': 'width:20px;height:20px;background:radial-gradient(circle,rgba(52,152,219,0.8) 0%,rgba(52,152,219,0) 70%);border-radius:50%;transform:translate(-50%,-50%);',
+      'ring': 'width:24px;height:24px;border:2px solid rgba(52,152,219,0.8);border-radius:50%;transform:translate(-50%,-50%);',
+      'crosshair': 'width:20px;height:20px;transform:translate(-50%,-50%);' +
+        'background:linear-gradient(to right,rgba(52,152,219,0.8) 40%,transparent 40%,transparent 60%,rgba(52,152,219,0.8) 60%),' +
+        'linear-gradient(to bottom,rgba(52,152,219,0.8) 40%,transparent 40%,transparent 60%,rgba(52,152,219,0.8) 60%);'
+    };
+    cursorEl.style.cssText += cursorStyles[cursorStyle] || '';
+  }
+  
   var canvas = document.createElement('canvas');
   canvas.id = 'mouse-effect-canvas';
-  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;';
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;';
   document.body.appendChild(canvas);
   
   var ctx = canvas.getContext('2d');
@@ -1373,164 +1487,91 @@ function applyMouseEffects() {
   canvas.height = window.innerHeight;
   
   var particles = [];
-  var mouseTrail = [];
+  var mouseX = 0, mouseY = 0;
+  var lastMouseX = 0, lastMouseY = 0;
   
-  // 鼠标样式
-  var cursors = {
-    'default': 'default',
-    'sparkle': 'none',
-    'trail': 'none',
-    'heart': 'none',
-    'star': 'none'
-  };
-  document.body.style.cursor = cursors[cursor];
-  
-  // 鼠标移动事件
   document.addEventListener('mousemove', function(e) {
-    var x = e.clientX;
-    var y = e.clientY;
+    mouseX = e.clientX;
+    mouseY = e.clientY;
     
-    // 鼠标样式特效
-    if (cursor !== 'default') {
-      if (cursor === 'sparkle') {
-        for (var i = 0; i < intensity; i++) {
-          particles.push({
-            x: x,
-            y: y,
-            vx: (Math.random() - 0.5) * 2,
-            vy: (Math.random() - 0.5) * 2,
-            life: 30,
-            color: 'hsl(' + Math.random() * 360 + ', 100%, 50%)',
-            type: 'sparkle'
-          });
-        }
-      } else if (cursor === 'trail') {
-        mouseTrail.push({x: x, y: y, life: 20});
-        if (mouseTrail.length > 50) mouseTrail.shift();
-      } else if (cursor === 'heart') {
-        particles.push({
-          x: x,
-          y: y,
-          vx: (Math.random() - 0.5) * 1,
-          vy: -Math.random() * 2 - 1,
-          life: 40,
-          type: 'heart',
-          color: 'hsl(' + (Math.random() * 30 + 340) + ', 100%, 50%)'
-        });
-      } else if (cursor === 'star') {
-        particles.push({
-          x: x,
-          y: y,
-          vx: (Math.random() - 0.5) * 1,
-          vy: (Math.random() - 0.5) * 1,
-          life: 30,
-          type: 'star',
-          color: 'hsl(' + (Math.random() * 60 + 40) + ', 100%, 50%)'
-        });
-      }
+    var cursorEl = document.getElementById('custom-cursor');
+    if (cursorEl) {
+      cursorEl.style.left = mouseX + 'px';
+      cursorEl.style.top = mouseY + 'px';
     }
     
-    // 滑动特效
     if (slideEffect !== 'none') {
-      if (Math.random() < 0.3) {
-        var particle = {x: x, y: y, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2, life: 50, type: slideEffect};
-        if (slideEffect === 'stars') {
-          particle.color = 'hsl(' + (Math.random() * 60 + 40) + ', 100%, 70%)';
-        } else if (slideEffect === 'bubbles') {
-          particle.color = 'hsl(' + (Math.random() * 60 + 180) + ', 70%, 60%)';
-          particle.vy = -Math.random() * 2 - 0.5;
-        } else if (slideEffect === 'snow') {
-          particle.color = '#fff';
-          particle.vy = Math.random() * 2 + 1;
-        } else if (slideEffect === 'sakura') {
-          particle.color = 'hsl(' + (Math.random() * 30 + 330) + ', 100%, 75%)';
-          particle.vy = Math.random() + 0.5;
-          particle.vx = Math.sin(Date.now() * 0.01) * 2;
+      var dx = mouseX - lastMouseX;
+      var dy = mouseY - lastMouseY;
+      var speed = Math.sqrt(dx * dx + dy * dy);
+      
+      if (speed > 3 && Math.random() < 0.4) {
+        var p = {x: mouseX, y: mouseY, life: 40, maxLife: 40};
+        
+        if (slideEffect === 'dust') {
+          p.vx = (Math.random() - 0.5) * 2;
+          p.vy = (Math.random() - 0.5) * 2;
+          p.size = Math.random() * 3 + 1;
+          p.color = 'rgba(150, 150, 150, 0.6)';
+        } else if (slideEffect === 'trace') {
+          p.vx = 0;
+          p.vy = 0;
+          p.size = 4;
+          p.color = 'rgba(52, 152, 219, 0.5)';
         }
-        particles.push(particle);
+        particles.push(p);
       }
     }
+    
+    lastMouseX = mouseX;
+    lastMouseY = mouseY;
   });
   
-  // 点击事件
   document.addEventListener('click', function(e) {
+    if (clickEffect === 'none') return;
+    
     var x = e.clientX;
     var y = e.clientY;
     
-    if (clickEffect === 'ripple') {
-      for (var i = 0; i < intensity * 3; i++) {
-        var angle = (Math.PI * 2 / (intensity * 3)) * i;
+    if (clickEffect === 'burst') {
+      for (var i = 0; i < 12; i++) {
+        var angle = (Math.PI * 2 / 12) * i;
         particles.push({
-          x: x,
-          y: y,
-          vx: Math.cos(angle) * 3,
-          vy: Math.sin(angle) * 3,
-          life: 30,
-          type: 'ripple',
-          color: 'hsl(' + (Math.random() * 60 + 180) + ', 70%, 60%)'
+          x: x, y: y,
+          vx: Math.cos(angle) * 4,
+          vy: Math.sin(angle) * 4,
+          life: 25, maxLife: 25,
+          size: 4,
+          color: 'rgba(52, 152, 219, 0.8)'
         });
       }
-    } else if (clickEffect === 'firework') {
-      for (var i = 0; i < intensity * 5; i++) {
-        var angle = Math.random() * Math.PI * 2;
-        var speed = Math.random() * 5 + 2;
-        particles.push({
-          x: x,
-          y: y,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          life: 40,
-          type: 'firework',
-          color: 'hsl(' + Math.random() * 360 + ', 100%, 60%)'
-        });
-      }
-    } else if (clickEffect === 'particles') {
-      for (var i = 0; i < intensity * 4; i++) {
-        particles.push({
-          x: x,
-          y: y,
-          vx: (Math.random() - 0.5) * 6,
-          vy: (Math.random() - 0.5) * 6,
-          life: 35,
-          type: 'particle',
-          color: 'hsl(' + Math.random() * 360 + ', 100%, 70%)'
-        });
-      }
-    } else if (clickEffect === 'text') {
-      var texts = ['富强', '民主', '文明', '和谐', '自由', '平等', '公正', '法治', '爱国', '敬业', '诚信', '友善'];
+    } else if (clickEffect === 'ring') {
       particles.push({
-        x: x,
-        y: y,
-        vy: -2,
-        life: 50,
-        type: 'text',
-        text: texts[Math.floor(Math.random() * texts.length)]
+        x: x, y: y,
+        vx: 0, vy: 0,
+        life: 20, maxLife: 20,
+        type: 'ring',
+        size: 0,
+        color: 'rgba(52, 152, 219, 0.6)'
       });
+    } else if (clickEffect === 'sparkle') {
+      for (var i = 0; i < 8; i++) {
+        particles.push({
+          x: x + (Math.random() - 0.5) * 20,
+          y: y + (Math.random() - 0.5) * 20,
+          vx: (Math.random() - 0.5) * 2,
+          vy: -Math.random() * 3 - 1,
+          life: 30, maxLife: 30,
+          size: Math.random() * 3 + 2,
+          color: 'rgba(255, 200, 100, 0.8)'
+        });
+      }
     }
   });
   
-  // 动画循环
   function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // 绘制拖尾
-    if (cursor === 'trail' && mouseTrail.length > 1) {
-      ctx.beginPath();
-      ctx.moveTo(mouseTrail[0].x, mouseTrail[0].y);
-      for (var i = 1; i < mouseTrail.length; i++) {
-        ctx.lineTo(mouseTrail[i].x, mouseTrail[i].y);
-      }
-      ctx.strokeStyle = 'rgba(100, 150, 255, 0.5)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      mouseTrail.forEach(function(p, i) {
-        p.life--;
-        if (p.life <= 0) mouseTrail.splice(i, 1);
-      });
-    }
-    
-    // 更新和绘制粒子
     for (var i = particles.length - 1; i >= 0; i--) {
       var p = particles[i];
       p.x += p.vx || 0;
@@ -1542,27 +1583,19 @@ function applyMouseEffects() {
         continue;
       }
       
-      var alpha = p.life / 50;
+      var alpha = p.life / p.maxLife;
       
-      if (p.type === 'text') {
-        ctx.font = '16px sans-serif';
-        ctx.fillStyle = 'rgba(255, 100, 100, ' + alpha + ')';
-        ctx.fillText(p.text, p.x, p.y);
-      } else if (p.type === 'heart') {
-        ctx.font = '16px sans-serif';
-        ctx.fillText('❤', p.x, p.y);
-      } else if (p.type === 'star') {
-        ctx.font = '14px sans-serif';
-        ctx.fillText('⭐', p.x, p.y);
-      } else if (p.type === 'sparkle') {
+      if (p.type === 'ring') {
+        p.size += 3;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = p.color;
-        ctx.fill();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.strokeStyle = p.color.replace('0.6', (alpha * 0.6).toFixed(2));
+        ctx.lineWidth = 2;
+        ctx.stroke();
       } else {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = p.color || 'rgba(100, 150, 255, ' + alpha + ')';
+        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+        ctx.fillStyle = p.color.replace(/[\d.]+\)$/, (alpha * 0.8).toFixed(2) + ')');
         ctx.fill();
       }
     }
@@ -1579,6 +1612,24 @@ function applyMouseEffects() {
 }
 
 initMouseEffects();
+
+// 文章布局设置
+function initLayoutSettings() {
+  var layout = localStorage.getItem('Stellar.layout') || 'grid';
+  document.querySelectorAll('.layout-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.layout === layout);
+  });
+}
+
+function setLayout(layout) {
+  localStorage.setItem('Stellar.layout', layout);
+  document.querySelectorAll('.layout-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.layout === layout);
+  });
+  location.reload();
+}
+
+initLayoutSettings();
 
 // 聚光灯阅读效果
 function initSpotlight() {
@@ -2337,6 +2388,19 @@ var articlesRankingData = [];
 var currentRankingType = 'words';
 var RANKING_VERSION = 'v4'; // 版本号，更新时强制刷新
 
+function toggleRanking() {
+  var content = document.getElementById('ranking-content');
+  var icon = document.getElementById('ranking-toggle-icon');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    icon.textContent = '▲';
+    initArticlesRanking();
+  } else {
+    content.style.display = 'none';
+    icon.textContent = '▼';
+  }
+}
+
 function initArticlesRanking() {
   var storedVersion = localStorage.getItem('articles_ranking_version');
   var storedData = localStorage.getItem('articles_ranking_data');
@@ -2419,8 +2483,6 @@ function renderRankingList(type) {
   
   container.innerHTML = html;
 }
-
-initArticlesRanking();
 </script>
 </article>
 
@@ -2430,7 +2492,10 @@ initArticlesRanking();
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#tools"><span class="toc-text">🛠️ 没用的工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#theme"><span class="toc-text">🎨 主题设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reading"><span class="toc-text">📖 阅读设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reverse"><span class="toc-text">🔄 反转设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mouse"><span class="toc-text">🖱️ 鼠标特效设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#music"><span class="toc-text">🎮 看板娘设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#wave"><span class="toc-text">📈 波纹</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#display"><span class="toc-text">🖥️ 界面显示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#music-search-section"><span class="toc-text">🎵 音乐搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#data"><span class="toc-text">📊 数据管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ranking"><span class="toc-text">🏆 文章排行榜</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#game-scores-modal"><span class="toc-text">🏆 游戏最高分记录</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#tools"><span class="toc-text">🛠️ 没用的工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#theme"><span class="toc-text">🎨 主题设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reading"><span class="toc-text">📖 阅读设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reverse"><span class="toc-text">🔄 反转设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mouse"><span class="toc-text">🖱️ 鼠标特效设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#music"><span class="toc-text">🎮 看板娘设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#wave"><span class="toc-text">📈 波纹</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#display"><span class="toc-text">🖥️ 界面显示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#music-search-section"><span class="toc-text">🎵 音乐搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#seo"><span class="toc-text">🔍 SEO优化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#data"><span class="toc-text">📊 数据管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ranking"><span class="toc-text">
+      🏆 文章排行榜
+      ▼
+    </span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#game-scores-modal"><span class="toc-text">🏆 游戏最高分记录</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
