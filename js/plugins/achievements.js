@@ -815,6 +815,246 @@
         progress: 0,
         target: 10,
         visitedLabs: []
+      },
+      'spring_festival_visitor': {
+        name: '新春访客',
+        desc: '春节期间访问博客',
+        icon: '🧧',
+        rarity: 'rare',
+        flavor: '新年快乐，恭喜发财！',
+        obtained: false,
+        obtainTime: null
+      },
+      'lantern_festival_visitor': {
+        name: '元宵赏灯',
+        desc: '元宵节访问博客',
+        icon: '🏮',
+        rarity: 'rare',
+        flavor: '灯火阑珊处，有你有我',
+        obtained: false,
+        obtainTime: null
+      },
+      'valentines_visitor': {
+        name: '浪漫使者',
+        desc: '情人节访问博客',
+        icon: '💕',
+        rarity: 'rare',
+        flavor: '愿有情人终成眷属',
+        obtained: false,
+        obtainTime: null
+      },
+      'womens_day_visitor': {
+        name: '女神节访客',
+        desc: '妇女节访问博客',
+        icon: '🌸',
+        rarity: 'common',
+        flavor: '愿你永远美丽自信',
+        obtained: false,
+        obtainTime: null
+      },
+      'labor_day_visitor': {
+        name: '劳动光荣',
+        desc: '劳动节访问博客',
+        icon: '👷',
+        rarity: 'common',
+        flavor: '致敬每一位劳动者',
+        obtained: false,
+        obtainTime: null
+      },
+      'youth_day_visitor': {
+        name: '青春无悔',
+        desc: '青年节访问博客',
+        icon: '🌟',
+        rarity: 'common',
+        flavor: '青春无悔，奋斗不止',
+        obtained: false,
+        obtainTime: null
+      },
+      'dragon_boat_visitor': {
+        name: '龙舟竞渡',
+        desc: '端午节访问博客',
+        icon: '🐉',
+        rarity: 'rare',
+        flavor: '吃粽子，赛龙舟',
+        obtained: false,
+        obtainTime: null
+      },
+      'childrens_day_visitor': {
+        name: '童心未泯',
+        desc: '儿童节访问博客',
+        icon: '🎈',
+        rarity: 'common',
+        flavor: '愿你永葆童心',
+        obtained: false,
+        obtainTime: null
+      },
+      'tanabata_visitor': {
+        name: '七夕相会',
+        desc: '七夕节访问博客',
+        icon: '🌌',
+        rarity: 'rare',
+        flavor: '鹊桥相会，浪漫七夕',
+        obtained: false,
+        obtainTime: null
+      },
+      'mid_autumn_visitor': {
+        name: '月圆人圆',
+        desc: '中秋节访问博客',
+        icon: '🥮',
+        rarity: 'rare',
+        flavor: '月圆人团圆',
+        obtained: false,
+        obtainTime: null
+      },
+      'national_day_visitor': {
+        name: '国庆欢庆',
+        desc: '国庆节访问博客',
+        icon: '🇨🇳',
+        rarity: 'rare',
+        flavor: '祝福祖国繁荣昌盛',
+        obtained: false,
+        obtainTime: null
+      },
+      'halloween_visitor': {
+        name: '万圣狂欢',
+        desc: '万圣节访问博客',
+        icon: '🎃',
+        rarity: 'rare',
+        flavor: '不给糖就捣蛋！',
+        obtained: false,
+        obtainTime: null
+      },
+      'double_eleven_visitor': {
+        name: '剁手达人',
+        desc: '双十一访问博客',
+        icon: '🛒',
+        rarity: 'common',
+        flavor: '剁手快乐！',
+        obtained: false,
+        obtainTime: null
+      },
+      'thanksgiving_visitor': {
+        name: '感恩之心',
+        desc: '感恩节访问博客',
+        icon: '🦃',
+        rarity: 'rare',
+        flavor: '感谢有你',
+        obtained: false,
+        obtainTime: null
+      },
+      'christmas_visitor': {
+        name: '圣诞快乐',
+        desc: '圣诞节访问博客',
+        icon: '🎄',
+        rarity: 'rare',
+        flavor: 'Merry Christmas！',
+        obtained: false,
+        obtainTime: null
+      },
+      'new_year_eve_visitor': {
+        name: '除夕守岁',
+        desc: '除夕访问博客',
+        icon: '🎆',
+        rarity: 'epic',
+        flavor: '辞旧迎新，新年大吉',
+        obtained: false,
+        obtainTime: null
+      },
+      'new_year_visitor': {
+        name: '元旦快乐',
+        desc: '元旦访问博客',
+        icon: '🎉',
+        rarity: 'rare',
+        flavor: '新年新气象',
+        obtained: false,
+        obtainTime: null
+      },
+      'april_fools_visitor': {
+        name: '愚人快乐',
+        desc: '愚人节访问博客',
+        icon: '🤡',
+        rarity: 'common',
+        flavor: '小心被骗哦~',
+        obtained: false,
+        obtainTime: null
+      },
+      'mothers_day_visitor': {
+        name: '感恩母亲',
+        desc: '母亲节访问博客',
+        icon: '👩',
+        rarity: 'rare',
+        flavor: '感谢妈妈的养育之恩',
+        obtained: false,
+        obtainTime: null
+      },
+      'fathers_day_visitor': {
+        name: '感恩父亲',
+        desc: '父亲节访问博客',
+        icon: '👨',
+        rarity: 'rare',
+        flavor: '感谢爸爸的辛勤付出',
+        obtained: false,
+        obtainTime: null
+      },
+      'teachers_day_visitor': {
+        name: '师恩难忘',
+        desc: '教师节访问博客',
+        icon: '📚',
+        rarity: 'rare',
+        flavor: '感谢老师的辛勤教导',
+        obtained: false,
+        obtainTime: null
+      },
+      'programmers_day_visitor': {
+        name: '程序员节快乐',
+        desc: '程序员节(10.24)访问博客',
+        icon: '💻',
+        rarity: 'epic',
+        flavor: '1024快乐！愿你的代码永无Bug',
+        obtained: false,
+        obtainTime: null
+      },
+      'blog_birthday_visitor': {
+        name: '博客生日快乐',
+        desc: '在博客生日当天访问',
+        icon: '🎂',
+        rarity: 'legendary',
+        flavor: '感谢你的陪伴！',
+        obtained: false,
+        obtainTime: null
+      },
+      'festival_collector': {
+        name: '节日收藏家',
+        desc: '在5个不同节日访问博客',
+        icon: '🎊',
+        rarity: 'epic',
+        flavor: '节日快乐，每一天都值得庆祝',
+        obtained: false,
+        obtainTime: null,
+        progress: 0,
+        target: 5,
+        visitedFestivals: []
+      },
+      'festival_master': {
+        name: '节日大师',
+        desc: '在10个不同节日访问博客',
+        icon: '🏆',
+        rarity: 'legendary',
+        flavor: '每一个节日都有你的身影',
+        obtained: false,
+        obtainTime: null,
+        progress: 0,
+        target: 10,
+        visitedFestivals: []
+      },
+      'festival_demo_finder': {
+        name: '彩蛋探索者',
+        desc: '发现隐藏的节日特效预览页面',
+        icon: '🥚',
+        rarity: 'epic',
+        flavor: '有些页面藏在不起眼的角落...',
+        obtained: false,
+        obtainTime: null
       }
     },
     
@@ -1257,6 +1497,72 @@
       this.checkCollectionAchievements();
       this.updateUI();
       return true;
+    },
+    
+    unlock: function(id, options) {
+      options = options || {};
+      
+      if (!id) return false;
+      
+      var isHidden = this.hiddenCards && this.hiddenCards[id];
+      var card = isHidden ? this.hiddenCards[id] : this.cards[id];
+      
+      if (!card) {
+        console.warn('Achievement not found:', id);
+        return false;
+      }
+      
+      if (card.obtained) return false;
+      
+      if (options.increment) {
+        this.incrementProgress(id, options.increment);
+        return true;
+      }
+      
+      if (options.progress !== undefined) {
+        this.updateProgress(id, options.progress);
+        return true;
+      }
+      
+      if (isHidden) {
+        return this.obtainHiddenCard(id);
+      } else {
+        return this.obtainCard(id);
+      }
+    },
+    
+    unlockAll: function() {
+      var unlocked = 0;
+      
+      for (var id in this.cards) {
+        if (!this.cards[id].obtained) {
+          this.cards[id].obtained = true;
+          this.cards[id].obtainTime = Date.now();
+          unlocked++;
+        }
+      }
+      
+      for (var id in this.hiddenCards) {
+        if (!this.hiddenCards[id].obtained) {
+          this.hiddenCards[id].obtained = true;
+          this.hiddenCards[id].obtainTime = Date.now();
+          unlocked++;
+        }
+      }
+      
+      if (unlocked > 0) {
+        this.obtainedCards = Object.keys(this.cards).filter(function(id) {
+          return this.cards[id].obtained;
+        }.bind(this)).length + Object.keys(this.hiddenCards).filter(function(id) {
+          return this.hiddenCards[id].obtained;
+        }.bind(this)).length;
+        
+        this.saveProgress();
+        this.checkCollectionAchievements();
+        this.updateUI();
+      }
+      
+      return unlocked;
     },
     
     checkCollectionAchievements: function() {

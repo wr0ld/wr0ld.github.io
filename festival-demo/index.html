@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>节日特效预览</title>
+  <script src="/js/plugins/achievements.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: #fff;
+    }
+    .festival-demo {
+      padding: 40px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .demo-title {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .demo-title h1 {
+      font-size: 2.5em;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .demo-title p {
+      opacity: 0.7;
+      font-size: 1.1em;
+    }
+    .festival-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+    }
+    .festival-card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 25px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .festival-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.1);
+    }
+    .festival-icon {
+      font-size: 3.5em;
+      margin-bottom: 15px;
+      display: block;
+    }
+    .festival-name {
+      font-size: 1.1em;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .festival-effect {
+      font-size: 0.85em;
+      opacity: 0.6;
+    }
+    .clear-btn {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      padding: 15px 35px;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 10000;
+      box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+      transition: all 0.3s ease;
+    }
+    .clear-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 35px rgba(231, 76, 60, 0.5);
+    }
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      text-decoration: none;
+      border-radius: 20px;
+      font-size: 14px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s ease;
+      z-index: 10000;
+    }
+    .back-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <a href="/" class="back-btn">← 返回博客</a>
+  
+  <div class="festival-demo">
+    <div class="demo-title">
+      <h1>🎊 节日特效预览 🎊</h1>
+      <p>点击下方卡片预览各种节日特效效果</p>
+    </div>
+    
+    <div class="festival-grid">
+      <div class="festival-card" onclick="previewEffect('snow')">
+        <span class="festival-icon">🎄</span>
+        <div class="festival-name">圣诞节</div>
+        <div class="festival-effect">雪花飘落</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('fireworks')">
+        <span class="festival-icon">🎆</span>
+        <div class="festival-name">春节/除夕</div>
+        <div class="festival-effect">烟花绽放</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('hearts')">
+        <span class="festival-icon">💕</span>
+        <div class="festival-name">情人节</div>
+        <div class="festival-effect">爱心上升</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('confetti')">
+        <span class="festival-icon">🎉</span>
+        <div class="festival-name">元旦</div>
+        <div class="festival-effect">彩带飘落</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('stars')">
+        <span class="festival-icon">🌟</span>
+        <div class="festival-name">青年节</div>
+        <div class="festival-effect">星星闪烁</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('balloons')">
+        <span class="festival-icon">🎈</span>
+        <div class="festival-name">儿童节</div>
+        <div class="festival-effect">气球上升</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('leaves')">
+        <span class="festival-icon">🍂</span>
+        <div class="festival-name">感恩节</div>
+        <div class="festival-effect">落叶飘落</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('flowers')">
+        <span class="festival-icon">🌸</span>
+        <div class="festival-name">妇女节</div>
+        <div class="festival-effect">花朵飘落</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('lanterns')">
+        <span class="festival-icon">🏮</span>
+        <div class="festival-name">元宵节</div>
+        <div class="festival-effect">灯笼漂浮</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('moon')">
+        <span class="festival-icon">🌕</span>
+        <div class="festival-name">中秋节</div>
+        <div class="festival-effect">月亮发光</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('ghosts')">
+        <span class="festival-icon">🎃</span>
+        <div class="festival-name">万圣节</div>
+        <div class="festival-effect">幽灵漂浮</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('code')">
+        <span class="festival-icon">💻</span>
+        <div class="festival-name">程序员节</div>
+        <div class="festival-effect">代码雨</div>
+      </div>
+      
+      <div class="festival-card" onclick="previewEffect('birthday')">
+        <span class="festival-icon">🎂</span>
+        <div class="festival-name">生日</div>
+        <div class="festival-effect">生日蛋糕</div>
+      </div>
+    </div>
+  </div>
+  
+  <button class="clear-btn" onclick="clearAllEffects()">🧹 清除特效</button>
+
+<script>
+(function() {
+  window.previewEffect = function(effect) {
+    clearAllEffects();
+    
+    setTimeout(function() {
+      switch(effect) {
+        case 'snow': createSnowEffect(); break;
+        case 'fireworks': createFireworksEffect(); break;
+        case 'hearts': createHeartsEffect(); break;
+        case 'confetti': createConfettiEffect(); break;
+        case 'stars': createStarsEffect(); break;
+        case 'balloons': createBalloonsEffect(); break;
+        case 'leaves': createLeavesEffect(); break;
+        case 'flowers': createFlowersEffect(); break;
+        case 'lanterns': createLanternsEffect(); break;
+        case 'moon': createMoonEffect(); break;
+        case 'ghosts': createGhostsEffect(); break;
+        case 'code': createCodeEffect(); break;
+        case 'birthday': createBirthdayEffect(); break;
+      }
+    }, 100);
+  };
+  
+  window.clearAllEffects = function() {
+    var containers = [
+      'snow-container', 'fireworks-canvas', 'hearts-container',
+      'confetti-container', 'stars-container', 'balloons-container',
+      'leaves-container', 'flowers-container', 'lanterns-container',
+      'ghosts-container', 'code-container', 'moon-effect', 'birthday-cake'
+    ];
+    
+    containers.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.remove();
+    });
+    
+    var moons = document.querySelectorAll('[style*="🌕"]');
+    moons.forEach(function(m) { m.remove(); });
+    
+    var cakes = document.querySelectorAll('[style*="🎂"]');
+    cakes.forEach(function(c) { c.remove(); });
+  };
+  
+  function createSnowEffect() {
+    var container = document.createElement('div');
+    container.id = 'snow-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+    document.body.appendChild(container);
+    
+    function createSnowflake() {
+      var snowflake = document.createElement('div');
+      snowflake.innerHTML = '❄';
+      snowflake.style.cssText = 'position:absolute;color:#fff;font-size:' + (Math.random() * 20 + 10) + 'px;left:' + Math.random() * 100 + '%;top:-20px;opacity:' + (Math.random() * 0.5 + 0.5) + ';animation:snowFall ' + (Math.random() * 5 + 5) + 's linear forwards;';
+      container.appendChild(snowflake);
+      setTimeout(function() { snowflake.remove(); }, 10000);
+    }
+    
+    if (!document.getElementById('snow-styles')) {
+      var style = document.createElement('style');
+      style.id = 'snow-styles';
+      style.textContent = '@keyframes snowFall{to{transform:translateY(100vh) rotate(360deg);}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 20; i++) {
+      setTimeout(createSnowflake, i * 100);
+    }
+    setInterval(createSnowflake, 200);
+  }
+  
+  function createFireworksEffect() {
+    var canvas = document.createElement('canvas');
+    canvas.id = 'fireworks-canvas';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;';
+    document.body.appendChild(canvas);
+    
+    var ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    var fireworks = [];
+    var particles = [];
+    
+    function createFirework() {
+      fireworks.push({
+        x: Math.random() * canvas.width,
+        y: canvas.height,
+        targetY: Math.random() * canvas.height * 0.5,
+        speed: 3 + Math.random() * 2,
+        color: 'hsl(' + Math.random() * 360 + ', 100%, 50%)'
+      });
+    }
+    
+    function createParticles(x, y, color) {
+      for (var i = 0; i < 30; i++) {
+        particles.push({
+          x: x, y: y,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.5) * 8,
+          life: 60,
+          color: color
+        });
+      }
+    }
+    
+    function animate() {
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      for (var i = fireworks.length - 1; i >= 0; i--) {
+        var fw = fireworks[i];
+        fw.y -= fw.speed;
+        ctx.beginPath();
+        ctx.arc(fw.x, fw.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = fw.color;
+        ctx.fill();
+        if (fw.y <= fw.targetY) {
+          createParticles(fw.x, fw.y, fw.color);
+          fireworks.splice(i, 1);
+        }
+      }
+      
+      for (var j = particles.length - 1; j >= 0; j--) {
+        var p = particles[j];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.1;
+        p.life--;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 60;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        if (p.life <= 0) particles.splice(j, 1);
+      }
+      
+      requestAnimationFrame(animate);
+    }
+    
+    for (var i = 0; i < 5; i++) {
+      setTimeout(createFirework, i * 500);
+    }
+    setInterval(createFirework, 1000);
+    animate();
+  }
+  
+  function createHeartsEffect() {
+    var container = document.createElement('div');
+    container.id = 'hearts-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+    document.body.appendChild(container);
+    
+    function createHeart() {
+      var heart = document.createElement('div');
+      heart.innerHTML = '❤';
+      heart.style.cssText = 'position:absolute;color:#ff69b4;font-size:' + (Math.random() * 20 + 15) + 'px;left:' + Math.random() * 100 + '%;bottom:-20px;animation:heartFloat ' + (Math.random() * 3 + 4) + 's ease-out forwards;';
+      container.appendChild(heart);
+      setTimeout(function() { heart.remove(); }, 7000);
+    }
+    
+    if (!document.getElementById('hearts-styles')) {
+      var style = document.createElement('style');
+      style.id = 'hearts-styles';
+      style.textContent = '@keyframes heartFloat{to{transform:translateY(-100vh) rotate(360deg);opacity:0;}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 10; i++) {
+      setTimeout(createHeart, i * 200);
+    }
+    setInterval(createHeart, 300);
+  }
+  
+  function createConfettiEffect() {
+    var container = document.createElement('div');
+    container.id = 'confetti-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+    document.body.appendChild(container);
+    
+    var colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+    
+    function createConfetti() {
+      var confetti = document.createElement('div');
+      confetti.style.cssText = 'position:absolute;width:10px;height:10px;background:' + colors[Math.floor(Math.random() * colors.length)] + ';left:' + Math.random() * 100 + '%;top:-10px;animation:confettiFall ' + (Math.random() * 3 + 3) + 's linear forwards;transform:rotate(' + Math.random() * 360 + 'deg);';
+      container.appendChild(confetti);
+      setTimeout(function() { confetti.remove(); }, 6000);
+    }
+    
+    if (!document.getElementById('confetti-styles')) {
+      var style = document.createElement('style');
+      style.id = 'confetti-styles';
+      style.textContent = '@keyframes confettiFall{to{transform:translateY(100vh) rotate(720deg);}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 50; i++) {
+      setTimeout(createConfetti, i * 50);
+    }
+    setInterval(createConfetti, 200);
+  }
+  
+  function createStarsEffect() {
+    var container = document.createElement('div');
+    container.id = 'stars-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+    document.body.appendChild(container);
+    
+    function createStar() {
+      var star = document.createElement('div');
+      star.innerHTML = '✨';
+      star.style.cssText = 'position:absolute;font-size:' + (Math.random() * 15 + 10) + 'px;left:' + Math.random() * 100 + '%;top:' + Math.random() * 100 + '%;animation:starTwinkle ' + (Math.random() * 2 + 1) + 's ease-in-out infinite;';
+      container.appendChild(star);
+    }
+    
+    if (!document.getElementById('stars-styles')) {
+      var style = document.createElement('style');
+      style.id = 'stars-styles';
+      style.textContent = '@keyframes starTwinkle{0%,100%{opacity:0.3;transform:scale(1);}50%{opacity:1;transform:scale(1.2);}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 30; i++) {
+      createStar();
+    }
+  }
+  
+  function createBalloonsEffect() {
+    var container = document.createElement('div');
+    container.id = 'balloons-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+    document.body.appendChild(container);
+    
+    function createBalloon() {
+      var balloon = document.createElement('div');
+      balloon.innerHTML = '🎈';
+      balloon.style.cssText = 'position:absolute;font-size:' + (Math.random() * 20 + 25) + 'px;left:' + Math.random() * 100 + '%;bottom:-50px;animation:balloonFloat ' + (Math.random() * 5 + 5) + 's ease-out forwards;';
+      container.appendChild(balloon);
+      setTimeout(function() { balloon.remove(); }, 10000);
+    }
+    
+    if (!document.getElementById('balloons-styles')) {
+      var style = document.createElement('style');
+      style.id = 'balloons-styles';
+      style.textContent = '@keyframes balloonFloat{to{transform:translateY(-100vh);}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 10; i++) {
+      setTimeout(createBalloon, i * 300);
+    }
+    setInterval(createBalloon, 500);
+  }
+  
+  function createLeavesEffect() {
+    var container = document.createElement('div');
+    container.id = 'leaves-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+    document.body.appendChild(container);
+    
+    var leaves = ['🍂', '🍁', '🍃'];
+    
+    function createLeaf() {
+      var leaf = document.createElement('div');
+      leaf.innerHTML = leaves[Math.floor(Math.random() * leaves.length)];
+      leaf.style.cssText = 'position:absolute;font-size:' + (Math.random() * 15 + 15) + 'px;left:' + Math.random() * 100 + '%;top:-20px;animation:leafFall ' + (Math.random() * 5 + 5) + 's linear forwards;';
+      container.appendChild(leaf);
+      setTimeout(function() { leaf.remove(); }, 10000);
+    }
+    
+    if (!document.getElementById('leaves-styles')) {
+      var style = document.createElement('style');
+      style.id = 'leaves-styles';
+      style.textContent = '@keyframes leafFall{to{transform:translateY(100vh) translateX(50px) rotate(720deg);}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 15; i++) {
+      setTimeout(createLeaf, i * 200);
+    }
+    setInterval(createLeaf, 400);
+  }
+  
+  function createFlowersEffect() {
+    var container = document.createElement('div');
+    container.id = 'flowers-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+    document.body.appendChild(container);
+    
+    var flowers = ['🌸', '🌺', '🌹', '🌷', '💐'];
+    
+    function createFlower() {
+      var flower = document.createElement('div');
+      flower.innerHTML = flowers[Math.floor(Math.random() * flowers.length)];
+      flower.style.cssText = 'position:absolute;font-size:' + (Math.random() * 20 + 15) + 'px;left:' + Math.random() * 100 + '%;top:-20px;animation:flowerFall ' + (Math.random() * 4 + 4) + 's ease-out forwards;';
+      container.appendChild(flower);
+      setTimeout(function() { flower.remove(); }, 8000);
+    }
+    
+    if (!document.getElementById('flowers-styles')) {
+      var style = document.createElement('style');
+      style.id = 'flowers-styles';
+      style.textContent = '@keyframes flowerFall{to{transform:translateY(100vh) rotate(360deg);}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 15; i++) {
+      setTimeout(createFlower, i * 150);
+    }
+    setInterval(createFlower, 350);
+  }
+  
+  function createLanternsEffect() {
+    var container = document.createElement('div');
+    container.id = 'lanterns-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+    document.body.appendChild(container);
+    
+    function createLantern() {
+      var lantern = document.createElement('div');
+      lantern.innerHTML = '🏮';
+      lantern.style.cssText = 'position:absolute;font-size:' + (Math.random() * 25 + 20) + 'px;left:' + Math.random() * 100 + '%;top:-30px;animation:lanternFloat ' + (Math.random() * 6 + 6) + 's ease-out forwards;';
+      container.appendChild(lantern);
+      setTimeout(function() { lantern.remove(); }, 12000);
+    }
+    
+    if (!document.getElementById('lanterns-styles')) {
+      var style = document.createElement('style');
+      style.id = 'lanterns-styles';
+      style.textContent = '@keyframes lanternFloat{to{transform:translateY(100vh);}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 8; i++) {
+      setTimeout(createLantern, i * 400);
+    }
+    setInterval(createLantern, 600);
+  }
+  
+  function createMoonEffect() {
+    var moon = document.createElement('div');
+    moon.innerHTML = '🌕';
+    moon.id = 'moon-effect';
+    moon.style.cssText = 'position:fixed;top:50px;right:50px;font-size:80px;opacity:0.8;z-index:9999;animation:moonGlow 3s ease-in-out infinite;';
+    document.body.appendChild(moon);
+    
+    if (!document.getElementById('moon-styles')) {
+      var style = document.createElement('style');
+      style.id = 'moon-styles';
+      style.textContent = '@keyframes moonGlow{0%,100%{filter:drop-shadow(0 0 20px #FFD700);}50%{filter:drop-shadow(0 0 40px #FFD700);}}';
+      document.head.appendChild(style);
+    }
+    
+    createStarsEffect();
+  }
+  
+  function createGhostsEffect() {
+    var container = document.createElement('div');
+    container.id = 'ghosts-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;';
+    document.body.appendChild(container);
+    
+    var ghosts = ['👻', '🎃', '🦇', '🕷️'];
+    
+    function createGhost() {
+      var ghost = document.createElement('div');
+      ghost.innerHTML = ghosts[Math.floor(Math.random() * ghosts.length)];
+      ghost.style.cssText = 'position:absolute;font-size:' + (Math.random() * 25 + 20) + 'px;left:' + Math.random() * 100 + '%;top:' + Math.random() * 100 + '%;animation:ghostFloat ' + (Math.random() * 3 + 2) + 's ease-in-out infinite;opacity:0.7;';
+      container.appendChild(ghost);
+    }
+    
+    if (!document.getElementById('ghosts-styles')) {
+      var style = document.createElement('style');
+      style.id = 'ghosts-styles';
+      style.textContent = '@keyframes ghostFloat{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-20px) rotate(10deg);}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 15; i++) {
+      createGhost();
+    }
+  }
+  
+  function createCodeEffect() {
+    var container = document.createElement('div');
+    container.id = 'code-container';
+    container.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;opacity:0.3;';
+    document.body.appendChild(container);
+    
+    var chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+    
+    function createCodeLine() {
+      var line = document.createElement('div');
+      var text = '';
+      for (var i = 0; i < 20; i++) {
+        text += chars[Math.floor(Math.random() * chars.length)];
+      }
+      line.textContent = text;
+      line.style.cssText = 'position:absolute;color:#00ff00;font-family:monospace;font-size:14px;left:' + Math.random() * 100 + '%;top:-20px;animation:codeFall ' + (Math.random() * 5 + 5) + 's linear forwards;writing-mode:vertical-rl;';
+      container.appendChild(line);
+      setTimeout(function() { line.remove(); }, 10000);
+    }
+    
+    if (!document.getElementById('code-styles')) {
+      var style = document.createElement('style');
+      style.id = 'code-styles';
+      style.textContent = '@keyframes codeFall{to{transform:translateY(100vh);}}';
+      document.head.appendChild(style);
+    }
+    
+    for (var i = 0; i < 20; i++) {
+      setTimeout(createCodeLine, i * 150);
+    }
+    setInterval(createCodeLine, 300);
+  }
+  
+  function createBirthdayEffect() {
+    createConfettiEffect();
+    
+    var cake = document.createElement('div');
+    cake.innerHTML = '🎂';
+    cake.id = 'birthday-cake';
+    cake.style.cssText = 'position:fixed;bottom:20px;right:20px;font-size:60px;z-index:9999;animation:birthdayBounce 1s ease-in-out infinite;';
+    document.body.appendChild(cake);
+    
+    if (!document.getElementById('birthday-styles')) {
+      var style = document.createElement('style');
+      style.id = 'birthday-styles';
+      style.textContent = '@keyframes birthdayBounce{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}';
+      document.head.appendChild(style);
+    }
+  }
+  
+  // 触发隐藏成就
+  function triggerAchievement() {
+    if (window.CardSystem && window.CardSystem.obtainCard) {
+      window.CardSystem.obtainCard('festival_demo_finder');
+    } else {
+      setTimeout(triggerAchievement, 500);
+    }
+  }
+  
+  if (document.readyState === 'complete') {
+    setTimeout(triggerAchievement, 500);
+  } else {
+    window.addEventListener('load', function() {
+      setTimeout(triggerAchievement, 500);
+    });
+  }
+})();
+</script>
+</body>
+</html>
