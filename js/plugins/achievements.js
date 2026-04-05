@@ -815,87 +815,6 @@
         progress: 0,
         target: 10,
         visitedLabs: []
-      },
-      'cipher_morse': {
-        name: '摩斯密码破译者',
-        desc: '完成摩斯密码挑战',
-        icon: '📡',
-        rarity: 'common',
-        flavor: '.... . .-.. .-.. ---   .-- --- .-. .-.. -..',
-        obtained: false,
-        obtainTime: null
-      },
-      'cipher_caesar': {
-        name: '凯撒密码破译者',
-        desc: '完成凯撒密码挑战',
-        icon: '📜',
-        rarity: 'common',
-        flavor: 'Veni, Vidi, Vici',
-        obtained: false,
-        obtainTime: null
-      },
-      'cipher_binary': {
-        name: '二进制解码者',
-        desc: '完成二进制解码挑战',
-        icon: '💻',
-        rarity: 'rare',
-        flavor: '01001000 01100001 01100011 01101011 01100101 01110010',
-        obtained: false,
-        obtainTime: null
-      },
-      'cipher_base64': {
-        name: 'Base64解码者',
-        desc: '完成Base64解码挑战',
-        icon: '🔣',
-        rarity: 'rare',
-        flavor: 'ZmxhZ3tiYXNlNjRfZGVjb2RlZH0=',
-        obtained: false,
-        obtainTime: null
-      },
-      'cipher_railfence': {
-        name: '栅栏密码破译者',
-        desc: '完成栅栏密码挑战',
-        icon: '🚧',
-        rarity: 'epic',
-        flavor: 'FLEAIGLAG → FLAGELIG',
-        obtained: false,
-        obtainTime: null
-      },
-      'cipher_hidden': {
-        name: '隐藏信息发现者',
-        desc: '发现文字中的隐藏信息',
-        icon: '🕵️',
-        rarity: 'epic',
-        flavor: 'WR0LD - 每句话都有秘密',
-        obtained: false,
-        obtainTime: null
-      },
-      'cipher_master': {
-        name: '解密大师',
-        desc: '完成所有解密挑战',
-        icon: '🏆',
-        rarity: 'legendary',
-        flavor: 'flag{m4st3r_0f_c1ph3r5}',
-        obtained: false,
-        obtainTime: null
-      },
-      'secret_path_finder': {
-        name: '秘密路径发现者',
-        desc: '发现隐藏的秘密路径',
-        icon: '🛤️',
-        rarity: 'epic',
-        flavor: '有些路只有探索者才能发现',
-        obtained: false,
-        obtainTime: null
-      },
-      'cipher_visitor': {
-        name: '解密探索者',
-        desc: '访问解密挑战中心',
-        icon: '🔐',
-        rarity: 'common',
-        flavor: '密码的世界等你来破解',
-        obtained: false,
-        obtainTime: null
       }
     },
     
@@ -1950,15 +1869,6 @@
       if (href.includes('/lab/pretext')) {
         this.obtainCard('pretext_tester');
         this.trackLabVisit('pretext');
-      }
-      
-      if (href.includes('/cipher')) {
-        this.obtainCard('cipher_visitor');
-      }
-      
-      if (href.includes('/secret-path') || href.includes('/secret_path')) {
-        this.obtainCard('secret_path_finder');
-        this.incrementEasterEgg();
       }
     },
     

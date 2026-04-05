@@ -50,8 +50,8 @@
 <meta property="og:description" content="🧱 打砖块            开始游戏       暂停                 得分: 0       最高分: 0       生命: 3                               游戏结束!       得分: 0       重新开始                 🎉 恭喜过关!       得分: 0       下一关">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-03-31T15:48:34.743Z">
-<meta property="article:modified_time" content="2026-03-26T05:44:23.976Z">
+<meta property="article:published_time" content="2026-04-05T05:11:11.201Z">
+<meta property="article:modified_time" content="2026-04-05T05:11:11.201Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -285,8 +285,8 @@
     x: 400,
     y: 550,
     radius: 8,
-    dx: 4,
-    dy: -4,
+    dx: 3.5,
+    dy: -3.5,
     speed: 5
   };
   
@@ -431,13 +431,13 @@
       ball.y = ball.radius;
       ball.dy = -ball.dy;
     } else if (ball.y + ball.dy > breakoutCanvas.height - ball.radius - paddle.height - 10) {
-      // 挡板碰撞
       if (ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-        // 根据击中位置改变角度
         let hitPoint = (ball.x - paddle.x) / paddle.width;
-        let angle = (hitPoint - 0.5) * Math.PI * 0.7;
-        ball.dx = ball.speed * Math.sin(angle);
-        ball.dy = -ball.speed * Math.cos(angle);
+        let angle = (hitPoint - 0.5) * Math.PI * 0.6;
+        let speed = Math.sqrt(ball.dx * ball.dx + ball.dy * ball.dy);
+        ball.dx = speed * Math.sin(angle);
+        ball.dy = -Math.abs(speed * Math.cos(angle));
+        ball.y = breakoutCanvas.height - ball.radius - paddle.height - 11;
       } else if (ball.y + ball.dy > breakoutCanvas.height - ball.radius) {
         // 掉落
         lives--;
@@ -458,8 +458,9 @@
   function resetBall() {
     ball.x = breakoutCanvas.width / 2;
     ball.y = breakoutCanvas.height - 50;
-    ball.dx = 4 * (Math.random() > 0.5 ? 1 : -1);
-    ball.dy = -4;
+    let angle = (Math.random() * 0.5 + 0.25) * Math.PI;
+    ball.dx = ball.speed * Math.cos(angle) * (Math.random() > 0.5 ? 1 : -1);
+    ball.dy = -ball.speed * Math.sin(angle);
     paddle.x = breakoutCanvas.width / 2 - paddle.width / 2;
   }
   
