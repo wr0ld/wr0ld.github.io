@@ -39,13 +39,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>标签：FastJSON - blog</title>
+  <title>标签：FastJson - blog</title>
 
   
     <meta name="description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
 <meta property="og:type" content="website">
 <meta property="og:title" content="blog">
-<meta property="og:url" content="https://wr0ld.github.io/tags/FastJSON/">
+<meta property="og:url" content="https://wr0ld.github.io/tags/FastJson/">
 <meta property="og:site_name" content="blog">
 <meta property="og:description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
 <meta property="og:locale" content="zh_CN">
@@ -120,39 +120,63 @@
 </div>
 
 <div id="post-container">
-  <div class="post-list post grid"><a class="post-card post" href="/posts/e90faa78/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png"/></div><h2 class="post-title">代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比</h2><div class="excerpt"><p>
-环境：FastJSON 1.2.47 &#x2F; JDK 8u65 &#x2F; Tomcat 9.0.20 &#x2F; IDEA 调试
+  <div class="post-list post grid"><a class="post-card post" href="/posts/5ef1061b/">
+<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image2.png"/></div><h2 class="post-title">代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析</h2><div class="excerpt"><p>
+1.2.47 的缓存绕过不需要开任何开关，默认配置就能打，危害最大。
 
 
 目录
-前言
-和 TemplatesImpl 链的区别
-补充：FastJSON 的 getter&#x2F;setter 扫描机制
 环境准备
-恶意类编写
-字节码转换脚本
-Payload 结构
-调试跟踪
-完整调用链总结
+漏洞概述
+Payload 结构解析
+源码跟踪：一步步看绕过过程
+第一阶段：处理字段 a，预热缓存
+第二阶段：处理字段 b，命中缓存绕过检测
 
 
-前言上一篇 Templat...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-28T07:00:00.000Z">2026-03-28</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
-</a><a class="post-card post" href="/posts/f70df821/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image2.png"/></div><h2 class="post-title">代码审计 | FastJSON 1.2.47 不出网利用 —— TemplatesImpl 链分析</h2><div class="excerpt"><p>目录
-前言
-两条链的区别
-TemplatesImpl 链概览
-利用前提
-利用步骤
-Payload 构造
-调试跟链
-完整调用链总结
-局限性
+总结
 
 
-前言上一篇分析了 FastJSON 1.2.24 的 JdbcRowSetImpl 出网 RCE 链，以及 1.2.25 ~ 1.2.43 的 autoType 绕过演进。这篇来看 1.2.47 的不出网利用方式——TemplatesImpl 链。
-关...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-26T16:00:00.000Z">2026-03-27</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
+环境准备版本：1.2.47
+使用 Maven 管理依赖，在 pom.xml 里改一下版本号就行。
+
+
+漏洞概述先看一下 Payload 的样子：
+1...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-26T02:00:00.000Z">2026-03-26</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
+</a><a class="post-card post" href="/posts/86d6dbe4/">
+<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/25%2042%2043_image6.png"/></div><h2 class="post-title">代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43</h2><div class="excerpt"><p>
+个人学习记录，记录一下这三个版本的绕过思路和调试过程。这三个版本有个共同点：都需要 autoTypeSupport=true 才能利用，算是一条贯穿始终的主线。
+
+
+目录
+环境准备
+1.2.25 —— checkAutoType 机制引入
+源码变化对比
+为什么要开启 autoTypeSupport
+调试过程 1225
+
+
+1.2.42 —— 双写绕过
+Payload 变化
+checkAut...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-25T02:00:00.000Z">2026-03-25</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
+</a><a class="post-card post" href="/posts/3035988a/">
+<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image5.png"/></div><h2 class="post-title">代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析</h2><div class="excerpt"><p>
+本文从环境搭建出发，一步一步分析 FastJson 反序列化 RCE 的完整利用链，并结合调试断点深入分析底层代码执行逻辑。
+
+
+目录
+漏洞背景
+环境准备
+搭建 Maven 项目
+FastJson @type 机制初探（User 例子）
+parseObject 两种调用方式的本质区别
+PoC 复现：JdbcRowSetImpl 利用链
+底层代码调试分析
+完整漏洞链路总结
+修复建议
+
+
+一、...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-24T06:00:00.000Z">2026-03-24</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
 </a></div>
 </div>
 
@@ -1047,43 +1071,6 @@ Payload 构造
 }
 @keyframes textFloat {
   0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
-}
-</style>
-
-<!-- PWA Service Worker -->
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then(function(reg) {
-    console.log('Service Worker 已注册，支持离线访问');
-  }).catch(function(err) {
-    console.log('Service Worker 注册失败:', err);
-  });
-}
-</script>
-
-<!-- Random Cover Image -->
-<script>
-(function() {
-  function refreshRandomCovers() {
-    var images = document.querySelectorAll('img[src*="loliapi.com"]');
-    images.forEach(function(img) {
-      var src = img.src;
-      var baseSrc = src.split('?')[0];
-      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
-    });
-  }
-  
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
-  } else {
-    refreshRandomCovers();
-  }
-})();
-</script>
-
-</div></body></html>
-sform: translate(-50%, -50%) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
 }
 </style>
