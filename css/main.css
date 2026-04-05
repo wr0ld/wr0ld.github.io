@@ -9826,6 +9826,13 @@ details.toc[open] >div.body section .header+.doc_tree {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.layout-switcher .layout-options .options-label .default-layout-hint {
+  font-size: 10px;
+  color: rgba(52,152,219,0.8);
+  font-weight: normal;
+  text-transform: none;
+  margin-left: 4px;
+}
 .layout-switcher .layout-options .options-divider {
   height: 1px;
   background: rgba(255,255,255,0.1);

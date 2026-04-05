@@ -458,6 +458,16 @@
         source: 'https://github.com/brunosimon/folio'
       },
       {
+        id: 'bruno-folio-2025',
+        title: 'Bruno Simon 2025 Portfolio',
+        desc: 'Bruno Simon 2025 全新作品集，全新3D场景、成就系统、彩蛋收集、Konami秘籍、天气系统等丰富玩法。',
+        url: '/lab/bruno-folio-2025/',
+        tags: ['Three.js', 'Rapier', 'Achievements'],
+        shortcuts: ['W/A/S/D 移动', 'Space 跳跃', '↑↑↓↓←→←→BA'],
+        version: '2025-04',
+        source: 'https://github.com/brunosimon/folio-2025'
+      },
+      {
         id: 'threejs-city',
         title: 'Three.js City',
         desc: '3D 城市驾驶模拟器，在随机生成的城市中行驶，支持雨滴效果和多摄像机视角。',
@@ -619,6 +629,10 @@
         if (url.includes('/lab/bruno-simon-folio')) {
           CardSystem.obtainCard('bruno_folio_visitor');
           CardSystem.trackLabVisit('bruno-simon-folio');
+        }
+        if (url.includes('/lab/bruno-folio-2025')) {
+          CardSystem.obtainCard('bruno_folio_2025_visitor');
+          CardSystem.trackLabVisit('bruno-folio-2025');
         }
         if (url.includes('/lab/my-room-in-3d')) {
           CardSystem.obtainCard('my_room_visitor');

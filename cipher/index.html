@@ -1,0 +1,1611 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>解密挑战 - blog</title>
+
+  
+    <meta name="description" content="🔐 解密挑战中心     破解密码，获取flag，解锁成就！                   🏆       已破解       0                 🎯       总挑战       6                 ⭐       总积分       0                           📡       摩斯密码       简单">
+<meta property="og:type" content="website">
+<meta property="og:title" content="解密挑战">
+<meta property="og:url" content="https://wr0ld.github.io/cipher/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="🔐 解密挑战中心     破解密码，获取flag，解锁成就！                   🏆       已破解       0                 🎯       总挑战       6                 ⭐       总积分       0                           📡       摩斯密码       简单">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-05T04:19:22.362Z">
+<meta property="article:modified_time" content="2026-04-05T04:19:22.362Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="blog, hexo, stellar, 技术, 编程">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Website","@id":"https://wr0ld.github.io/cipher/","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"name":"解密挑战","description":"\n  \n    🔐 解密挑战中心\n    破解密码，获取flag，解锁成就！\n  \n\n  \n    \n      🏆\n      已破解\n      0\n    \n    \n      🎯\n      总挑战\n      6\n    \n    \n      ⭐\n      总积分\n      0\n    \n  \n\n  \n  \n    \n      📡\n      摩斯密码\n     ...","url":"https://wr0ld.github.io/cipher/","keywords":"blog, hexo, stellar, 技术, 编程"}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="page" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets"></div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+
+  <span class="sep"></span>
+  <a class="cap breadcrumb" href="/cipher/">解密挑战</a>
+  </div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-05T04:19:22.362Z">2026-04-05</time></span><span class="sep"></span><span class="text word-count">字数：140</span><span class="sep"></span><span class="text img-count">图片：0</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>解密挑战</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><div class="cipher-container">
+  <div class="cipher-header">
+    <h1>🔐 解密挑战中心</h1>
+    <p class="cipher-subtitle">破解密码，获取flag，解锁成就！</p>
+  </div>
+
+  <div class="cipher-stats">
+    <div class="stat-item">
+      <span class="stat-icon">🏆</span>
+      <span class="stat-label">已破解</span>
+      <span class="stat-value" id="solvedCount">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-icon">🎯</span>
+      <span class="stat-label">总挑战</span>
+      <span class="stat-value" id="totalCount">6</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-icon">⭐</span>
+      <span class="stat-label">总积分</span>
+      <span class="stat-value" id="totalScore">0</span>
+    </div>
+  </div>
+
+  <!-- 摩斯密码挑战 -->
+  <div class="cipher-challenge" id="morse-challenge">
+    <div class="challenge-header">
+      <span class="challenge-icon">📡</span>
+      <h2>摩斯密码</h2>
+      <span class="challenge-difficulty difficulty-easy">简单</span>
+      <span class="challenge-points">10分</span>
+    </div>
+    <div class="challenge-content">
+      <p class="challenge-desc">破译这段摩斯密码，获取隐藏信息：</p>
+      <div class="cipher-text">.... . .-.. .-.. ---   .-- --- .-. .-.. -..</div>
+      <div class="hint-box">
+        <span class="hint-icon">💡</span>
+        <span class="hint-text">提示: 摩斯密码用 . 和 - 表示字母，空格分隔单词</span>
+      </div>
+      <div class="answer-section">
+        <input type="text" class="answer-input" id="morse-answer" placeholder="输入你的答案...">
+        <button class="submit-btn" onclick="checkMorse()">提交答案</button>
+      </div>
+      <div class="result-message" id="morse-result"></div>
+    </div>
+  </div>
+
+  <!-- 凯撒密码挑战 -->
+  <div class="cipher-challenge" id="caesar-challenge">
+    <div class="challenge-header">
+      <span class="challenge-icon">📜</span>
+      <h2>凯撒密码</h2>
+      <span class="challenge-difficulty difficulty-easy">简单</span>
+      <span class="challenge-points">15分</span>
+    </div>
+    <div class="challenge-content">
+      <p class="challenge-desc>这段文字被凯撒密码加密了，偏移量为3：</p>
+      <div class="cipher-text">WUHDWLYH</div>
+      <div class="hint-box">
+        <span class="hint-icon">💡</span>
+        <span class="hint-text">提示: 每个字母向后移动3位即可解密</span>
+      </div>
+      <div class="answer-section">
+        <input type="text" class="answer-input" id="caesar-answer" placeholder="输入你的答案...">
+        <button class="submit-btn" onclick="checkCaesar()">提交答案</button>
+      </div>
+      <div class="result-message" id="caesar-result"></div>
+    </div>
+  </div>
+
+  <!-- 二进制解码挑战 -->
+  <div class="cipher-challenge" id="binary-challenge">
+    <div class="challenge-header">
+      <span class="challenge-icon">💻</span>
+      <h2>二进制解码</h2>
+      <span class="challenge-difficulty difficulty-medium">中等</span>
+      <span class="challenge-points">20分</span>
+    </div>
+    <div class="challenge-content">
+      <p class="challenge-desc">将这段二进制转换为ASCII文本：</p>
+      <div class="cipher-text">01001000 01100001 01100011 01101011 01100101 01110010</div>
+      <div class="hint-box">
+        <span class="hint-icon">💡</span>
+        <span class="hint-text">提示: 每8位二进制对应一个ASCII字符</span>
+      </div>
+      <div class="answer-section">
+        <input type="text" class="answer-input" id="binary-answer" placeholder="输入你的答案...">
+        <button class="submit-btn" onclick="checkBinary()">提交答案</button>
+      </div>
+      <div class="result-message" id="binary-result"></div>
+    </div>
+  </div>
+
+  <!-- Base64解码挑战 -->
+  <div class="cipher-challenge" id="base64-challenge">
+    <div class="challenge-header">
+      <span class="challenge-icon">🔣</span>
+      <h2>Base64解码</h2>
+      <span class="challenge-difficulty difficulty-medium">中等</span>
+      <span class="challenge-points">25分</span>
+    </div>
+    <div class="challenge-content">
+      <p class="challenge-desc">解码这段Base64编码：</p>
+      <div class="cipher-text">ZmxhZ3tiYXNlNjRfZGVjb2RlZH0=</div>
+      <div class="hint-box">
+        <span class="hint-icon">💡</span>
+        <span class="hint-text">提示: 使用 atob() 函数或在线工具解码</span>
+      </div>
+      <div class="answer-section">
+        <input type="text" class="answer-input" id="base64-answer" placeholder="输入你的答案...">
+        <button class="submit-btn" onclick="checkBase64()">提交答案</button>
+      </div>
+      <div class="result-message" id="base64-result"></div>
+    </div>
+  </div>
+
+  <!-- 栅栏密码挑战 -->
+  <div class="cipher-challenge" id="railfence-challenge">
+    <div class="challenge-header">
+      <span class="challenge-icon">🚧</span>
+      <h2>栅栏密码</h2>
+      <span class="challenge-difficulty difficulty-hard">困难</span>
+      <span class="challenge-points">30分</span>
+    </div>
+    <div class="challenge-content">
+      <p class="challenge-desc">解密这段2栏栅栏密码：</p>
+      <div class="cipher-text">FLEAIGLAG</div>
+      <div class="hint-box">
+        <span class="hint-icon">💡</span>
+        <span class="hint-text">提示: 将字母分成两行，然后按列读取</span>
+      </div>
+      <div class="answer-section">
+        <input type="text" class="answer-input" id="railfence-answer" placeholder="输入你的答案...">
+        <button class="submit-btn" onclick="checkRailfence()">提交答案</button>
+      </div>
+      <div class="result-message" id="railfence-result"></div>
+    </div>
+  </div>
+
+  <!-- 隐藏信息挑战 -->
+  <div class="cipher-challenge" id="hidden-challenge">
+    <div class="challenge-header">
+      <span class="challenge-icon">🕵️</span>
+      <h2>隐藏信息</h2>
+      <span class="challenge-difficulty difficulty-hard">困难</span>
+      <span class="challenge-points">50分</span>
+    </div>
+    <div class="challenge-content">
+      <p class="challenge-desc">找出下面这段文字中隐藏的信息（取每句话的首字母）：</p>
+      <div class="cipher-text prose">
+        <p><strong>W</strong>eb开发是一门有趣的技术。</p>
+        <p><strong>R</strong>eact和Vue都是流行的框架。</p>
+        <p><strong>0</strong>pen Source让世界更美好。</p>
+        <p><strong>L</strong>inux是程序员的好朋友。</p>
+        <p><strong>D</strong>ocker改变了我们部署应用的方式。</p>
+      </div>
+      <div class="hint-box">
+        <span class="hint-icon">💡</span>
+        <span class="hint-text">提示: 注意每句话开头，组成一个单词</span>
+      </div>
+      <div class="answer-section">
+        <input type="text" class="answer-input" id="hidden-answer" placeholder="输入你的答案...">
+        <button class="submit-btn" onclick="checkHidden()">提交答案</button>
+      </div>
+      <div class="result-message" id="hidden-result"></div>
+    </div>
+  </div>
+
+  <!-- 最终挑战 -->
+  <div class="cipher-challenge cipher-final" id="final-challenge" style="display:none;">
+    <div class="challenge-header">
+      <span class="challenge-icon">🏆</span>
+      <h2>终极挑战</h2>
+      <span class="challenge-difficulty difficulty-legendary">传说</span>
+      <span class="challenge-points">100分</span>
+    </div>
+    <div class="challenge-content">
+      <p class="challenge-desc">结合之前所有答案的首字母，组成最终flag：</p>
+      <div class="cipher-text">flag{??????}</div>
+      <div class="hint-box">
+        <span class="hint-icon">💡</span>
+        <span class="hint-text">提示: H + C + H + f + F + W = ?</span>
+      </div>
+      <div class="answer-section">
+        <input type="text" class="answer-input" id="final-answer" placeholder="输入最终flag...">
+        <button class="submit-btn" onclick="checkFinal()">提交答案</button>
+      </div>
+      <div class="result-message" id="final-result"></div>
+    </div>
+  </div>
+
+  <div class="cipher-footer">
+    <p>🎉 完成所有挑战可获得"解密大师"成就！</p>
+    <p class="footer-hint">隐藏提示: 试试访问 /secret-path/</p>
+  </div>
+</div>
+
+<style>
+.cipher-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.cipher-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.cipher-header h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cipher-subtitle {
+  color: var(--text-p3, #666);
+  font-size: 1.1em;
+}
+
+.cipher-stats {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: var(--card, #f5f5f5);
+  border-radius: 12px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.stat-icon {
+  font-size: 24px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--text-p3, #666);
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--theme, #3498db);
+}
+
+.cipher-challenge {
+  background: var(--card, #fff);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border, #e0e0e0);
+  transition: all 0.3s;
+}
+
+.cipher-challenge:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.cipher-challenge.solved {
+  border-color: #27ae60;
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.05), rgba(39, 174, 96, 0.1));
+}
+
+.cipher-challenge.solved .challenge-header {
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+}
+
+.challenge-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.challenge-icon {
+  font-size: 24px;
+}
+
+.challenge-header h2 {
+  margin: 0;
+  font-size: 1.2em;
+  flex: 1;
+}
+
+.challenge-difficulty {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.difficulty-easy {
+  background: #27ae60;
+}
+
+.difficulty-medium {
+  background: #f39c12;
+}
+
+.difficulty-hard {
+  background: #e74c3c;
+}
+
+.difficulty-legendary {
+  background: linear-gradient(135deg, #f1c40f, #e67e22);
+  animation: glow 2s infinite;
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px #f1c40f; }
+  50% { box-shadow: 0 0 20px #f1c40f; }
+}
+
+.challenge-points {
+  font-weight: bold;
+}
+
+.challenge-content {
+  padding: 20px;
+}
+
+.challenge-desc {
+  margin-bottom: 15px;
+  color: var(--text-p2, #444);
+}
+
+.cipher-text {
+  background: var(--background, #f0f0f0);
+  padding: 15px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 1.1em;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  word-break: break-all;
+  border-left: 4px solid var(--theme, #3498db);
+}
+
+.hint-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  background: rgba(52, 152, 219, 0.1);
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.hint-icon {
+  font-size: 18px;
+}
+
+.hint-text {
+  font-size: 14px;
+  color: var(--text-p2, #444);
+}
+
+.answer-section {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.answer-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid var(--border, #e0e0e0);
+  border-radius: 8px;
+  font-size: 16px;
+  background: var(--background, #fff);
+  color: var(--text-p1, #333);
+  transition: all 0.3s;
+}
+
+.answer-input:focus {
+  outline: none;
+  border-color: var(--theme, #3498db);
+  box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
+}
+
+.submit-btn {
+  padding: 12px 25px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.result-message {
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  display: none;
+}
+
+.result-message.success {
+  display: block;
+  background: rgba(39, 174, 96, 0.1);
+  color: #27ae60;
+  border: 1px solid #27ae60;
+}
+
+.result-message.error {
+  display: block;
+  background: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  border: 1px solid #e74c3c;
+}
+
+.cipher-final {
+  border: 2px solid #f1c40f;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(241, 196, 15, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(241, 196, 15, 0.6); }
+}
+
+.cipher-footer {
+  text-align: center;
+  margin-top: 30px;
+  padding: 20px;
+  background: var(--card, #fff);
+  border-radius: 12px;
+  border: 1px solid var(--border, #e0e0e0);
+}
+
+.footer-hint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-p3, #999);
+  opacity: 0.5;
+}
+
+@media (max-width: 600px) {
+  .cipher-stats {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .answer-section {
+    flex-direction: column;
+  }
+  
+  .submit-btn {
+    width: 100%;
+  }
+}
+</style>
+
+<script>
+var cipherState = {
+  morse: false,
+  caesar: false,
+  binary: false,
+  base64: false,
+  railfence: false,
+  hidden: false,
+  final: false,
+  score: 0
+};
+
+function loadState() {
+  var saved = localStorage.getItem('cipherChallengeState');
+  if (saved) {
+    cipherState = JSON.parse(saved);
+    updateUI();
+  }
+}
+
+function saveState() {
+  localStorage.setItem('cipherChallengeState', JSON.stringify(cipherState));
+}
+
+function updateUI() {
+  var solved = 0;
+  var challenges = ['morse', 'caesar', 'binary', 'base64', 'railfence', 'hidden'];
+  
+  challenges.forEach(function(name) {
+    if (cipherState[name]) {
+      solved++;
+      var el = document.getElementById(name + '-challenge');
+      if (el) el.classList.add('solved');
+    }
+  });
+  
+  document.getElementById('solvedCount').textContent = solved;
+  document.getElementById('totalScore').textContent = cipherState.score;
+  
+  if (solved >= 5 && !cipherState.final) {
+    document.getElementById('final-challenge').style.display = 'block';
+  }
+  
+  if (cipherState.final) {
+    document.getElementById('final-challenge').classList.add('solved');
+    document.getElementById('final-challenge').style.display = 'block';
+  }
+}
+
+function showResult(id, success, message) {
+  var el = document.getElementById(id);
+  el.className = 'result-message ' + (success ? 'success' : 'error');
+  el.textContent = message;
+}
+
+function checkMorse() {
+  var answer = document.getElementById('morse-answer').value.toUpperCase().trim();
+  if (answer === 'HELLO WORLD') {
+    showResult('morse-result', true, '🎉 正确！摩斯密码破译成功！+10分');
+    cipherState.morse = true;
+    cipherState.score += 10;
+    saveState();
+    updateUI();
+    triggerAchievement('cipher_morse');
+  } else {
+    showResult('morse-result', false, '❌ 答案不正确，再试试？');
+  }
+}
+
+function checkCaesar() {
+  var answer = document.getElementById('caesar-answer').value.toUpperCase().trim();
+  if (answer === 'CREATIVE') {
+    showResult('caesar-result', true, '🎉 正确！凯撒密码破译成功！+15分');
+    cipherState.caesar = true;
+    cipherState.score += 15;
+    saveState();
+    updateUI();
+    triggerAchievement('cipher_caesar');
+  } else {
+    showResult('caesar-result', false, '❌ 答案不正确，再试试？');
+  }
+}
+
+function checkBinary() {
+  var answer = document.getElementById('binary-answer').value.trim();
+  if (answer.toLowerCase() === 'hacker') {
+    showResult('binary-result', true, '🎉 正确！二进制解码成功！+20分');
+    cipherState.binary = true;
+    cipherState.score += 20;
+    saveState();
+    updateUI();
+    triggerAchievement('cipher_binary');
+  } else {
+    showResult('binary-result', false, '❌ 答案不正确，再试试？');
+  }
+}
+
+function checkBase64() {
+  var answer = document.getElementById('base64-answer').value.trim();
+  if (answer === 'flag{base64_decoded}') {
+    showResult('base64-result', true, '🎉 正确！Base64解码成功！+25分');
+    cipherState.base64 = true;
+    cipherState.score += 25;
+    saveState();
+    updateUI();
+    triggerAchievement('cipher_base64');
+  } else {
+    showResult('base64-result', false, '❌ 答案不正确，再试试？');
+  }
+}
+
+function checkRailfence() {
+  var answer = document.getElementById('railfence-answer').value.toUpperCase().trim();
+  if (answer === 'FLAGELIG') {
+    showResult('railfence-result', true, '🎉 正确！栅栏密码破译成功！+30分');
+    cipherState.railfence = true;
+    cipherState.score += 30;
+    saveState();
+    updateUI();
+    triggerAchievement('cipher_railfence');
+  } else {
+    showResult('railfence-result', false, '❌ 答案不正确，再试试？');
+  }
+}
+
+function checkHidden() {
+  var answer = document.getElementById('hidden-answer').value.trim();
+  if (answer.toLowerCase() === 'wr0ld') {
+    showResult('hidden-result', true, '🎉 正确！隐藏信息发现成功！+50分');
+    cipherState.hidden = true;
+    cipherState.score += 50;
+    saveState();
+    updateUI();
+    triggerAchievement('cipher_hidden');
+  } else {
+    showResult('hidden-result', false, '❌ 答案不正确，再试试？');
+  }
+}
+
+function checkFinal() {
+  var answer = document.getElementById('final-answer').value.trim();
+  if (answer.toLowerCase() === 'flag{hchffw}' || answer === 'HCHFFW') {
+    showResult('final-result', true, '🏆 恭喜！终极挑战完成！+100分 你已成为解密大师！');
+    cipherState.final = true;
+    cipherState.score += 100;
+    saveState();
+    updateUI();
+    triggerAchievement('cipher_master');
+    showCelebration();
+  } else {
+    showResult('final-result', false, '❌ 最终答案不正确，回顾一下各个挑战的首字母？');
+  }
+}
+
+function triggerAchievement(id) {
+  if (window.CardSystem) {
+    window.CardSystem.obtainCard(id);
+    window.CardSystem.incrementEasterEgg();
+  }
+  
+  if (window.secret && window.secret.cipherSolved) {
+    window.secret.cipherSolved(id);
+  }
+}
+
+function showCelebration() {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = '<div style="text-align:center;color:white;"><div style="font-size:80px;">🏆</div><h1 style="font-size:40px;margin:20px 0;">解密大师</h1><p style="font-size:20px;">恭喜你完成所有挑战！</p><p style="font-size:16px;margin-top:20px;opacity:0.7;">flag{m4st3r_0f_c1ph3r5}</p><button onclick="this.parentElement.parentElement.remove()" style="margin-top:30px;padding:15px 40px;font-size:18px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:10px;cursor:pointer;">继续探索</button></div>';
+  document.body.appendChild(overlay);
+}
+
+loadState();
+</script>
+</article>
+
+
+
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-text">🔐 解密挑战中心</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#morse-challenge"><span class="toc-text">摩斯密码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#caesar-challenge"><span class="toc-text">凯撒密码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#binary-challenge"><span class="toc-text">二进制解码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#base64-challenge"><span class="toc-text">Base64解码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#railfence-challenge"><span class="toc-text">栅栏密码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#hidden-challenge"><span class="toc-text">隐藏信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#final-challenge"><span class="toc-text">终极挑战</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
