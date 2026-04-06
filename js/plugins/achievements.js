@@ -1,6 +1,10 @@
 (function() {
   'use strict';
   
+  if (window.CardSystem) {
+    return;
+  }
+  
   var CardSystem = {
     cards: {
       'first_visit': {
