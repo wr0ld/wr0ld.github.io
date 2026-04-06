@@ -1888,6 +1888,10 @@
     initTimeDisplay: function() {
       var self = this;
       
+      if (document.getElementById('time-widget')) {
+        return;
+      }
+      
       var footer = document.querySelector('footer') || document.querySelector('.footer') || document.querySelector('#footer');
       if (!footer) return;
       
