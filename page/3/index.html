@@ -118,51 +118,7 @@
 </div>
 
 <div id="post-container">
-  <div class="post-list post grid"><a class="post-card post" href="/posts/3035988a/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image5.png"/></div><h2 class="post-title">代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析</h2><div class="excerpt"><p>
-本文从环境搭建出发，一步一步分析 FastJson 反序列化 RCE 的完整利用链，并结合调试断点深入分析底层代码执行逻辑。
-
-
-目录
-漏洞背景
-环境准备
-搭建 Maven 项目
-FastJson @type 机制初探（User 例子）
-parseObject 两种调用方式的本质区别
-PoC 复现：JdbcRowSetImpl 利用链
-底层代码调试分析
-完整漏洞链路总结
-修复建议
-
-
-一、...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-24T06:00:00.000Z">2026-03-24</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
-</a><a class="post-card post" href="/posts/5532e4a/">
-<article class="md-text"><div class="post-cover"><img src="/images/THP.png"/></div><h2 class="post-title">THP-CSK 靶场 Linux 内网横向渗透全流程</h2><div class="excerpt"><p>🛡️ THP-CSK 靶场 · Linux 内网横向渗透全流程
-靶场编号： #189 · 难度方向： Web DMZ → 内网横向涉及技术： Struts2 RCE · 内核提权 · SSH 密钥复用 · SOCKS 代理穿透 · Jenkins 凭据解密
-https://www.cnblogs.com/wrold/p/19748562
-
-
-📋 靶场概述
-本次靶场共三台 Linux 主机...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-24T04:00:00.000Z">2026-03-24</time></span><span class="cap breadcrumb"><span>linux</span></span></div></article>
-</a><a class="post-card post" href="/posts/55d71cb8/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%93%A5%E6%96%AF%E6%8B%89_image33.png"/></div><h2 class="post-title">工具魔改 | 魔改哥斯拉 - 反编译重打包与Webshell免杀对抗</h2><div class="excerpt"><p>🦖 魔改哥斯拉 | 反编译重打包 + 特征指纹打乱 + Webshell免杀对抗
-本文记录对哥斯拉（Godzilla）v4.01 进行魔改的完整过程，涵盖 JAR 反编译环境搭建、特征指纹修改、Webshell 免杀对抗等内容。
-https://www.cnblogs.com/wrold/p/19738454
-免责声明：本文仅用于学习研究，请勿用于非法用途。
-
-
-📌 目录
-环境准备
-JA...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-23T04:00:00.000Z">2026-03-23</time></span><span class="cap breadcrumb"><span>工具魔改</span></span></div></article>
-</a><a class="post-card post" href="/posts/e39557c4/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image3.png"/></div><h2 class="post-title">工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展</h2><div class="excerpt"><p>🔧 安全工具 | Fscan 魔改二开 · 特征消除与功能扩展
-📌 原fscan项目地址：https://github.com/shadow1ng/fscan
-Fscan 是一款优秀的内网综合扫描工具，方便一键自动化、全方位漏扫扫描。在落地使用过程中，流量及文件不修改的情况下基本被检测查杀，针对这种情况，我们进行了一些基本的参数测试和特征去除，外加功能拓展。
-
-
-📋 目录
-一、环境准备...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-22T04:00:00.000Z">2026-03-22</time></span><span class="cap breadcrumb"><span>工具魔改</span></span></div></article>
-</a><a class="post-card post" href="/posts/5ddd3711/">
+  <div class="post-list post grid"><a class="post-card post" href="/posts/5ddd3711/">
 <article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180841876.png"/></div><h2 class="post-title">工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗</h2><div class="excerpt"><p>🔧 sqlmap 魔改研究 —— 从流量特征到 WAF 对抗
 本文记录了对 sqlmap 进行源码级魔改的完整过程，目标是通过修改流量特征、请求头、payload 混淆等手段，降低被 OWASP ModSecurity CRS 规则集检测到的概率。所有测试均在本地靶场（DVWA）环境下进行，仅用于学习和安全研究。
 https://www.cnblogs.com/wrold/p/197308...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-21T04:00:00.000Z">2026-03-21</time></span><span class="cap breadcrumb"><span>工具魔改</span></span></div></article>
@@ -207,13 +163,110 @@ php://filter/read=convert.base64-encode/resource=index.php
 php://input
 读取POST原始数据，配合文件包含执行代码
 ?...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-19T04:00:00.000Z">2026-03-19</time></span><span class="cap breadcrumb"><span>笔记</span></span></div></article>
+</a><a class="post-card post" href="/posts/f10adb67/">
+<article class="md-text"><div class="post-cover"><img src="/images/VulnHub.jpg"/></div><h2 class="post-title">VulnHub DC-9 靶机渗透测试笔记</h2><div class="excerpt"><p>VulnHub DC-9 靶机渗透测试笔记
+靶机信息
+
+靶机名称：DC-9（DC 系列最终章 🎯）
+靶机来源：VulnHub
+目标：获取 root 权限，找到最终 flag
+难度：⭐⭐⭐⭐☆（较难）
+涉及技术：SQL 注入、文件包含（LFI）、Port Knocking、SSH 爆破、sudo 提权、&#x2F;etc&#x2F;passwd 写入提权
+https://www.cnblog...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-18T04:00:00.000Z">2026-03-18</time></span><span class="cap breadcrumb"><span>linux</span></span></div></article>
+</a><a class="post-card post" href="/posts/16177df0/">
+<article class="md-text"><div class="post-cover"><img src="/images/VulnHub.jpg"/></div><h2 class="post-title">VulnHub DC-8 靶机渗透测试笔记</h2><div class="excerpt"><p>VulnHub DC-8 靶机渗透测试笔记
+靶机信息
+
+靶机名称：DC-8
+靶机来源：VulnHub
+目标：获取 root 权限，找到最终 flag
+难度：⭐⭐⭐⭐☆（中等偏难）
+涉及技术：信息收集、SQL注入、hashcat 哈希破解、PHP 反弹 Shell、Exim4 SUID 提权
+https://www.cnblogs.com/wrold/p/19686607
+
+
+
+一、信息收集1...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-17T04:00:00.000Z">2026-03-17</time></span><span class="cap breadcrumb"><span>linux</span></span></div></article>
+</a><a class="post-card post" href="/posts/9bfd2b6a/">
+<article class="md-text"><div class="post-cover"><img src="/images/VulnHub.jpg"/></div><h2 class="post-title">VulnHub DC-7 靶机渗透测试笔记</h2><div class="excerpt"><p>VulnHub DC-7 靶机渗透测试笔记
+靶机系列：DC Series | 难度：中等 | 核心漏洞：GitHub OSINT 信息泄露 + Drupal PHP Filter RCE + PATH 劫持提权
+
+
+📋 目录
+环境信息
+信息收集
+漏洞利用
+权限提升
+总结
+
+
+🖥️ 环境信息
+
+
+项目
+信息
+
+
+
+靶机地址
+192.168.168.170
+
+
+攻击机地址
+192.168.1...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-16T04:00:00.000Z">2026-03-16</time></span><span class="cap breadcrumb"><span>linux</span></span></div></article>
+</a><a class="post-card post" href="/posts/7ce08dfd/">
+<article class="md-text"><div class="post-cover"><img src="/images/VulnHub.jpg"/></div><h2 class="post-title">VulnHub DC-6 靶机渗透测试笔记</h2><div class="excerpt"><p>VulnHub DC-6 靶机渗透测试笔记
+靶机信息
+
+靶机名称：DC-6
+靶机来源：VulnHub
+目标：获取 root 权限，找到最终 flag
+难度：⭐⭐⭐☆☆（中等）
+涉及技术：信息收集、WordPress 插件漏洞、命令执行、SSH登录、sudo 提权、nmap 脚本提权
+
+
+
+一、信息收集1.1 主机发现
+目标 IP：192.168.168.169
+1.2 端口与服务扫描1nma...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-15T04:00:00.000Z">2026-03-15</time></span><span class="cap breadcrumb"><span>linux</span></span></div></article>
+</a><a class="post-card post" href="/posts/8eb76005/">
+<article class="md-text"><div class="post-cover"><img src="/images/VulnHub.jpg"/></div><h2 class="post-title">VulnHub DC-5 靶机渗透测试笔记</h2><div class="excerpt"><p>VulnHub DC-5 靶机渗透测试笔记
+靶机信息
+
+靶机名称：DC-5
+靶机来源：VulnHub
+目标：获取 root 权限，找到最终 flag
+难度：⭐⭐⭐☆☆（中等）
+涉及技术：信息收集、文件包含漏洞（LFI）、日志污染、Webshell、Screen 4.5.0 SUID 提权
+
+
+
+一、信息收集1.1 主机发现
+知识点： -sn 是 Ping Scan（主机发现），不进行端口扫描...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-14T04:00:00.000Z">2026-03-14</time></span><span class="cap breadcrumb"><span>linux</span></span></div></article>
+</a><a class="post-card post" href="/posts/69aac692/">
+<article class="md-text"><div class="post-cover"><img src="/images/VulnHub.jpg"/></div><h2 class="post-title">VulnHub DC-4 靶机渗透测试笔记</h2><div class="excerpt"><p>VulnHub DC-4 靶机渗透测试笔记
+靶机信息
+
+靶机名称：DC-4
+靶机来源：VulnHub
+目标：获取 root 权限，找到最终 flag
+难度：⭐⭐⭐☆☆（中等）
+涉及技术：信息收集、Web 密码爆破、命令注入、反弹 Shell、SSH 爆破、sudo 提权
+
+
+
+一、信息收集1.1 主机发现1ifconfig
+
+
+本机 IP：192.168.168.128
+1nmap -sn ...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-13T04:00:00.000Z">2026-03-13</time></span><span class="cap breadcrumb"><span>linux</span></span></div></article>
 </a></div>
 </div>
 
 <div id="paginator-wrapper">
   
   <div class='paginator-wrap dis-select'>
-  <a class="extend prev" rel="prev" href="/page/2/"></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/4/"></a>
+  <a class="extend prev" rel="prev" href="/page/2/"></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/4/"></a>
   </div>
 
 
