@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pulsating Infinite Fractal</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+      }
+      canvas {
+        display: block;
+      }
+      .lil-gui {
+        z-index: 9999;
+        position: absolute;
+        top: 0;
+        right: 0;
+      }
+    </style>
+    <!-- Import Map for Three.js v0.149.0 -->
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@v0.149.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.149.0/examples/jsm/"
+        }
+      }
+    </script>
+    <!-- LIL-GUI UMD (not used for manual tweaking here but can be added later) -->
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.18.0/dist/lil-gui.umd.min.js"></script>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from 'three';
+      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+      import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+      import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+      import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+      // ---------------------------------------------------
+      // 1) Scene, Camera, Renderer Setup
+      // ---------------------------------------------------
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.set(0, 0, 2);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // OrbitControls for manual navigation
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+
+      // ---------------------------------------------------
+      // 2) Full-Screen Quad with Ray-Marching Shader
+      // ---------------------------------------------------
+      // We'll render our fractal via a ShaderMaterial on a plane that covers the viewport.
+      const plane = new THREE.PlaneGeometry(2, 2);
+
+      const uniforms = {
+        uTime: { value: 0.0 },
+        uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+        // These parameters will be pulsated:
+        uIterations: { value: 1 }, // will oscillate between 1 and 3
+        uPower: { value: 0.0 },    // will oscillate from 0 to 16
+        uZoom: { value: 1.0 },
+        uBloomColor: { value: new THREE.Color(1.0, 1.0, 1.0) },
+        uCameraPos: { value: new THREE.Vector3() },
+        uCameraMatrix: { value: new THREE.Matrix4() },
+      };
+
+      const vertexShader = /* glsl */ `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = vec4(position, 1.0);
+        }
+      `;
+
+      // A simple ray-marching shader for a Mandelbulb-like fractal.
+      const fragmentShader = /* glsl */ `
+        precision highp float;
+        varying vec2 vUv;
+
+        uniform float uTime;
+        uniform vec2 uResolution;
+        uniform int uIterations;
+        uniform float uPower;
+        uniform float uZoom;
+        uniform vec3 uBloomColor;
+        uniform vec3 uCameraPos;
+        uniform mat4 uCameraMatrix;
+
+        // Distance estimator for a Mandelbulb-like fractal.
+        float mandelbulbDE(vec3 pos) {
+          const int MAX_ITER = 100;
+          int iter = 0;
+          vec3 z = pos;
+          float dr = 1.0;
+          float r = 0.0;
+          for (int i = 0; i < MAX_ITER; i++) {
+            if(i >= uIterations * 5) break;
+            r = length(z);
+            if (r > 2.0) break;
+            float theta = acos(z.z / r);
+            float phi = atan(z.y, z.x);
+            float zr = pow(r, uPower);
+            dr = pow(r, uPower - 1.0) * uPower * dr + 1.0;
+            float sinTheta = sin(theta * uPower);
+            float cosTheta = cos(theta * uPower);
+            float sinPhi   = sin(phi * uPower);
+            float cosPhi   = cos(phi * uPower);
+            z = zr * vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosTheta) + pos;
+            iter++;
+          }
+          return 0.5 * log(r) * r / dr;
+        }
+
+        void main() {
+          // Map fragment coordinate to [-1, 1]
+          vec2 uv = (vUv - 0.5) * 2.0;
+          uv.x *= uResolution.x / uResolution.y;
+
+          // Compute ray direction from camera using the inverse camera matrix.
+          vec4 forward4 = inverse(uCameraMatrix) * vec4(0.0, 0.0, -1.0, 0.0);
+          vec3 forward = normalize(forward4.xyz);
+          vec4 right4 = inverse(uCameraMatrix) * vec4(1.0, 0.0, 0.0, 0.0);
+          vec3 right = normalize(right4.xyz);
+          vec4 up4 = inverse(uCameraMatrix) * vec4(0.0, 1.0, 0.0, 0.0);
+          vec3 up = normalize(up4.xyz);
+
+          vec3 dir = normalize(forward + uv.x * right + uv.y * up);
+          
+          // Ray march
+          float totalDist = 0.0;
+          const float maxDist = 100.0;
+          float t = 0.0;
+          vec3 pos = uCameraPos;
+          bool hit = false;
+          const float EPSILON = 0.0001;
+
+          for (int i = 0; i < 128; i++) {
+            vec3 currentPos = pos + dir * t;
+            float distEst = mandelbulbDE(currentPos * uZoom);
+            if (abs(distEst) < EPSILON) {
+              hit = true;
+              break;
+            }
+            t += distEst;
+            if (t > maxDist) break;
+          }
+
+          if (!hit) {
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+            return;
+          }
+          // Shade based on distance
+          float shade = 1.0 - (t / maxDist);
+          vec3 color = mix(vec3(0.0), uBloomColor, shade);
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `;
+
+      const material = new THREE.ShaderMaterial({
+        vertexShader,
+        fragmentShader,
+        uniforms,
+      });
+
+      // The quad that covers the screen.
+      const screenQuad = new THREE.Mesh(plane, material);
+      screenQuad.frustumCulled = false;
+      const fractalScene = new THREE.Scene();
+      fractalScene.add(screenQuad);
+
+      // Orthographic camera for full-screen quad
+      const orthoCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 10);
+
+      // ---------------------------------------------------
+      // 3) Post-Processing (Bloom)
+      // ---------------------------------------------------
+      const composer = new EffectComposer(renderer);
+      const renderPass = new RenderPass(fractalScene, orthoCamera);
+      composer.addPass(renderPass);
+
+      const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        1.0,  // strength (will be updated)
+        0.4,  // radius
+        0.85  // threshold
+      );
+      composer.addPass(bloomPass);
+
+      // ---------------------------------------------------
+      // 4) Animation & Pulsation
+      // ---------------------------------------------------
+      const clock = new THREE.Clock();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+
+        // ---------- Pulsating Parameters ----------
+        // uPower oscillates from 0 to 16.
+        const pulsate = (Math.sin(t * Math.PI/2) + 1) / 2; // 0 to 1
+        uniforms.uPower.value = pulsate * 16.0;
+
+        // uIterations oscillates from 1 to 3.
+        // We use a phase shift so it pulsates in between.
+        const iterValue = 1 + ((Math.sin(t * Math.PI/2 + Math.PI/2) + 1) / 2) * 2.0;
+        uniforms.uIterations.value = Math.round(iterValue);
+
+        // Bloom strength oscillates from 0 to 1.6.
+        const bloomStrength = ((Math.sin(t * Math.PI/2 + Math.PI) + 1) / 2) * 1.6;
+        bloomPass.strength = bloomStrength;
+
+        // ---------- Color Complementation ----------
+        // Use a base hue that shifts over time.
+        // The fractal foreground uses baseHue; background gets the complementary hue (baseHue + 0.5).
+        const baseHue = (t * 0.1) % 1.0; // cycles every 10 seconds
+        const fractalHue = baseHue;
+        const backgroundHue = (baseHue + 0.5) % 1.0;
+        uniforms.uBloomColor.value.setHSL(fractalHue, 1.0, 0.5);
+        scene.background = new THREE.Color();
+        scene.background.setHSL(backgroundHue, 1.0, 0.5);
+
+        // ---------- Pass Camera Info to Shader ----------
+        camera.updateMatrixWorld();
+        uniforms.uCameraPos.value.copy(camera.position);
+        uniforms.uCameraMatrix.value.copy(camera.matrixWorld);
+        uniforms.uTime.value += clock.getDelta();
+
+        controls.update();
+        composer.render();
+      }
+      animate();
+
+      // ---------------------------------------------------
+      // 5) Resize Handling
+      // ---------------------------------------------------
+      window.addEventListener("resize", () => {
+        const width = window.innerWidth, height = window.innerHeight;
+        renderer.setSize(width, height);
+        composer.setSize(width, height);
+        uniforms.uResolution.value.set(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      });
+    </script>
+  </body>
+</html>
