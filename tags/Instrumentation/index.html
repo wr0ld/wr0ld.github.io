@@ -39,13 +39,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>标签：Valve - blog</title>
+  <title>标签：Instrumentation - blog</title>
 
   
     <meta name="description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
 <meta property="og:type" content="website">
 <meta property="og:title" content="blog">
-<meta property="og:url" content="https://wr0ld.github.io/tags/Valve/">
+<meta property="og:url" content="https://wr0ld.github.io/tags/Instrumentation/">
 <meta property="og:site_name" content="blog">
 <meta property="og:description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
 <meta property="og:locale" content="zh_CN">
@@ -120,24 +120,9 @@
 </div>
 
 <div id="post-container">
-  <div class="post-list post grid"><a class="post-card post" href="/posts/a7f3c8d2/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/owQBfADXeNBEQF9knoiGUAeAwE0cElaIAAyDEP~tplv-dy-vqe2-sr-v2_1920_1079_q80.jpg"/></div><h2 class="post-title">原理分析 | Valve —— Tomcat 特有内存马</h2><div class="excerpt"><p>
-Tomcat 特有，比 Filter 更底层、更隐蔽。
-
-
-目录
-一、什么是 Valve？
-二、Pipeline 是什么？
-三、Valve 在 Pipeline 中是”单向链表”
-四、Valve 与 Filter 的关键区别
-五、静态注册 Valve
-六、动态注入（内存马核心）
-七、Valve 的层级扩展（Engine &#x2F; Host 级别注入）
-八、四种内存马对比总结
-总结
-
-
-...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-11T15:30:00.000Z">2026-04-11</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
+  <div class="post-list post grid"><a class="post-card post" href="/posts/a3e7f2c9/">
+<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/sdf.jpg"/></div><h2 class="post-title">原理分析 | Agent —— Tomcat 内存马</h2><div class="excerpt"><p>原理分析 | Agent —— Tomcat 内存马
+前几种（Filter、Servlet、Listener、Valve）都是在 Servlet容器层 做手脚——往 StandardContext 的集合里注入恶意组件。而 Agent内存马 下沉到 JVM字节码层，不依赖 Filter&#x2F;Servlet&#x2F;Listener 这些组件，通过 Instrumentation 动态...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-20T11:18:00.000Z">2026-04-20</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
 </a></div>
 </div>
 
