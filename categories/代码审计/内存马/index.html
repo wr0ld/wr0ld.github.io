@@ -120,7 +120,10 @@
 </div>
 
 <div id="post-container">
-  <div class="post-list post grid"><a class="post-card post" href="/posts/a3e7f2c9/">
+  <div class="post-list post grid"><a class="post-card post" href="/posts/b8e2f4a1/">
+<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/ogIyfADuwNCAhF9ToazaYACAgED4C3oIAAeDE7~tplv-dy-aweme-images-ds-rs-v1_1918_1034_q80.jpg"/></div><h2 class="post-title">原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地</h2><div class="excerpt"><p>原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地
+摘要：本文记录了一次完整的实践过程：在一个存在反序列化漏洞的 Tomcat Web 应用上，利用 Commons Collections 利用链，将 Filter &#x2F; Servlet &#x2F; Listener 类型的内存马注入进运行时内存，实现无文件落地的持久化控制。整体思路是：找到反序列化...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-21T15:30:00.000Z">2026-04-21</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
+</a><a class="post-card post" href="/posts/a3e7f2c9/">
 <article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/sdf.jpg"/></div><h2 class="post-title">原理分析 | Agent —— Tomcat 内存马</h2><div class="excerpt"><p>原理分析 | Agent —— Tomcat 内存马
 前几种（Filter、Servlet、Listener、Valve）都是在 Servlet容器层 做手脚——往 StandardContext 的集合里注入恶意组件。而 Agent内存马 下沉到 JVM字节码层，不依赖 Filter&#x2F;Servlet&#x2F;Listener 这些组件，通过 Instrumentation 动态...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-20T11:18:00.000Z">2026-04-20</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
 </a><a class="post-card post" href="/posts/a7f3c8d2/">
@@ -141,9 +144,6 @@ Tomcat 特有，比 Filter 更底层、更隐蔽。
 
 
 ...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-11T15:30:00.000Z">2026-04-11</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
-</a><a class="post-card post" href="/posts/b8e2f4a1/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/ogIyfADuwNCAhF9ToazaYACAgED4C3oIAAeDE7~tplv-dy-aweme-images-ds-rs-v1_1918_1034_q80.jpg"/></div><h2 class="post-title">原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地</h2><div class="excerpt"><p>原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地
-摘要：本文记录了一次完整的实践过程：在一个存在反序列化漏洞的 Tomcat Web 应用上，利用 Commons Collections 利用链，将 Filter &#x2F; Servlet &#x2F; Listener 类型的内存马注入进运行时内存，实现无文件落地的持久化控制。整体思路是：找到反序列化...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-11T15:30:00.000Z">2026-04-11</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
 </a><a class="post-card post" href="/posts/9a18f0c4/">
 <article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/oMBqEeiBAifEs2uANzhcAcJIQAiAweAr4FE1Pw~tplv-dy-vqe2-sr-v2_1920_1334_q80.jpg"/></div><h2 class="post-title">原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结</h2><div class="excerpt"><p>原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结目录
 前置：StandardContext 回顾
@@ -190,7 +190,7 @@ web.xml 方式注册 Filter
 <script>
   // 所有文章数据（用于仅标题布局）
   // eslint-disable-next-line
-  const allPostsData = [{"title":"原理分析 | Agent —— Tomcat 内存马","path":"posts/a3e7f2c9/","link":""},{"title":"原理分析 | Valve —— Tomcat 特有内存马","path":"posts/a7f3c8d2/","link":""},{"title":"原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地","path":"posts/b8e2f4a1/","link":""},{"title":"原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结","path":"posts/9a18f0c4/","link":""},{"title":"原理分析 | Servlet —— Tomcat 内存马","path":"posts/eb030935/","link":""},{"title":"原理分析 | Filter —— Tomcat 内存马从零到注入","path":"posts/7b9eb72d/","link":""}];
+  const allPostsData = [{"title":"原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地","path":"posts/b8e2f4a1/","link":""},{"title":"原理分析 | Agent —— Tomcat 内存马","path":"posts/a3e7f2c9/","link":""},{"title":"原理分析 | Valve —— Tomcat 特有内存马","path":"posts/a7f3c8d2/","link":""},{"title":"原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结","path":"posts/9a18f0c4/","link":""},{"title":"原理分析 | Servlet —— Tomcat 内存马","path":"posts/eb030935/","link":""},{"title":"原理分析 | Filter —— Tomcat 内存马从零到注入","path":"posts/7b9eb72d/","link":""}];
   
   // 布局切换功能
   (function() {
