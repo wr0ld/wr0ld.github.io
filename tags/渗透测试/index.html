@@ -39,13 +39,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
-  <title>标签：FastJson - blog</title>
+  <title>标签：渗透测试 - blog</title>
 
   
     <meta name="description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
 <meta property="og:type" content="website">
 <meta property="og:title" content="blog">
-<meta property="og:url" content="https://wr0ld.github.io/tags/FastJson/">
+<meta property="og:url" content="https://wr0ld.github.io/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/">
 <meta property="og:site_name" content="blog">
 <meta property="og:description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
 <meta property="og:locale" content="zh_CN">
@@ -120,63 +120,25 @@
 </div>
 
 <div id="post-container">
-  <div class="post-list post grid"><a class="post-card post" href="/posts/5ef1061b/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image2.png"/></div><h2 class="post-title">代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析</h2><div class="excerpt"><p>
-1.2.47 的缓存绕过不需要开任何开关，默认配置就能打，危害最大。
+  <div class="post-list post grid"><a class="post-card post" href="/posts/c5d1a7e3/">
+<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/o8UyinNBiAABrhcAMPAB5SZHwAIavYgxBEQ11~tplv-dy-vqe2-sr-v2_1920_1079_q80.jpg"/></div><h2 class="post-title">记一次常态化渗透测试：从域名到 Getshell 的思路</h2><div class="excerpt"><p>记一次常态化渗透测试：从域名到 Getshell 的思路
+声明：本文完全脱敏，测试均为授权行为，禁止用于非法用途。
 
 
 目录
-环境准备
-漏洞概述
-Payload 结构解析
-源码跟踪：一步步看绕过过程
-第一阶段：处理字段 a，预热缓存
-第二阶段：处理字段 b，命中缓存绕过检测
-
-
-总结
-
-
-环境准备版本：1.2.47
-使用 Maven 管理依赖，在 pom.xml 里改一下版本号就行。
-
-
-漏洞概述先看一下 Payload 的样子：
-1...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-26T02:00:00.000Z">2026-03-26</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
-</a><a class="post-card post" href="/posts/86d6dbe4/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/25%2042%2043_image6.png"/></div><h2 class="post-title">代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43</h2><div class="excerpt"><p>
-个人学习记录，记录一下这三个版本的绕过思路和调试过程。这三个版本有个共同点：都需要 autoTypeSupport=true 才能利用，算是一条贯穿始终的主线。
-
-
-目录
-环境准备
-1.2.25 —— checkAutoType 机制引入
-源码变化对比
-为什么要开启 autoTypeSupport
-调试过程 1225
-
-
-1.2.42 —— 双写绕过
-Payload 变化
-checkAut...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-25T02:00:00.000Z">2026-03-25</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
-</a><a class="post-card post" href="/posts/3035988a/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image5.png"/></div><h2 class="post-title">代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析</h2><div class="excerpt"><p>
-本文从环境搭建出发，一步一步分析 FastJson 反序列化 RCE 的完整利用链，并结合调试断点深入分析底层代码执行逻辑。
-
-
-目录
-漏洞背景
-环境准备
-搭建 Maven 项目
-FastJson @type 机制初探（User 例子）
-parseObject 两种调用方式的本质区别
-PoC 复现：JdbcRowSetImpl 利用链
-底层代码调试分析
-完整漏洞链路总结
-修复建议
-
-
-一、...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-03-24T06:00:00.000Z">2026-03-24</time></span><span class="cap breadcrumb"><span>代码审计</span></span></div></article>
+前言
+一、初始资产侦察
+二、登录框测试
+三、主页信息收集
+四、目录扫描——发现关键接口
+五、Shiro 鉴权绕过验证
+六、后台目录探测
+七、上传接口黑盒测试
+八、路径穿越测试
+九、XSS 利用与方向转换
+十、JS 接口挖掘（幻影插件）
+十一、越权接口
+十二、Druid...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-30T03:29:00.000Z">2026-04-30</time></span><span class="cap breadcrumb"><span>实战</span></span></div></article>
 </a></div>
 </div>
 

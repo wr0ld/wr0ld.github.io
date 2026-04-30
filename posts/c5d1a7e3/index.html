@@ -1,0 +1,1237 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>记一次常态化渗透测试：从域名到 Getshell 的思路 - blog</title>
+
+  
+    <meta name="description" content="记一次常态化渗透测试：从域名到 Getshell 的思路 声明：本文完全脱敏，测试均为授权行为，禁止用于非法用途。   目录 前言 一、初始资产侦察 二、登录框测试 三、主页信息收集 四、目录扫描——发现关键接口 五、Shiro 鉴权绕过验证 六、后台目录探测 七、上传接口黑盒测试 八、路径穿越测试 九、XSS 利用与方向转换 十、JS 接口挖掘（幻影插件） 十一、越权接口 十二、Druid 监控">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次常态化渗透测试：从域名到 Getshell 的思路">
+<meta property="og:url" content="https://wr0ld.github.io/posts/c5d1a7e3/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="记一次常态化渗透测试：从域名到 Getshell 的思路 声明：本文完全脱敏，测试均为授权行为，禁止用于非法用途。   目录 前言 一、初始资产侦察 二、登录框测试 三、主页信息收集 四、目录扫描——发现关键接口 五、Shiro 鉴权绕过验证 六、后台目录探测 七、上传接口黑盒测试 八、路径穿越测试 九、XSS 利用与方向转换 十、JS 接口挖掘（幻影插件） 十一、越权接口 十二、Druid 监控">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-04-30T03:29:00.000Z">
+<meta property="article:modified_time" content="2026-04-30T03:30:45.299Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="反序列化">
+<meta property="article:tag" content="Shiro">
+<meta property="article:tag" content="渗透测试">
+<meta property="article:tag" content="鉴权绕过">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="反序列化,Shiro,渗透测试,鉴权绕过">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=1.0.0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-30T11:29:00+08:00","dateModified":"2026-04-30T11:30:45+08:00","datePublished":"2026-04-30T11:29:00+08:00","description":"","headline":"记一次常态化渗透测试：从域名到 Getshell 的思路","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c5d1a7e3/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c5d1a7e3/","keywords":"反序列化, Shiro, 渗透测试, 鉴权绕过","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/o8UyinNBiAABrhcAMPAB5SZHwAIavYgxBEQ11~tplv-dy-vqe2-sr-v2_1920_1079_q80.jpg","image":1}</script>
+  
+</head>
+<body>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%AE%9E%E6%88%98/">实战</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-04-30T03:29:00.000Z">2026-04-30</time></span><span class="sep"></span><span class="text word-count">字数：7250</span><span class="sep"></span><span class="text img-count">图片：18</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>记一次常态化渗透测试：从域名到 Getshell 的思路</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content"><h1 id="记一次常态化渗透测试：从域名到-Getshell-的思路"><a href="#记一次常态化渗透测试：从域名到-Getshell-的思路" class="headerlink" title="记一次常态化渗透测试：从域名到 Getshell 的思路"></a>记一次常态化渗透测试：从域名到 Getshell 的思路</h1><blockquote>
+<p><strong>声明</strong>：本文完全脱敏，测试均为授权行为，禁止用于非法用途。</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
+<li><a href="#%E4%B8%80%E5%88%9D%E5%A7%8B%E8%B5%84%E4%BA%A7%E4%BE%A6%E5%AF%9F">一、初始资产侦察</a></li>
+<li><a href="#%E4%BA%8C%E7%99%BB%E5%BD%95%E6%A1%86%E6%B5%8B%E8%AF%95">二、登录框测试</a></li>
+<li><a href="#%E4%B8%89%E4%B8%BB%E9%A1%B5%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86">三、主页信息收集</a></li>
+<li><a href="#%E5%9B%9B%E7%9B%AE%E5%BD%95%E6%89%AB%E6%8F%8F%E5%8F%91%E7%8E%B0%E5%85%B3%E9%94%AE%E6%8E%A5%E5%8F%A3">四、目录扫描——发现关键接口</a></li>
+<li><a href="#%E4%BA%94shiro-%E9%89%B4%E6%9D%83%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81">五、Shiro 鉴权绕过验证</a></li>
+<li><a href="#%E5%85%AD%E5%90%8E%E5%8F%B0%E7%9B%AE%E5%BD%95%E6%8E%A2%E6%B5%8B">六、后台目录探测</a></li>
+<li><a href="#%E4%B8%83%E4%B8%8A%E4%BC%A0%E6%8E%A5%E5%8F%A3%E9%BB%91%E7%9B%92%E6%B5%8B%E8%AF%95">七、上传接口黑盒测试</a></li>
+<li><a href="#%E5%85%AB%E8%B7%AF%E5%BE%84%E7%A9%BF%E8%B6%8A%E6%B5%8B%E8%AF%95">八、路径穿越测试</a></li>
+<li><a href="#%E4%B9%9Dxss-%E5%88%A9%E7%94%A8%E4%B8%8E%E6%96%B9%E5%90%91%E8%BD%AC%E6%8D%A2">九、XSS 利用与方向转换</a></li>
+<li><a href="#%E5%8D%81js-%E6%8E%A5%E5%8F%A3%E6%8C%96%E6%8E%98%E5%B9%BB%E5%BD%B1%E6%8F%92%E4%BB%B6">十、JS 接口挖掘（幻影插件）</a></li>
+<li><a href="#%E5%8D%81%E4%B8%80%E8%B6%8A%E6%9D%83%E6%8E%A5%E5%8F%A3">十一、越权接口</a></li>
+<li><a href="#%E5%8D%81%E4%BA%8Cdruid-%E7%9B%91%E6%8E%A7%E5%8F%B0%E5%8F%91%E7%8E%B0">十二、Druid 监控台发现</a></li>
+<li><a href="#%E5%8D%81%E4%B8%89shiro-%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8--getshell">十三、Shiro 漏洞利用 &amp; Getshell</a></li>
+<li><a href="#%E5%8D%81%E5%9B%9Bedr-%E5%AF%B9%E6%8A%97%E4%B8%8E%E5%90%8E%E6%B8%97%E9%80%8F%E5%B0%9D%E8%AF%95">十四、EDR 对抗与后渗透尝试</a></li>
+<li><a href="#%E5%8D%81%E4%BA%94%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96">十五、数据库与配置文件读取</a></li>
+<li>十六、找cms漏洞</li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<hr>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这篇文章是一次常态化渗透测试的思路总结，不是复现过程，图也比较少，主要记录的是整个测试的思路流程。测试时间大概是一天。</p>
+<hr>
+<h2 id="一、初始资产侦察"><a href="#一、初始资产侦察" class="headerlink" title="一、初始资产侦察"></a>一、初始资产侦察</h2><p>到手的资产是一些<strong>外网域名</strong>和<strong>内网 IP</strong>，由于某些原因内网部分没法直接访问，就先把精力放在外网上。</p>
+<p>随便打开了几个，看了一眼大致情况：</p>
+<ul>
+<li>一个有登录框，但有评审入口可以直接跳过登录</li>
+<li>一个正常网页</li>
+<li>一个纯登录框，看起来好像能注册</li>
+</ul>
+<p>大差不差，先从第一个开始测。</p>
+<hr>
+<h2 id="二、登录框测试"><a href="#二、登录框测试" class="headerlink" title="二、登录框测试"></a>二、登录框测试</h2><p>说实话不是很想测登录框这种东西，大概看了看，就没打算抓包仔细测了。</p>
+<p>登录方式有两种：账号密码 和 手机号。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image1.png"></p>
+<p>随便用了几个弱口令，比如 <code>admin</code>、<code>admin123</code>，登录失败，<strong>发现验证码没有刷新</strong>，这是个可以记一下的点——但是有账号错误次数限制，爆破也不现实。</p>
+<p>手机号那边也不能随便填，会提示账号不存在，说明是先校验了账号是否存在再做后续逻辑，这样爆破也没意义。</p>
+<blockquote>
+<p><strong>小结</strong>：登录框有次数限制 + 手机号存在性校验，暂时没有明显漏洞，换个方向。</p>
+</blockquote>
+<hr>
+<h2 id="三、主页信息收集"><a href="#三、主页信息收集" class="headerlink" title="三、主页信息收集"></a>三、主页信息收集</h2><p>进入主页后，页面有图片和视频，右键查看源代码或者直接复制图片链接，能看到路径：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/upload/video/</span><br><span class="line">/upload/image/</span><br></pre></td></tr></table></figure>
+
+<p>这里就应该想到：<strong>既然有这些路径，那有没有对应的上传接口？</strong></p>
+<p>同时注意 URL，发现页面请求的文件都以 <code>.do</code> 结尾，这一般是 <strong>Struts2 框架</strong> 的特征，记一下。</p>
+<p>随意浏览了一下，只发现一个评论区，顺手测了个最简单的 XSS：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span>alert(1)<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>页面上什么都没显示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image2.png"></p>
+<p>右键搜索也没找到自己写的内容，看起来有过滤，不急，先继续收集信息。</p>
+<p>用 BP 登录后抓包，回显的却是 302 重定向：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image3.png"></p>
+<p>猜测评论接口需要登录鉴权。因为用的是 BP 内置浏览器，没有登录的,  换成登录状态后发包，正常返回 200，但不管发什么内容都是固定回显：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image4.png"></p>
+<p>没什么直接利用价值，先放着。</p>
+<hr>
+<h2 id="四、目录扫描——发现关键接口"><a href="#四、目录扫描——发现关键接口" class="headerlink" title="四、目录扫描——发现关键接口"></a>四、目录扫描——发现关键接口</h2><p>用 Kali 的 <strong>Dirsearch</strong> 扫了一下目录：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260429181803549.png"></p>
+<p>这里有<strong>重大发现</strong>，扫出了两个关键路径：</p>
+<ul>
+<li><code>/;admin</code> — Shiro 鉴权绕过路径</li>
+<li><code>/common/upload.do</code> — 文件上传接口 (这里有点不记得了, 目录扫出来的还是js 代码里面找的)</li>
+</ul>
+<p><code>/;admin</code> 这个是经典的 Shiro 鉴权绕过方式，利用的是<strong>中间件（Nginx&#x2F;Tomcat）与 Shiro 框架对 URL 解析的差异（Normalized Path Error）</strong> 导致的权限绕过，相关漏洞编号 CVE-2020-11989 或类似逻辑漏洞。</p>
+<blockquote>
+<p><strong>原理简述</strong>：Tomcat 会把 <code>/;admin/xxx</code> 中的 <code>;admin</code> 当作 URL 参数部分处理，请求实际到达的路径是 <code>/xxx</code>；但 Shiro 的路由匹配是在 URL 规范化之前做的，看到的路径里没有匹配到受保护规则，就放行了，从而实现绕过。</p>
+</blockquote>
+<hr>
+<h2 id="五、Shiro-鉴权绕过验证"><a href="#五、Shiro-鉴权绕过验证" class="headerlink" title="五、Shiro 鉴权绕过验证"></a>五、Shiro 鉴权绕过验证</h2><p>直接用之前找到的评论接口来验证，先退出登录，然后构造：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/;admin/comment/saveComment.do</span> <span class="meta">HTTP/1.1</span></span><br></pre></td></tr></table></figure>
+
+<p>参数保持和正常请求一致，浏览器退出登录，包里把 Cookie 全删了，点发包——<strong>返回 200</strong>。</p>
+<p>经过多次测试，确认确实存在<strong>鉴权绕过</strong>。</p>
+<hr>
+<h2 id="六、后台目录探测"><a href="#六、后台目录探测" class="headerlink" title="六、后台目录探测"></a>六、后台目录探测</h2><p>既然能绕过鉴权，自然想到直接访问后台。根据目录扫描的结果，测试了疑似后台的路径：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/login_toLogin.do</span><br></pre></td></tr></table></figure>
+
+<p>返回结果全是空白页面，抓包发现是 302 重定向：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image6.png"></p>
+<p>利用分号绕过，访问 <code>/;admin/login_toLogin.do</code>，返回 200 但是”非法访问”：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image7.png"></p>
+<p>换成 POST 发包还是一样，看来是<strong>参数问题</strong>，但不知道具体参数名是什么，暂时放弃这条路。</p>
+<blockquote>
+<p><strong>思路</strong>：遇到这种情况可以考虑基于 HTTP 状态码差分分析做黑盒参数探测——对不同参数名&#x2F;值逐一测试，通过响应差异推断后端逻辑。</p>
+</blockquote>
+<hr>
+<h2 id="七、上传接口黑盒测试"><a href="#七、上传接口黑盒测试" class="headerlink" title="七、上传接口黑盒测试"></a>七、上传接口黑盒测试</h2><p>开始测试 <code>/common/upload.do</code>。</p>
+<p>直接 GET 访问，返回 <strong>405</strong>（Method Not Allowed）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image8.png"></p>
+<p>换成 POST，返回 <strong>200 OK，但响应体里包着 500 异常</strong>。这种现象很典型——请求格式对了，但参数不对，服务端逻辑跑到一半报错了。</p>
+<p>在 Java SpringMVC 框架里，后端接收文件通常用 <code>MultipartFile file</code> 参数，所以构造一个 <code>multipart/form-data</code> 请求：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/common/upload.do</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=----WebKitFormBoundaryCheckParam</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"></span><br><span class="line"><span class="language-pgsql"><span class="comment">------WebKitFormBoundaryCheckParam</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;file&quot;; filename=&quot;test.txt&quot;</span></span><br><span class="line"><span class="language-pgsql">Content-<span class="keyword">Type</span>: <span class="type">text</span>/plain</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">test_content</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------WebKitFormBoundaryCheckParam--</span></span></span><br></pre></td></tr></table></figure>
+
+<p>返回 200，但响应内容是：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;info&quot;</span><span class="punctuation">:</span><span class="string">&quot;typeError&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>翻译过来就是”类型错误”——说明<strong>文件格式有限制</strong>，但接口是通的。</p>
+<p>经过测试，部分文件类型可以上传，比如 <code>.html</code>、<code>.pdf</code> 等，但 <code>.jsp</code> 这些不行。</p>
+<p>换成 PDF 上传后，回显：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;path&quot;</span><span class="punctuation">:</span><span class="string">&quot;/upload/null/20260429/test_423.pdf&quot;</span><span class="punctuation">,</span><span class="attr">&quot;fileNewName&quot;</span><span class="punctuation">:</span><span class="string">&quot;test_423.pdf&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>直接访问这个路径，文件确实可以访问：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image9.png"></p>
+<p>这里有个很有意思的细节——<strong>路径里有个 <code>null</code> 文件夹</strong>。</p>
+<p>这说明后端在拼接路径的时候，代码逻辑大概是这样的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">savePath = <span class="string">&quot;/upload/&quot;</span> + dir + <span class="string">&quot;/&quot;</span> + date + <span class="string">&quot;/&quot;</span> + filename;</span><br></pre></td></tr></table></figure>
+
+<p><code>dir</code> 参数没有传，后端没有做空值处理，直接把 <code>null</code> 字符串拼进去了，这是<strong>路径变量未初始化导致的信息泄露</strong>，间接暴露了后端的代码逻辑结构。</p>
+<hr>
+<h2 id="八、路径穿越测试"><a href="#八、路径穿越测试" class="headerlink" title="八、路径穿越测试"></a>八、路径穿越测试</h2><p>既然路径是字符串拼接，自然想到测试路径穿越。</p>
+<p>经过测试，参数名 <code>dir</code> 是可以被后端读取的，构造如下：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/common/upload.do</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=----WebKitFormBoundaryParamTest</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"></span><br><span class="line"><span class="language-pgsql"><span class="comment">------WebKitFormBoundaryParamTest</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;dir&quot;</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">wrold</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------WebKitFormBoundaryParamTest</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;file&quot;; filename=&quot;test.pdf&quot;</span></span><br><span class="line"><span class="language-pgsql">Content-<span class="keyword">Type</span>: application/pdf</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">test_content</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------WebKitFormBoundaryParamTest--</span></span></span><br></pre></td></tr></table></figure>
+
+<p>返回：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;path&quot;</span><span class="punctuation">:</span><span class="string">&quot;/upload/wrold/20260429/test_854.pdf&quot;</span><span class="punctuation">,</span><span class="attr">&quot;fileNewName&quot;</span><span class="punctuation">:</span><span class="string">&quot;test_854.pdf&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>尝试路径穿越，把 <code>dir</code> 改成 <code>../</code>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;path&quot;</span><span class="punctuation">:</span><span class="string">&quot;/upload/..//20260429/test_715.pdf&quot;</span><span class="punctuation">,</span><span class="attr">&quot;fileNewName&quot;</span><span class="punctuation">:</span><span class="string">&quot;test_715.pdf&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>多级目录也没有过滤：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;path&quot;</span><span class="punctuation">:</span><span class="string">&quot;/upload/../..//20260429/test_641.pdf&quot;</span><span class="punctuation">,</span><span class="attr">&quot;fileNewName&quot;</span><span class="punctuation">:</span><span class="string">&quot;test_641.pdf&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>后端代码逻辑确实非常粗糙，直接做字符串拼接，完全没有做路径规范化校验：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">savePath = root + dir + <span class="string">&quot;/&quot;</span> + date + <span class="string">&quot;/&quot;</span> + filename;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>标准修复方式</strong>：应该对 <code>dir</code> 参数做白名单校验，或者使用 <code>Paths.get(root).resolve(dir).normalize()</code> 后校验结果是否仍在 root 目录内。</p>
+</blockquote>
+<p><strong>但问题是</strong>：<code>.jsp</code> 及其各种变体（<code>.jspx</code>、<code>.JSP</code> 等）全都被拦截了。试了试 <code>00截断</code>，直接触发了 500 响应，而且 IP 还被封了。</p>
+<p>看来这个系统代码写得不咋样，但是对危险操作的检测还挺严的。</p>
+<hr>
+<h2 id="九、XSS-利用与方向转换"><a href="#九、XSS-利用与方向转换" class="headerlink" title="九、XSS 利用与方向转换"></a>九、XSS 利用与方向转换</h2><p>目前能上传的只有 <code>.html</code>，要么用来写钓鱼页面，要么做存储型 XSS。</p>
+<p>写了个简单的测试页面：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"><span class="title function_">alert</span>(<span class="variable language_">document</span>.<span class="property">cookie</span>);</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>上传后访问，cookie 弹窗正常触发：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image10.png"></p>
+<p>这个存储型 XSS 是确实存在的，但 Cookie 能不能利用还得看有没有 <code>HttpOnly</code>，这里先记录，换个思路继续挖。</p>
+<hr>
+<h2 id="十、JS-接口挖掘（幻影插件）"><a href="#十、JS-接口挖掘（幻影插件）" class="headerlink" title="十、JS 接口挖掘（幻影插件）"></a>十、JS 接口挖掘（幻影插件）</h2><p>换个方向，从 JS 代码里找接口。用的是<strong>幻影</strong>这个插件，做深度扫描：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image11.png"></p>
+<p>扫出来的内容还挺多，还能导出 Excel，很方便。</p>
+<hr>
+<h2 id="十一、越权接口"><a href="#十一、越权接口" class="headerlink" title="十一、越权接口"></a>十一、越权接口</h2><p>在扫描结果里，找到了和评论功能相关的三个接口，经过测试，在未授权&#x2F;越权状态下均可操作：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/comment/saveComment.do    # 发表评论</span><br><span class="line">/comment/getCommentTree.do # 获取评论树</span><br><span class="line">/comment/delComment.do     # 删除评论</span><br></pre></td></tr></table></figure>
+
+<p>增删查都能越权，挺典型的 <strong>IDOR（Insecure Direct Object Reference）</strong> 问题。</p>
+<hr>
+<h2 id="十二、Druid-监控台发现"><a href="#十二、Druid-监控台发现" class="headerlink" title="十二、Druid 监控台发现"></a>十二、Druid 监控台发现</h2><p>后来 AI 提示我，既然 <code>/;admin</code> 可以绕过鉴权，那可以在这个前缀下再扫一次，针对性地加上后缀过滤：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dirsearch -u <span class="string">&quot;https://目标/;admin/&quot;</span> -e <span class="keyword">do</span>,jsp,xml,json,sql -x 404</span><br></pre></td></tr></table></figure>
+
+<p><code>-e</code> 只看这些后缀，<code>-x</code> 排除 404，这样结果会干净很多。</p>
+<p>果然扫出来了 <strong>Druid 监控台</strong>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/druid/index.html</span><br></pre></td></tr></table></figure>
+
+<p>访问后需要账号密码：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image12.png"></p>
+<p>去网上查了一下默认密码，对不上，暂时先放着。</p>
+<blockquote>
+<p><strong>Druid 监控台</strong>（<code>com.alibaba.druid</code>）是 Java 应用常见的连接池监控组件，默认配置下可能暴露 SQL 查询记录、会话信息、接口调用统计等，是信息收集的好地方。默认密码一般是 <code>admin/admin</code> 或者 <code>druid/druid</code>。</p>
+</blockquote>
+<hr>
+<h2 id="十三、Shiro-漏洞利用-Getshell"><a href="#十三、Shiro-漏洞利用-Getshell" class="headerlink" title="十三、Shiro 漏洞利用 &amp; Getshell"></a>十三、Shiro 漏洞利用 &amp; Getshell</h2><p><strong>Shiro 特征确认</strong></p>
+<p><code>/;admin</code> 越权本质上是 Shiro 的漏洞，虽然登录框没有”记住我”这种明显入口，但抓包发现部分回显包里有：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rememberMe=deleteMe</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image13.png"></p>
+<p>这就说明后端用了 Shiro，<code>deleteMe</code> 是 Shiro 在认为 Cookie 无效时的固定回应，反而把自己暴露了。既然确认了 Shiro，那就顺着测一下反序列化。</p>
+<p><strong>Key 爆破</strong></p>
+<p>用的是 GitHub 上的工具：<a target="_blank" rel="noopener" href="https://github.com/SummerSec/ShiroAttack2">ShiroAttack2</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image14.png"></p>
+<p>直接填域名检测不到 Shiro，因为并不是所有页面都走 Shiro 鉴权，要找一个有鉴权的目录填进去，才能正常爆破。</p>
+<p>但爆破的时候提示”未读取到可用于爆破的 Key 列表”，应该是工具没找到字典，换了一个工具继续尝试，惊喜出现了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[++] 找到 key：4AvVhmFLUs0KTA3Kprsdag==</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260429182705483.png"></p>
+<p>这个 Key 就是 Shiro 的 <code>rememberMe</code> Cookie 加解密密钥，很多系统用的默认密钥或者弱密钥，网上有现成字典。</p>
+<p><strong>链爆破</strong></p>
+<p>把密钥填回 ShiroAttack2，点击”全部链爆破”——<strong>结果全部失败</strong>。</p>
+<p>刚准备自己用 URLDNS 链测一下的时候，AI 提醒我可能是 Cookie 的问题，一下就点醒我了，填上了一行正确的 Cookie 后再试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CommonsBeanutils1（CB1）链成功</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260429182808529.png"></p>
+<p>切换到命令执行界面，<code>whoami</code>、<code>id</code>、<code>ifconfig</code> 一顿乱敲，完全没有问题，而且是 <strong>root 权限</strong>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image17.png"></p>
+<blockquote>
+<p><strong>关于 CB1 链</strong>：<code>CommonsBeanutils1</code> 是利用 <code>commons-beanutils</code> 组件的反序列化链，不依赖 <code>commons-collections</code>，在很多裁剪了 CC 依赖的环境里依然可用，是 Shiro 利用的高频链之一。这里 Cookie 问题指的是请求里的 Session Cookie 影响了服务端的反序列化处理逻辑，加上对应的认证 Cookie 后请求才能被正确路由。</p>
+</blockquote>
+<hr>
+<h2 id="十四、EDR-对抗与后渗透尝试"><a href="#十四、EDR-对抗与后渗透尝试" class="headerlink" title="十四、EDR 对抗与后渗透尝试"></a>十四、EDR 对抗与后渗透尝试</h2><p>成功执行命令之后，发现目标有 168 和 10 两个网段，说不定有内网机器，想法很好，但执行起来很难。</p>
+<p><strong>内存马注入尝试</strong></p>
+<p>尝试了几个内存马注入方式，要么直接报错，要么立刻封我 IP，就没再继续了。用的一直是梯子，没钱用代理池，太难受了。</p>
+<blockquote>
+<p><strong>说明</strong>：当前命令回显也是通过反序列化注入的内存马实现的，不是真正的交互式终端，很多命令不支持，比如管道符之类的，危险命令还会直接触发 IP 封禁。</p>
+</blockquote>
+<p><strong>SSH 密钥植入尝试</strong></p>
+<p>想写 SSH 密钥来建立稳定连接，折腾了一顿，发现对方的 SSH 版本超级老，适配版本之后，又被 EDR 检测到了。</p>
+<p><code>ps</code> 一看，竟然装了<strong>天融信或深信服的 EDR</strong>（记不太清了），反正很难缠。</p>
+<blockquote>
+<p><strong>EDR 检测原理</strong>：现代 EDR 不只看文件，还会监控进程行为、系统调用、网络连接等。SSH 密钥植入会触发文件写入 + sshd 重新读取 authorized_keys 的行为链，大概率被行为检测命中。</p>
+</blockquote>
+<hr>
+<h2 id="十五、数据库与配置文件读取"><a href="#十五、数据库与配置文件读取" class="headerlink" title="十五、数据库与配置文件读取"></a>十五、数据库与配置文件读取</h2><p><strong>数据库连接尝试</strong></p>
+<p><code>ssh</code> 不行就看数据库，发现数据库和网站部署在同一目录下。尝试直接连接，被拦了；从自己机器连也被阻拦，出口防火墙策略很严。或许可以用反弹方式中转，但没有公网服务器，而且大概率依然会被封，就没继续了。</p>
+<p>危险操作也不能随便测，虽然是授权的，但也不想搞破坏。</p>
+<p><strong>Druid 配置文件读取</strong></p>
+<p>想起来之前发现的 Druid，直接通过命令执行读配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /opt/xxx/tomcat/webapps/ROOT/WEB-INF/web.xml</span><br></pre></td></tr></table></figure>
+
+<p>找到了 Druid 的账号密码，直接登录监控后台：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image18.png"></p>
+<p>看了一下里面的内容，对于已经有命令执行权限的我来说，Druid 后台能给的信息价值相对就没那么大了。</p>
+<p><strong>历史命令 &amp; 数据库配置</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /root/.bash_history</span><br></pre></td></tr></table></figure>
+
+<p>读了历史命令，发现了数据库配置文件路径，继续读：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /opt/xxx/tomcat/webapps/ROOT/WEB-INF/classes/dbconfig.properties</span><br></pre></td></tr></table></figure>
+
+<p>数据库配置倒是拿到了，但连接不上，出口流量全被拦死了，暂时没有更好的办法。</p>
+<p>到下午，测试就到此为止了，因为 EDR 的缘故后续基本很难继续推进。</p>
+<hr>
+<h2 id="十六、找cms漏洞"><a href="#十六、找cms漏洞" class="headerlink" title="十六、找cms漏洞"></a>十六、找cms漏洞</h2><p>其实还找到一个文件上传的漏洞插件</p>
+<p>思路就是拿到权限后简单看了一下文件和结构, 进过ai分析应该是有一个cms啥的类似的插件, 在网上搜一下历史漏洞, 果然有就是不知道能不能用, 抱着试一下的心态真的成功了</p>
+<p>但是忘记了能不能解析jsp 来着, 应该还是不能的</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这次渗透的整体链路大概是这样的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">目录扫描 → 发现 /;admin（Shiro 鉴权绕过）+ /common/upload.do</span><br><span class="line">    ↓</span><br><span class="line">上传接口黑盒测试 → 路径穿越 + 类型限制（JSP 被拦）</span><br><span class="line">    ↓</span><br><span class="line">JS 接口挖掘 → 越权操作（评论 CRUD 全越权）</span><br><span class="line">    ↓</span><br><span class="line">发现 rememberMe=deleteMe → 确认 Shiro → Key 爆破成功</span><br><span class="line">    ↓</span><br><span class="line">CB1 链反序列化利用 → 命令执行（root）</span><br><span class="line">    ↓</span><br><span class="line">内存马注入失败（EDR 拦截）→ SSH 植入失败（EDR 拦截）→ 数据库连接失败（防火墙拦截）</span><br><span class="line">    ↓</span><br><span class="line">读配置文件 → Druid 后台登录 → 数据库配置读取（无法利用）</span><br></pre></td></tr></table></figure>
+
+<p><strong>几点体会</strong>：</p>
+<ol>
+<li><p><strong>URL 要时常关注</strong>，<code>.do</code> 后缀这种框架特征是很重要的信息，能帮助判断技术栈，进而找对应的历史漏洞。</p>
+</li>
+<li><p><strong>目录扫描不只扫一次</strong>，发现鉴权绕过路径（如 <code>/;admin</code>）之后，可以在这个路径前缀下再扫一轮，经常有意外收获，这次的 Druid 就是这么发现的。</p>
+</li>
+<li><p><strong>状态码差异是探针</strong>，GET 返回 405、POST 返回 200 包裹 500，这种组合就在告诉你”方法对了，参数不对”，是黑盒测试里很常见的信号。</p>
+</li>
+<li><p><strong><code>null</code> 路径是代码质量的泄露</strong>，响应里出现 <code>/upload/null/</code> 这种东西，直接说明后端字符串拼接没做空值保护，路径穿越测试优先级拉满。</p>
+</li>
+<li><p><strong>Shiro 的 <code>rememberMe=deleteMe</code></strong> 是个非常明显的特征，即使没有”记住我”的前端入口，抓包看响应头也能发现，这个特征出现了就一定要跟进测。</p>
+</li>
+<li><p><strong>链不对 Cookie 也不对，两个问题同时存在会让你完全摸不着头脑</strong>，这次 CB1 能成功很大程度上是因为 AI 提示了 Cookie 的问题，要不然可能就认为这个链不可用了。</p>
+</li>
+<li><p><strong>在有 EDR 的环境里</strong>，文件落地类操作（写 Shell、植入 SSH 密钥）基本是死路，内存马是更优先的选择，但内存马注入本身也有行为特征，整体难度上了一个台阶。</p>
+</li>
+</ol>
+<hr>
+</article>
+<div class="article-footer">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<div class="widgets">
+
+<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%AE%B0%E4%B8%80%E6%AC%A1%E5%B8%B8%E6%80%81%E5%8C%96%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95%EF%BC%9A%E4%BB%8E%E5%9F%9F%E5%90%8D%E5%88%B0-Getshell-%E7%9A%84%E6%80%9D%E8%B7%AF"><span class="toc-text">记一次常态化渗透测试：从域名到 Getshell 的思路</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%88%9D%E5%A7%8B%E8%B5%84%E4%BA%A7%E4%BE%A6%E5%AF%9F"><span class="toc-text">一、初始资产侦察</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E7%99%BB%E5%BD%95%E6%A1%86%E6%B5%8B%E8%AF%95"><span class="toc-text">二、登录框测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E4%B8%BB%E9%A1%B5%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-text">三、主页信息收集</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%9B%AE%E5%BD%95%E6%89%AB%E6%8F%8F%E2%80%94%E2%80%94%E5%8F%91%E7%8E%B0%E5%85%B3%E9%94%AE%E6%8E%A5%E5%8F%A3"><span class="toc-text">四、目录扫描——发现关键接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81Shiro-%E9%89%B4%E6%9D%83%E7%BB%95%E8%BF%87%E9%AA%8C%E8%AF%81"><span class="toc-text">五、Shiro 鉴权绕过验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81%E5%90%8E%E5%8F%B0%E7%9B%AE%E5%BD%95%E6%8E%A2%E6%B5%8B"><span class="toc-text">六、后台目录探测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E4%B8%8A%E4%BC%A0%E6%8E%A5%E5%8F%A3%E9%BB%91%E7%9B%92%E6%B5%8B%E8%AF%95"><span class="toc-text">七、上传接口黑盒测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E8%B7%AF%E5%BE%84%E7%A9%BF%E8%B6%8A%E6%B5%8B%E8%AF%95"><span class="toc-text">八、路径穿越测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81XSS-%E5%88%A9%E7%94%A8%E4%B8%8E%E6%96%B9%E5%90%91%E8%BD%AC%E6%8D%A2"><span class="toc-text">九、XSS 利用与方向转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81JS-%E6%8E%A5%E5%8F%A3%E6%8C%96%E6%8E%98%EF%BC%88%E5%B9%BB%E5%BD%B1%E6%8F%92%E4%BB%B6%EF%BC%89"><span class="toc-text">十、JS 接口挖掘（幻影插件）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%80%E3%80%81%E8%B6%8A%E6%9D%83%E6%8E%A5%E5%8F%A3"><span class="toc-text">十一、越权接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%BA%8C%E3%80%81Druid-%E7%9B%91%E6%8E%A7%E5%8F%B0%E5%8F%91%E7%8E%B0"><span class="toc-text">十二、Druid 监控台发现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%B8%89%E3%80%81Shiro-%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8-Getshell"><span class="toc-text">十三、Shiro 漏洞利用 &amp; Getshell</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E5%9B%9B%E3%80%81EDR-%E5%AF%B9%E6%8A%97%E4%B8%8E%E5%90%8E%E6%B8%97%E9%80%8F%E5%B0%9D%E8%AF%95"><span class="toc-text">十四、EDR 对抗与后渗透尝试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E4%BA%94%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96"><span class="toc-text">十五、数据库与配置文件读取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E5%85%AD%E3%80%81%E6%89%BEcms%E6%BC%8F%E6%B4%9E"><span class="toc-text">十六、找cms漏洞</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=1.33.1" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: none !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
