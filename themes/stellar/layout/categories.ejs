@@ -3,6 +3,7 @@ page.robots = 'noindex,follow';
 if (page.menu_id == undefined) {
   page.menu_id = 'post';
 }
+page.rightbar = 'catnav'
 %>
 <%- partial('_partial/main/navbar/nav_tabs_blog') %>
 <div class='post-list categories-page' id="categories-container">
@@ -83,14 +84,14 @@ if (page.menu_id == undefined) {
           var children = getChildCategories(parentCat);
           var hasChildren = children.length > 0;
         %>
-          <div class="category-card">
+          <div class="category-card" id="cat-<%- parentCat.name %>">
             <div class="card-header">
               <h2 class="card-title"><%- parentCat.name %></h2>
               <span class="card-count"><%- getPostCount(parentCat) %></span>
             </div>
             <% if (hasChildren) { %>
               <% children.forEach(function(childCat) { %>
-                <div class="child-category">
+                <div class="child-category" id="cat-<%- childCat.name %>">
                   <div class="child-header">
                     <span class="child-name"><%- childCat.name %></span>
                     <span class="child-count"><%- getPostCount(childCat) %></span>
@@ -130,7 +131,7 @@ if (page.menu_id == undefined) {
             var hasChildren = children.length > 0;
             var position = index % 2 === 0 ? 'left' : 'right';
           %>
-            <div class="timeline-item <%= position %>">
+            <div class="timeline-item <%= position %>" id="cat-<%- parentCat.name %>">
               <div class="timeline-connector"></div>
               <div class="timeline-dot"></div>
               <div class="timeline-content">
@@ -142,7 +143,7 @@ if (page.menu_id == undefined) {
                 <div class="category-articles">
                   <% if (hasChildren) { %>
                     <% children.forEach(function(childCat) { %>
-                      <div class="child-section">
+                      <div class="child-section" id="cat-<%- childCat.name %>">
                         <div class="child-title"><%- childCat.name %> (<%- getPostCount(childCat) %>)</div>
                         <% childCat.posts.sort('-date').limit(3).each(function(post){ %>
                           <a href="<%= url_for(post.path) %>" class="article-link">
@@ -199,6 +200,36 @@ if (page.menu_id == undefined) {
       applyCategoriesStyle(e.newValue);
     }
   });
+  
+  // 分类导航 - 平滑滚动 + 高亮跟踪
+  document.querySelectorAll('.catnav-link, .catnav-child').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+  
+  var catnavLinks = document.querySelectorAll('.catnav-link, .catnav-child');
+  if (catnavLinks.length > 0) {
+    var catSections = [];
+    catnavLinks.forEach(function(link) {
+      var target = document.querySelector(link.getAttribute('href'));
+      if (target) catSections.push({ el: target, link: link });
+    });
+    window.addEventListener('scroll', function() {
+      var scrollTop = window.scrollY + 100;
+      var active = null;
+      catSections.forEach(function(s) {
+        var top = s.el.getBoundingClientRect().top + window.scrollY;
+        if (top <= scrollTop) active = s;
+      });
+      catnavLinks.forEach(function(l) { l.classList.remove('active'); });
+      if (active) active.link.classList.add('active');
+    }, { passive: true });
+  }
 })();
 </script>
 

@@ -22,6 +22,10 @@ categories:
   show_count: true
   columns: 1
 
+# 分类导航目录
+catnav:
+  layout: catnav
+
 # Recent update
 recent:
   layout: recent
