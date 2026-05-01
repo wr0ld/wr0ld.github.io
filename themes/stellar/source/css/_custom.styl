@@ -670,9 +670,27 @@ html.reverse-both
     font-size: 1.1em !important
     color: var(--text, #fff) !important
     transition: all 0.2s
+    position: relative
+    padding-bottom: 0.35em !important
+    &:after
+      content: ''
+      position: absolute
+      left: 0
+      bottom: 0
+      width: 50px
+      height: 2px
+      border-radius: 2px
+      background: linear-gradient(90deg, #4A90D9, #7B2FBE, #2D1B69, #000000)
+      background-size: 200% 100%
+      animation: headingGlow 3s ease-in-out infinite
+      opacity: 0.6
+      trans1 all
   
   &:hover .post-title
     color: var(--theme, #3498db) !important
+    &:after
+      width: 70px
+      opacity: 1
 
 .post-list.list .post-title,
 .post-list.grid .post-title,
@@ -1111,10 +1129,11 @@ button:not(.layout-toggle-btn), .filter-btn, .nav-home
     opacity: 1
     transform: translateY(0)
 
-// ---------- 3. 标题左侧渐变装饰线 ----------
+// ---------- 3. 标题左侧渐变装饰线 + 底部渐变横条 ----------
 .md-text.content h2
   position: relative
   padding-left: 1rem !important
+  padding-bottom: 0.4em !important
   &:before
     content: ''
     position: absolute
@@ -1130,10 +1149,23 @@ button:not(.layout-toggle-btn), .filter-btn, .nav-home
   &:hover:before
     height: 90%
     opacity: 1
+  &:after
+    content: ''
+    position: absolute
+    left: 0
+    bottom: 0
+    width: 80px
+    height: 3px
+    border-radius: 2px
+    background: linear-gradient(90deg, #4A90D9, #7B2FBE, #2D1B69, #000000)
+    background-size: 200% 100%
+    animation: headingGlow 3s ease-in-out infinite
+    box-shadow: 0 0 6px rgba(74, 144, 217, 0.3), 0 0 12px rgba(123, 47, 190, 0.2)
 
 .md-text.content h3
   position: relative
   padding-left: 0.8rem !important
+  padding-bottom: 0.3em !important
   &:before
     content: ''
     position: absolute
@@ -1149,6 +1181,24 @@ button:not(.layout-toggle-btn), .filter-btn, .nav-home
   &:hover:before
     height: 80%
     opacity: 0.9
+  &:after
+    content: ''
+    position: absolute
+    left: 0
+    bottom: 0
+    width: 40px
+    height: 2px
+    border-radius: 2px
+    background: linear-gradient(90deg, #4A90D9, #7B2FBE, transparent)
+    background-size: 200% 100%
+    animation: headingGlow 3s ease-in-out infinite
+    opacity: 0.6
+
+@keyframes headingGlow
+  0%, 100%
+    background-position: 0% 50%
+  50%
+    background-position: 100% 50%
 
 // ---------- 4. 代码块增强 ----------
 .md-text .highlight
