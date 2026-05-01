@@ -80,7 +80,10 @@ if (theme.style.prefers_theme === 'auto') {
         html += `<div class="main-mask" onclick="sidebar.dismiss()"></div>`
       html += `</div>`
       html += `<aside class="l_right">`
-        html += partial('_partial/sidebar/index_rightbar')
+        html += `<div class="sidebg"></div>`
+        html += `<div class="rightbar-container">`
+          html += partial('_partial/sidebar/index_rightbar')
+        html += `</div>`
       html += `</aside>`
       html += partial('_partial/menubtn')
     html += `</div>`

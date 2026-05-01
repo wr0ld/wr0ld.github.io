@@ -22,9 +22,8 @@
 .l_body .l_right
   justify-self: left
   max-height: calc(100% - calc(var(--gap-margin) * 2) * 2)
-  .widgets
+  .rightbar-container
     height: 100%
-    overflow visible
 
 // 平板布局
 @media screen and (max-width: $device-laptop)
@@ -45,9 +44,7 @@
       max-height: 'calc(%s - %s * 2 - %s)' % (100vh var(--gap-margin) $rightbar-bottom-margin)
       box-shadow: $boxshadow-card-float
       z-index: 10
-      background: var(--background)
-      overflow: auto
-      scrollbar(0, 0)
+      height: 100%
       --blur-bg: var(--bg-a60)
       --blur-px: 50px
   .l_body[rightbar]

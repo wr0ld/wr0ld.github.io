@@ -88,3 +88,53 @@
       --saturate: 300%
     .leftbar-container:after
       background: var(--bg-a20)
+  .l_right
+    .sidebg
+      display: none
+    .rightbar-container
+      background: none
+
+// 右侧边栏容器（与左侧一致）
+.l_right
+  position relative
+  .sidebg
+    pointer-events: none
+    position: absolute
+    inset: 0
+    border-radius: $border-card-l
+    background: var(--bg-a20)
+    backdrop-filter: blur(10px) saturate(200%)
+    -webkit-backdrop-filter: blur(10px) saturate(200%)
+  .rightbar-container
+    position relative
+    height: 100%
+    display: flex
+    flex-direction: column
+    border-radius: $border-card-l
+    overflow: hidden
+    >.widgets
+      border-radius: $border-bar
+      mask: linear-gradient(white, 90%, transparent)
+      -webkit-mask: linear-gradient(white, 90%, transparent)
+      overflow-y: auto
+      scrollbar(0, 0)
+    >*
+      z-index 1
+    &:before
+      position: absolute
+      pointer-events: none
+      content: ''
+      top: 0
+      bottom: 0
+      left: 0
+      right: 0
+      border-radius: $border-card-l
+      background: rgba(white, 0.5)
+      box-shadow: inset 0 0 32px 1px rgba(white, 0.5)
+      backdrop-filter: saturate(300%)
+      -webkit-backdrop-filter: saturate(300%)
+      mask: linear-gradient(black, rgba(black, 0.5), 70%, transparent, 90%, transparent)
+      -webkit-mask: linear-gradient(black, rgba(black, 0.5), 70%, transparent, 90%, transparent)
+      @media (prefers-color-scheme: dark)
+        background: rgba(white, 0.05)
+        box-shadow: inset 0 0 32px 1px rgba(white, 0.1)
