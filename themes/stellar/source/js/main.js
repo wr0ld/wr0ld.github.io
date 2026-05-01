@@ -335,8 +335,8 @@ document.addEventListener('DOMContentLoaded', function() {
       var y = e.clientY - rect.top;
       var centerX = rect.width / 2;
       var centerY = rect.height / 2;
-      var rotateX = (y - centerY) / centerY * -3.5;
-      var rotateY = (x - centerX) / centerX * 3.5;
+      var rotateX = (y - centerY) / centerY * -5;
+      var rotateY = (x - centerX) / centerX * 5;
       this.style.setProperty('transition', 'none', 'important');
       this.style.transform = 'perspective(1000px) translateY(-3px) scale3d(1.005,1.005,1.005) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
     });
