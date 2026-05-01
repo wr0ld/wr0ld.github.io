@@ -138,6 +138,11 @@ function safe_json(str) {
       } else {
         // 其他布局：恢复原始分页HTML
         postContainer.innerHTML = originalHTML;
+        // 移除 slide-up 类（避免新 DOM 未被 ScrollReveal 观测导致隐藏）
+        // 卡片入场效果由 CSS 动画 .post-card 自带动画兜底
+        postContainer.querySelectorAll('.slide-up').forEach(function(el) {
+          el.classList.remove('slide-up');
+        });
         let postList = postContainer.querySelector('.post-list');
         postList.classList.remove('list', 'grid', 'compact', 'title-only');
         postList.classList.add(layout);

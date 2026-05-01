@@ -1029,10 +1029,24 @@ a.post-card .breadcrumb span
 
 // ---------- 卡片悬停增强 ----------
 .post-card
+  animation: cardFadeIn 0.3s ease both
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important
   &:hover
     transform: translateY(-3px) scale(1.005) !important
     box-shadow: 0 0 6px -2px rgba(255, 255, 255, 0.7), 0 0 40px -8px rgba(255, 255, 255, 0.35) !important
+
+// 卡片入场动画（逐个出现，40ms 间隔，快速但有序）
+@keyframes cardFadeIn
+  from
+    opacity: 0
+    transform: translateY(12px) scale(0.98)
+  to
+    opacity: 1
+    transform: translateY(0) scale(1)
+
+for n in (1..20)
+  .post-card:nth-child({n})
+    animation-delay: (n - 1) * 40ms
 
 // ---------- 分类卡片悬停 ----------
 .category-card
