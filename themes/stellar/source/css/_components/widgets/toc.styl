@@ -1,21 +1,27 @@
 .widget-wrapper.toc
   z-index 3
+  position relative
+  overflow visible
+
+  // 背景毛玻璃效果
+  background: var(--background)
+  border: 1px solid var(--block-border)
+  border-radius: 12px
+  backdrop-filter: blur(10px)
+  -webkit-backdrop-filter: blur(10px)
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06)
+
   .widget-body
     position relative
     &:before
       content: ''
       position absolute
-      top: 6px
-      bottom: 6px
-      left: 0
-      width: 4px
-      background: var(--block)
-      border-radius: 4px
-  
-  if !$site-background-image
-    @media screen and (min-width: $device-laptop)
-      background: var(--background)
-
+      top: 8px
+      bottom: 8px
+      left: 16px
+      width: 2px
+      background: var(--block-border)
+      border-radius: 2px
 
 // 目录基本样式
 .widget-wrapper.toc .toc
@@ -30,33 +36,92 @@
   a
     --padding: calc(var(--gap-padding) / 2)
     --padding-offset: calc(0 - var(--padding))
-    padding: 4px var(--padding)
-    margin: 0 var(--padding)
+    padding: 6px var(--padding)
+    padding-left: 28px
+    margin: 1px 8px
     color: var(--text-p3)
     display: block
     position relative
-    border-radius: $border-bar
+    border-radius: 6px
     trans1 all
-    &.active:before
+    font-weight: 400
+    letter-spacing: 0.2px
+    overflow: hidden
+
+    // 背景水波纹效果
+    &::after
       content: ''
-      position absolute
-      top: 6px
-      bottom: 6px
-      left: -8px
-      width: 4px
-      background: var(--theme)
-      border-radius: 4px
+      position: absolute
+      inset: 0
+      border-radius: 6px
+      background: linear-gradient(135deg, var(--theme), #7B2FBE)
+      opacity: 0
+      transform: scaleX(0.8) scaleY(0.3)
+      trans1 all
+      z-index: -1
+
     &:hover
-      background: var(--block-border)
       color: var(--text)
-    
+      background: var(--block-border)
+      transform: translateX(3px)
+
+    // 激活状态 - 霓虹光效
+    &.active
+      color: #fff !important
+      font-weight: 500
+      text-shadow: 0 0 8px rgba(123, 47, 190, 0.3)
+      transform: translateX(4px)
+
+      &::after
+        opacity: 1
+        transform: scaleX(1) scaleY(1)
+
+      // 左侧发光指示器
+      &:before
+        content: ''
+        position: absolute
+        top: 50%
+        left: 0
+        transform: translateY(-50%)
+        width: 3px
+        height: 18px
+        background: linear-gradient(180deg, #4A90D9, #7B2FBE)
+        border-radius: 2px
+        box-shadow: 0 0 8px rgba(74, 144, 217, 0.5), 0 0 16px rgba(123, 47, 190, 0.3)
+        animation: tocGlow 2s ease-in-out infinite
+
+// 霓虹光脉冲动画
+@keyframes tocGlow
+  0%, 100%
+    box-shadow: 0 0 8px rgba(74, 144, 217, 0.5), 0 0 16px rgba(123, 47, 190, 0.3)
+  50%
+    box-shadow: 0 0 12px rgba(74, 144, 217, 0.7), 0 0 24px rgba(123, 47, 190, 0.5)
+
+// 左侧背景竖线装饰
+.widget-wrapper.toc .widget-body
+  &::after
+    content: ''
+    position: absolute
+    top: 8px
+    bottom: 8px
+    left: 16px
+    width: 2px
+    background: linear-gradient(180deg, #4A90D9 0%, #7B2FBE 50%, transparent 100%)
+    border-radius: 2px
+    opacity: 0
+    trans1 all
+
+.widget-wrapper.toc .widget-body:has(a.active)
+  &::after
+    opacity: 1
+
 // 固定位置
 .l_right .widgets .widget-wrapper.toc
   margin-top: 0
   position: sticky
   position: -webkit-sticky
   top: calc(var(--gap-margin) * 1)
-  padding: 16px 0
+  padding: 12px 0
   &:first-child
     top: calc(var(--gap-margin) * 2)
     padding-top: 1rem
@@ -69,77 +134,81 @@
     overflow: auto
     scrollbar(0, 0)
 
-
-
 // 各级缩进样式
 .widget-wrapper.toc .toc
   .toc-item
     font-weight: 500
-    --fsp: $fsp1
+    --fsp: $fsp2
   .toc-item .toc-item
     font-weight: 400
-    --fsp: $fsp2
+    --fsp: $fsp3
   ol
     padding-left: 0
+  .toc-child
+    overflow: hidden
+    trans1 all
   .toc-child .toc-link
-    padding-left: 1.5rem
+    padding-left: 40px
   .toc-child .toc-child .toc-link
-    padding-left: 2.5rem
+    padding-left: 52px
   .toc-child .toc-child .toc-child .toc-link
-    padding-left: 3.5rem
+    padding-left: 64px
   .toc-child .toc-child .toc-child .toc-child .toc-link
-    padding-left: 4.5rem
+    padding-left: 76px
   .toc-child .toc-child .toc-child .toc-child .toc-child .toc-link
-    padding-left: 5rem
+    padding-left: 88px
 
 // 高亮样式
 .widget-wrapper.toc .toc a.toc-link.active
-  color: var(--text)
+  color: #fff
   &:before,&:after
     content: ''
 
-// 始终折叠
-.widget-wrapper.toc[collapse='true']
-  .toc-item a.toc-link+ol
-    display: none
-  // 激活上级目录时显示子目录
-  .toc a.toc-link.active+ol
-    display: block
-
-// 自动折叠
+// 子目录展开/折叠动画
+.widget-wrapper.toc[collapse='true'],
 .widget-wrapper.toc[collapse='auto']
   .toc-item a.toc-link+ol
-    display: none
-  // 激活上级目录时显示子目录
+    max-height: 0
+    opacity: 0
+    overflow: hidden
+    trans1 all
+    transform: translateY(-4px)
   .toc a.toc-link.active+ol
-    display: block
-  // 鼠标放上去时显示子目录
+    max-height: 300px
+    opacity: 1
+    transform: translateY(0)
+
+.widget-wrapper.toc[collapse='auto']
   &:hover a.toc-link+ol
-    display: block
+    max-height: 300px
+    opacity: 1
+    transform: translateY(0)
 
 // 子目录激活时显示
-.widget-wrapper.toc[collapse='true'] ol:has(> .toc-item a.active)
-  display: block
+.widget-wrapper.toc[collapse='true'] ol:has(> .toc-item a.active),
 .widget-wrapper.toc[collapse='auto'] ol:has(> .toc-item a.active)
-  display: block
+  max-height: 300px
+  opacity: 1
+  transform: translateY(0)
 
-// 手动折叠
-.widget-wrapper.toc 
+// 折叠/展开按钮
+.widget-wrapper.toc .widget-header
+  cursor: pointer
+  user-select: none
+
+.widget-wrapper.toc
   .widget-body
     display: grid
     grid-template-rows: 1fr
     trans1 all
     overflow hidden
-.l_right .widgets .widget-wrapper.toc .widget-header .cap-action:hover
-  background: var(--block-border)
+
 .l_right .widgets .widget-wrapper.toc.collapse
-  .widget-header .cap-action
-    background: var(--block-border)
   .widget-body
     grid-template-rows: 0fr
 
 // 编辑本文按钮
-.widget-wrapper.toc .widget-body+.widget-footer:before 
+.widget-wrapper.toc .widget-body+.widget-footer:before
   content: ''
   position absolute
   background: var(--block-border)
@@ -147,6 +216,7 @@
   height: 1px
   left: var(--gap-padding)
   right: var(--gap-padding)
+
 .widget-wrapper.toc .widget-footer
   margin-top: 8px
   color: var(--text-p2)
@@ -158,14 +228,14 @@
     color: inherit
     font-size: $fs-14
     padding: 8px var(--gap-padding)
-    border-radius: $border-bar
+    border-radius: 6px
     trans1 all
     svg,img
       height: 16px
       width: auto
       margin-right: 8px
   a:hover
-    background: var(--block-border)
+    background: var(--block)
     color: var(--text)
 
 .widget-wrapper.toc+.widget-wrapper
@@ -178,6 +248,9 @@
       .widget-wrapper.toc
         position: static
         background: none
+        border: none
+        backdrop-filter: none
+        box-shadow: none
   .widget-wrapper.toc .toc
     a
       color: var(--text-p2)

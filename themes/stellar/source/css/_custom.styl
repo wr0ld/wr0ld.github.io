@@ -855,40 +855,8 @@ html.reverse-both
       font-weight: 500
       color: #fff !important
     
-    .collapse-toggle
-      position: relative
-      z-index: 1
-      display: flex
-      align-items: center
-      justify-content: center
-      width: 20px
-      height: 20px
-      border-radius: 6px
-      background: rgba(255, 255, 255, 0.1)
-      border: 1px solid rgba(255, 255, 255, 0.15)
-      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1)
-      
-      i
-        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)
-        font-size: 10px
-        color: var(--text-p2)
-    
-    &:hover .collapse-toggle
-      background: rgba(255, 255, 255, 0.15)
-      border-color: rgba(255, 255, 255, 0.2)
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1)
-      
-      i
-        color: var(--text-p1)
-        transform: translateY(1px)
   
   &.collapsed
-    .widget-header .collapse-toggle i
-      transform: rotate(-90deg)
-    
-    .widget-header:hover .collapse-toggle i
-      transform: rotate(-90deg) translateY(1px)
-    
     .widget-body
       display: none
   

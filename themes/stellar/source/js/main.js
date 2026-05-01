@@ -144,14 +144,21 @@ const init = {
         }
       }
       
+      var ticking = false;
       var timeout = null;
       window.addEventListener('scroll', function() {
-        activeTOC();
+        if (!ticking) {
+          requestAnimationFrame(function() {
+            activeTOC();
+            ticking = false;
+          });
+          ticking = true;
+        }
         if(timeout !== null) clearTimeout(timeout);
         timeout = setTimeout(function() {
           scrollTOC();
-        }.bind(this), 50);
-      });      
+        }.bind(this), 100);
+      }, { passive: true });      
     })
   },
   sidebar: () => {
