@@ -76,7 +76,7 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Website","@id":"https://wr0ld.github.io/live2d-widget/demo/demo/","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"name":"blog","description":"\n\n\n\nLive2D 看板娘 / Demo\n\n#github svg {\n\ttransition: all 1s;\n\tfill: #222;\n\tcolor: #fff;\n\tposition: absolute;\n\ttop: 0;\n\tright: 0;\n\tborder: 0;\n\twidth: 80px;\n\theight: 80px;\n}\n#github:hover svg {\n\twidth: ...","url":"https://wr0ld.github.io/live2d-widget/demo/demo/","keywords":"blog, hexo, stellar, 技术, 编程"}</script>
   
 </head>
-<body>
+<body><div class="reading-progress-bar"></div>
 
 <div class="l_body content" id="start" layout="page" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
@@ -95,7 +95,7 @@
 
 
 
-<div class="article banner top">
+<div class="article banner slide-up top">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 
@@ -105,7 +105,7 @@
 <div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-03-31T15:48:34.851Z">2026-03-31</time></span><span class="sep"></span><span class="text word-count">字数：171</span><span class="sep"></span><span class="text img-count">图片：0</span></div></div></div>
     
   </div>
-  </div><article class="md-text content"><!DOCTYPE html>
+  </div><article class="md-text content slide-up"><!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -143,9 +143,9 @@
 
 
 
-<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
-<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-</aside><div class='float-panel'>
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
+</div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
   </button>
@@ -446,6 +446,7 @@
   });
 </script>
 <script>
+  const l_body = document.querySelector('.l_body');
   const sidebar = {
     leftbar: () => {
       if (l_body) {
@@ -766,6 +767,25 @@
         });
       })
     }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
   });
 </script>
 <script>

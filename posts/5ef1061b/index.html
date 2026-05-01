@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-26T02:00:00.000Z">
-<meta property="article:modified_time" content="2026-04-05T04:26:01.335Z">
+<meta property="article:modified_time" content="2026-05-01T02:37:24.073Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -76,10 +76,10 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-26T10:00:00+08:00","dateModified":"2026-04-05T12:26:01+08:00","datePublished":"2026-03-26T10:00:00+08:00","description":"","headline":"代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/5ef1061b/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/5ef1061b/","keywords":"代码审计, Java, 反序列化, FastJson","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image2.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-26T10:00:00+08:00","dateModified":"2026-05-01T10:37:24+08:00","datePublished":"2026-03-26T10:00:00+08:00","description":"","headline":"代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/5ef1061b/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/5ef1061b/","keywords":"代码审计, Java, 反序列化, FastJson","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image2.png","image":1}</script>
   
 </head>
-<body>
+<body><div class="reading-progress-bar"></div>
 
 <div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
@@ -93,7 +93,7 @@
 <div class="widgets">
 <div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
-<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+<widget class="widget-wrapper slide-up todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -102,7 +102,7 @@
 
 
 
-<div class="article banner top">
+<div class="article banner slide-up top">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/fastjson/">fastjson</a></div>
@@ -117,7 +117,7 @@
     </div>
     
   </div>
-  </div><article class="md-text content"><blockquote>
+  </div><article class="md-text content slide-up"><blockquote>
 <p>1.2.47 的缓存绕过不需要开任何开关，默认配置就能打，危害最大。</p>
 </blockquote>
 <hr>
@@ -228,7 +228,7 @@
 </ol>
 <p>这个漏洞影响范围极广，也是学 Fastjson 漏洞历史必须要搞懂的一个版本。</p>
 </article>
-<div class="article-footer">
+<div class="article-footer slide-up">
     <section id="license">
       <div class="header"><span>许可协议</span></div>
       <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
@@ -243,12 +243,12 @@
 
 
 
-<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
-<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
 <div class="widgets">
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%A6%82%E8%BF%B0"><span class="toc-text">漏洞概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Payload-%E7%BB%93%E6%9E%84%E8%A7%A3%E6%9E%90"><span class="toc-text">Payload 结构解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86-a%EF%BC%9A%E5%BE%80%E7%BC%93%E5%AD%98%E9%87%8C%E5%A1%9E%E4%B8%9C%E8%A5%BF"><span class="toc-text">第一部分 a：往缓存里塞东西</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86-b%EF%BC%9A%E4%BB%8E%E7%BC%93%E5%AD%98%E9%87%8C%E5%8F%96%E5%87%BA%E6%9D%A5%E7%94%A8"><span class="toc-text">第二部分 b：从缓存里取出来用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E8%B7%9F%E8%B8%AA%EF%BC%9A%E4%B8%80%E6%AD%A5%E6%AD%A5%E7%9C%8B%E7%BB%95%E8%BF%87%E8%BF%87%E7%A8%8B"><span class="toc-text">源码跟踪：一步步看绕过过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%EF%BC%9A%E5%A4%84%E7%90%86%E5%AD%97%E6%AE%B5-a%EF%BC%8C%E9%A2%84%E7%83%AD%E7%BC%93%E5%AD%98"><span class="toc-text">第一阶段：处理字段 a，预热缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%EF%BC%9A%E5%A4%84%E7%90%86%E5%AD%97%E6%AE%B5-b%EF%BC%8C%E5%91%BD%E4%B8%AD%E7%BC%93%E5%AD%98%E7%BB%95%E8%BF%87%E6%A3%80%E6%B5%8B"><span class="toc-text">第二阶段：处理字段 b，命中缓存绕过检测</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
-</div></aside><div class='float-panel'>
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select" onclick="sidebar.toggleTOC()"><span class="name">本文目录</span></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%A6%82%E8%BF%B0"><span class="toc-text">漏洞概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Payload-%E7%BB%93%E6%9E%84%E8%A7%A3%E6%9E%90"><span class="toc-text">Payload 结构解析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%83%A8%E5%88%86-a%EF%BC%9A%E5%BE%80%E7%BC%93%E5%AD%98%E9%87%8C%E5%A1%9E%E4%B8%9C%E8%A5%BF"><span class="toc-text">第一部分 a：往缓存里塞东西</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%83%A8%E5%88%86-b%EF%BC%9A%E4%BB%8E%E7%BC%93%E5%AD%98%E9%87%8C%E5%8F%96%E5%87%BA%E6%9D%A5%E7%94%A8"><span class="toc-text">第二部分 b：从缓存里取出来用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E8%B7%9F%E8%B8%AA%EF%BC%9A%E4%B8%80%E6%AD%A5%E6%AD%A5%E7%9C%8B%E7%BB%95%E8%BF%87%E8%BF%87%E7%A8%8B"><span class="toc-text">源码跟踪：一步步看绕过过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%EF%BC%9A%E5%A4%84%E7%90%86%E5%AD%97%E6%AE%B5-a%EF%BC%8C%E9%A2%84%E7%83%AD%E7%BC%93%E5%AD%98"><span class="toc-text">第一阶段：处理字段 a，预热缓存</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%EF%BC%9A%E5%A4%84%E7%90%86%E5%AD%97%E6%AE%B5-b%EF%BC%8C%E5%91%BD%E4%B8%AD%E7%BC%93%E5%AD%98%E7%BB%95%E8%BF%87%E6%A3%80%E6%B5%8B"><span class="toc-text">第二阶段：处理字段 b，命中缓存绕过检测</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
   </button>
@@ -549,6 +549,7 @@
   });
 </script>
 <script>
+  const l_body = document.querySelector('.l_body');
   const sidebar = {
     leftbar: () => {
       if (l_body) {
@@ -869,6 +870,25 @@
         });
       })
     }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
   });
 </script>
 <script>

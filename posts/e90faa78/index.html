@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-28T07:00:00.000Z">
-<meta property="article:modified_time" content="2026-04-05T04:26:01.296Z">
+<meta property="article:modified_time" content="2026-05-01T02:37:23.985Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="Java反序列化">
 <meta property="article:tag" content="RCE">
@@ -76,10 +76,10 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-28T15:00:00+08:00","dateModified":"2026-04-05T12:26:01+08:00","datePublished":"2026-03-28T15:00:00+08:00","description":"","headline":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/e90faa78/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/e90faa78/","keywords":"Java反序列化, RCE, FastJSON, BCEL","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-28T15:00:00+08:00","dateModified":"2026-05-01T10:37:23+08:00","datePublished":"2026-03-28T15:00:00+08:00","description":"","headline":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/e90faa78/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/e90faa78/","keywords":"Java反序列化, RCE, FastJSON, BCEL","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png","image":1}</script>
   
 </head>
-<body>
+<body><div class="reading-progress-bar"></div>
 
 <div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
@@ -93,7 +93,7 @@
 <div class="widgets">
 <div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
 
-<widget class="widget-wrapper todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span><span class="collapse-toggle"><i class="fas fa-chevron-down"></i></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+<widget class="widget-wrapper slide-up todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
 </div>
 
 </div></aside><div class="l_main" id="main">
@@ -102,7 +102,7 @@
 
 
 
-<div class="article banner top">
+<div class="article banner slide-up top">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/fastjson/">fastjson</a></div>
@@ -117,7 +117,7 @@
     </div>
     
   </div>
-  </div><article class="md-text content"><blockquote>
+  </div><article class="md-text content slide-up"><blockquote>
 <p>环境：FastJSON 1.2.47 &#x2F; JDK 8u65 &#x2F; Tomcat 9.0.20 &#x2F; IDEA 调试</p>
 </blockquote>
 <hr>
@@ -281,7 +281,7 @@
 <hr>
 <h2 id="完整调用链总结"><a href="#完整调用链总结" class="headerlink" title="完整调用链总结"></a>完整调用链总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">JSON.parseObject()</span><br><span class="line">  → setDriverClassLoader()      [BCEL ClassLoader 对象注入]</span><br><span class="line">  → setDriverClassName()        [$$BCEL$$...字符串注入]</span><br><span class="line">  → getConnection()             [FastJSON 自动扫描触发，无需写字段]</span><br><span class="line">    → createDataSource()</span><br><span class="line">      → createConnectionFactory()</span><br><span class="line">        → Class.forName(driverClassName, true, driverClassLoader)</span><br><span class="line">          → BCEL ClassLoader 识别 $$BCEL$$ 前缀</span><br><span class="line">            → Utility.decode() 解码成字节码</span><br><span class="line">              → defineClass() 加载进 JVM</span><br><span class="line">                → 类初始化 → static 块执行 → 💥 RCE</span><br></pre></td></tr></table></figure>
 </article>
-<div class="article-footer">
+<div class="article-footer slide-up">
     <section id="license">
       <div class="header"><span>许可协议</span></div>
       <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
@@ -296,12 +296,12 @@
 
 
 
-<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
-<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
 <div class="widgets">
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%92%8C-TemplatesImpl-%E9%93%BE%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">和 TemplatesImpl 链的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A5%E5%85%85%EF%BC%9AFastJSON-%E7%9A%84-getter-setter-%E6%89%AB%E6%8F%8F%E6%9C%BA%E5%88%B6"><span class="toc-text">补充：FastJSON 的 getter&#x2F;setter 扫描机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8-getter-%E8%A7%A6%E5%8F%91"><span class="toc-text">自动 getter 触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#setter-%E8%A7%A6%E5%8F%91"><span class="toc-text">setter 触发</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%81%B6%E6%84%8F%E7%B1%BB%E7%BC%96%E5%86%99"><span class="toc-text">恶意类编写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E8%BD%AC%E6%8D%A2%E8%84%9A%E6%9C%AC"><span class="toc-text">字节码转换脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Payload-%E7%BB%93%E6%9E%84"><span class="toc-text">Payload 结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E8%B7%9F%E8%B8%AA"><span class="toc-text">调试跟踪</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#setDriverClassLoader"><span class="toc-text">setDriverClassLoader</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#setDriverClassName"><span class="toc-text">setDriverClassName</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#method-invoke-%E5%8F%8D%E5%B0%84%E8%B0%83%E7%94%A8"><span class="toc-text">method.invoke 反射调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#getConnection"><span class="toc-text">getConnection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#createDataSource-%E2%86%92-createConnectionFactory"><span class="toc-text">createDataSource → createConnectionFactory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Class-forName-%E8%A7%A6%E5%8F%91-RCE"><span class="toc-text">Class.forName 触发 RCE</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%B0%83%E7%94%A8%E9%93%BE%E6%80%BB%E7%BB%93"><span class="toc-text">完整调用链总结</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
-</div></aside><div class='float-panel'>
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select" onclick="sidebar.toggleTOC()"><span class="name">本文目录</span></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%92%8C-TemplatesImpl-%E9%93%BE%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">和 TemplatesImpl 链的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A1%A5%E5%85%85%EF%BC%9AFastJSON-%E7%9A%84-getter-setter-%E6%89%AB%E6%8F%8F%E6%9C%BA%E5%88%B6"><span class="toc-text">补充：FastJSON 的 getter&#x2F;setter 扫描机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8-getter-%E8%A7%A6%E5%8F%91"><span class="toc-text">自动 getter 触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#setter-%E8%A7%A6%E5%8F%91"><span class="toc-text">setter 触发</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="toc-text">环境准备</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%81%B6%E6%84%8F%E7%B1%BB%E7%BC%96%E5%86%99"><span class="toc-text">恶意类编写</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E8%8A%82%E7%A0%81%E8%BD%AC%E6%8D%A2%E8%84%9A%E6%9C%AC"><span class="toc-text">字节码转换脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Payload-%E7%BB%93%E6%9E%84"><span class="toc-text">Payload 结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E8%B7%9F%E8%B8%AA"><span class="toc-text">调试跟踪</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#setDriverClassLoader"><span class="toc-text">setDriverClassLoader</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#setDriverClassName"><span class="toc-text">setDriverClassName</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#method-invoke-%E5%8F%8D%E5%B0%84%E8%B0%83%E7%94%A8"><span class="toc-text">method.invoke 反射调用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#getConnection"><span class="toc-text">getConnection</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#createDataSource-%E2%86%92-createConnectionFactory"><span class="toc-text">createDataSource → createConnectionFactory</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Class-forName-%E8%A7%A6%E5%8F%91-RCE"><span class="toc-text">Class.forName 触发 RCE</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4%E8%B0%83%E7%94%A8%E9%93%BE%E6%80%BB%E7%BB%93"><span class="toc-text">完整调用链总结</span></a></li></ol></div><div class="widget-footer"><a class="top" onclick="util.scrollTop()"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><!-- Icon from Solar by 480 Design - https://creativecommons.org/licenses/by/4.0/ --><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg><span>回到顶部</span></a></div></widget>
+</div></div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
   </button>
@@ -602,6 +602,7 @@
   });
 </script>
 <script>
+  const l_body = document.querySelector('.l_body');
   const sidebar = {
     leftbar: () => {
       if (l_body) {
@@ -922,6 +923,25 @@
         });
       })
     }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
   });
 </script>
 <script>

@@ -91,8 +91,6 @@ const hud = {
 
 // defines
 
-const l_body = document.querySelector('.l_body');
-
 
 const init = {
   toc: () => {
@@ -144,14 +142,21 @@ const init = {
         }
       }
       
+      var ticking = false;
       var timeout = null;
       window.addEventListener('scroll', function() {
-        activeTOC();
+        if (!ticking) {
+          requestAnimationFrame(function() {
+            activeTOC();
+            ticking = false;
+          });
+          ticking = true;
+        }
         if(timeout !== null) clearTimeout(timeout);
         timeout = setTimeout(function() {
           scrollTOC();
-        }.bind(this), 50);
-      });      
+        }.bind(this), 100);
+      }, { passive: true });      
     })
   },
   sidebar: () => {
@@ -293,3 +298,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+// 阅读进度条 - 蓝紫黑彩虹渐变
+(function() {
+  const bar = document.querySelector('.reading-progress-bar');
+  if (!bar) return;
+
+  function updateProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    if (docHeight <= 0) {
+      bar.style.width = '0%';
+      return;
+    }
+    const progress = Math.min(scrollTop / docHeight * 100, 100);
+    bar.style.width = progress + '%';
+  }
+
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  window.addEventListener('resize', updateProgress, { passive: true });
+  updateProgress();
+})();

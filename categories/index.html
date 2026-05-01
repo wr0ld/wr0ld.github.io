@@ -74,7 +74,7 @@
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Website","@id":"https://wr0ld.github.io","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"name":"blog","description":"wr0ld 的个人博客，记录技术学习与生活点滴","url":"https://wr0ld.github.io"}</script>
   
 </head>
-<body>
+<body><div class="reading-progress-bar"></div>
 
 <div class="l_body index" id="start" layout="undefined" type="undefined" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
 
@@ -95,7 +95,7 @@
 
 <div class="navbar top"><div class="navbar-blur"><div class="navbar-container"><nav class="post"><a href="/">近期发布</a><a class="active" href="/categories/">分类</a><a href="/archives/">归档</a><span style="flex: 1;"></span><a href="/srk-toolbox/">SRK Toolbox</a><a href="/payloader/">Payloader</a></nav></div></div></div>
 <div class='post-list categories-page' id="categories-container">
-  <article class='' id='cats'>
+  <article class='slide-up' id='cats'>
     <div class="timeline-header">
       <h1 class="timeline-title">文章分类</h1>
       <p class="timeline-subtitle">共 <span>15</span> 个分类，<span>44</span> 篇文章</p>
@@ -357,6 +357,20 @@
               
                 <div class="child-category">
                   <div class="child-header">
+                    <span class="child-name">靶机渗透</span>
+                    <span class="child-count">1</span>
+                  </div>
+                  <div class="card-articles">
+                    
+                      <a href="/posts/5532e4a/" class="card-article-link">
+                        <span class="article-title-text">THP-CSK 靶场 Linux 内网横向渗透全流程</span>
+                      </a>
+                    
+                  </div>
+                </div>
+              
+                <div class="child-category">
+                  <div class="child-header">
                     <span class="child-name">vulnhub-DC</span>
                     <span class="child-count">9</span>
                   </div>
@@ -396,20 +410,6 @@
                     
                       <a href="/posts/a423f6db/" class="card-article-link">
                         <span class="article-title-text">VulnHub DC-1 靶机渗透测试笔记</span>
-                      </a>
-                    
-                  </div>
-                </div>
-              
-                <div class="child-category">
-                  <div class="child-header">
-                    <span class="child-name">靶机渗透</span>
-                    <span class="child-count">1</span>
-                  </div>
-                  <div class="card-articles">
-                    
-                      <a href="/posts/5532e4a/" class="card-article-link">
-                        <span class="article-title-text">THP-CSK 靶场 Linux 内网横向渗透全流程</span>
                       </a>
                     
                   </div>
@@ -672,6 +672,16 @@
                   
                     
                       <div class="child-section">
+                        <div class="child-title">靶机渗透 (1)</div>
+                        
+                          <a href="/posts/5532e4a/" class="article-link">
+                            <span class="article-bullet"></span>
+                            <span class="article-title">THP-CSK 靶场 Linux 内网横向渗透全流程</span>
+                          </a>
+                        
+                      </div>
+                    
+                      <div class="child-section">
                         <div class="child-title">vulnhub-DC (9)</div>
                         
                           <a href="/posts/f10adb67/" class="article-link">
@@ -687,16 +697,6 @@
                           <a href="/posts/9bfd2b6a/" class="article-link">
                             <span class="article-bullet"></span>
                             <span class="article-title">VulnHub DC-7 靶机渗透测试笔记</span>
-                          </a>
-                        
-                      </div>
-                    
-                      <div class="child-section">
-                        <div class="child-title">靶机渗透 (1)</div>
-                        
-                          <a href="/posts/5532e4a/" class="article-link">
-                            <span class="article-bullet"></span>
-                            <span class="article-title">THP-CSK 靶场 Linux 内网横向渗透全流程</span>
                           </a>
                         
                       </div>
@@ -1153,9 +1153,9 @@
 }
 </style>
 
-<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
-<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
-</aside><div class='float-panel'>
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
+</div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
   </button>
@@ -1456,6 +1456,7 @@
   });
 </script>
 <script>
+  const l_body = document.querySelector('.l_body');
   const sidebar = {
     leftbar: () => {
       if (l_body) {
@@ -1776,6 +1777,25 @@
         });
       })
     }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
   });
 </script>
 <script>
