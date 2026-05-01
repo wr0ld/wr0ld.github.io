@@ -30,14 +30,26 @@ function layout_post_list(partial, layoutClass) {
 
 // 获取所有文章数据（用于仅标题布局显示全部文章）
 var allPosts = [];
-var postsSource = page.category ? site.categories.findOne({name: page.category}).posts : site.posts;
-postsSource.sort('date', -1).each(function(post) {
-  allPosts.push({
-    title: post.title || '无标题',
-    path: post.path,
-    link: post.link
+var postsSource = site.posts;
+if (page.category) {
+  var category = site.categories.findOne({name: page.category});
+  if (category && category.posts) {
+    postsSource = category.posts;
+  }
+}
+if (postsSource && postsSource.sort) {
+  postsSource.sort('date', -1).each(function(post) {
+    allPosts.push({
+      title: post.title || '无标题',
+      path: post.path || '',
+      link: post.link || ''
+    });
   });
-});
+}
+
+function safe_json(str) {
+  return str.replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
+}
 %>
 
 <%- partial('_partial/main/navbar/nav_tabs_blog') %>
@@ -48,7 +60,7 @@ postsSource.sort('date', -1).each(function(post) {
   </button>
   <div class="layout-options">
     <div class="options-section">
-      <div class="options-label">布局方式</div>
+      <div class="options-label">布局方式 <span class="default-layout-hint">(默认: 网格)</span></div>
       <button class="layout-btn" data-layout="list"><span>列表</span></button>
       <button class="layout-btn active" data-layout="grid"><span>网格</span></button>
       <button class="layout-btn" data-layout="compact"><span>紧凑</span></button>
@@ -69,10 +81,24 @@ postsSource.sort('date', -1).each(function(post) {
 
 <script>
   // 所有文章数据（用于仅标题布局）
-  const allPostsData = <%- JSON.stringify(allPosts) %>;
+  // eslint-disable-next-line
+  const allPostsData = <%- safe_json(JSON.stringify(allPosts)) %>;
   
   // 布局切换功能
   (function() {
+    // 将 layout-switcher 移到 body 下，避免父级 transform 导致 fixed 失效
+    var ls = document.querySelector('.layout-switcher');
+    if (ls && ls.parentNode !== document.body) {
+      document.body.appendChild(ls);
+    }
+
+    // 强制修复卡片meta颜色（EJS模板已内联style，此处仅作兜底）
+    var metaGray = 'rgba(160,165,180,0.85)';
+    setTimeout(function() {
+      document.querySelectorAll('.post-card .breadcrumb, .post-card .breadcrumb *').forEach(function(el) {
+        if (!el.style.color || el.style.color.indexOf('rgba(160') === -1) el.style.color = metaGray;
+      });
+    }, 100);
     const layoutButtons = document.querySelectorAll('.layout-btn[data-layout]');
     const postContainer = document.getElementById('post-container');
     const paginatorWrapper = document.getElementById('paginator-wrapper');

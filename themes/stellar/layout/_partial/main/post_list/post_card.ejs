@@ -87,8 +87,8 @@ function div_default() {
       }
       if (cats.length > 0) {
         let cat = cats.shift();
-        el += '<span class="cap breadcrumb"' + category_color(cat) + '>';
-        el += `<span>${cat}</span>`
+        el += '<span class="cap breadcrumb"' + category_color(cat) + ' style="color:rgba(160,165,180,0.85)!important">';
+        el += `<span style="color:rgba(160,165,180,0.85)!important">${cat}</span>`
         el += '</span>';
       }
     }

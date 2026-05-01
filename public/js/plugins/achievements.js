@@ -1,6 +1,10 @@
 (function() {
   'use strict';
   
+  if (window.CardSystem) {
+    return;
+  }
+  
   var CardSystem = {
     cards: {
       'first_visit': {
@@ -705,6 +709,15 @@
         obtained: false,
         obtainTime: null
       },
+      'bruno_folio_2025_visitor': {
+        name: '2025探索者',
+        desc: '体验Bruno Simon 2025全新作品集',
+        icon: '🏎️',
+        rarity: 'epic',
+        flavor: '成就、彩蛋、秘籍...更多玩法等你发现',
+        obtained: false,
+        obtainTime: null
+      },
       'my_room_visitor': {
         name: '房间访客',
         desc: '参观3D房间场景',
@@ -740,6 +753,312 @@
         flavor: '霓虹灯下的午夜狂飙',
         obtained: false,
         obtainTime: null
+      },
+      'infinite_world_explorer': {
+        name: '无限世界探索者',
+        desc: '探索无限程序化生成的3D世界',
+        icon: '🌍',
+        rarity: 'rare',
+        flavor: '在无尽的世界中自由奔跑',
+        obtained: false,
+        obtainTime: null
+      },
+      'black_hole_observer': {
+        name: '黑洞观测者',
+        desc: '观测WebGL黑洞可视化效果',
+        icon: '🕳️',
+        rarity: 'epic',
+        flavor: '凝视深渊，深渊也在凝视你',
+        obtained: false,
+        obtainTime: null
+      },
+      'win11_explorer': {
+        name: 'Windows体验官',
+        desc: '体验React复刻的Windows 11',
+        icon: '🪟',
+        rarity: 'rare',
+        flavor: '在浏览器中重温经典系统',
+        obtained: false,
+        obtainTime: null
+      },
+      'terminal_lover': {
+        name: '终端爱好者',
+        desc: '体验LiveTerm终端风格网站',
+        icon: '💻',
+        rarity: 'common',
+        flavor: '命令行是程序员的浪漫',
+        obtained: false,
+        obtainTime: null
+      },
+      'login_animator': {
+        name: '动画鉴赏家',
+        desc: '体验卡通角色登录动画',
+        icon: '🐱',
+        rarity: 'common',
+        flavor: '可爱的动画让人心情愉悦',
+        obtained: false,
+        obtainTime: null
+      },
+      'pretext_tester': {
+        name: '文本布局测试员',
+        desc: '体验Pretext文本布局实验',
+        icon: '📝',
+        rarity: 'common',
+        flavor: '文本排版也是一门艺术',
+        obtained: false,
+        obtainTime: null
+      },
+      'lab_master': {
+        name: '实验室大师',
+        desc: '体验所有实验室项目',
+        icon: '🔬',
+        rarity: 'legendary',
+        flavor: '探索精神永不止步',
+        obtained: false,
+        obtainTime: null,
+        progress: 0,
+        target: 10,
+        visitedLabs: []
+      },
+      'spring_festival_visitor': {
+        name: '新春访客',
+        desc: '春节期间访问博客',
+        icon: '🧧',
+        rarity: 'rare',
+        flavor: '新年快乐，恭喜发财！',
+        obtained: false,
+        obtainTime: null
+      },
+      'lantern_festival_visitor': {
+        name: '元宵赏灯',
+        desc: '元宵节访问博客',
+        icon: '🏮',
+        rarity: 'rare',
+        flavor: '灯火阑珊处，有你有我',
+        obtained: false,
+        obtainTime: null
+      },
+      'valentines_visitor': {
+        name: '浪漫使者',
+        desc: '情人节访问博客',
+        icon: '💕',
+        rarity: 'rare',
+        flavor: '愿有情人终成眷属',
+        obtained: false,
+        obtainTime: null
+      },
+      'womens_day_visitor': {
+        name: '女神节访客',
+        desc: '妇女节访问博客',
+        icon: '🌸',
+        rarity: 'common',
+        flavor: '愿你永远美丽自信',
+        obtained: false,
+        obtainTime: null
+      },
+      'labor_day_visitor': {
+        name: '劳动光荣',
+        desc: '劳动节访问博客',
+        icon: '👷',
+        rarity: 'common',
+        flavor: '致敬每一位劳动者',
+        obtained: false,
+        obtainTime: null
+      },
+      'youth_day_visitor': {
+        name: '青春无悔',
+        desc: '青年节访问博客',
+        icon: '🌟',
+        rarity: 'common',
+        flavor: '青春无悔，奋斗不止',
+        obtained: false,
+        obtainTime: null
+      },
+      'dragon_boat_visitor': {
+        name: '龙舟竞渡',
+        desc: '端午节访问博客',
+        icon: '🐉',
+        rarity: 'rare',
+        flavor: '吃粽子，赛龙舟',
+        obtained: false,
+        obtainTime: null
+      },
+      'childrens_day_visitor': {
+        name: '童心未泯',
+        desc: '儿童节访问博客',
+        icon: '🎈',
+        rarity: 'common',
+        flavor: '愿你永葆童心',
+        obtained: false,
+        obtainTime: null
+      },
+      'tanabata_visitor': {
+        name: '七夕相会',
+        desc: '七夕节访问博客',
+        icon: '🌌',
+        rarity: 'rare',
+        flavor: '鹊桥相会，浪漫七夕',
+        obtained: false,
+        obtainTime: null
+      },
+      'mid_autumn_visitor': {
+        name: '月圆人圆',
+        desc: '中秋节访问博客',
+        icon: '🥮',
+        rarity: 'rare',
+        flavor: '月圆人团圆',
+        obtained: false,
+        obtainTime: null
+      },
+      'national_day_visitor': {
+        name: '国庆欢庆',
+        desc: '国庆节访问博客',
+        icon: '🇨🇳',
+        rarity: 'rare',
+        flavor: '祝福祖国繁荣昌盛',
+        obtained: false,
+        obtainTime: null
+      },
+      'halloween_visitor': {
+        name: '万圣狂欢',
+        desc: '万圣节访问博客',
+        icon: '🎃',
+        rarity: 'rare',
+        flavor: '不给糖就捣蛋！',
+        obtained: false,
+        obtainTime: null
+      },
+      'double_eleven_visitor': {
+        name: '剁手达人',
+        desc: '双十一访问博客',
+        icon: '🛒',
+        rarity: 'common',
+        flavor: '剁手快乐！',
+        obtained: false,
+        obtainTime: null
+      },
+      'thanksgiving_visitor': {
+        name: '感恩之心',
+        desc: '感恩节访问博客',
+        icon: '🦃',
+        rarity: 'rare',
+        flavor: '感谢有你',
+        obtained: false,
+        obtainTime: null
+      },
+      'christmas_visitor': {
+        name: '圣诞快乐',
+        desc: '圣诞节访问博客',
+        icon: '🎄',
+        rarity: 'rare',
+        flavor: 'Merry Christmas！',
+        obtained: false,
+        obtainTime: null
+      },
+      'new_year_eve_visitor': {
+        name: '除夕守岁',
+        desc: '除夕访问博客',
+        icon: '🎆',
+        rarity: 'epic',
+        flavor: '辞旧迎新，新年大吉',
+        obtained: false,
+        obtainTime: null
+      },
+      'new_year_visitor': {
+        name: '元旦快乐',
+        desc: '元旦访问博客',
+        icon: '🎉',
+        rarity: 'rare',
+        flavor: '新年新气象',
+        obtained: false,
+        obtainTime: null
+      },
+      'april_fools_visitor': {
+        name: '愚人快乐',
+        desc: '愚人节访问博客',
+        icon: '🤡',
+        rarity: 'common',
+        flavor: '小心被骗哦~',
+        obtained: false,
+        obtainTime: null
+      },
+      'mothers_day_visitor': {
+        name: '感恩母亲',
+        desc: '母亲节访问博客',
+        icon: '👩',
+        rarity: 'rare',
+        flavor: '感谢妈妈的养育之恩',
+        obtained: false,
+        obtainTime: null
+      },
+      'fathers_day_visitor': {
+        name: '感恩父亲',
+        desc: '父亲节访问博客',
+        icon: '👨',
+        rarity: 'rare',
+        flavor: '感谢爸爸的辛勤付出',
+        obtained: false,
+        obtainTime: null
+      },
+      'teachers_day_visitor': {
+        name: '师恩难忘',
+        desc: '教师节访问博客',
+        icon: '📚',
+        rarity: 'rare',
+        flavor: '感谢老师的辛勤教导',
+        obtained: false,
+        obtainTime: null
+      },
+      'programmers_day_visitor': {
+        name: '程序员节快乐',
+        desc: '程序员节(10.24)访问博客',
+        icon: '💻',
+        rarity: 'epic',
+        flavor: '1024快乐！愿你的代码永无Bug',
+        obtained: false,
+        obtainTime: null
+      },
+      'blog_birthday_visitor': {
+        name: '博客生日快乐',
+        desc: '在博客生日当天访问',
+        icon: '🎂',
+        rarity: 'legendary',
+        flavor: '感谢你的陪伴！',
+        obtained: false,
+        obtainTime: null
+      },
+      'festival_collector': {
+        name: '节日收藏家',
+        desc: '在5个不同节日访问博客',
+        icon: '🎊',
+        rarity: 'epic',
+        flavor: '节日快乐，每一天都值得庆祝',
+        obtained: false,
+        obtainTime: null,
+        progress: 0,
+        target: 5,
+        visitedFestivals: []
+      },
+      'festival_master': {
+        name: '节日大师',
+        desc: '在10个不同节日访问博客',
+        icon: '🏆',
+        rarity: 'legendary',
+        flavor: '每一个节日都有你的身影',
+        obtained: false,
+        obtainTime: null,
+        progress: 0,
+        target: 10,
+        visitedFestivals: []
+      },
+      'festival_demo_finder': {
+        name: '彩蛋探索者',
+        desc: '发现隐藏的节日特效预览页面',
+        icon: '🥚',
+        rarity: 'epic',
+        flavor: '有些页面藏在不起眼的角落...',
+        obtained: false,
+        obtainTime: null
       }
     },
     
@@ -750,10 +1069,188 @@
       legendary: { bg: '#744210', border: '#d69e2e', glow: '#f6e05e', name: '传说' }
     },
     
+    levels: [
+      { name: '新手收藏家', minCards: 0, icon: '🌱', color: '#9ca3af' },
+      { name: '初级收藏家', minCards: 5, icon: '🌿', color: '#6ee7b7' },
+      { name: '中级收藏家', minCards: 15, icon: '🌳', color: '#34d399' },
+      { name: '高级收藏家', minCards: 30, icon: '⭐', color: '#fbbf24' },
+      { name: '资深收藏家', minCards: 50, icon: '🌟', color: '#f59e0b' },
+      { name: '大师收藏家', minCards: 70, icon: '💫', color: '#a855f7' },
+      { name: '传奇收藏家', minCards: 90, icon: '👑', color: '#ec4899' },
+      { name: '至尊收藏家', minCards: 100, icon: '🏆', color: '#fcd34d' }
+    ],
+    
+    hiddenCards: {
+      'konami_master': {
+        name: '秘籍大师',
+        desc: '输入Konami秘籍代码',
+        icon: '⬆️',
+        rarity: 'epic',
+        flavor: '上上下下左右左右BA',
+        obtained: false,
+        obtainTime: null,
+        hidden: true
+      },
+      'triple_click': {
+        name: '三击达人',
+        desc: '在页面任意位置三击',
+        icon: '🖱️',
+        rarity: 'common',
+        flavor: '三次点击，三次快乐',
+        obtained: false,
+        obtainTime: null,
+        hidden: true
+      },
+      'scroll_master': {
+        name: '滚动大师',
+        desc: '滚动页面超过50000像素',
+        icon: '📜',
+        rarity: 'rare',
+        flavor: '手指已练成神功',
+        obtained: false,
+        obtainTime: null,
+        hidden: true,
+        progress: 0,
+        target: 50000
+      },
+      'insomniac': {
+        name: '夜猫子之王',
+        desc: '连续3天在凌晨访问博客',
+        icon: '🦉',
+        rarity: 'legendary',
+        flavor: '深夜的代码更有灵魂',
+        obtained: false,
+        obtainTime: null,
+        hidden: true,
+        streak: 0
+      },
+      'speed_demon': {
+        name: '速度恶魔',
+        desc: '在5秒内点击20次',
+        icon: '⚡',
+        rarity: 'epic',
+        flavor: '手速惊人！',
+        obtained: false,
+        obtainTime: null,
+        hidden: true
+      },
+      'secret_message': {
+        name: '秘密信使',
+        desc: '在控制台输入 wr0ld.secret()',
+        icon: '🔐',
+        rarity: 'legendary',
+        flavor: '你发现了开发者的秘密',
+        obtained: false,
+        obtainTime: null,
+        hidden: true
+      },
+      'long_stay': {
+        name: '忠实访客',
+        desc: '单次访问停留超过30分钟',
+        icon: '⏰',
+        rarity: 'epic',
+        flavor: '感谢你的陪伴',
+        obtained: false,
+        obtainTime: null,
+        hidden: true
+      },
+      'refresh_master': {
+        name: '刷新达人',
+        desc: '刷新页面超过10次',
+        icon: '🔄',
+        rarity: 'rare',
+        flavor: '刷新刷新再刷新',
+        obtained: false,
+        obtainTime: null,
+        hidden: true,
+        progress: 0,
+        target: 10
+      },
+      'dev_explorer': {
+        name: '代码探索者',
+        desc: '打开开发者工具（F12）',
+        icon: '🔧',
+        rarity: 'rare',
+        flavor: '代码世界的门已打开',
+        obtained: false,
+        obtainTime: null,
+        hidden: true
+      },
+      'select_all': {
+        name: '全选大师',
+        desc: '使用 Ctrl+A 全选页面',
+        icon: '📄',
+        rarity: 'common',
+        flavor: '全部都要！',
+        obtained: false,
+        obtainTime: null,
+        hidden: true
+      },
+      'bookmark_master': {
+        name: '收藏大师',
+        desc: '使用 Ctrl+D 收藏页面',
+        icon: '⭐',
+        rarity: 'rare',
+        flavor: '下次还想见到你',
+        obtained: false,
+        obtainTime: null,
+        hidden: true
+      },
+      'console_master': {
+        name: '控制台大师',
+        desc: '多次打开开发者控制台',
+        icon: '💻',
+        rarity: 'epic',
+        flavor: '你是开发者吗？',
+        obtained: false,
+        obtainTime: null,
+        hidden: true,
+        progress: 0,
+        target: 5
+      },
+      'long_press': {
+        name: '长按大师',
+        desc: '长按鼠标超过5秒',
+        icon: '🖱️',
+        rarity: 'common',
+        flavor: '按捺不住的好奇心',
+        obtained: false,
+        obtainTime: null,
+        hidden: true
+      },
+      'keyboard_hero': {
+        name: '键盘英雄',
+        desc: '快速连续按下10个不同按键',
+        icon: '⌨️',
+        rarity: 'epic',
+        flavor: '键盘侠是你',
+        obtained: false,
+        obtainTime: null,
+        hidden: true,
+        progress: 0,
+        target: 10
+      },
+      'mystery_clicker': {
+        name: '神秘点击者',
+        desc: '点击页面空白区域100次',
+        icon: '❓',
+        rarity: 'rare',
+        flavor: '点击是一种态度',
+        obtained: false,
+        obtainTime: null,
+        hidden: true,
+        progress: 0,
+        target: 100
+      }
+    },
+    
     totalCards: 0,
     obtainedCards: 0,
     readTime: 0,
     initialized: false,
+    clickCount: 0,
+    clickStartTime: 0,
+    refreshCount: 0,
     terminalFlags: {
       hidden_file: false,
       sql_injection: false,
@@ -777,7 +1274,170 @@
       this.initKonamiCode();
       this.checkDeviceType();
       this.checkTheme();
+      this.initHiddenAchievements();
       this.updateUI();
+    },
+    
+    getLevel: function() {
+      var level = this.levels[0];
+      for (var i = this.levels.length - 1; i >= 0; i--) {
+        if (this.obtainedCards >= this.levels[i].minCards) {
+          level = this.levels[i];
+          break;
+        }
+      }
+      return level;
+    },
+    
+    getNextLevel: function() {
+      var currentLevel = this.getLevel();
+      for (var i = 0; i < this.levels.length; i++) {
+        if (this.levels[i].minCards > this.obtainedCards) {
+          return this.levels[i];
+        }
+      }
+      return null;
+    },
+    
+    getLevelProgress: function() {
+      var nextLevel = this.getNextLevel();
+      if (!nextLevel) return 100;
+      var currentLevel = this.getLevel();
+      var progress = this.obtainedCards - currentLevel.minCards;
+      var needed = nextLevel.minCards - currentLevel.minCards;
+      return Math.min(100, Math.round((progress / needed) * 100));
+    },
+    
+    initHiddenAchievements: function() {
+      var self = this;
+      
+      var refreshCount = parseInt(localStorage.getItem('refreshCount') || '0') + 1;
+      localStorage.setItem('refreshCount', refreshCount);
+      this.refreshCount = refreshCount;
+      if (refreshCount >= 10) {
+        this.obtainHiddenCard('refresh_master');
+      }
+      
+      document.addEventListener('click', function(e) {
+        self.clickCount++;
+        if (self.clickCount === 1) {
+          self.clickStartTime = Date.now();
+        }
+        if (Date.now() - self.clickStartTime > 800) {
+          self.clickCount = 1;
+          self.clickStartTime = Date.now();
+        }
+        if (self.clickCount >= 20 && Date.now() - self.clickStartTime <= 5000) {
+          self.obtainHiddenCard('speed_demon');
+        }
+        if (self.clickCount >= 3 && Date.now() - self.clickStartTime <= 800) {
+          self.obtainHiddenCard('triple_click');
+          self.clickCount = 0;
+        }
+      });
+      
+      document.addEventListener('scroll', function() {
+        var scrollY = window.scrollY || document.documentElement.scrollTop;
+        if (self.hiddenCards.scroll_master && !self.hiddenCards.scroll_master.obtained) {
+          self.hiddenCards.scroll_master.progress = Math.max(self.hiddenCards.scroll_master.progress || 0, scrollY);
+          if (self.hiddenCards.scroll_master.progress >= 50000) {
+            self.obtainHiddenCard('scroll_master');
+          }
+        }
+      });
+      
+      var mouseDownTime = 0;
+      document.addEventListener('mousedown', function(e) {
+        mouseDownTime = Date.now();
+      });
+      document.addEventListener('mouseup', function(e) {
+        if (Date.now() - mouseDownTime >= 5000) {
+          self.obtainHiddenCard('long_press');
+        }
+      });
+      
+      var pressedKeys = new Set();
+      var keyPressStartTime = 0;
+      document.addEventListener('keydown', function(e) {
+        if (Date.now() - keyPressStartTime > 2000) {
+          pressedKeys.clear();
+        }
+        if (pressedKeys.size === 0) {
+          keyPressStartTime = Date.now();
+        }
+        pressedKeys.add(e.key);
+        if (pressedKeys.size >= 10 && Date.now() - keyPressStartTime <= 2000) {
+          self.obtainHiddenCard('keyboard_hero');
+          pressedKeys.clear();
+        }
+        
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J'))) {
+          self.obtainHiddenCard('dev_explorer');
+          var consoleCount = parseInt(localStorage.getItem('consoleOpenCount') || '0') + 1;
+          localStorage.setItem('consoleOpenCount', consoleCount);
+          if (consoleCount >= 5) {
+            self.obtainHiddenCard('console_master');
+          }
+        }
+        
+        if (e.ctrlKey && e.key === 'a') {
+          self.obtainHiddenCard('select_all');
+        }
+        
+        if (e.ctrlKey && e.key === 'd') {
+          e.preventDefault();
+          self.obtainHiddenCard('bookmark_master');
+        }
+      });
+      
+      document.addEventListener('click', function(e) {
+        if (e.target.tagName === 'BODY' || e.target.tagName === 'HTML' || 
+            e.target.classList.contains('l_main') || e.target.classList.contains('l_body')) {
+          var mysteryClicks = parseInt(localStorage.getItem('mysteryClicks') || '0') + 1;
+          localStorage.setItem('mysteryClicks', mysteryClicks);
+          if (mysteryClicks >= 100) {
+            self.obtainHiddenCard('mystery_clicker');
+          }
+        }
+      });
+      
+      this.checkInsomniacStreak();
+      
+      setInterval(function() {
+        if (self.readTime >= 1800 && !self.hiddenCards.long_stay.obtained) {
+          self.obtainHiddenCard('long_stay');
+        }
+      }, 60000);
+    },
+    
+    checkInsomniacStreak: function() {
+      var hour = new Date().getHours();
+      if (hour >= 0 && hour < 5) {
+        var lastInsomniacVisit = localStorage.getItem('lastInsomniacVisit');
+        var today = new Date().toDateString();
+        if (lastInsomniacVisit !== today) {
+          var streak = parseInt(localStorage.getItem('insomniacStreak') || '0') + 1;
+          localStorage.setItem('insomniacStreak', streak);
+          localStorage.setItem('lastInsomniacVisit', today);
+          this.hiddenCards.insomniac.streak = streak;
+          if (streak >= 3) {
+            this.obtainHiddenCard('insomniac');
+          }
+        }
+      }
+    },
+    
+    obtainHiddenCard: function(id) {
+      if (!this.hiddenCards[id]) return false;
+      if (this.hiddenCards[id].obtained) return false;
+      
+      this.hiddenCards[id].obtained = true;
+      this.hiddenCards[id].obtainTime = Date.now();
+      this.obtainedCards++;
+      this.saveProgress();
+      this.showCardNotification(id, true);
+      this.updateUI();
+      return true;
     },
     
     loadProgress: function() {
@@ -792,14 +1452,24 @@
               }
             }
           }
+          if (data.hiddenCards) {
+            for (var key in data.hiddenCards) {
+              if (this.hiddenCards[key]) {
+                this.hiddenCards[key] = Object.assign(this.hiddenCards[key], data.hiddenCards[key]);
+              }
+            }
+          }
           this.readTime = data.readTime || 0;
           this.terminalFlags = data.terminalFlags || this.terminalFlags;
         }
         
-        this.totalCards = Object.keys(this.cards).length;
+        this.totalCards = Object.keys(this.cards).length + Object.keys(this.hiddenCards).length;
         this.obtainedCards = 0;
         for (var id in this.cards) {
           if (this.cards[id].obtained) this.obtainedCards++;
+        }
+        for (var id in this.hiddenCards) {
+          if (this.hiddenCards[id].obtained) this.obtainedCards++;
         }
       } catch(e) {
         console.warn('Card load error:', e);
@@ -810,6 +1480,7 @@
       try {
         localStorage.setItem('cardCollection', JSON.stringify({
           cards: this.cards,
+          hiddenCards: this.hiddenCards,
           readTime: this.readTime,
           terminalFlags: this.terminalFlags
         }));
@@ -830,6 +1501,72 @@
       this.checkCollectionAchievements();
       this.updateUI();
       return true;
+    },
+    
+    unlock: function(id, options) {
+      options = options || {};
+      
+      if (!id) return false;
+      
+      var isHidden = this.hiddenCards && this.hiddenCards[id];
+      var card = isHidden ? this.hiddenCards[id] : this.cards[id];
+      
+      if (!card) {
+        console.warn('Achievement not found:', id);
+        return false;
+      }
+      
+      if (card.obtained) return false;
+      
+      if (options.increment) {
+        this.incrementProgress(id, options.increment);
+        return true;
+      }
+      
+      if (options.progress !== undefined) {
+        this.updateProgress(id, options.progress);
+        return true;
+      }
+      
+      if (isHidden) {
+        return this.obtainHiddenCard(id);
+      } else {
+        return this.obtainCard(id);
+      }
+    },
+    
+    unlockAll: function() {
+      var unlocked = 0;
+      
+      for (var id in this.cards) {
+        if (!this.cards[id].obtained) {
+          this.cards[id].obtained = true;
+          this.cards[id].obtainTime = Date.now();
+          unlocked++;
+        }
+      }
+      
+      for (var id in this.hiddenCards) {
+        if (!this.hiddenCards[id].obtained) {
+          this.hiddenCards[id].obtained = true;
+          this.hiddenCards[id].obtainTime = Date.now();
+          unlocked++;
+        }
+      }
+      
+      if (unlocked > 0) {
+        this.obtainedCards = Object.keys(this.cards).filter(function(id) {
+          return this.cards[id].obtained;
+        }.bind(this)).length + Object.keys(this.hiddenCards).filter(function(id) {
+          return this.hiddenCards[id].obtained;
+        }.bind(this)).length;
+        
+        this.saveProgress();
+        this.checkCollectionAchievements();
+        this.updateUI();
+      }
+      
+      return unlocked;
     },
     
     checkCollectionAchievements: function() {
@@ -881,11 +1618,16 @@
       this.updateProgress(id, current + amount);
     },
     
-    showCardNotification: function(id) {
+    showCardNotification: function(id, isHidden) {
       var card = this.cards[id];
+      if (!card && isHidden) {
+        card = this.hiddenCards[id];
+      }
       if (!card) return;
       
       var rarity = this.rarityColors[card.rarity];
+      
+      var titleText = isHidden ? '🌟 发现隐藏成就!' : '🃏 获得新卡牌!';
       
       var notification = document.createElement('div');
       notification.className = 'card-notification';
@@ -895,7 +1637,7 @@
           '<div class="card-rarity">' + rarity.name + '</div>' +
           '<div class="card-icon">' + card.icon + '</div>' +
           '<div class="card-info">' +
-            '<div class="card-title">🃏 获得新卡牌!</div>' +
+            '<div class="card-title">' + titleText + '</div>' +
             '<div class="card-name">' + card.name + '</div>' +
             '<div class="card-desc">' + card.desc + '</div>' +
           '</div>' +
@@ -1150,6 +1892,10 @@
     initTimeDisplay: function() {
       var self = this;
       
+      if (document.getElementById('time-widget')) {
+        return;
+      }
+      
       var footer = document.querySelector('footer') || document.querySelector('.footer') || document.querySelector('#footer');
       if (!footer) return;
       
@@ -1391,14 +2137,66 @@
       
       if (href.includes('/lab/bruno-simon-folio')) {
         this.obtainCard('bruno_folio_visitor');
+        this.trackLabVisit('bruno-simon-folio');
+      }
+      
+      if (href.includes('/lab/bruno-folio-2025')) {
+        this.obtainCard('bruno_folio_2025_visitor');
+        this.trackLabVisit('bruno-folio-2025');
       }
       
       if (href.includes('/lab/my-room-in-3d')) {
         this.obtainCard('my_room_visitor');
+        this.trackLabVisit('my-room-in-3d');
       }
       
       if (href.includes('/lab/threejs-city')) {
         this.obtainCard('city_driver');
+        this.trackLabVisit('threejs-city');
+      }
+      
+      if (href.includes('/lab/infinite-world')) {
+        this.obtainCard('infinite_world_explorer');
+        this.trackLabVisit('infinite-world');
+      }
+      
+      if (href.includes('/lab/black-hole')) {
+        this.obtainCard('black_hole_observer');
+        this.trackLabVisit('black-hole');
+      }
+      
+      if (href.includes('/lab/win11react')) {
+        this.obtainCard('win11_explorer');
+        this.trackLabVisit('win11react');
+      }
+      
+      if (href.includes('/lab/liveterm')) {
+        this.obtainCard('terminal_lover');
+        this.trackLabVisit('liveterm');
+      }
+      
+      if (href.includes('/lab/login-animation')) {
+        this.obtainCard('login_animator');
+        this.trackLabVisit('login-animation');
+      }
+      
+      if (href.includes('/lab/pretext')) {
+        this.obtainCard('pretext_tester');
+        this.trackLabVisit('pretext');
+      }
+    },
+    
+    trackLabVisit: function(labId) {
+      if (!this.cards.lab_master.visitedLabs) {
+        this.cards.lab_master.visitedLabs = [];
+      }
+      if (!this.cards.lab_master.visitedLabs.includes(labId)) {
+        this.cards.lab_master.visitedLabs.push(labId);
+        this.cards.lab_master.progress = this.cards.lab_master.visitedLabs.length;
+        if (this.cards.lab_master.progress >= this.cards.lab_master.target) {
+          this.obtainCard('lab_master');
+        }
+        this.saveProgress();
       }
     },
     
@@ -1522,15 +2320,41 @@
         return;
       }
       
+      var level = this.getLevel();
+      var nextLevel = this.getNextLevel();
+      var levelProgress = this.getLevelProgress();
+      
       var panel = document.createElement('div');
       panel.id = 'card-panel';
       
       var html = '<div class="card-panel-overlay"></div><div class="card-panel-content">';
-      html += '<div class="card-panel-header"><h2>🃏 卡牌收集</h2><span class="card-close">&times;</span></div>';
-      html += '<div class="card-panel-stats">';
-      html += '<span>收集进度: ' + this.obtainedCards + '/' + this.totalCards + '</span>';
-      html += '<span>停留时间: ' + Math.floor(this.readTime / 60) + '分钟</span>';
+      
+      html += '<div class="card-panel-header">';
+      html += '<h2>🃏 卡牌收集</h2>';
+      html += '<div class="card-header-actions">';
+      html += '<button class="card-share-btn" onclick="CardSystem.generateShareCard()">📤 分享成就</button>';
+      html += '<span class="card-close">&times;</span>';
+      html += '</div></div>';
+      
+      html += '<div class="card-level-section">';
+      html += '<div class="card-level-badge" style="background: linear-gradient(135deg, ' + level.color + ', ' + level.color + '88);">';
+      html += '<span class="level-icon">' + level.icon + '</span>';
+      html += '<span class="level-name">' + level.name + '</span>';
       html += '</div>';
+      html += '<div class="card-level-progress">';
+      if (nextLevel) {
+        html += '<div class="level-progress-bar"><div class="level-progress-fill" style="width: ' + levelProgress + '%; background: ' + level.color + ';"></div></div>';
+        html += '<span class="level-progress-text">距离 ' + nextLevel.name + ' 还需 ' + (nextLevel.minCards - this.obtainedCards) + ' 张卡牌</span>';
+      } else {
+        html += '<span class="level-max">已达到最高等级！</span>';
+      }
+      html += '</div></div>';
+      
+      html += '<div class="card-panel-stats">';
+      html += '<span>📊 收集进度: ' + this.obtainedCards + '/' + this.totalCards + '</span>';
+      html += '<span>⏱️ 停留时间: ' + Math.floor(this.readTime / 60) + '分钟</span>';
+      html += '</div>';
+      
       html += '<div class="card-panel-filters">';
       html += '<button class="card-filter active" data-filter="all">全部</button>';
       html += '<button class="card-filter" data-filter="common">普通</button>';
@@ -1539,7 +2363,9 @@
       html += '<button class="card-filter" data-filter="legendary">传说</button>';
       html += '<button class="card-filter" data-filter="obtained">已获得</button>';
       html += '<button class="card-filter" data-filter="missing">未获得</button>';
+      html += '<button class="card-filter" data-filter="hidden">隐藏</button>';
       html += '</div>';
+      
       html += '<div class="card-panel-grid">';
       
       for (var id in this.cards) {
@@ -1565,6 +2391,30 @@
         html += '</div></div>';
       }
       
+      for (var id in this.hiddenCards) {
+        var card = this.hiddenCards[id];
+        var rarity = this.rarityColors[card.rarity];
+        var obtainedClass = card.obtained ? 'obtained' : 'locked';
+        
+        html += '<div class="card-item ' + obtainedClass + ' hidden-card" data-rarity="' + card.rarity + '" data-obtained="' + card.obtained + '" data-hidden="true">';
+        html += '<div class="card-inner" style="border-color: ' + (card.obtained ? rarity.border : '#333') + '; background: ' + (card.obtained ? rarity.bg : '#0a0a0a') + ';">';
+        if (card.obtained) {
+          html += '<div class="card-rarity-badge" style="color: ' + rarity.glow + ';">🔒 隐藏 · ' + rarity.name + '</div>';
+          html += '<div class="card-icon">' + card.icon + '</div>';
+          html += '<div class="card-name">' + card.name + '</div>';
+          html += '<div class="card-desc">' + card.desc + '</div>';
+          if (card.flavor) {
+            html += '<div class="card-flavor">' + card.flavor + '</div>';
+          }
+        } else {
+          html += '<div class="card-rarity-badge" style="color: #666;">🔒 隐藏</div>';
+          html += '<div class="card-icon">❓</div>';
+          html += '<div class="card-name">???</div>';
+          html += '<div class="card-desc">特殊条件解锁</div>';
+        }
+        html += '</div></div>';
+      }
+      
       html += '</div></div>';
       panel.innerHTML = html;
       
@@ -1579,19 +2429,32 @@
       
       var style = document.createElement('style');
       style.textContent = 
-        '.card-panel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }' +
+        '.card-panel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); }' +
         '.card-panel-content { position: relative; max-width: 900px; margin: 0 auto; padding: 20px; max-height: 90vh; overflow-y: auto; }' +
-        '.card-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }' +
+        '.card-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }' +
         '.card-panel-header h2 { color: #fff; margin: 0; }' +
+        '.card-header-actions { display: flex; align-items: center; gap: 10px; }' +
+        '.card-share-btn { background: linear-gradient(135deg, #667eea, #764ba2); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }' +
         '.card-close { color: #fff; font-size: 28px; cursor: pointer; }' +
+        '.card-level-section { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 12px; }' +
+        '.card-level-badge { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; }' +
+        '.level-icon { font-size: 24px; }' +
+        '.level-name { color: #fff; font-weight: bold; font-size: 14px; }' +
+        '.card-level-progress { flex: 1; }' +
+        '.level-progress-bar { height: 8px; background: #333; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }' +
+        '.level-progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }' +
+        '.level-progress-text { color: #aaa; font-size: 12px; }' +
+        '.level-max { color: #fbbf24; font-weight: bold; }' +
         '.card-panel-stats { display: flex; gap: 20px; margin-bottom: 15px; color: #aaa; }' +
         '.card-panel-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }' +
-        '.card-filter { background: #333; border: 1px solid #555; color: #aaa; padding: 6px 12px; border-radius: 4px; cursor: pointer; }' +
+        '.card-filter { background: #333; border: 1px solid #555; color: #aaa; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }' +
+        '.card-filter:hover { background: #444; }' +
         '.card-filter.active { background: #4a5568; color: #fff; border-color: #718096; }' +
         '.card-panel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }' +
         '.card-item { perspective: 1000px; }' +
-        '.card-inner { border-radius: 12px; padding: 15px; text-align: center; min-height: 180px; display: flex; flex-direction: column; justify-content: center; }' +
+        '.card-inner { border-radius: 12px; padding: 15px; text-align: center; min-height: 180px; display: flex; flex-direction: column; justify-content: center; border-width: 2px; border-style: solid; }' +
         '.card-item.locked .card-inner { opacity: 0.6; filter: grayscale(0.5); }' +
+        '.card-item.hidden-card .card-inner { border-style: dashed; }' +
         '.card-rarity-badge { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }' +
         '.card-icon { font-size: 36px; margin-bottom: 8px; }' +
         '.card-name { color: #fff; font-weight: bold; margin-bottom: 4px; }' +
@@ -1620,14 +2483,117 @@
           var filter = btn.dataset.filter;
           panel.querySelectorAll('.card-item').forEach(function(item) {
             var show = false;
-            if (filter === 'all') show = true;
+            var isHidden = item.dataset.hidden === 'true';
+            if (filter === 'all') show = !isHidden;
+            else if (filter === 'hidden') show = isHidden;
             else if (filter === 'obtained') show = item.dataset.obtained === 'true';
             else if (filter === 'missing') show = item.dataset.obtained === 'false';
-            else show = item.dataset.rarity === filter;
+            else show = item.dataset.rarity === filter && !isHidden;
             item.style.display = show ? 'block' : 'none';
           });
         });
       });
+    },
+    
+    generateShareCard: function() {
+      var level = this.getLevel();
+      var canvas = document.createElement('canvas');
+      canvas.width = 600;
+      canvas.height = 400;
+      var ctx = canvas.getContext('2d');
+      
+      var gradient = ctx.createLinearGradient(0, 0, 600, 400);
+      gradient.addColorStop(0, '#1a1a2e');
+      gradient.addColorStop(1, '#16213e');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 600, 400);
+      
+      ctx.fillStyle = 'rgba(255,255,255,0.05)';
+      for (var i = 0; i < 50; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.random() * 600, Math.random() * 400, Math.random() * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 28px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🃏 卡牌收集成就', 300, 50);
+      
+      ctx.font = '60px system-ui, sans-serif';
+      ctx.fillText(level.icon, 300, 140);
+      
+      ctx.font = 'bold 24px system-ui, sans-serif';
+      ctx.fillStyle = level.color;
+      ctx.fillText(level.name, 300, 180);
+      
+      ctx.font = '18px system-ui, sans-serif';
+      ctx.fillStyle = '#aaa';
+      ctx.fillText('收集进度: ' + this.obtainedCards + '/' + this.totalCards, 300, 230);
+      
+      var obtainedByRarity = { common: 0, rare: 0, epic: 0, legendary: 0 };
+      for (var id in this.cards) {
+        if (this.cards[id].obtained) {
+          obtainedByRarity[this.cards[id].rarity]++;
+        }
+      }
+      for (var id in this.hiddenCards) {
+        if (this.hiddenCards[id].obtained) {
+          obtainedByRarity[this.hiddenCards[id].rarity]++;
+        }
+      }
+      
+      var rarityInfo = [
+        { name: '普通', count: obtainedByRarity.common, color: '#718096' },
+        { name: '稀有', count: obtainedByRarity.rare, color: '#63b3ed' },
+        { name: '史诗', count: obtainedByRarity.epic, color: '#b794f4' },
+        { name: '传说', count: obtainedByRarity.legendary, color: '#f6e05e' }
+      ];
+      
+      var startX = 100;
+      rarityInfo.forEach(function(r, i) {
+        var x = startX + i * 120;
+        ctx.fillStyle = r.color;
+        ctx.font = 'bold 20px system-ui, sans-serif';
+        ctx.fillText(r.count, x, 280);
+        ctx.fillStyle = '#666';
+        ctx.font = '12px system-ui, sans-serif';
+        ctx.fillText(r.name, x, 300);
+      });
+      
+      ctx.fillStyle = '#444';
+      ctx.font = '14px system-ui, sans-serif';
+      ctx.fillText('wr0ld\'s Blog', 300, 360);
+      
+      ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(10, 10, 580, 380);
+      
+      var dataUrl = canvas.toDataURL('image/png');
+      var link = document.createElement('a');
+      link.download = 'card-achievement-' + Date.now() + '.png';
+      link.href = dataUrl;
+      link.click();
+      
+      this.showToast('成就卡片已保存！');
+    },
+    
+    showToast: function(message) {
+      var toast = document.createElement('div');
+      toast.textContent = message;
+      toast.style.cssText = 
+        'position: fixed;' +
+        'bottom: 20px;' +
+        'left: 50%;' +
+        'transform: translateX(-50%);' +
+        'background: #333;' +
+        'color: #fff;' +
+        'padding: 12px 24px;' +
+        'border-radius: 8px;' +
+        'z-index: 9999999;' +
+        'font-family: system-ui, sans-serif;';
+      document.body.appendChild(toast);
+      setTimeout(function() { toast.remove(); }, 3000);
     },
     
     updateUI: function() {
@@ -1645,4 +2611,22 @@
   }
   
   window.CardSystem = CardSystem;
+  
+  window.wr0ld = {
+    secret: function() {
+      if (window.CardSystem) {
+        CardSystem.obtainHiddenCard('secret_message');
+      }
+      console.log('%c🔐 你发现了开发者的秘密！', 'color: #a855f7; font-size: 20px; font-weight: bold;');
+      console.log('%c感谢你探索这个博客的每一个角落。', 'color: #888; font-size: 14px;');
+      console.log('%cflag{wr0ld_s3cr3t_4ch13v3m3nt}', 'color: #fbbf24; font-size: 12px; font-family: monospace;');
+    },
+    hint: function() {
+      console.log('%c💡 提示：试试这些隐藏功能', 'color: #4ecdc4; font-size: 16px;');
+      console.log('%c• 三击页面任意位置', 'color: #888;');
+      console.log('%c• 快速点击20次', 'color: #888;');
+      console.log('%c• 凌晨访问博客', 'color: #888;');
+      console.log('%c• 输入 Konami 秘籍', 'color: #888;');
+    }
+  };
 })();

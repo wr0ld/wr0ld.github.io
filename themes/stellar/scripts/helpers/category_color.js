@@ -16,7 +16,8 @@ hexo.extend.helper.register('category_color', function(cat){
     } else if (textColor.length == (1+6)) { // #ffffff
       bgColor += '20'
     }
-    return ` style="--text-p2:${textColor};--theme-block:${bgColor}"`;
+    // 只设置背景色变量，文字固定为灰色
+    return ` style="color:rgba(160,165,180,0.85)!important;--theme-block:${bgColor}"`;
   }
-  return ''
+  return ' style="color:rgba(160,165,180,0.85)"'
 })

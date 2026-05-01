@@ -116,9 +116,11 @@ button:active,
 a:active {
   transform: scale(0.95);
 }
-.post-card:hover,
-a:hover {
+.post-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 0 6px -2px rgba(255,255,255,0.7), 0 0 40px -8px rgba(255,255,255,0.35);
+}
+a:hover {
   box-shadow: 0 8px 16px rgba(255,255,255,0.2);
 }
 .md-text .highlight {
@@ -813,16 +815,26 @@ html.reverse-both * {
 .widget-header .name {
   color: #fff !important;
 }
-#post-meta {
+.article.banner #post-meta,
+.md #post-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   align-items: center;
 }
-#post-meta .text,
-#post-meta time,
-#post-meta span {
+.article.banner #post-meta .text,
+.md #post-meta .text,
+.article.banner #post-meta time,
+.md #post-meta time,
+.article.banner #post-meta span,
+.md #post-meta span {
   color: #fff !important;
+}
+#post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
 }
 #post-meta .sep {
   margin: 0 4px;
@@ -839,6 +851,75 @@ html.reverse-both * {
 .post-card .meta.cap .cap {
   margin-right: 8px;
   padding: 4px 8px;
+}
+.post-card .md-text {
+  padding: 0.2rem 0.8rem !important;
+}
+.post-card .post-cover img {
+  object-fit: cover !important;
+  border-radius: 6px !important;
+}
+.post-card .post-cover {
+  margin-bottom: 4px !important;
+  margin-top: 2px !important;
+}
+.post-card .post-title {
+  font-size: 0.95em !important;
+  margin-bottom: 2px !important;
+  margin-top: 0 !important;
+}
+.post-card .excerpt p {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+  font-size: 12px !important;
+  margin: 2px 0 !important;
+}
+.post-card .meta.cap {
+  display: flex !important;
+  justify-content: space-between !important;
+  margin-top: 2px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  gap: 8px !important;
+}
+a.post-card .meta.cap,
+a.post-card .meta.cap .cap,
+a.post-card #post-meta,
+a.post-card #post-meta time,
+a.post-card #post-meta span,
+a.post-card #post-meta *,
+a.post-card .breadcrumb,
+a.post-card .breadcrumb span {
+  color: rgba(160,165,180,0.85) !important;
+}
+.post-card .md-text > *:last-child,
+.post-card .md-text > .meta:last-child {
+  margin-bottom: 4px !important;
+}
+.post-card article.md-text {
+  padding-bottom: 6px !important;
+}
+.post-card .meta.cap .cap {
+  margin-right: 0 !important;
+  padding: 2px 6px !important;
+}
+.post-list.grid {
+  gap: 0.4rem !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.layout-switcher {
+  position: fixed !important;
+  z-index: 9999 !important;
 }
 @-moz-keyframes waifuFadeIn {
   to {
@@ -9825,6 +9906,13 @@ details.toc[open] >div.body section .header+.doc_tree {
   margin-bottom: 2px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+.layout-switcher .layout-options .options-label .default-layout-hint {
+  font-size: 10px;
+  color: rgba(52,152,219,0.8);
+  font-weight: normal;
+  text-transform: none;
+  margin-left: 4px;
 }
 .layout-switcher .layout-options .options-divider {
   height: 1px;

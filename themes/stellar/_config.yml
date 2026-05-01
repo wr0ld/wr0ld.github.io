@@ -553,12 +553,12 @@ plugins:
 
   # https://scrollrevealjs.org/api/reveal.html
   scrollreveal:
-    enable: #true # 慎用，有些时候打开页面空白
+    enable: true
     js: https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js
-    distance: 8px
-    duration: 500 # ms
-    interval: 50 # ms
-    scale: 1 # 0.1~1
+    distance: 12px  # 适中移动距离
+    duration: 400   # ms - 缩短时间减少卡顿
+    interval: 80    # ms - 适度间隔
+    scale: 0.98     # 轻微缩放，更自然
   
   # AI 摘要
   # https://github.com/qxchuckle/Post-Summary-AI

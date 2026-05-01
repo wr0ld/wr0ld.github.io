@@ -192,8 +192,11 @@ button:active, .post-card:active, a:active
   transform: scale(0.95)
 
 // 悬停效果
-.post-card:hover, a:hover
+.post-card:hover
   transform: translateY(-2px)
+  box-shadow: 0 0 6px -2px rgba(255, 255, 255, 0.7), 0 0 40px -8px rgba(255, 255, 255, 0.35)
+
+a:hover
   box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2)
 
 // 代码块样式增强 - macOS风格
@@ -926,15 +929,22 @@ html.reverse-both
 .widget-header .name
   color: #fff !important
 
-// 文章详情页 meta 信息样式
+// 文章详情页 meta 信息样式（仅文章页，不影响卡片）
+.article.banner #post-meta,
+.md #post-meta
+  display: flex
+  flex-wrap: wrap
+  gap: 12px
+  align-items: center
+
+  .text, time, span
+    color: #fff !important
+
 #post-meta
   display: flex
   flex-wrap: wrap
   gap: 12px
   align-items: center
-  
-  .text, time, span
-    color: #fff !important
     
   .sep
     margin: 0 4px
@@ -953,3 +963,265 @@ html.reverse-both
   .cap
     margin-right: 8px
     padding: 4px 8px
+
+// 卡片内容区缩小上下空白
+.post-card .md-text
+  padding: 0.2rem 0.8rem !important
+
+// 卡片封面图
+.post-card .post-cover img
+  object-fit: cover !important
+  border-radius: 6px !important
+
+// 卡片封面下方空白
+.post-card .post-cover
+  margin-bottom: 4px !important
+  margin-top: 2px !important
+
+// 卡片标题缩小间距
+.post-card .post-title
+  font-size: 0.95em !important
+  margin-bottom: 2px !important
+  margin-top: 0 !important
+
+// 卡片摘述限制2行并缩小间距
+.post-card .excerpt p
+  display: -webkit-box !important
+  -webkit-line-clamp: 2 !important
+  -webkit-box-orient: vertical !important
+  overflow: hidden !important
+  font-size: 12px !important
+  margin: 2px 0 !important
+
+// 卡片meta信息：时间左、分类右
+.post-card .meta.cap
+  display: flex !important
+  justify-content: space-between !important
+  margin-top: 2px !important
+  padding-top: 0 !important
+  padding-bottom: 0 !important
+  gap: 8px !important
+
+// 卡片meta区域文字颜色（硬编码灰色，避免CSS变量动画时序问题）
+a.post-card .meta.cap,
+a.post-card .meta.cap .cap,
+a.post-card #post-meta,
+a.post-card #post-meta time,
+a.post-card #post-meta span,
+a.post-card #post-meta *,
+a.post-card .breadcrumb,
+a.post-card .breadcrumb span
+  color: rgba(160, 165, 180, 0.85) !important
+
+// 卡片底部收尾间距
+.post-card .md-text > *:last-child,
+.post-card .md-text > .meta:last-child
+  margin-bottom: 4px !important
+
+.post-card article.md-text
+  padding-bottom: 6px !important
+
+.post-card .meta.cap .cap
+  margin-right: 0 !important
+  padding: 2px 6px !important
+
+// 网格布局卡片间距缩小
+.post-list.grid
+  gap: 0.4rem !important
+
+// ============================================================
+// 全局动画系统（已优化 - 使用 GPU 加速，减少重排）
+// ============================================================
+
+// ---------- 1. 页面入场动画 ----------
+.l_body
+  animation: pageIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both
+  will-change: opacity
+
+@keyframes pageIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+// ---------- 2. 导航栏动画 ----------
+.navbar-blur
+  animation: navSlideDown 0.35s cubic-bezier(0.22, 1, 0.36, 1) both
+
+@keyframes navSlideDown
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+.navbar nav a
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease !important
+  &:hover
+    transform: translateY(-1px) !important
+
+// ---------- 3. 侧边栏淡入 ----------
+.l_left
+  animation: sidebarIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both
+
+@keyframes sidebarIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+// ---------- 4. 文章卡片交错入场 ----------
+.post-card
+  animation: cardIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both !important
+
+.post-list .post-card:nth-child(1)  { animation-delay: 0.03s !important }
+.post-list .post-card:nth-child(2)  { animation-delay: 0.06s !important }
+.post-list .post-card:nth-child(3)  { animation-delay: 0.09s !important }
+.post-list .post-card:nth-child(4)  { animation-delay: 0.12s !important }
+.post-list .post-card:nth-child(5)  { animation-delay: 0.15s !important }
+.post-list .post-card:nth-child(6)  { animation-delay: 0.18s !important }
+
+@keyframes cardIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+// ---------- 5. 卡片悬停增强（GPU加速） ----------
+.post-card
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important
+  will-change: transform
+  &:hover
+    transform: translateY(-3px) scale(1.005) !important
+    box-shadow: 0 0 6px -2px rgba(255, 255, 255, 0.7), 0 0 40px -8px rgba(255, 255, 255, 0.35) !important
+
+// ---------- 6. Widget 入场 ----------
+.widget-wrapper
+  animation: widgetIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both
+
+@keyframes widgetIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+.l_left .widget-wrapper:nth-child(1) { animation-delay: 0.10s }
+.l_left .widget-wrapper:nth-child(2) { animation-delay: 0.15s }
+.l_left .widget-wrapper:nth-child(3) { animation-delay: 0.20s }
+.l_left .widget-wrapper:nth-child(4) { animation-delay: 0.25s }
+
+// ---------- 7. 文章详情页动画 ----------
+.md-text
+  h1, h2, h3, h4, h5, h6
+    animation: headingIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both
+  h1 { animation-delay: 0.05s }
+  h2 { animation-delay: 0.08s }
+
+@keyframes headingIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+// ---------- 8. 封面/横幅动画 ----------
+.article.banner
+  animation: bannerIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both
+
+@keyframes bannerIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+// ---------- 9. 归档列表动画 ----------
+.archive-list
+  animation: listIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both
+
+.post-list.archives .archive-list:nth-child(2)  { animation-delay: 0.03s }
+.post-list.archives .archive-list:nth-child(3)  { animation-delay: 0.06s }
+.post-list.archives .archive-list:nth-child(4)  { animation-delay: 0.09s }
+
+@keyframes listIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+// ---------- 10. 分类页面动画 ----------
+.category-card
+  animation: catCardIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease !important
+  will-change: transform
+  &:hover
+    transform: translateY(-2px) !important
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important
+
+.categories-style-1 .category-card:nth-child(1)  { animation-delay: 0.03s }
+.categories-style-1 .category-card:nth-child(2)  { animation-delay: 0.06s }
+.categories-style-1 .category-card:nth-child(3)  { animation-delay: 0.09s }
+.categories-style-1 .category-card:nth-child(4)  { animation-delay: 0.12s }
+
+@keyframes catCardIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+// ---------- 11. 链接卡片悬停（GPU加速） ----------
+.card, .link-card, .sites-card
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease !important
+  will-change: transform
+  &:hover
+    transform: translateY(-2px) !important
+
+// ---------- 12. 按钮增强 ----------
+button:not(.layout-toggle-btn), .filter-btn, .nav-home
+  transition: transform 0.2s ease, color 0.2s ease !important
+  &:hover
+    transform: translateY(-1px) !important
+  &:active
+    transform: scale(0.97) !important
+
+// ---------- 13. 图片悬停缩放 ----------
+.md-text img:not([class])
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1) !important
+  border-radius: 8px !important
+  &:hover
+    transform: scale(1.02) !important
+
+// ---------- 14. 标签悬停 ----------
+.tag, .widget .tag
+  transition: transform 0.2s ease, color 0.2s ease !important
+  &:hover
+    transform: translateY(-1px) scale(1.05) !important
+
+// ---------- 15. 分页器动画 ----------
+.paginator-wrap
+  animation: pageIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both
+
+  .page-number, .extend
+    transition: transform 0.25s ease, color 0.2s ease !important
+    &:hover
+      transform: translateY(-1px) !important
+
+// ---------- 16. 页脚动画 ----------
+footer
+  animation: footerIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both
+
+@keyframes footerIn
+  from
+    opacity: 0
+  to
+    opacity: 1
+
+
+// ---------- 17. 减少动画偏好支持（无障碍）----------
+@media (prefers-reduced-motion: reduce)
+  *, *::before, *::after
+    animation-duration: 0.01ms !important
+    animation-iteration-count: 1 !important
+    transition-duration: 0.01ms !important
+
+// 布局切换器固定定位保障
+.layout-switcher
+  position: fixed !important
+  z-index: 9999 !important

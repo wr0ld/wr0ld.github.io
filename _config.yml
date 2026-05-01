@@ -44,6 +44,19 @@ skip_render:
   - lab/my-room-in-3d/**
   - lab/bruno-simon-folio/**
   - lab/threejs-city/**
+  - lab/win11react/**
+  - srk-toolbox/**
+  - lab/liveterm/**
+  - lab/infinite-world/**
+  - lab/black-hole/**
+  - lab/bruno-folio-2025/**
+  - festival-demo/**
+  - lab/quantum-fractal-explorer/**
+  - lab/3d-wireframe/**
+  - lab/canvas-celebration/**
+  - lab/david-alvarado-portfolio/**
+  - lab/galaxy-portfolio/**
+  - games/**
 
 # Writing
 new_post_name: :title.md # File name of new posts
@@ -76,7 +89,7 @@ prismjs:
 # order_by: Posts order. (Order by date descending by default)
 index_generator:
   path: ''
-  per_page: 7
+  per_page: 9
   order_by: -date
 
 # Category & Tag
@@ -105,6 +118,7 @@ pagination_dir: page
 # Include / Exclude file(s)
 ## include:/exclude: options only apply to the 'source/' folder
 include:
+  - "lab/liveterm/_next/**"
 exclude:
 ignore:
 

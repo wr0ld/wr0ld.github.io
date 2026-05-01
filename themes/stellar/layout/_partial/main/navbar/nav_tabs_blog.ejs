@@ -14,7 +14,7 @@ function layoutDiv() {
   if (site.categories && site.categories.length > 0) {
     if (page.category) {
       el += '<a class="active" href="' + pretty_url(config.category_dir) + '">' + __("btn.category") + __("symbol.colon") + page.category + '</a>';
-    } else if (page.layout == "categories") {
+    } else if (page.layout == "categories" || page.path.startsWith(config.category_dir + '/') || page.path.startsWith(config.category_dir + '.')) {
       el += '<a class="active" href="' + pretty_url(config.category_dir) + '">' + __("btn.categories") + '</a>';
     } else {
       el += '<a href="' + pretty_url(config.category_dir) + '">' + __("btn.categories") + '</a>';
@@ -51,6 +51,7 @@ function layoutDiv() {
   }
   
   el += '<span style="flex: 1;"></span>';
+  el += '<a href="/srk-toolbox/">SRK Toolbox</a>';
   el += '<a href="/payloader/">Payloader</a>';
 
   el += '</nav>';

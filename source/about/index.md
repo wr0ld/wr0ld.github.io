@@ -25,7 +25,7 @@ menu_id: about
     </div>
     <div class="info-item">
       <span class="label">公众号：</span>
-      <span class="value">弹不出的5h31ll</span>
+      <span class="value">弹不出的5h3ll</span>
     </div>
   </div>
 </div>

@@ -2,7 +2,7 @@
 const content = theme.footer.content?.replace('{author.name}', (config.author || 'Anonymity'))?.replace('{theme.name}', stellar_info('name'))?.replace('{theme.version}', stellar_info('version'))?.replace('{theme.tree}', stellar_info('tree'))
 function layoutDiv() {
   var el = ''
-  el += `<footer class="page-footer${scrollreveal(' ')} footnote">`
+  el += '<footer class="page-footer' + scrollreveal(' ') + ' footnote">'
   el += '<hr>'
   el += '<div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div>'
   // sitemap
@@ -16,7 +16,7 @@ function layoutDiv() {
     } else {
       count = Math.min(sitemap.length, 5)
     }
-    el += `<div class="sitemap" style="column-count:${count};">`
+    el += '<div class="sitemap" style="column-count:' + count + ';">'
     for (let group of sitemap) {
       let title = group.title
       let items = group.items

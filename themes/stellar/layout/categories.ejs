@@ -14,6 +14,7 @@ if (page.menu_id == undefined) {
     
     <%
     var categoryIcons = {
+      '实战': '🎯',
       'web': '🌐',
       'linux': '🐧',
       'windows': '🪟',
@@ -22,7 +23,7 @@ if (page.menu_id == undefined) {
       '笔记': '📝'
     };
     
-    var customOrder = ['代码审计', 'web', 'linux', 'windows', '工具魔改', '笔记'];
+    var customOrder = ['实战', '代码审计', '工具魔改', 'web', 'linux', 'windows', '笔记'];
     
     var rootCategories = [];
     site.categories.each(function(cat) {
@@ -46,6 +47,18 @@ if (page.menu_id == undefined) {
           children.push(cat);
         }
       });
+      
+      if (parentCat.name === '代码审计') {
+        var codeAuditOrder = ['内存马', 'log4j', 'shiro', 'cc', 'fastjson'];
+        children.sort(function(a, b) {
+          var indexA = codeAuditOrder.indexOf(a.name);
+          var indexB = codeAuditOrder.indexOf(b.name);
+          if (indexA === -1) indexA = 999;
+          if (indexB === -1) indexB = 999;
+          return indexA - indexB;
+        });
+      }
+      
       return children;
     }
     
