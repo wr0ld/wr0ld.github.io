@@ -91,8 +91,6 @@ const hud = {
 
 // defines
 
-const l_body = document.querySelector('.l_body');
-
 
 const init = {
   toc: () => {
