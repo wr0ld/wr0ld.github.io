@@ -1,8 +1,8 @@
 <% if ((is_home() || is_category() || is_tag()) && page.total > 1) { %>
   <div class='paginator-wrap dis-select<%- scrollreveal(' ') %>'>
   <%- paginator({
-    prev_text: '',
-    next_text: '',
+    prev_text: '‹ 上一页',
+    next_text: '下一页 ›',
     force_prev_next:true
   }) %>
   </div>
