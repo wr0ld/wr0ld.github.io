@@ -21,7 +21,7 @@
   top: calc(var(--gap-margin) * 2)
 .l_body .l_right
   justify-self: left
-  max-height: calc(100% - calc(var(--gap-margin) * 2) * 2)
+  max-height: 'calc(%s - %s * 2 - %s)' % (100vh var(--gap-margin) $rightbar-bottom-margin)
   .rightbar-container
     height: 100%
 

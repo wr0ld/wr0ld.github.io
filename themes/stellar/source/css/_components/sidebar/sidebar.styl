@@ -6,7 +6,7 @@
     margin: var(--gap-max) var(--gap-margin) 0
 
 .l_right
-  margin: calc(var(--gap-margin) * 2) 0
+  margin: calc(var(--gap-margin) * 2) var(--gap-margin)
   border-radius: $border-card-l
 @media screen and (min-width: $device-2k)
   .l_left
@@ -96,7 +96,7 @@
 
 // 右侧边栏容器（与左侧一致）
 .l_right
-  position relative
+  top: calc(var(--gap-margin) * 2)
   .sidebg
     pointer-events: none
     position: absolute
