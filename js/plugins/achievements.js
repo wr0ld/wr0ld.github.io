@@ -1903,11 +1903,11 @@
       timeContainer.id = 'time-widget';
       timeContainer.className = 'footer-time-info';
       timeContainer.innerHTML = 
-        '<span class="footer-clock">🕐 <span id="footer-time">--:--:--</span></span>' +
+        '<span class="footer-clock"><span id="footer-time">--:--:--</span></span>' +
         '<span class="footer-divider">|</span>' +
-        '<span class="footer-stat">⏱️ <span id="footer-online">0h 0m</span></span>' +
+        '<span class="footer-stat"><span id="footer-online">0h 0m</span></span>' +
         '<span class="footer-divider">|</span>' +
-        '<span class="footer-stat">🃏 <span id="footer-cards">0/0</span></span>';
+        '<span class="footer-stat"><span id="footer-cards">0/0</span></span>';
       
       footer.insertBefore(timeContainer, footer.firstChild);
       

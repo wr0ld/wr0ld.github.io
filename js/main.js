@@ -319,3 +319,128 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('resize', updateProgress, { passive: true });
   updateProgress();
 })();
+
+// 卡片 3D 视差效果
+(function() {
+  var cards = document.querySelectorAll('.post-card');
+  if (cards.length === 0) return;
+  cards.forEach(function(card) {
+    card.addEventListener('mouseenter', function() {
+      this.dataset.tiltActive = 'true';
+    });
+    card.addEventListener('mousemove', function(e) {
+      if (!this.dataset.tiltActive) return;
+      var rect = this.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      var centerX = rect.width / 2;
+      var centerY = rect.height / 2;
+      var rotateX = (y - centerY) / centerY * -5;
+      var rotateY = (x - centerX) / centerX * 5;
+      this.style.setProperty('transition', 'none', 'important');
+      this.style.transform = 'perspective(1000px) translateY(-3px) scale3d(1.005,1.005,1.005) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
+    });
+    card.addEventListener('mouseleave', function() {
+      delete this.dataset.tiltActive;
+      this.style.removeProperty('transition');
+      this.style.transform = '';
+    });
+  });
+})();
+
+// 打字机效果
+(function() {
+  var el = document.querySelector('.welcome-text');
+  if (!el) return;
+  var text = el.textContent.trim();
+  el.textContent = '';
+  var cursor = document.createElement('span');
+  cursor.className = 'typewriter-cursor';
+  cursor.textContent = '_';
+  el.appendChild(cursor);
+  var i = 0;
+  function type() {
+    if (i < text.length) {
+      cursor.before(document.createTextNode(text.charAt(i)));
+      i++;
+      setTimeout(type, 80 + Math.random() * 40);
+    }
+  }
+  setTimeout(type, 600);
+})();
+
+// 全屏动态背景管理
+(function() {
+  var canvas, ctx, particles = [], animId, enabled = false;
+  
+  function initCanvas() {
+    if (canvas) return;
+    canvas = document.createElement('canvas');
+    canvas.id = 'hacker-bg';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.3;';
+    document.body.insertBefore(canvas, document.body.firstChild);
+    ctx = canvas.getContext('2d');
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+  }
+  
+  function resize() {
+    if (!canvas) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  
+  function createParticles() {
+    particles = [];
+    var count = Math.floor((canvas.width * canvas.height) / 15000);
+    for (var i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: 0.3 + Math.random() * 0.5,
+        size: 1 + Math.random() * 2,
+        alpha: 0.2 + Math.random() * 0.6,
+        char: String.fromCharCode(0x30A0 + Math.random() * 96)
+      });
+    }
+  }
+  
+  function animate() {
+    if (!enabled) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '12px monospace';
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.y += p.vy;
+      p.x += p.vx;
+      if (p.y > canvas.height) {
+        p.y = -10;
+        p.x = Math.random() * canvas.width;
+        p.char = String.fromCharCode(0x30A0 + Math.random() * 96);
+      }
+      ctx.fillStyle = 'rgba(0, 255, 65, ' + p.alpha + ')';
+      ctx.fillText(p.char, p.x, p.y);
+    }
+    animId = requestAnimationFrame(animate);
+  }
+  
+  window.toggleHackerBg = function(flag) {
+    enabled = flag;
+    if (flag) {
+      initCanvas();
+      createParticles();
+      animate();
+      localStorage.setItem('Stellar.hackerBg', '1');
+    } else {
+      if (animId) cancelAnimationFrame(animId);
+      if (canvas) { canvas.style.display = 'none'; }
+      localStorage.setItem('Stellar.hackerBg', '0');
+    }
+    if (flag && canvas) canvas.style.display = '';
+  };
+  
+  if (localStorage.getItem('Stellar.hackerBg') === '1') {
+    window.toggleHackerBg(true);
+  }
+})();

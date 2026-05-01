@@ -42,16 +42,16 @@
   <title>设置 - blog</title>
 
   
-    <meta name="description" content="🛠️ 没用的工具            🔮 占卜       进入占卜                 🔢 计算器       打开计算器                   🎨 主题设置            深色模式                🌙         切换主题                          📖 阅读设置">
+    <meta name="description" content="🛠️ 没用的工具            🔮 占卜       进入占卜                 🔢 计算器       打开计算器                   🎨 主题设置            深色模式                🌙         切换主题                        🌐 赛博背景">
 <meta property="og:type" content="website">
 <meta property="og:title" content="设置">
 <meta property="og:url" content="https://wr0ld.github.io/settings/">
 <meta property="og:site_name" content="blog">
-<meta property="og:description" content="🛠️ 没用的工具            🔮 占卜       进入占卜                 🔢 计算器       打开计算器                   🎨 主题设置            深色模式                🌙         切换主题                          📖 阅读设置">
+<meta property="og:description" content="🛠️ 没用的工具            🔮 占卜       进入占卜                 🔢 计算器       打开计算器                   🎨 主题设置            深色模式                🌙         切换主题                        🌐 赛博背景">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-05-01T02:37:24.488Z">
-<meta property="article:modified_time" content="2026-05-01T02:37:24.488Z">
+<meta property="article:published_time" content="2026-05-01T06:23:35.218Z">
+<meta property="article:modified_time" content="2026-05-01T06:23:35.218Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -73,7 +73,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Website","@id":"https://wr0ld.github.io/settings/","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"name":"设置","description":"\n  \n    \n    🛠️ 没用的工具\n    \n      🔮 占卜\n      进入占卜\n    \n    \n      🔢 计算器\n      打开计算器\n    \n  \n  \n  \n    🎨 主题设置\n    \n      深色模式\n      \n        🌙\n        切换主题\n      \n    \n  \n  \n  \n    📖 阅读设置\n    \n...","url":"https://wr0ld.github.io/settings/","keywords":"blog, hexo, stellar, 技术, 编程"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Website","@id":"https://wr0ld.github.io/settings/","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"name":"设置","description":"\n  \n    \n    🛠️ 没用的工具\n    \n      🔮 占卜\n      进入占卜\n    \n    \n      🔢 计算器\n      打开计算器\n    \n  \n  \n  \n    🎨 主题设置\n    \n      深色模式\n      \n        🌙\n        切换主题\n      \n    \n    \n      🌐 赛博背景\n      \n...","url":"https://wr0ld.github.io/settings/","keywords":"blog, hexo, stellar, 技术, 编程"}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -135,6 +135,13 @@
         <span class="theme-icon">🌙</span>
         <span class="theme-text">切换主题</span>
       </button>
+    </div>
+    <div class="setting-item">
+      <span>🌐 赛博背景</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="hackerBg" onchange="toggleHackerBg(this.checked)">
+        <span class="slider"></span>
+      </label>
     </div>
   </div>
   
@@ -2933,6 +2940,14 @@ function renderRankingList(type) {
   
   container.innerHTML = html;
 }
+
+// 同步赛博背景开关状态
+(function() {
+  var cb = document.getElementById('hackerBg');
+  if (cb) {
+    cb.checked = localStorage.getItem('Stellar.hackerBg') === '1';
+  }
+})();
 </script>
 </article>
 
