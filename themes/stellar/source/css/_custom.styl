@@ -384,6 +384,26 @@ html.reverse-both
   *
     transform: scale(-1, -1)
 
+// 阅读进度条 - 蓝紫黑彩虹渐变
+.reading-progress-bar
+  position: fixed
+  top: 0
+  left: 0
+  width: 0
+  height: 3px
+  z-index: 99999
+  background: linear-gradient(90deg, #4A90D9, #7B2FBE, #2D1B69, #000000)
+  background-size: 200% 100%
+  animation: progressGlow 2s ease infinite
+  transition: width 0.1s ease-out
+  box-shadow: 0 0 6px rgba(74, 144, 217, 0.5), 0 0 12px rgba(123, 47, 190, 0.3)
+
+@keyframes progressGlow
+  0%, 100%
+    background-position: 0% 50%
+  50%
+    background-position: 100% 50%
+
 // 自定义右键菜单样式
 .custom-context-menu
   position: fixed

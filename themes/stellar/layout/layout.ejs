@@ -63,6 +63,7 @@ if (theme.style.prefers_theme === 'auto') {
 }
   html += partial('_partial/head')
   html += `<body>`
+    html += `<div class="reading-progress-bar"></div>`
     html += site_background
     html += partial('_partial/cover/index')
     html += `<div class="l_body ${page_type}" id="start" layout="${page.layout}" type="${article_type}" ${indent ? 'text-indent' : ''}>`
