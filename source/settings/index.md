@@ -27,6 +27,13 @@ menu_id: settings
         <span class="theme-text">切换主题</span>
       </button>
     </div>
+    <div class="setting-item">
+      <span>🌐 赛博背景</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="hackerBg" onchange="toggleHackerBg(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
   </div>
   
   <div id="reading" class="settings-section">
@@ -2824,4 +2831,12 @@ function renderRankingList(type) {
   
   container.innerHTML = html;
 }
+
+// 同步赛博背景开关状态
+(function() {
+  var cb = document.getElementById('hackerBg');
+  if (cb) {
+    cb.checked = localStorage.getItem('Stellar.hackerBg') === '1';
+  }
+})();
 </script>
