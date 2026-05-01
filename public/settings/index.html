@@ -95,7 +95,7 @@
 
 
 
-<div class="article banner top">
+<div class="article banner slide-up top">
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 
@@ -113,7 +113,7 @@
     </div>
     
   </div>
-  </div><article class="md-text content"><div class="settings-wrapper">
+  </div><article class="md-text content slide-up"><div class="settings-wrapper">
   <div class="settings-container">
     <div id="tools" class="settings-section">
     <h2>🛠️ 没用的工具</h2>
@@ -2938,11 +2938,11 @@ function renderRankingList(type) {
 
 
 
-<footer class="page-footer footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<footer class="page-footer slide-up footnote"><hr><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
 <div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right">
 <div class="widgets">
 
-<widget class="widget-wrapper toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#tools"><span class="toc-text">🛠️ 没用的工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#theme"><span class="toc-text">🎨 主题设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reading"><span class="toc-text">📖 阅读设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reverse"><span class="toc-text">🔄 反转设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mouse"><span class="toc-text">🖱️ 鼠标特效设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#music"><span class="toc-text">🎮 看板娘设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#wave"><span class="toc-text">📈 波纹</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#display"><span class="toc-text">🖥️ 界面显示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#music-search-section"><span class="toc-text">🎵 音乐搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#seo"><span class="toc-text">
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select"><span class="name">本文目录</span><a class="cap-action" onclick="sidebar.toggleTOC()" ><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg></a></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#tools"><span class="toc-text">🛠️ 没用的工具</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#theme"><span class="toc-text">🎨 主题设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reading"><span class="toc-text">📖 阅读设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#reverse"><span class="toc-text">🔄 反转设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mouse"><span class="toc-text">🖱️ 鼠标特效设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#music"><span class="toc-text">🎮 看板娘设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#wave"><span class="toc-text">📈 波纹</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#display"><span class="toc-text">🖥️ 界面显示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#music-search-section"><span class="toc-text">🎵 音乐搜索</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#seo"><span class="toc-text">
       🔍 SEO优化
       ▼
     </span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#data"><span class="toc-text">📊 数据管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ranking"><span class="toc-text">
@@ -3570,6 +3570,25 @@ function renderRankingList(type) {
         });
       })
     }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
   });
 </script>
 <script>

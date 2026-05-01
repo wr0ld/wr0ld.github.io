@@ -908,6 +908,215 @@ a.post-card .breadcrumb span {
 .post-list.grid {
   gap: 0.4rem !important;
 }
+.navbar nav a {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease !important;
+}
+.navbar nav a:hover {
+  transform: translateY(-1px) !important;
+}
+.post-card {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important;
+}
+.post-card:hover {
+  transform: translateY(-3px) scale(1.005) !important;
+  box-shadow: 0 0 6px -2px rgba(255,255,255,0.7), 0 0 40px -8px rgba(255,255,255,0.35) !important;
+}
+.category-card {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease !important;
+}
+.category-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2) !important;
+}
+.card,
+.link-card,
+.sites-card {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease !important;
+}
+.card:hover,
+.link-card:hover,
+.sites-card:hover {
+  transform: translateY(-2px) !important;
+}
+button:not(.layout-toggle-btn),
+.filter-btn,
+.nav-home {
+  transition: transform 0.2s ease, color 0.2s ease !important;
+}
+button:not(.layout-toggle-btn):hover,
+.filter-btn:hover,
+.nav-home:hover {
+  transform: translateY(-1px) !important;
+}
+button:not(.layout-toggle-btn):active,
+.filter-btn:active,
+.nav-home:active {
+  transform: scale(0.97) !important;
+}
+.md-text img:not([class]) {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  border-radius: 8px !important;
+}
+.md-text img:not([class]):hover {
+  transform: scale(1.02) !important;
+}
+.tag,
+.widget .tag {
+  transition: transform 0.2s ease, color 0.2s ease !important;
+}
+.tag:hover,
+.widget .tag:hover {
+  transform: translateY(-1px) scale(1.05) !important;
+}
+.paginator-wrap .page-number,
+.paginator-wrap .extend {
+  transition: transform 0.25s ease, color 0.2s ease !important;
+}
+.paginator-wrap .page-number:hover,
+.paginator-wrap .extend:hover {
+  transform: translateY(-1px) !important;
+}
+.article.banner .content .bottom .title span {
+  display: inline-block;
+  animation: titleSlideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.article.banner .content .top {
+  animation: breadSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.md-text.content h2 {
+  position: relative;
+  padding-left: 1rem !important;
+}
+.md-text.content h2:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 70%;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent), var(--theme));
+  opacity: 0.85;
+  transition: height 0.3s ease, opacity 0.3s ease;
+}
+.md-text.content h2:hover:before {
+  height: 90%;
+  opacity: 1;
+}
+.md-text.content h3 {
+  position: relative;
+  padding-left: 0.8rem !important;
+}
+.md-text.content h3:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 2px;
+  background: var(--theme);
+  opacity: 0.6;
+  transition: height 0.3s ease, opacity 0.3s ease;
+}
+.md-text.content h3:hover:before {
+  height: 80%;
+  opacity: 0.9;
+}
+.md-text .highlight {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.md-text .highlight:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  transform: translateY(-1px);
+}
+.md-text blockquote {
+  position: relative;
+  border-left: 3px solid var(--theme) !important;
+  transition: border-left-width 0.3s ease, background 0.3s ease;
+}
+.md-text blockquote:hover {
+  border-left-width: 5px !important;
+  background: var(--block-hover) !important;
+}
+.article-footer {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important;
+}
+.article-footer:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+}
+.md-text table tr {
+  transition: background 0.2s ease;
+}
+.md-text table tr:hover {
+  background: var(--block-hover) !important;
+}
+.md-text p a:not([class]) {
+  background-image: linear-gradient(var(--theme), var(--theme));
+  background-size: 0% 2px;
+  background-position: left bottom;
+  background-repeat: no-repeat;
+  transition: background-size 0.3s ease, color 0.2s ease;
+}
+.md-text p a:not([class]):hover {
+  background-size: 100% 2px;
+  color: var(--theme);
+}
+.md-text p>img {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease !important;
+}
+.md-text p>img:hover {
+  transform: scale(1.02) !important;
+  box-shadow: 0 8px 30px rgba(100,100,255,0.15) !important;
+}
+.md-text code:not([class*="language"]) {
+  background: var(--theme-a10);
+  color: var(--theme);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  transition: background 0.2s ease;
+}
+.md-text code:not([class*="language"]):hover {
+  background: var(--theme-a20);
+}
+.md-text ul li,
+.md-text ol li {
+  transition: transform 0.2s ease, background 0.2s ease;
+  border-radius: 4px;
+}
+.md-text ul li:hover,
+.md-text ol li:hover {
+  transform: translateX(4px);
+}
+.toc .toc-link.active {
+  position: relative;
+}
+.toc .toc-link.active:after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--theme);
+  animation: tocDot 1.5s ease-in-out infinite;
+}
+.related-posts .post-card {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important;
+}
+.related-posts .post-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1083,6 +1292,126 @@ a.post-card .breadcrumb span {
   to {
     opacity: 0;
     transform: translateX(100%);
+  }
+}
+@-moz-keyframes titleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@-webkit-keyframes titleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@-o-keyframes titleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes titleSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@-moz-keyframes breadSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@-webkit-keyframes breadSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@-o-keyframes breadSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes breadSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@-moz-keyframes tocDot {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.4);
+  }
+}
+@-webkit-keyframes tocDot {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.4);
+  }
+}
+@-o-keyframes tocDot {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.4);
+  }
+}
+@keyframes tocDot {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.4);
   }
 }
 :root {
@@ -10386,6 +10715,9 @@ div.swiper-slide img {
 }
 .swiper-button-next:after {
   transform: translateX(1px);
+}
+.slide-up {
+  visibility: hidden;
 }
 .highlight {
   position: relative;
