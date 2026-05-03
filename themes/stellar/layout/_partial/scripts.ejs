@@ -22,7 +22,7 @@ function custom_inject() {
 <%- partial('scripts/lazyload') %>
 
 <!-- required -->
-<script src="<%- url_for(`${theme.stellar.main_js}?v=${stellar_info('version')}`) %>" defer></script>
+<script src="<%- url_for(`${theme.stellar.main_js}?v=${stellar_info('build')}`) %>" defer></script>
 
 <%- partial('scripts/theme') %>
 
@@ -51,7 +51,7 @@ function custom_inject() {
 <script src="<%- url_for('/js/plugins/hotkeys.js') %>"></script>
 
 <!-- Achievements / Card System -->
-<script src="<%- url_for('/js/plugins/achievements.js') %>"></script>
+<script src="<%- url_for(`/js/plugins/achievements.js?v=${stellar_info('build')}`) %>"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="<%- url_for('/js/plugins/special-days.js') %>"></script>

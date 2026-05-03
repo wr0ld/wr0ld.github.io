@@ -16,6 +16,8 @@ hexo.extend.helper.register('stellar_info', function(args){
     return repo + '/issues/'
   } else if (args == 'tree') {
     return repo + '/tree/' + version;
+  } else if (args == 'build') {
+    return Date.now().toString(36);
   }
   return '';
 });

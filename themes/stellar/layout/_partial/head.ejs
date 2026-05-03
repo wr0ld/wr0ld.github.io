@@ -144,7 +144,7 @@ function generate_canonical() {
     <%- feed_tag(config.feed.path, {title: config.title}) %>
   <% } %>
 
-  <link rel="stylesheet" href="<%- url_for(`${theme.stellar.main_css}?v=${css_version()}`) %>">
+  <link rel="stylesheet" href="<%- url_for(`${theme.stellar.main_css}?v=${stellar_info('build')}`) %>">
 
 
   <% if (config.favicon) { %>
