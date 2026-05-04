@@ -100,6 +100,26 @@ footer:
       - '[关于我](/about/)'
   content: |
 
+######## Category Order ########
+category_order:
+  - 其他
+  - 实战
+  - 代码审计
+  - 工具魔改
+  - Windows
+  - linux
+  - web
+  - 笔记
+
+######## Subcategory Order ########
+subcategory_order:
+  代码审计:
+    - 内存马
+    - log4j
+    - shiro
+    - cc
+    - fastjson
+
 ######## Plugins ########
 plugins:
   fancybox:
