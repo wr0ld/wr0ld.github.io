@@ -69,11 +69,12 @@ function custom_inject() {
 <style>
   #waifu {
     position: fixed !important;
-    bottom: 20px !important;
-    right: 20px !important;
+    bottom: 0 !important;
+    right: 10px !important;
     left: auto !important;
     z-index: 1000 !important;
-    transform: none !important;
+    transform: scale(var(--waifu-scale, 1)) !important;
+    transform-origin: bottom right !important;
     display: block !important;
     opacity: 1 !important;
     visibility: visible !important;

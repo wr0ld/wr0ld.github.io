@@ -127,7 +127,11 @@ menu_id: settings
   </div>
   
   <div id="music" class="settings-section">
-    <h2>🎮 看板娘设置</h2>
+    <h2 class="collapsible-header" onclick="toggleWaifuSection()">
+      🎮 看板娘设置
+      <span class="toggle-icon" id="waifu-toggle-icon">▼</span>
+    </h2>
+    <div class="collapsible-content" id="waifu-content">
     <div class="setting-item">
       <span>显示看板娘</span>
       <label class="toggle-switch">
@@ -135,9 +139,14 @@ menu_id: settings
         <span class="slider"></span>
       </label>
     </div>
-    <div class="waifu-model-section">
-      <div class="waifu-model-label">看板娘模型</div>
-      <div class="waifu-model-options" id="waifuModelOptions"></div>
+    <div class="setting-item">
+      <span>看板娘大小</span>
+      <div class="waifu-zoom-slider">
+        <input type="range" id="waifuZoomSlider" min="50" max="200" value="100">
+        <span id="waifu-zoom-value">100%</span>
+        <button class="zoom-reset-btn" onclick="resetWaifuZoom()" title="恢复默认">↺</button>
+      </div>
+    </div>
     </div>
   </div>
   
@@ -616,52 +625,6 @@ button:hover {
   text-align: left;
 }
 
-.waifu-model-options {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-}
-
-.skin-btn, .waifu-model-btn {
-  padding: 6px 12px;
-  border: 2px solid var(--border, #e0e0e0);
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  background: var(--card, #fff);
-  transition: all 0.2s;
-  color: var(--text-p1);
-}
-
-.skin-btn:hover, .waifu-model-btn:hover {
-  transform: scale(1.05);
-}
-
-.skin-btn.active, .waifu-model-btn.active {
-  border-color: var(--theme, #3498db);
-  box-shadow: 0 0 8px var(--theme, #3498db);
-}
-
-.waifu-group {
-  margin-bottom: 16px;
-}
-
-.waifu-group-title {
-  font-size: 14px;
-  font-weight: bold;
-  color: var(--text-p1);
-  margin-bottom: 8px;
-  padding-left: 4px;
-  border-left: 3px solid var(--theme, #3498db);
-}
-
-.waifu-group-models {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
 .cursor-options, .click-effect-options, .slide-effect-options, .reverse-options {
   display: flex;
   gap: 8px;
@@ -992,6 +955,78 @@ input:checked + .slider:before {
   color: var(--text-p2);
 }
 
+.waifu-zoom-slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 260px;
+}
+
+.waifu-zoom-slider input[type="range"] {
+  flex: 1;
+  min-width: 100px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border, #e0e0e0);
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.waifu-zoom-slider input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--theme, #3498db);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.waifu-zoom-slider input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.waifu-zoom-slider input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--theme, #3498db);
+  cursor: pointer;
+  border: none;
+}
+
+#waifu-zoom-value {
+  min-width: 36px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-p2);
+  flex-shrink: 0;
+}
+
+.zoom-reset-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1.5px solid var(--border, #444);
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--card, rgba(255,255,255,0.03));
+  color: var(--text-p2);
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.zoom-reset-btn:hover {
+  border-color: var(--theme, #3498db);
+  color: var(--theme, #3498db);
+  background: var(--theme-alpha10, rgba(52,152,219,0.08));
+}
+
 .ranking-tabs {
   display: flex;
   gap: 8px;
@@ -1118,84 +1153,6 @@ input:checked + .slider:before {
 </style>
 
 <script>
-var WAIFU_MODELS = [
-  { modelId: 0, textureId: 0, name: 'Pio酱', group: 'Potion Maker' },
-  { modelId: 1, textureId: 0, name: 'Tia酱', group: 'Potion Maker' },
-  { modelId: 2, textureId: 0, name: 'B站22娘', group: 'Bilibili' },
-  { modelId: 3, textureId: 0, name: 'B站33娘', group: 'Bilibili' },
-  { modelId: 4, textureId: 0, name: 'Shizuku', group: 'ShizukuTalk' },
-  { modelId: 4, textureId: 1, name: 'Shizuku睡衣', group: 'ShizukuTalk' },
-  { modelId: 5, textureId: 0, name: '涅普顿(经典)', group: '海王星' },
-  { modelId: 5, textureId: 1, name: '涅普顿', group: '海王星' },
-  { modelId: 5, textureId: 2, name: '涅普顿(圣诞)', group: '海王星' },
-  { modelId: 5, textureId: 3, name: '涅普顿(女仆)', group: '海王星' },
-  { modelId: 5, textureId: 4, name: '涅普顿(泳装)', group: '海王星' },
-  { modelId: 5, textureId: 5, name: '诺瓦露(经典)', group: '海王星' },
-  { modelId: 5, textureId: 6, name: '诺瓦露', group: '海王星' },
-  { modelId: 5, textureId: 7, name: '诺瓦露(圣诞)', group: '海王星' },
-  { modelId: 5, textureId: 8, name: '诺瓦露(泳装)', group: '海王星' },
-  { modelId: 5, textureId: 9, name: '布兰(经典)', group: '海王星' },
-  { modelId: 5, textureId: 10, name: '布兰', group: '海王星' },
-  { modelId: 5, textureId: 11, name: '布兰(泳装)', group: '海王星' },
-  { modelId: 5, textureId: 12, name: '贝露(经典)', group: '海王星' },
-  { modelId: 5, textureId: 13, name: '贝露', group: '海王星' },
-  { modelId: 5, textureId: 14, name: '贝露(泳装)', group: '海王星' },
-  { modelId: 5, textureId: 15, name: 'Nepgear', group: '海王星' },
-  { modelId: 5, textureId: 16, name: 'Nepgear(Extra)', group: '海王星' },
-  { modelId: 5, textureId: 17, name: 'Nepgear(泳装)', group: '海王星' },
-  { modelId: 5, textureId: 18, name: 'Histoire', group: '海王星' },
-  { modelId: 5, textureId: 19, name: 'Histoire(无悬停)', group: '海王星' },
-  { modelId: 6, textureId: 0, name: '丛云', group: '舰娘' }
-];
-
-function initWaifuSettings() {
-  var container = document.getElementById('waifuModelOptions');
-  var currentModelId = parseInt(localStorage.getItem('modelId')) || 0;
-  var currentTextureId = parseInt(localStorage.getItem('modelTexturesId')) || 0;
-  
-  var groups = {};
-  WAIFU_MODELS.forEach(function(model, index) {
-    if (!groups[model.group]) {
-      groups[model.group] = [];
-    }
-    groups[model.group].push({ ...model, index: index });
-  });
-  
-  var html = '';
-  for (var groupName in groups) {
-    html += '<div class="waifu-group"><div class="waifu-group-title">' + groupName + '</div><div class="waifu-group-models">';
-    groups[groupName].forEach(function(model) {
-      var isActive = model.modelId === currentModelId && model.textureId === currentTextureId;
-      html += '<button class="waifu-model-btn ' + (isActive ? 'active' : '') + '" ';
-      html += 'onclick="selectWaifuModel(' + model.modelId + ', ' + model.textureId + ')">';
-      html += model.name;
-      html += '</button>';
-    });
-    html += '</div></div>';
-  }
-  container.innerHTML = html;
-  
-  var showWaifu = localStorage.getItem('waifu_show') === 'true';
-  document.getElementById('showWaifu').checked = showWaifu;
-}
-
-function selectWaifuModel(modelId, textureId) {
-  document.querySelectorAll('.waifu-model-btn').forEach(function(btn) {
-    btn.classList.remove('active');
-  });
-  if (event && event.target) {
-    event.target.classList.add('active');
-  }
-  
-  if (window.switchWaifuModel) {
-    window.switchWaifuModel(modelId, textureId);
-  } else {
-    localStorage.setItem('modelId', modelId);
-    localStorage.setItem('modelTexturesId', textureId || 0);
-    location.reload();
-  }
-}
-
 function toggleWaifu(show) {
   localStorage.setItem('waifu_show', show.toString());
   if (!show) {
@@ -1225,8 +1182,7 @@ function toggleWaifu(show) {
         waifuToggle.classList.add('waifu-toggle-active');
       }
     }
-  }
-  if (show && !waifu) {
+  } else if (show) {
     location.reload();
   }
   window.dispatchEvent(new StorageEvent('storage', {
@@ -1234,6 +1190,21 @@ function toggleWaifu(show) {
     newValue: show.toString()
   }));
 }
+
+// 监听到看板娘自身 toggle 按钮点击时同步 settings 开关状态
+document.addEventListener('click', function(e) {
+  var toggle = document.getElementById('waifu-toggle');
+  if (toggle && toggle.contains(e.target)) {
+    setTimeout(function() {
+      var waifu = document.getElementById('waifu');
+      var cb = document.getElementById('showWaifu');
+      if (cb && waifu) {
+        var isShowing = !waifu.classList.contains('waifu-hidden') && waifu.style.display !== 'none';
+        cb.checked = isShowing;
+      }
+    }, 100);
+  }
+});
 
 function toggleCustomContextMenu(enabled) {
   localStorage.setItem('customContextMenu', enabled.toString());
@@ -1294,7 +1265,44 @@ if (glitchEffectSaved !== null) {
   document.getElementById('glitchEffect').checked = glitchEffectSaved === 'true';
 }
 
-initWaifuSettings();
+function setWaifuZoom(pct) {
+  var label = document.getElementById('waifu-zoom-value');
+  if (label) label.textContent = pct + '%';
+  localStorage.setItem('waifu_zoom', pct);
+  var waifu = document.getElementById('waifu');
+  if (waifu) {
+    waifu.style.setProperty('--waifu-scale', (pct / 100) + '');
+  }
+}
+
+function resetWaifuZoom() {
+  var slider = document.getElementById('waifuZoomSlider');
+  if (slider) { slider.value = 100; }
+  setWaifuZoom(100);
+}
+
+// 初始化看板娘设置折叠状态
+(function() {
+  var waifuContent = document.getElementById('waifu-content');
+  var waifuIcon = document.getElementById('waifu-toggle-icon');
+  var waifuCollapsed = localStorage.getItem('waifu_collapsed');
+  if (waifuCollapsed === 'true' && waifuContent) {
+    waifuContent.style.display = 'none';
+    if (waifuIcon) waifuIcon.textContent = '▼';
+  }
+})();
+
+// 初始化看板娘缩放
+(function() {
+  var saved = parseInt(localStorage.getItem('waifu_zoom')) || 100;
+  var slider = document.getElementById('waifuZoomSlider');
+  var label = document.getElementById('waifu-zoom-value');
+  if (slider) {
+    slider.value = saved;
+    slider.addEventListener('input', function() { setWaifuZoom(this.value); });
+  }
+  if (label) { label.textContent = saved + '%'; }
+})();
 
 function showAchievementsGuide() {
   var achievements = getAchievementsData();
@@ -2775,6 +2783,20 @@ function toggleRanking() {
   } else {
     content.style.display = 'none';
     icon.textContent = '▼';
+  }
+}
+
+function toggleWaifuSection() {
+  var content = document.getElementById('waifu-content');
+  var icon = document.getElementById('waifu-toggle-icon');
+  if (content.style.display === 'none') {
+    content.style.display = 'block';
+    icon.textContent = '▲';
+    localStorage.setItem('waifu_collapsed', 'false');
+  } else {
+    content.style.display = 'none';
+    icon.textContent = '▼';
+    localStorage.setItem('waifu_collapsed', 'true');
   }
 }
 
