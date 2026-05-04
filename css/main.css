@@ -1,5 +1,5 @@
 :root {
-  --width-main: 1000px;
+  --width-main: 1150px;
   --fsp: 17px;
   --fsh2: calc(var(--fsp) + 11px);
   --fsh3: calc(var(--fsp) + 7px);
@@ -12,12 +12,12 @@
 }
 @media screen and (min-width: 2048px) {
   :root {
-    --width-main: 1100px;
+    --width-main: 1250px;
   }
 }
 @media screen and (min-width: 2560px) {
   :root {
-    --width-main: 1200px;
+    --width-main: 1350px;
   }
 }
 @media screen and (max-width: 768px) {
@@ -778,6 +778,13 @@ html.reverse-both * {
   border-radius: 12px;
   padding: 8px;
 }
+.l_right .widgets .linklist .widget-header {
+  text-align: left;
+  width: 223px;
+  display: grid;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 .widget-wrapper.todo-widget .widget-body {
   max-height: 300px;
   overflow-y: auto;
@@ -821,6 +828,17 @@ html.reverse-both * {
 }
 .nav-area .menu {
   grid-template-columns: repeat(3, 1fr) !important;
+}
+.nav-area .menu .menu-divider {
+  grid-column: 1/-1;
+  height: 1px;
+  margin: 8px 12px;
+  background: var(--theme, #3498db);
+  border: 0;
+  padding: 0;
+  opacity: 0.3;
+  display: block !important;
+  pointer-events: none;
 }
 .widget-header .name {
   color: #fff !important;

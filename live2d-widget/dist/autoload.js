@@ -44,6 +44,12 @@ function loadExternalResource(url, type) {
   };
   window.Image.prototype = OriginalImage.prototype;
 
+  // 随机皮肤标记
+  if (localStorage.getItem('waifu_rand_skin') === 'true') {
+    localStorage.removeItem('waifu_rand_skin');
+    localStorage.removeItem('modelTexturesId');
+  }
+
   await Promise.all([
     loadExternalResource(live2d_path + 'waifu.css', 'css'),
     loadExternalResource(live2d_path + 'waifu-tips.js', 'js')
@@ -62,7 +68,9 @@ function loadExternalResource(url, type) {
   setTimeout(function() {
     var waifu = document.getElementById('waifu');
     if (waifu) {
-      var show = localStorage.getItem('waifu_show');
+        var zoom = parseInt(localStorage.getItem('waifu_zoom')) || 100;
+        waifu.style.setProperty('--waifu-scale', (zoom / 100) + '');
+        var show = localStorage.getItem('waifu_show');
       if (show === 'false') {
         waifu.classList.add('waifu-hidden');
         waifu.classList.remove('waifu-active');
@@ -107,23 +115,25 @@ console.log('\n%cLive2D%cWidget%c - Local Version\n', 'padding: 8px; background:
 window.switchWaifuModel = function(modelId, textureId) {
   var currentModelId = parseInt(localStorage.getItem('modelId')) || 0;
   var currentTextureId = parseInt(localStorage.getItem('modelTexturesId')) || 0;
-  
+
   if (currentModelId === modelId && currentTextureId === (textureId || 0)) {
     return false;
   }
-  
+
   localStorage.setItem('modelId', modelId);
   localStorage.setItem('modelTexturesId', textureId || 0);
-  
-  var canvas = document.getElementById('live2d');
-  if (canvas) {
-    canvas.style.opacity = '0.3';
-    canvas.style.transition = 'opacity 0.3s';
-  }
-  
-  setTimeout(function() {
+
+  var waifu = document.getElementById('waifu');
+  if (waifu) {
+    waifu.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    waifu.style.opacity = '0';
+    waifu.style.transform = 'translateY(10px)';
+    setTimeout(function() {
+      location.reload();
+    }, 350);
+  } else {
     location.reload();
-  }, 300);
-  
+  }
+
   return true;
 };
