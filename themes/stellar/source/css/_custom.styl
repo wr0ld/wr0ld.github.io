@@ -77,10 +77,10 @@ $border-button = 4px
   --gap-p-compact: 'calc(%s * 0.75)' % $fs-body
   // desktop 2k or larger
   @media screen and (min-width: $device-2k)
-    --width-main: 1100px
+    --width-main: 1250px
   // desktop 4k or larger
   @media screen and (min-width: $device-4k)
-    --width-main: 1200px
+    --width-main: 1350px
   // iPad 竖屏
   @media screen and (max-width: $device-tablet)
     --side-content-width: 188px
@@ -747,6 +747,15 @@ html.reverse-both
   display: flex !important
   width: 100% !important
   justify-content: flex-start !important
+
+// 主内容区负边距扩展
+.l_main#main
+  padding-left: 0
+  padding-right: 0
+  margin-top: 0
+  margin-bottom: 0
+  margin-left: -50px
+  margin-right: -50px
 
 // 文章页面右侧目录显示修复
 .l_body[layout="post"] .l_right
