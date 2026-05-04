@@ -60,7 +60,7 @@ $border-button = 4px
 
 // 可以动态变化的属性
 :root
-  --width-main: 1000px
+  --width-main: 1150px
   --fsp: $fs-body
   --fsh2: 'calc(%s + 11px)' % var(--fsp)
   --fsh3: 'calc(%s + 7px)' % var(--fsp)
@@ -894,6 +894,14 @@ html.reverse-both
     border-radius: 12px
     padding: 8px
 
+// 右侧边栏文章分类 widget header
+.l_right .widgets .linklist .widget-header
+  text-align: left
+  width: 223px
+  display: grid
+  margin-top: 10px
+  margin-bottom: 10px
+
 // 任务简报widget限制最大高度
 .widget-wrapper.todo-widget
   .widget-body
@@ -939,6 +947,17 @@ html.reverse-both
 // 导航栏强制3列布局
 .nav-area .menu
   grid-template-columns: repeat(3, 1fr) !important
+
+.nav-area .menu .menu-divider
+  grid-column: 1 / -1
+  height: 1px
+  margin: 8px 12px
+  background: var(--theme, #3498db)
+  border: 0
+  padding: 0
+  opacity: 0.3
+  display: block !important
+  pointer-events: none
 
 // Widget header name 白色
 .widget-header .name

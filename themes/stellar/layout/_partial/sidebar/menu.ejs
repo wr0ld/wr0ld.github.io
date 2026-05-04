@@ -3,7 +3,14 @@ function layoutDiv() {
   var el = ''
   el += `<nav class="menu dis-select${where == 'main' ? ' mobile-hidden' : ''}">`
   for (let item of (theme.menubar.items || [])) {
-    if (item == undefined || item.id == null || item.url == null) {
+    if (item == undefined) {
+      continue
+    }
+    if (item.divider === true) {
+      el += `<div class="menu-divider"></div>`
+      continue
+    }
+    if (item.id == null || item.url == null) {
       continue
     }
     var itemUrl = item.url

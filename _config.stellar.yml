@@ -7,41 +7,45 @@ logo:
 menubar:
   columns: 3
   items:
+    # 主题页面
     - id: post
       theme: '#1BCDFC'
       icon: solar:documents-bold-duotone
       title: 博客
       url: /
-    - id: lab
-      theme: '#F39C12'
-      icon: solar:programming-bold-duotone
-      title: 实验室
-      url: /lab/
-    - id: games
-      theme: '#FF6B6B'
-      icon: solar:gamepad-bold-duotone
-      title: 游戏
-      url: /games/
-    - id: gallery
-      theme: '#FF9FF3'
-      icon: solar:gallery-bold-duotone
-      title: 相册
-      url: /gallery/
-    - id: cards
-      theme: '#E91E63'
-      icon: solar:card-bold-duotone
-      title: 卡牌
-      url: "javascript:if(window.CardSystem)window.CardSystem.showPanel()"
-    - id: settings
-      theme: '#9B59B6'
-      icon: solar:settings-bold-duotone
-      title: 设置
-      url: /settings/
     - id: about
       theme: '#3DC550'
       icon: solar:user-bold-duotone
       title: 关于
       url: /about/
+    - id: settings
+      theme: '#9B59B6'
+      icon: solar:settings-bold-duotone
+      title: 设置
+      url: /settings/
+    # 分隔线
+    - divider: true
+    # 外部页面
+    - id: lab
+      theme: '#F39C12'
+      icon: solar:programming-bold-duotone
+      title: 实验室
+      url: /lab/
+    - id: gallery
+      theme: '#FF9FF3'
+      icon: solar:gallery-bold-duotone
+      title: 相册
+      url: /gallery/
+    - id: games
+      theme: '#FF6B6B'
+      icon: solar:gamepad-bold-duotone
+      title: 游戏
+      url: /games/
+    - id: cards
+      theme: '#E91E63'
+      icon: solar:card-bold-duotone
+      title: 卡牌
+      url: "javascript:if(window.CardSystem)window.CardSystem.showPanel()"
 
 ######## Main ########
 site_tree:
