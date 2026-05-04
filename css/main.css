@@ -638,10 +638,37 @@ html.reverse-both * {
   width: 100% !important;
   justify-content: flex-start !important;
 }
+.l_main#main {
+  padding-left: 0;
+  padding-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: -50px;
+  margin-right: -50px;
+}
 .l_body[layout="post"] .l_right {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+}
+.rightbar-top-btn {
+  margin: 0 var(--gap-margin) 8px;
+}
+.rightbar-top-btn a.top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text-p2);
+  font-size: 0.8125rem;
+  background: var(--bg-a30);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.rightbar-top-btn a.top:hover {
+  background: var(--bg-a60);
+  color: var(--text-p1);
 }
 .l_body[layout="post"] .l_right .widgets {
   display: block !important;
