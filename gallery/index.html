@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📸 图片</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:system-ui,"Microsoft Yahei","Segoe UI",Arial,sans-serif}
+body{background:linear-gradient(135deg,#0a0c10 0%,#141920 30%,#0d1117 60%,#0a0c10 100%);background-size:400% 400%;animation:bgShift 20s ease infinite;overflow-x:hidden}
+@keyframes bgShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.gallery-wrap{max-width:1600px;margin:0 auto;padding:30px 16px 80px;position:relative;z-index:1}
+.gallery-header{text-align:center;padding:60px 20px 40px;position:relative}
+.gallery-header h1{font-size:clamp(2rem,4vw,3.2rem);font-weight:800;background:linear-gradient(135deg,#f093fb,#f5576c,#4facfe);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px;position:relative;display:inline-block}
+.gallery-header h1::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:60px;height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#f5576c,transparent)}
+.gallery-header .stats{font-size:.85rem;color:rgba(255,255,255,.35);margin-top:20px;letter-spacing:2px;font-weight:300}
+.gallery-grid{column-count:5;column-gap:12px;padding:0 4px}
+@media(max-width:1200px){.gallery-grid{column-count:4}}
+@media(max-width:900px){.gallery-grid{column-count:3}}
+@media(max-width:600px){.gallery-grid{column-count:2;column-gap:8px;padding:0}}
+.gallery-item{break-inside:avoid;margin-bottom:12px;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;opacity:0;transform:translateY(40px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1);box-shadow:0 4px 24px rgba(0,0,0,.4);will-change:transform,opacity;background:#1a1e24}
+.gallery-item.visible{opacity:1;transform:translateY(0)}
+.gallery-item:hover{transform:translateY(-4px);box-shadow:0 12px 48px rgba(0,0,0,.5)}
+.gallery-item img{width:100%;height:auto;display:block;transition:transform .6s ease}
+.gallery-item:hover img{transform:scale(1.06)}
+.gallery-item .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.15) 45%,transparent 65%);opacity:0;transition:opacity .4s ease;display:flex;flex-direction:column;justify-content:flex-end;padding:20px;pointer-events:none}
+.gallery-item:hover .overlay{opacity:1}
+.gallery-item .overlay .caption{color:#fff;font-size:.85rem;font-weight:500;transform:translateY(12px);transition:transform .4s cubic-bezier(.22,1,.36,1);text-shadow:0 2px 12px rgba(0,0,0,.5);line-height:1.4}
+.gallery-item:hover .overlay .caption{transform:translateY(0)}
+.gallery-empty{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:rgba(255,255,255,.3);display:none}
+.gallery-empty.show{display:block}
+.gallery-empty .empty-icon{font-size:3rem;margin-bottom:12px}
+.back-link{position:fixed;top:20px;left:20px;z-index:100;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.1);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s ease;color:#fff;text-decoration:none}
+.back-link:hover{background:rgba(255,255,255,.15);transform:scale(1.1);border-color:rgba(255,255,255,.2)}
+.back-link svg{width:18px;height:18px;fill:#fff}
+</style>
+</head>
+<body>
+
+<a class="back-link" href="/" title="返回首页">
+  <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+</a>
+
+<div class="gallery-wrap">
+  <div class="gallery-header">
+    <h1>📸 图片</h1>
+    <div class="stats"><span id="total-count">0</span> 张</div>
+  </div>
+  <div class="gallery-grid md-text article-content" id="gallery-grid"></div>
+</div>
+
+<div class="gallery-empty">
+  <div class="empty-icon">📭</div>
+  <p>还没有图片哦~</p>
+</div>
+
+<script src="/js/plugins/image-viewer.js"></script>
+<script>
+let galleryData=[];
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function loadImages(){
+  fetch('/gallery/images.json').then(r=>r.json()).then(d=>{
+    galleryData=shuffle(d);renderGallery(galleryData)
+  }).catch(()=>{document.querySelector('.gallery-empty')?.classList.add('show')})
+}
+
+function renderGallery(data){
+  const g=document.getElementById('gallery-grid');
+  if(!data.length){document.querySelector('.gallery-empty')?.classList.add('show');return}
+  document.getElementById('total-count').textContent=data.length;
+  let html='';
+  data.forEach((item,i)=>{
+    html+=`<div class="gallery-item" data-index="${i}"><img src="${item.src}" alt="${item.title||''}"><div class="overlay">${item.title?`<span class="caption">${item.title}</span>`:''}</div></div>`;
+  });
+  g.innerHTML=html;
+  const obs=new IntersectionObserver(e=>{e.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:.05,rootMargin:'0px 0px 60px 0px'});
+  document.querySelectorAll('.gallery-item').forEach((e,i)=>{e.style.transitionDelay=(i%12)*50+'ms';obs.observe(e)});
+}
+
+loadImages();
+</script>
+</body>
+</html>
