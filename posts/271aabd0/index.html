@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-05-04T06:20:00.000Z">
-<meta property="article:modified_time" content="2026-05-04T08:05:03.587Z">
+<meta property="article:modified_time" content="2026-05-04T08:06:02.457Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="内网渗透">
 <meta property="article:tag" content="渗透测试">
@@ -69,7 +69,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mosevn7c">
+  <link rel="stylesheet" href="/css/main.css?v=mosp4otn">
 
 
   
@@ -78,7 +78,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-04T14:20:00+08:00","dateModified":"2026-05-04T16:05:03+08:00","datePublished":"2026-05-04T14:20:00+08:00","description":"","headline":"小迪VPC1内网打靶全流程记录","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/271aabd0/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/271aabd0/","keywords":"内网渗透, 渗透测试, CVE-2024-4577, MS17-010, Weblogic, Zerologon","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/ogAAAAIyNhHAAeqI50NtCfnpBzz9XsECMdEiqg~tplv-dy-vqe2-sr-v2_1920_1079_q80.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-04T14:20:00+08:00","dateModified":"2026-05-04T16:06:02+08:00","datePublished":"2026-05-04T14:20:00+08:00","description":"","headline":"小迪VPC1内网打靶全流程记录","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/271aabd0/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/271aabd0/","keywords":"内网渗透, 渗透测试, CVE-2024-4577, MS17-010, Weblogic, Zerologon","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/ogAAAAIyNhHAAeqI50NtCfnpBzz9XsECMdEiqg~tplv-dy-vqe2-sr-v2_1920_1079_q80.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -108,7 +108,7 @@
   <div class="content">
     <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
 <span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Windows/">Windows</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/Windows/vpc/">vpc</a></div>
-<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-05-04T06:20:00.000Z">2026-05-04</time></span><span class="sep"></span><span class="text word-count">字数：15951</span><span class="sep"></span><span class="text img-count">图片：111</span></div></div></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-05-04T06:20:00.000Z">2026-05-04</time></span><span class="sep"></span><span class="text word-count">字数：15587</span><span class="sep"></span><span class="text img-count">图片：111</span></div></div></div>
     
     <div class="bottom only-title">
       
@@ -381,7 +381,32 @@
 <p><strong>大坑记录：</strong> 之前因为改过 CS 的文件导致有点 bug（不是专业人士还是不要乱改的好），导致 MS17-010 一直不能回连上 MSF，查了一上午不知道什么原因，最后用新的 CS 服务端文件测试就能直接打通了。</p>
 <p>教训：<strong>环境问题比技术问题更难排查</strong>，以后遇到怎么打都不通的时候，先检查工具本身是否正常。</p>
 <p><strong>MS17-010 流量总结：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">    subgraph 第二台[&quot;第二台 (内网目标)&quot;]</span><br><span class="line">        A[192.168.2.128]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph Kali[&quot;Kali 攻击机&quot;]</span><br><span class="line">        B[&quot;CS:7777&lt;br/&gt;(接收反弹)&quot;]</span><br><span class="line">        C[&quot;MSF:7777&lt;br/&gt;(本地处理)&quot;]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph 第一台[&quot;第一台 (跳板机/双网卡)&quot;]</span><br><span class="line">        D1[&quot;网卡1: 192.168.139.130&lt;br/&gt;(139网段，初始入口)&quot;]</span><br><span class="line">        D2[&quot;网卡2: 192.168.2.140&lt;br/&gt;(2网段，内网横向)&quot;]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    D1 --&gt;|&quot;① 初始beacon上线 :5566&quot;| B</span><br><span class="line">    C --&gt;|&quot;② 攻击指令 (通过SOCKS代理)&quot;| D2</span><br><span class="line">    D2 --&gt;|&quot;③ MS17-010攻击 445端口&quot;| A</span><br><span class="line">    A --&gt;|&quot;④ 反弹连接 :7777&quot;| B</span><br><span class="line">    B --&gt;|⑤ 本地转发| C</span><br><span class="line"></span><br><span class="line">    style A fill:#f96</span><br><span class="line">    style B fill:#f9f</span><br><span class="line">    style C fill:#9cf</span><br><span class="line">    style D1 fill:#ff9</span><br><span class="line">    style D2 fill:#ff9</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">graph LR
+    subgraph 第二台[&quot;第二台 (内网目标)&quot;]
+        A[192.168.2.128]
+    end
+
+    subgraph Kali[&quot;Kali 攻击机&quot;]
+        B[&quot;CS:7777<br/>(接收反弹)&quot;]
+        C[&quot;MSF:7777<br/>(本地处理)&quot;]
+    end
+
+    subgraph 第一台[&quot;第一台 (跳板机/双网卡)&quot;]
+        D1[&quot;网卡1: 192.168.139.130<br/>(139网段，初始入口)&quot;]
+        D2[&quot;网卡2: 192.168.2.140<br/>(2网段，内网横向)&quot;]
+    end
+
+    D1 -->|&quot;① 初始beacon上线 :5566&quot;| B
+    C -->|&quot;② 攻击指令 (通过SOCKS代理)&quot;| D2
+    D2 -->|&quot;③ MS17-010攻击 445端口&quot;| A
+    A -->|&quot;④ 反弹连接 :7777&quot;| B
+    B -->|⑤ 本地转发| C
+
+    style A fill:#f96
+    style B fill:#f9f
+    style C fill:#9cf
+    style D1 fill:#ff9
+    style D2 fill:#ff9</pre>
 
 <h3 id="Win7上线CS"><a href="#Win7上线CS" class="headerlink" title="Win7上线CS"></a>Win7上线CS</h3><p>有了 MSF 的 session，接下来需要把权限转回 CS 接管，因为 CS 图形化更方便管理。</p>
 <p>但是，2 网段是内网段，如果转发上线的话，它不能直接连接到 Kali 上的 CS 服务端，直接用 MSF 的模块还需要搞端口转发比较麻烦。</p>
@@ -403,10 +428,53 @@
 <p>成功上线，是 System 权限的：</p>
 <p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260504_142014_hgno.png"></p>
 <p><strong>流量图：</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">    subgraph 外网[&quot;外网 (139网段)&quot;]</span><br><span class="line">        KALI[&quot;Kali CS服务端&lt;br/&gt;192.168.139.128&quot;]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph 跳板机[&quot;跳板机 (双网卡)&quot;]</span><br><span class="line">        NIC1[&quot;网卡1: 192.168.139.130&lt;br/&gt;(外网通信)&quot;]</span><br><span class="line">        NIC2[&quot;网卡2: 192.168.2.140&lt;br/&gt;(内网通信)&quot;]</span><br><span class="line">        NIC1 &lt;-.-&gt; NIC2</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph 内网[&quot;内网 (2网段)&quot;]</span><br><span class="line">        TARGET[&quot;内网目标主机&lt;br/&gt;192.168.2.128&quot;]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    TARGET --&gt;|① Beacon主动连接&lt;br/&gt;192.168.2.140:5678| NIC2</span><br><span class="line">    NIC2 -.-&gt;|② 跳板机内部转发| NIC1</span><br><span class="line">    NIC1 --&gt;|③ 转发到CS服务端&lt;br/&gt;192.168.139.128:CS端口| KALI</span><br><span class="line"></span><br><span class="line">    style KALI fill:#9cf</span><br><span class="line">    style NIC1 fill:#ff9</span><br><span class="line">    style NIC2 fill:#ff9</span><br><span class="line">style TARGET fill:#f96</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">graph LR
+    subgraph 外网[&quot;外网 (139网段)&quot;]
+        KALI[&quot;Kali CS服务端<br/>192.168.139.128&quot;]
+    end
+
+    subgraph 跳板机[&quot;跳板机 (双网卡)&quot;]
+        NIC1[&quot;网卡1: 192.168.139.130<br/>(外网通信)&quot;]
+        NIC2[&quot;网卡2: 192.168.2.140<br/>(内网通信)&quot;]
+        NIC1 <-.-> NIC2
+    end
+
+    subgraph 内网[&quot;内网 (2网段)&quot;]
+        TARGET[&quot;内网目标主机<br/>192.168.2.128&quot;]
+    end
+
+    TARGET -->|① Beacon主动连接<br/>192.168.2.140:5678| NIC2
+    NIC2 -.->|② 跳板机内部转发| NIC1
+    NIC1 -->|③ 转发到CS服务端<br/>192.168.139.128:CS端口| KALI
+
+    style KALI fill:#9cf
+    style NIC1 fill:#ff9
+    style NIC2 fill:#ff9
+style TARGET fill:#f96</pre>
 
 <p>指定内网的后门文件访问的是跳板机的 2 网段，这样可以正常通讯，然后 CS 会自己处理流量转发与 CS 服务器联通，实现内网上线。（跳板机不能去除，内网需要通过跳板机才能流量通讯。）</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">graph LR</span><br><span class="line">    subgraph 内网[&quot;2网段 (内网)&quot;]</span><br><span class="line">        A[内网目标&lt;br/&gt;192.168.2.128]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph 跳板机[&quot;跳板机 (双网卡)&quot;]</span><br><span class="line">        B1[网卡1&lt;br/&gt;192.168.2.140&lt;br/&gt;接收内网连接]</span><br><span class="line">        B2[网卡2&lt;br/&gt;192.168.139.130&lt;br/&gt;连接外网]</span><br><span class="line">        B1 &lt;--&gt;|内部转发| B2</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    subgraph 外网[&quot;139网段 (外网)&quot;]</span><br><span class="line">        C[CS服务端&lt;br/&gt;192.168.139.128]</span><br><span class="line">    end</span><br><span class="line"></span><br><span class="line">    A --&gt;|① Beacon连接&lt;br/&gt;192.168.2.140:5678| B1</span><br><span class="line">    B2 --&gt;|③ 转发到CS&lt;br/&gt;192.168.139.128:CS端口| C</span><br><span class="line"></span><br><span class="line">    style A fill:#f96</span><br><span class="line">    style B1 fill:#ff9</span><br><span class="line">    style B2 fill:#ff9</span><br><span class="line">style C fill:#9cf</span><br></pre></td></tr></table></figure>
+<pre class="mermaid">graph LR
+    subgraph 内网[&quot;2网段 (内网)&quot;]
+        A[内网目标<br/>192.168.2.128]
+    end
+
+    subgraph 跳板机[&quot;跳板机 (双网卡)&quot;]
+        B1[网卡1<br/>192.168.2.140<br/>接收内网连接]
+        B2[网卡2<br/>192.168.139.130<br/>连接外网]
+        B1 <-->|内部转发| B2
+    end
+
+    subgraph 外网[&quot;139网段 (外网)&quot;]
+        C[CS服务端<br/>192.168.139.128]
+    end
+
+    A -->|① Beacon连接<br/>192.168.2.140:5678| B1
+    B2 -->|③ 转发到CS<br/>192.168.139.128:CS端口| C
+
+    style A fill:#f96
+    style B1 fill:#ff9
+    style B2 fill:#ff9
+style C fill:#9cf</pre>
 
 <h3 id="横向到Win10"><a href="#横向到Win10" class="headerlink" title="横向到Win10"></a>横向到Win10</h3><p>另外一个 2 网段的内网机器：192.168.2.129</p>
 <p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260504_142014_8px1.png"></p>
@@ -1209,7 +1277,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mosevn7g" defer></script>
+<script src="/js/main.js?v=mosp4otr" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1429,6 +1497,16 @@
     ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
   });
 </script>
+<script defer type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    mermaid.initialize({
+      theme: "default",
+      logLevel: 3
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  });
+</script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     window.codeElements = document.querySelectorAll('.code');
@@ -1463,7 +1541,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mosevn7h"></script>
+<script src="/js/plugins/achievements.js?v=mosp4otr"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

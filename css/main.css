@@ -104,13 +104,24 @@ input[type="submit"],
   background-color: rgba(52,152,219,0.4);
   pointer-events: none;
 }
-button {
+button,
+.post-card,
+a {
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease;
 }
-button:active {
+button:active,
+.post-card:active,
+a:active {
   transform: scale(0.95);
+}
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 6px -2px rgba(255,255,255,0.7), 0 0 40px -8px rgba(255,255,255,0.35);
+}
+a:hover {
+  box-shadow: 0 8px 16px rgba(255,255,255,0.2);
 }
 .md-text .highlight {
   position: relative;
@@ -646,7 +657,7 @@ html.reverse-both * {
 .rightbar-top-btn a.top {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
   padding: 8px 12px;
   border-radius: 8px;
   color: var(--text-p2);
@@ -654,6 +665,10 @@ html.reverse-both * {
   background: var(--bg-a30);
   transition: all 0.2s;
   cursor: pointer;
+}
+.rightbar-top-btn a.top svg {
+  height: 16px;
+  width: auto;
 }
 .rightbar-top-btn a.top:hover {
   background: var(--bg-a60);
@@ -902,7 +917,8 @@ html.reverse-both * {
 .post-card .post-cover img {
   object-fit: cover !important;
   border-radius: 6px !important;
-  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 .post-card .post-cover {
   margin-bottom: 4px !important;
@@ -962,16 +978,18 @@ a.post-card .breadcrumb span {
 .post-card {
   position: relative;
   animation: cardFadeIn 0.3s ease both;
-  transform: none !important;
-  transition: none !important;
-  overflow: visible !important;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important;
+}
+.post-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateZ(0);
+  pointer-events: none;
 }
 .post-card:hover {
-  transform: none !important;
-  box-shadow: none !important;
-}
-.post-card:active {
-  transform: none !important;
+  transform: translateY(-3px) scale(1.005);
+  box-shadow: 0 0 6px -2px rgba(255,255,255,0.7), 0 0 40px -8px rgba(255,255,255,0.35) !important;
 }
 .post-card:nth-child(1) {
   animation-delay: 0ms;
@@ -1072,22 +1090,17 @@ button:not(.layout-toggle-btn):active,
 .md-text img:not([class]):hover {
   transform: scale(1.02) !important;
 }
-.post-card .post-cover img {
-  transition: none !important;
-}
-.post-card .post-cover img:hover {
-  transform: translateZ(0);
-}
-.post-card article.md-text .post-cover img:hover {
-  transform: translateZ(0) !important;
-}
 .tag,
 .widget .tag {
   transition: transform 0.2s ease, color 0.2s ease !important;
 }
-.tag:hover,
-.widget .tag:hover {
-  transform: translateY(-1px) scale(1.05) !important;
+.md-text pre.mermaid {
+  overflow: hidden;
+  max-width: 100%;
+}
+pre.mermaid svg {
+  max-width: 100% !important;
+  height: auto !important;
 }
 .article.banner .content .bottom .title span {
   display: inline-block;
