@@ -104,24 +104,13 @@ input[type="submit"],
   background-color: rgba(52,152,219,0.4);
   pointer-events: none;
 }
-button,
-.post-card,
-a {
+button {
   position: relative;
   overflow: hidden;
   transition: transform 0.2s ease;
 }
-button:active,
-.post-card:active,
-a:active {
+button:active {
   transform: scale(0.95);
-}
-.post-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 6px -2px rgba(255,255,255,0.7), 0 0 40px -8px rgba(255,255,255,0.35);
-}
-a:hover {
-  box-shadow: 0 8px 16px rgba(255,255,255,0.2);
 }
 .md-text .highlight {
   position: relative;
@@ -913,8 +902,7 @@ html.reverse-both * {
 .post-card .post-cover img {
   object-fit: cover !important;
   border-radius: 6px !important;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 .post-card .post-cover {
   margin-bottom: 4px !important;
@@ -974,18 +962,16 @@ a.post-card .breadcrumb span {
 .post-card {
   position: relative;
   animation: cardFadeIn 0.3s ease both;
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important;
-}
-.post-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  transform: translateZ(0);
-  pointer-events: none;
+  transform: none !important;
+  transition: none !important;
+  overflow: visible !important;
 }
 .post-card:hover {
-  transform: translateY(-3px) scale(1.005);
-  box-shadow: 0 0 6px -2px rgba(255,255,255,0.7), 0 0 40px -8px rgba(255,255,255,0.35) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.post-card:active {
+  transform: none !important;
 }
 .post-card:nth-child(1) {
   animation-delay: 0ms;
@@ -1085,6 +1071,15 @@ button:not(.layout-toggle-btn):active,
 }
 .md-text img:not([class]):hover {
   transform: scale(1.02) !important;
+}
+.post-card .post-cover img {
+  transition: none !important;
+}
+.post-card .post-cover img:hover {
+  transform: translateZ(0);
+}
+.post-card article.md-text .post-cover img:hover {
+  transform: translateZ(0) !important;
 }
 .tag,
 .widget .tag {

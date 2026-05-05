@@ -320,34 +320,6 @@ document.addEventListener('DOMContentLoaded', function() {
   updateProgress();
 })();
 
-// 卡片 3D 视差效果
-(function() {
-  var cards = document.querySelectorAll('.post-card');
-  if (cards.length === 0) return;
-  cards.forEach(function(card) {
-    card.addEventListener('mouseenter', function() {
-      this.dataset.tiltActive = 'true';
-    });
-    card.addEventListener('mousemove', function(e) {
-      if (!this.dataset.tiltActive) return;
-      var rect = this.getBoundingClientRect();
-      var x = e.clientX - rect.left;
-      var y = e.clientY - rect.top;
-      var centerX = rect.width / 2;
-      var centerY = rect.height / 2;
-      var rotateX = (y - centerY) / centerY * -5;
-      var rotateY = (x - centerX) / centerX * 5;
-      this.style.setProperty('transition', 'none', 'important');
-      this.style.transform = 'perspective(1000px) translateY(-3px) scale3d(1.005,1.005,1.005) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
-    });
-    card.addEventListener('mouseleave', function() {
-      delete this.dataset.tiltActive;
-      this.style.removeProperty('transition');
-      this.style.transform = '';
-    });
-  });
-})();
-
 // 打字机效果
 (function() {
   var el = document.querySelector('.welcome-text');
