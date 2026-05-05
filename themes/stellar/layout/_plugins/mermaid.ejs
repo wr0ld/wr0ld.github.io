@@ -1,47 +1,10 @@
 <script defer type="text/javascript" src="<%- conf.js %>"></script>
 <script>
   window.addEventListener('DOMContentLoaded', (event) => {
-    var isDark =
-      "<%- theme.style.prefers_theme %>" == "dark" ||
-      ("<%- theme.style.prefers_theme %>" == "auto" &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches);
-    var mermaid_config = {
-      theme: "neutral",
-      logLevel: 0,
-      themeVariables: isDark ? {
-        background: "#1e1e1e",
-        primaryColor: "#2a2d33",
-        primaryBorderColor: "#81B1DB",
-        primaryTextColor: "#000",
-        lineColor: "#d3d3d3",
-        secondaryColor: "#333",
-        tertiaryColor: "#2a2d33",
-        clusterBkg: "#2a2d33",
-        clusterBorder: "rgba(255,255,255,0.25)",
-        nodeBorder: "#81B1DB",
-        nodeTextColor: "#000",
-        edgeLabelBackground: "#585858",
-        edgeLabelColor: "#000",
-        titleColor: "#000"
-      } : {
-        primaryTextColor: "#000",
-        nodeTextColor: "#000",
-        edgeLabelColor: "#000",
-        titleColor: "#000"
-      },
-      flowchart: {
-        useMaxWidth: true,
-        htmlLabels: true,
-        curve: "linear"
-      },
-      gantt: {
-        axisFormat: "%Y/%m/%d"
-      },
-      sequence: {
-        actorMargin: 50
-      }
-    }
-    mermaid.initialize(mermaid_config);
+    mermaid.initialize({
+      theme: "default",
+      logLevel: 3
+    });
     mermaid.run({ querySelector: '.mermaid' });
   });
 </script>

@@ -1165,8 +1165,14 @@ button:not(.layout-toggle-btn), .filter-btn, .nav-home
 // ---------- 标签悬停 ----------
 .tag, .widget .tag
   transition: transform 0.2s ease, color 0.2s ease !important
-  &:hover
-    transform: translateY(-1px) scale(1.05) !important
+
+// ---------- Mermaid 图表宽度适配 ----------
+.md-text pre.mermaid
+  overflow: hidden
+  max-width: 100%
+pre.mermaid svg
+  max-width: 100% !important
+  height: auto !important
 
 // ============================================================
 // 文章详情页增强动画（scrollreveal 负责入场，此处增强交互体验）
