@@ -608,7 +608,7 @@ plugins:
   # ```
   mermaid:
     enable: true
-    style_optimization: false # use custom style in stellar
+    style_optimization: true # use custom style in stellar
     js: https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
     # Available themes: default | dark | forest | neutral
     theme: neutral
