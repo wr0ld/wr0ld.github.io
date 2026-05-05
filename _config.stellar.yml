@@ -109,7 +109,7 @@ category_order:
   - 其他
   - 实战
   - 代码审计
-  - 工具魔改
+  - 安全工具
   - Windows
   - linux
   - web
@@ -123,6 +123,12 @@ subcategory_order:
     - shiro
     - cc
     - fastjson
+  安全工具:
+    - 工具魔改
+    - 工具
+  linux:
+    - 靶机渗透
+    - vulnhub-DC
 
 ######## Plugins ########
 plugins:

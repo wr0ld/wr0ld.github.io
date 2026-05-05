@@ -2,6 +2,7 @@
 title: 工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展
 cover: https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image3.png
 categories:
+  - 安全工具
   - 工具魔改
 tags:
   - 工具魔改

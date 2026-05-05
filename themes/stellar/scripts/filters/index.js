@@ -3,6 +3,20 @@
 hexo.extend.filter.register('after_render:html', require('./lib/img_lazyload').processSite);
 hexo.extend.filter.register('after_render:html', require('./lib/img_onerror').processSite);
 
+// Mermaid: convert highlight.js wrapped ```mermaid blocks to <pre class="mermaid">
+hexo.extend.filter.register('after_post_render', function(data) {
+  if (!data.content) return data;
+  data.content = data.content.replace(/<figure class="highlight[^"]*">\s*<table>\s*<tr>\s*<td class="gutter">[\s\S]*?<\/td>\s*<td class="code">\s*<pre>([\s\S]*?)<\/pre>\s*<\/td>\s*<\/tr>\s*<\/table>\s*<\/figure>/g, function(match, preContent) {
+    var text = preContent.replace(/<span[^>]*>/g, '').replace(/<\/span>/g, '');
+    text = text.replace(/<br\s*\/?>/g, '\n').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&').trim();
+    if (text.includes('graph ') || text.includes('flowchart ') || text.includes('sequenceDiagram') || text.includes('classDiagram') || text.includes('stateDiagram') || text.includes('erDiagram') || text.includes('gantt') || text.includes('pie ') || text.includes('gitgraph')) {
+      return '<pre class="mermaid">' + text + '</pre>';
+    }
+    return match;
+  });
+  return data;
+}, 99);
+
 function change_image(data) {
     if (this.theme.config.tag_plugins.image.parse_markdown) {
       // data.content = data.content.replace(

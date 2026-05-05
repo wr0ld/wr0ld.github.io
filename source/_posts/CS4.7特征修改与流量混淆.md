@@ -2,6 +2,7 @@
 title: 工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆
 cover: 'https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image22.png'
 categories:
+  - 安全工具
   - 工具魔改
 tags:
   - Cobalt Strike

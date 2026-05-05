@@ -2,18 +2,17 @@
 <script>
   window.addEventListener('DOMContentLoaded', (event) => {
     var mermaid_config = {
-      startOnLoad: true,
       theme:
         "<%- theme.style.prefers_theme %>" == "auto" &&
           window.matchMedia("(prefers-color-scheme: dark)").matches
           ? "dark"
           : "<%- conf.theme %>",
-      logLevel: 3,
+      logLevel: 0,
       themeVariables: {
         darkMode: true
       },
       flowchart: {
-        useMaxWidth: false,
+        useMaxWidth: true,
         htmlLabels: true,
         curve: "linear"
       },
@@ -25,5 +24,6 @@
       }
     }
     mermaid.initialize(mermaid_config);
+    mermaid.run({ querySelector: '.mermaid' });
   });
 </script>

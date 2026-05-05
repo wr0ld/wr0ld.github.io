@@ -2,6 +2,7 @@
 title: 工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗
 cover: https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180841876.png
 categories:
+  - 安全工具
   - 工具魔改
 tags:
   - 工具魔改
