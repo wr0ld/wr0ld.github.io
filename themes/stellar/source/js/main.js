@@ -444,3 +444,177 @@ document.addEventListener('DOMContentLoaded', function() {
     window.toggleHackerBg(true);
   }
 })();
+
+// Canvas Particle Network 粒子聚合背景
+(function() {
+  var canvas, ctx, particles = [], animId, enabled = false;
+  var mouse = { x: 0, y: 0, active: false };
+  var maxDistance = 150;
+  var clusterDistance = 190;
+
+  function initCanvas() {
+    if (canvas) return;
+    canvas = document.createElement('canvas');
+    canvas.id = 'particle-network-bg';
+    canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.55;';
+    document.body.insertBefore(canvas, document.body.firstChild);
+    ctx = canvas.getContext('2d');
+    resize();
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('mouseleave', onMouseLeave, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onMouseLeave, { passive: true });
+  }
+
+  function onResize() {
+    resize();
+    createParticles();
+  }
+
+  function resize() {
+    if (!canvas) return;
+    var ratio = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(window.innerWidth * ratio);
+    canvas.height = Math.floor(window.innerHeight * ratio);
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  }
+
+  function onMouseMove(e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+  }
+
+  function onTouchMove(e) {
+    if (!e.touches || !e.touches.length) return;
+    mouse.x = e.touches[0].clientX;
+    mouse.y = e.touches[0].clientY;
+    mouse.active = true;
+  }
+
+  function onMouseLeave() {
+    mouse.active = false;
+  }
+
+  function createParticles() {
+    if (!canvas) return;
+    particles = [];
+    var area = window.innerWidth * window.innerHeight;
+    var count = Math.max(50, Math.min(120, Math.floor(area / 14000)));
+    for (var i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        baseX: Math.random() * window.innerWidth,
+        baseY: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        size: 1.2 + Math.random() * 1.8
+      });
+    }
+  }
+
+  function drawLine(a, b, distance, limit, color) {
+    var alpha = 1 - distance / limit;
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.strokeStyle = color.replace('{alpha}', (alpha * 0.42).toFixed(3));
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  function animate() {
+    if (!enabled || !ctx || !canvas) return;
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < -20) p.x = window.innerWidth + 20;
+      if (p.x > window.innerWidth + 20) p.x = -20;
+      if (p.y < -20) p.y = window.innerHeight + 20;
+      if (p.y > window.innerHeight + 20) p.y = -20;
+
+      if (mouse.active) {
+        var dx = mouse.x - p.x;
+        var dy = mouse.y - p.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < clusterDistance && dist > 0.01) {
+          var force = (1 - dist / clusterDistance) * 0.045;
+          p.vx += dx * force / dist;
+          p.vy += dy * force / dist;
+        }
+      }
+
+      p.vx *= 0.985;
+      p.vy *= 0.985;
+      p.vx += (Math.random() - 0.5) * 0.015;
+      p.vy += (Math.random() - 0.5) * 0.015;
+      p.vx = Math.max(-1.2, Math.min(1.2, p.vx));
+      p.vy = Math.max(-1.2, Math.min(1.2, p.vy));
+    }
+
+    for (var j = 0; j < particles.length; j++) {
+      var a = particles[j];
+      for (var k = j + 1; k < particles.length; k++) {
+        var b = particles[k];
+        var lx = a.x - b.x;
+        var ly = a.y - b.y;
+        var lineDistance = Math.sqrt(lx * lx + ly * ly);
+        if (lineDistance < maxDistance) {
+          drawLine(a, b, lineDistance, maxDistance, 'rgba(80, 220, 255, {alpha})');
+        }
+      }
+
+      if (mouse.active) {
+        var mx = a.x - mouse.x;
+        var my = a.y - mouse.y;
+        var mouseDistance = Math.sqrt(mx * mx + my * my);
+        if (mouseDistance < clusterDistance) {
+          drawLine(a, mouse, mouseDistance, clusterDistance, 'rgba(147, 112, 255, {alpha})');
+        }
+      }
+
+      var glow = mouse.active ? 'rgba(147, 112, 255, 0.75)' : 'rgba(80, 220, 255, 0.75)';
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, a.size, 0, Math.PI * 2);
+      ctx.fillStyle = glow;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = glow;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    animId = requestAnimationFrame(animate);
+  }
+
+  window.toggleParticleNetworkBg = function(flag) {
+    enabled = flag;
+    if (flag) {
+      initCanvas();
+      createParticles();
+      if (animId) cancelAnimationFrame(animId);
+      canvas.style.display = '';
+      animate();
+      localStorage.setItem('Stellar.particleNetworkBg', '1');
+    } else {
+      if (animId) cancelAnimationFrame(animId);
+      animId = null;
+      if (canvas) {
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        canvas.style.display = 'none';
+      }
+      localStorage.setItem('Stellar.particleNetworkBg', '0');
+    }
+  };
+
+  if (localStorage.getItem('Stellar.particleNetworkBg') === '1') {
+    window.toggleParticleNetworkBg(true);
+  }
+})();

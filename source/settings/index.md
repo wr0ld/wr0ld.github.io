@@ -34,6 +34,13 @@ menu_id: settings
         <span class="slider"></span>
       </label>
     </div>
+    <div class="setting-item">
+      <span>✨ 粒子聚合背景</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="particleNetworkBg" onchange="toggleParticleNetworkBg(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
   </div>
   
   <div id="reading" class="settings-section">
@@ -2859,6 +2866,14 @@ function renderRankingList(type) {
   var cb = document.getElementById('hackerBg');
   if (cb) {
     cb.checked = localStorage.getItem('Stellar.hackerBg') === '1';
+  }
+})();
+
+// 同步粒子聚合背景开关状态
+(function() {
+  var cb = document.getElementById('particleNetworkBg');
+  if (cb) {
+    cb.checked = localStorage.getItem('Stellar.particleNetworkBg') === '1';
   }
 })();
 </script>
