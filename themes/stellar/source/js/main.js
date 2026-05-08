@@ -322,12 +322,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 卡片 3D 视差效果
 (function() {
-  var cards = document.querySelectorAll('.post-card');
-  if (cards.length === 0) return;
-  cards.forEach(function(card) {
+  function bindPostCardTilt(root) {
+    var cards = (root || document).querySelectorAll('.post-card:not([data-tilt-bound])');
+    if (cards.length === 0) return;
+    cards.forEach(function(card) {
+      card.dataset.tiltBound = 'true';
+
     card.addEventListener('mouseenter', function() {
       this.dataset.tiltActive = 'true';
     });
+
     card.addEventListener('mousemove', function(e) {
       if (!this.dataset.tiltActive) return;
       var rect = this.getBoundingClientRect();
@@ -338,14 +342,34 @@ document.addEventListener('DOMContentLoaded', function() {
       var rotateX = (y - centerY) / centerY * -5;
       var rotateY = (x - centerX) / centerX * 5;
       this.style.setProperty('transition', 'none', 'important');
-      this.style.transform = 'perspective(1000px) translateY(-3px) scale3d(1.005,1.005,1.005) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
+      this.style.setProperty('transform', 'perspective(1000px) translateY(-3px) scale3d(1.005,1.005,1.005) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)', 'important');
     });
+
     card.addEventListener('mouseleave', function() {
       delete this.dataset.tiltActive;
       this.style.removeProperty('transition');
-      this.style.transform = '';
+      this.style.removeProperty('transform');
     });
   });
+  }
+
+  function initPostCardTilt() {
+    bindPostCardTilt(document);
+
+    var container = document.querySelector('#post-container') || document.body;
+    if (container && window.MutationObserver) {
+      var observer = new MutationObserver(function() {
+        bindPostCardTilt(container);
+      });
+      observer.observe(container, { childList: true, subtree: true });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPostCardTilt);
+  } else {
+    initPostCardTilt();
+  }
 })();
 
 // 打字机效果

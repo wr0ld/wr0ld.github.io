@@ -738,6 +738,7 @@ html.reverse-both
 
 .post-list
   overflow: visible !important
+  perspective: 1000px
 
 .l_main
   overflow: visible !important
@@ -1114,6 +1115,8 @@ a.post-card .breadcrumb span
 // ---------- 卡片悬停增强 ----------
 .post-card
   position: relative
+  transform-style: preserve-3d
+  will-change: transform
   animation: cardFadeIn 0.3s ease both
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important
   // 伪元素 translateZ 强制 GPU 渲染层，不干扰主 transform 动画
