@@ -342,8 +342,8 @@ document.addEventListener('DOMContentLoaded', function() {
       var list = this.closest('.post-list');
       var isGrid = list && list.classList.contains('grid');
       var isList = list && list.classList.contains('list');
-      var maxTilt = isGrid ? 2.45 : (isList ? 0.75 : 1.25);
-      var perspective = isGrid ? 2600 : (isList ? 5200 : 3600);
+      var maxTilt = isGrid ? 3.2 : (isList ? 1.25 : 1.8);
+      var perspective = isGrid ? 2400 : (isList ? 4600 : 3200);
       var lift = isGrid ? -3 : (isList ? -1 : -2);
       var scale = isGrid ? 1.003 : (isList ? 1.0005 : 1.0015);
       var rotateX = (y - centerY) / centerY * -maxTilt;
