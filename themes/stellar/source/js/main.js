@@ -339,10 +339,17 @@ document.addEventListener('DOMContentLoaded', function() {
       var y = e.clientY - rect.top;
       var centerX = rect.width / 2;
       var centerY = rect.height / 2;
-      var rotateX = (y - centerY) / centerY * -1.8;
-      var rotateY = (x - centerX) / centerX * 1.8;
+      var list = this.closest('.post-list');
+      var isGrid = list && list.classList.contains('grid');
+      var isList = list && list.classList.contains('list');
+      var maxTilt = isGrid ? 2.45 : (isList ? 0.75 : 1.25);
+      var perspective = isGrid ? 2600 : (isList ? 5200 : 3600);
+      var lift = isGrid ? -3 : (isList ? -1 : -2);
+      var scale = isGrid ? 1.003 : (isList ? 1.0005 : 1.0015);
+      var rotateX = (y - centerY) / centerY * -maxTilt;
+      var rotateY = (x - centerX) / centerX * maxTilt;
       this.style.setProperty('transition', 'none', 'important');
-      this.style.setProperty('transform', 'perspective(2200px) translateY(-2px) scale3d(1.002,1.002,1.002) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)', 'important');
+      this.style.setProperty('transform', 'perspective(' + perspective + 'px) translateY(' + lift + 'px) scale3d(' + scale + ',' + scale + ',' + scale + ') rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)', 'important');
     });
 
     card.addEventListener('mouseleave', function() {
