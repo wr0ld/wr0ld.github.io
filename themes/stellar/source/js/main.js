@@ -339,10 +339,10 @@ document.addEventListener('DOMContentLoaded', function() {
       var y = e.clientY - rect.top;
       var centerX = rect.width / 2;
       var centerY = rect.height / 2;
-      var rotateX = (y - centerY) / centerY * -5;
-      var rotateY = (x - centerX) / centerX * 5;
+      var rotateX = (y - centerY) / centerY * -1.8;
+      var rotateY = (x - centerX) / centerX * 1.8;
       this.style.setProperty('transition', 'none', 'important');
-      this.style.setProperty('transform', 'perspective(1000px) translateY(-3px) scale3d(1.005,1.005,1.005) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)', 'important');
+      this.style.setProperty('transform', 'perspective(2200px) translateY(-2px) scale3d(1.002,1.002,1.002) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)', 'important');
     });
 
     card.addEventListener('mouseleave', function() {
