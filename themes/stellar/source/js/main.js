@@ -451,6 +451,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var mouse = { x: 0, y: 0, active: false };
   var maxDistance = 150;
   var clusterDistance = 190;
+  var polygonRadius = 78;
 
   function initCanvas() {
     if (canvas) return;
@@ -512,6 +513,8 @@ document.addEventListener('DOMContentLoaded', function() {
         baseY: Math.random() * window.innerHeight,
         vx: (Math.random() - 0.5) * 0.35,
         vy: (Math.random() - 0.5) * 0.35,
+        orbitAngle: Math.random() * Math.PI * 2,
+        orbitRadius: polygonRadius + (Math.random() - 0.5) * 34,
         size: 1.2 + Math.random() * 1.8
       });
     }
@@ -530,6 +533,8 @@ document.addEventListener('DOMContentLoaded', function() {
   function animate() {
     if (!enabled || !ctx || !canvas) return;
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    var time = performance.now();
+    var clustered = [];
 
     for (var i = 0; i < particles.length; i++) {
       var p = particles[i];
@@ -545,10 +550,25 @@ document.addEventListener('DOMContentLoaded', function() {
         var dx = mouse.x - p.x;
         var dy = mouse.y - p.y;
         var dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < clusterDistance && dist > 0.01) {
-          var force = (1 - dist / clusterDistance) * 0.045;
-          p.vx += dx * force / dist;
-          p.vy += dy * force / dist;
+        if (dist < clusterDistance) {
+          var angle = p.orbitAngle + time * 0.00022;
+          var sides = 7;
+          var sector = Math.PI * 2 / sides;
+          var snapped = Math.round(angle / sector) * sector;
+          var blend = 0.58;
+          var polygonAngle = snapped * blend + angle * (1 - blend);
+          var radius = p.orbitRadius + Math.sin(time * 0.001 + i) * 10;
+          var targetX = mouse.x + Math.cos(polygonAngle) * radius;
+          var targetY = mouse.y + Math.sin(polygonAngle) * radius;
+          var tx = targetX - p.x;
+          var ty = targetY - p.y;
+          var targetDist = Math.sqrt(tx * tx + ty * ty) || 1;
+          var force = (1 - dist / clusterDistance) * 0.08;
+          p.vx += tx / targetDist * force;
+          p.vy += ty / targetDist * force;
+          p.vx += -Math.sin(polygonAngle) * 0.006;
+          p.vy += Math.cos(polygonAngle) * 0.006;
+          clustered.push({ particle: p, angle: polygonAngle });
         }
       }
 
@@ -560,6 +580,23 @@ document.addEventListener('DOMContentLoaded', function() {
       p.vy = Math.max(-1.2, Math.min(1.2, p.vy));
     }
 
+    if (clustered.length > 2) {
+      clustered.sort(function(a, b) { return a.angle - b.angle; });
+      ctx.beginPath();
+      for (var n = 0; n < clustered.length; n++) {
+        var node = clustered[n].particle;
+        if (n === 0) {
+          ctx.moveTo(node.x, node.y);
+        } else {
+          ctx.lineTo(node.x, node.y);
+        }
+      }
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(147, 112, 255, 0.18)';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
+
     for (var j = 0; j < particles.length; j++) {
       var a = particles[j];
       for (var k = j + 1; k < particles.length; k++) {
@@ -569,15 +606,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var lineDistance = Math.sqrt(lx * lx + ly * ly);
         if (lineDistance < maxDistance) {
           drawLine(a, b, lineDistance, maxDistance, 'rgba(80, 220, 255, {alpha})');
-        }
-      }
-
-      if (mouse.active) {
-        var mx = a.x - mouse.x;
-        var my = a.y - mouse.y;
-        var mouseDistance = Math.sqrt(mx * mx + my * my);
-        if (mouseDistance < clusterDistance) {
-          drawLine(a, mouse, mouseDistance, clusterDistance, 'rgba(147, 112, 255, {alpha})');
         }
       }
 
