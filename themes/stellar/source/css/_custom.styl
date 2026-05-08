@@ -1425,3 +1425,25 @@ for n in (1..20)
   to
     opacity: 1
     transform: translateY(0)
+
+// 文章正文边框卡片
+.l_body[layout="post"] article.md-text.content
+  margin: 0 var(--gap-margin) var(--gap-margin)
+  padding: 1.25rem 1.35rem 2rem !important
+  border: 1px solid rgba(120, 140, 180, 0.22)
+  border-radius: 18px
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015))
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.04)
+  backdrop-filter: blur(8px)
+  -webkit-backdrop-filter: blur(8px)
+
+:root[data-theme="dark"] .l_body[layout="post"] article.md-text.content
+  border-color: rgba(255, 255, 255, 0.14)
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018))
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05)
+
+@media screen and (max-width: $device-mobile-max)
+  .l_body[layout="post"] article.md-text.content
+    margin: 0 0.5rem 0.75rem
+    padding: 1rem 1rem 1.5rem !important
+    border-radius: 14px
