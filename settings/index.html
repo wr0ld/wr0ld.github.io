@@ -50,8 +50,8 @@
 <meta property="og:description" content="🛠️ 没用的工具            🔮 占卜       进入占卜                 🔢 计算器       打开计算器                   🎨 主题设置            深色模式                🌙         切换主题                        🌐 赛博背景">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-05-05T11:02:15.036Z">
-<meta property="article:modified_time" content="2026-05-05T11:02:15.036Z">
+<meta property="article:published_time" content="2026-05-08T13:05:08.233Z">
+<meta property="article:modified_time" content="2026-05-08T13:03:57.235Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -64,7 +64,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mowvchuj">
+  <link rel="stylesheet" href="/css/main.css?v=mowzowci">
 
 
   
@@ -140,6 +140,13 @@
       <span>🌐 赛博背景</span>
       <label class="toggle-switch">
         <input type="checkbox" id="hackerBg" onchange="toggleHackerBg(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="setting-item">
+      <span>✨ 粒子聚合背景</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="particleNetworkBg" onchange="toggleParticleNetworkBg(this.checked)">
         <span class="slider"></span>
       </label>
     </div>
@@ -2970,6 +2977,14 @@ function renderRankingList(type) {
     cb.checked = localStorage.getItem('Stellar.hackerBg') === '1';
   }
 })();
+
+// 同步粒子聚合背景开关状态
+(function() {
+  var cb = document.getElementById('particleNetworkBg');
+  if (cb) {
+    cb.checked = localStorage.getItem('Stellar.particleNetworkBg') === '1';
+  }
+})();
 </script>
 </article>
 
@@ -3418,7 +3433,7 @@ function renderRankingList(type) {
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mowvchum" defer></script>
+<script src="/js/main.js?v=mowzowcm" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -3682,7 +3697,7 @@ function renderRankingList(type) {
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mowvchum"></script>
+<script src="/js/plugins/achievements.js?v=mowzowcm"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>
