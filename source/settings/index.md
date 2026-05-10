@@ -1280,6 +1280,11 @@ function setWaifuZoom(pct) {
   if (waifu) {
     waifu.style.setProperty('--waifu-scale', (pct / 100) + '');
   }
+  // 通知 autoload.js 实时应用缩放
+  window.dispatchEvent(new StorageEvent('storage', {
+    key: 'waifu_zoom',
+    newValue: pct.toString()
+  }));
 }
 
 function resetWaifuZoom() {
@@ -1299,7 +1304,7 @@ function resetWaifuZoom() {
   }
 })();
 
-// 初始化看板娘缩放
+// 初始化看板娘缩放与开关状态
 (function() {
   var saved = parseInt(localStorage.getItem('waifu_zoom')) || 100;
   var slider = document.getElementById('waifuZoomSlider');
@@ -1309,6 +1314,16 @@ function resetWaifuZoom() {
     slider.addEventListener('input', function() { setWaifuZoom(this.value); });
   }
   if (label) { label.textContent = saved + '%'; }
+  // 应用到当前页面的看板娘元素
+  var waifu = document.getElementById('waifu');
+  if (waifu && saved !== 100) {
+    waifu.style.setProperty('--waifu-scale', (saved / 100).toString());
+  }
+  // 初始化显示看板娘开关状态
+  var showWaifuCb = document.getElementById('showWaifu');
+  if (showWaifuCb) {
+    showWaifuCb.checked = localStorage.getItem('waifu_show') === 'true';
+  }
 })();
 
 function showAchievementsGuide() {
