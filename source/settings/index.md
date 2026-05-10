@@ -1159,7 +1159,20 @@ input:checked + .slider:before {
 }
 </style>
 
+<!-- 默认设置配置文件，可直接编辑 source/settings/defaults.js 修改各项默认值 -->
+<script src="/settings/defaults.js"></script>
+
 <script>
+// ── 将 defaults.js 中的默认值同步到 localStorage（仅填充空缺项，不覆盖已保存的设置）──
+(function() {
+  if (!window._siteDefaults) return;
+  for (var k in window._siteDefaults) {
+    if (localStorage.getItem(k) === null) {
+      localStorage.setItem(k, window._siteDefaults[k]);
+    }
+  }
+})();
+
 function toggleWaifu(show) {
   localStorage.setItem('waifu_show', show.toString());
   if (!show) {
