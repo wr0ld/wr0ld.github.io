@@ -26,15 +26,11 @@ function loadExternalResource(url, type) {
   });
 }
 
-(async () => {
-  var showWaifu = localStorage.getItem('waifu_show');
-  if (showWaifu !== 'true') {
-    console.log('Live2D: 看板娘默认禁用，请在设置中开启');
-    var style = document.createElement('style');
-    style.innerHTML = '#waifu { display: none !important; } #waifu-toggle { display: flex !important; }';
-    document.head.appendChild(style);
-    return;
-  }
+// 统一的初始化函数，支持多次调用
+var _waifuInitialized = false;
+async function initWaifuWidget() {
+  if (_waifuInitialized) return;
+  _waifuInitialized = true;
 
   const OriginalImage = window.Image;
   window.Image = function(...args) {
@@ -58,7 +54,8 @@ function loadExternalResource(url, type) {
     logLevel: 'error',
     drag: false,
   });
-  
+
+  // 初始化完成后应用保存的缩放值
   setTimeout(function() {
     var waifu = document.getElementById('waifu');
     if (waifu) {
@@ -66,31 +63,58 @@ function loadExternalResource(url, type) {
       if (show === 'false') {
         waifu.classList.add('waifu-hidden');
         waifu.classList.remove('waifu-active');
-        waifu.style.display = 'none';
         waifu.style.setProperty('display', 'none', 'important');
       } else {
         waifu.classList.add('waifu-active');
         waifu.classList.remove('waifu-hidden');
-        waifu.style.display = '';
+        waifu.style.removeProperty('display');
+      }
+      // 应用保存的缩放值
+      var savedZoom = parseInt(localStorage.getItem('waifu_zoom')) || 100;
+      if (savedZoom !== 100) {
+        waifu.style.setProperty('--waifu-scale', (savedZoom / 100).toString());
       }
     }
-  }, 500);
+  }, 800);
+}
+
+(async () => {
+  var showWaifu = localStorage.getItem('waifu_show');
+  if (showWaifu !== 'true') {
+    console.log('Live2D: 看板娘已禁用，可在设置中开启');
+    return;
+  }
+  await initWaifuWidget();
 })();
 
 window.addEventListener('storage', function(e) {
   if (e.key === 'waifu_show') {
     var waifu = document.getElementById('waifu');
-    if (waifu) {
-      if (e.newValue === 'false') {
-        waifu.classList.add('waifu-hidden');
-        waifu.classList.remove('waifu-active');
-        waifu.style.display = 'none';
-        waifu.style.setProperty('display', 'none', 'important');
+    if (e.newValue === 'true') {
+      if (!waifu) {
+        // Widget 尚未加载，动态初始化
+        initWaifuWidget();
       } else {
         waifu.classList.remove('waifu-hidden');
         waifu.classList.add('waifu-active');
-        waifu.style.display = '';
+        waifu.style.removeProperty('display');
+        // 应用保存的缩放
+        var savedZoom = parseInt(localStorage.getItem('waifu_zoom')) || 100;
+        waifu.style.setProperty('--waifu-scale', (savedZoom / 100).toString());
       }
+    } else if (e.newValue === 'false') {
+      if (waifu) {
+        waifu.classList.add('waifu-hidden');
+        waifu.classList.remove('waifu-active');
+        waifu.style.setProperty('display', 'none', 'important');
+      }
+    }
+  } else if (e.key === 'waifu_zoom') {
+    // 实时响应缩放变化
+    var waifu = document.getElementById('waifu');
+    if (waifu) {
+      var zoom = parseInt(e.newValue) || 100;
+      waifu.style.setProperty('--waifu-scale', (zoom / 100).toString());
     }
   }
 });

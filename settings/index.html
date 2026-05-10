@@ -50,8 +50,8 @@
 <meta property="og:description" content="🛠️ 没用的工具            🔮 占卜       进入占卜                 🔢 计算器       打开计算器                   🎨 主题设置            深色模式                🌙         切换主题                        🌐 赛博背景">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
-<meta property="article:published_time" content="2026-05-08T13:05:08.233Z">
-<meta property="article:modified_time" content="2026-05-08T13:03:57.235Z">
+<meta property="article:published_time" content="2026-05-10T08:02:22.998Z">
+<meta property="article:modified_time" content="2026-05-10T08:02:22.998Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="blog, hexo, stellar, 技术, 编程">
 <meta name="twitter:card" content="summary">
@@ -64,7 +64,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mozbt5nt">
+  <link rel="stylesheet" href="/css/main.css?v=mozjb2vu">
 
 
   
@@ -1268,7 +1268,20 @@ input:checked + .slider:before {
 }
 </style>
 
+<!-- 默认设置配置文件，可直接编辑 source/settings/defaults.js 修改各项默认值 -->
+<script src="/settings/defaults.js"></script>
+
 <script>
+// ── 将 defaults.js 中的默认值同步到 localStorage（仅填充空缺项，不覆盖已保存的设置）──
+(function() {
+  if (!window._siteDefaults) return;
+  for (var k in window._siteDefaults) {
+    if (localStorage.getItem(k) === null) {
+      localStorage.setItem(k, window._siteDefaults[k]);
+    }
+  }
+})();
+
 function toggleWaifu(show) {
   localStorage.setItem('waifu_show', show.toString());
   if (!show) {
@@ -1389,6 +1402,11 @@ function setWaifuZoom(pct) {
   if (waifu) {
     waifu.style.setProperty('--waifu-scale', (pct / 100) + '');
   }
+  // 通知 autoload.js 实时应用缩放
+  window.dispatchEvent(new StorageEvent('storage', {
+    key: 'waifu_zoom',
+    newValue: pct.toString()
+  }));
 }
 
 function resetWaifuZoom() {
@@ -1408,7 +1426,7 @@ function resetWaifuZoom() {
   }
 })();
 
-// 初始化看板娘缩放
+// 初始化看板娘缩放与开关状态
 (function() {
   var saved = parseInt(localStorage.getItem('waifu_zoom')) || 100;
   var slider = document.getElementById('waifuZoomSlider');
@@ -1418,6 +1436,16 @@ function resetWaifuZoom() {
     slider.addEventListener('input', function() { setWaifuZoom(this.value); });
   }
   if (label) { label.textContent = saved + '%'; }
+  // 应用到当前页面的看板娘元素
+  var waifu = document.getElementById('waifu');
+  if (waifu && saved !== 100) {
+    waifu.style.setProperty('--waifu-scale', (saved / 100).toString());
+  }
+  // 初始化显示看板娘开关状态
+  var showWaifuCb = document.getElementById('showWaifu');
+  if (showWaifuCb) {
+    showWaifuCb.checked = localStorage.getItem('waifu_show') === 'true';
+  }
 })();
 
 function showAchievementsGuide() {
@@ -3433,7 +3461,7 @@ function renderRankingList(type) {
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mozbt5nw" defer></script>
+<script src="/js/main.js?v=mozjb2vy" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -3697,7 +3725,7 @@ function renderRankingList(type) {
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mozbt5nw"></script>
+<script src="/js/plugins/achievements.js?v=mozjb2vz"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>
@@ -3708,10 +3736,24 @@ function renderRankingList(type) {
 <!-- Offline Vault - 断网保护机制 -->
 <script src="/js/plugins/offline-vault.js"></script>
 
+<!-- 默认设置配置文件 -->
+<script src="/settings/defaults.js"></script>
+<script>
+// 将 defaults.js 的默认值应用到 localStorage 空缺项
+(function() {
+  if (!window._siteDefaults) return;
+  for (var k in window._siteDefaults) {
+    if (localStorage.getItem(k) === null) {
+      localStorage.setItem(k, window._siteDefaults[k]);
+    }
+  }
+})();
+</script>
+
 <!-- Live2D Widget - Local Version -->
 <script src="/live2d-widget/dist/autoload.js"></script>
 
-<!-- Live2D Widget 位置调整和默认显示 -->
+<!-- Live2D Widget 位置调整 -->
 <style>
   #waifu {
     position: fixed !important;
@@ -3721,9 +3763,7 @@ function renderRankingList(type) {
     z-index: 1000 !important;
     transform: scale(var(--waifu-scale, 1)) !important;
     transform-origin: bottom right !important;
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+    /* 不覆盖 display，由 autoload.js 和 waifu.css 控制显隐 */
   }
   #waifu #live2d {
     position: relative !important;

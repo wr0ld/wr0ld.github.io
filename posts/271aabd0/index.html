@@ -69,7 +69,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mozbt5oh">
+  <link rel="stylesheet" href="/css/main.css?v=mozjb2wq">
 
 
   
@@ -1277,7 +1277,7 @@ style C fill:#9cf</pre>
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mozbt5ol" defer></script>
+<script src="/js/main.js?v=mozjb2wu" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1541,7 +1541,7 @@ style C fill:#9cf</pre>
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mozbt5ol"></script>
+<script src="/js/plugins/achievements.js?v=mozjb2wu"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>
@@ -1552,10 +1552,24 @@ style C fill:#9cf</pre>
 <!-- Offline Vault - 断网保护机制 -->
 <script src="/js/plugins/offline-vault.js"></script>
 
+<!-- 默认设置配置文件 -->
+<script src="/settings/defaults.js"></script>
+<script>
+// 将 defaults.js 的默认值应用到 localStorage 空缺项
+(function() {
+  if (!window._siteDefaults) return;
+  for (var k in window._siteDefaults) {
+    if (localStorage.getItem(k) === null) {
+      localStorage.setItem(k, window._siteDefaults[k]);
+    }
+  }
+})();
+</script>
+
 <!-- Live2D Widget - Local Version -->
 <script src="/live2d-widget/dist/autoload.js"></script>
 
-<!-- Live2D Widget 位置调整和默认显示 -->
+<!-- Live2D Widget 位置调整 -->
 <style>
   #waifu {
     position: fixed !important;
@@ -1565,9 +1579,7 @@ style C fill:#9cf</pre>
     z-index: 1000 !important;
     transform: scale(var(--waifu-scale, 1)) !important;
     transform-origin: bottom right !important;
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
+    /* 不覆盖 display，由 autoload.js 和 waifu.css 控制显隐 */
   }
   #waifu #live2d {
     position: relative !important;
