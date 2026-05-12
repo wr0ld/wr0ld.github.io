@@ -62,7 +62,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mozjb32g">
+  <link rel="stylesheet" href="/css/main.css?v=mp2fxa63">
 
 
   
@@ -120,7 +120,25 @@
 </div>
 
 <div id="post-container">
-  <div class="post-list post grid"><a class="post-card slide-up post" href="/posts/a7f2b9d3/">
+  <div class="post-list post grid"><a class="post-card slide-up post" href="/posts/c3d8e7f2/">
+<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/o4gsLkYFH1AABIRX4wPAayAcPiICmiAEDgXj3~tplv-dy-aweme-images-ds-rs-v1_1920_1080_q80.jpg"/></div><h2 class="post-title">代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析</h2><div class="excerpt"><p>代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析
+CVE-2017-5638 · Apache Struts2 · Jakarta 多部分解析器 RCE
+
+
+目录
+环境搭建
+漏洞触发验证
+Payload 逐段拆解
+手动搭建复现环境
+正常请求流程梳理
+调试验证 OGNL 执行
+源码调用栈分析
+沙箱机制与绕过过程
+总结
+
+
+环境搭建用 vulhub 直接起环境，...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-05-12T08:30:00.000Z">2026-05-12</time></span><span class="cap breadcrumb" style="color:rgba(160,165,180,0.85)" style="color:rgba(160,165,180,0.85)!important"><span style="color:rgba(160,165,180,0.85)!important">代码审计</span></span></div></article>
+</a><a class="post-card slide-up post" href="/posts/a7f2b9d3/">
 <article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/oM1sigyCiAA6DgFAIPAB3maXXAIyPqmHjE4LY~tplv-dy-aweme-images-ds-rs-v1_1920_1080_q80.jpg"/></div><h2 class="post-title">代码审计 | Struts2 —— S2-016 OGNL 注入原理</h2><div class="excerpt"><p>代码审计 | Struts2 —— S2-016 OGNL 注入原理
 本文是 Struts2 漏洞系列的第一篇，以 S2-016 为切入点，重点搞清楚 OGNL 注入的原理。Payload 极简，但背后的机制值得细细拆解。
 
@@ -199,17 +217,6 @@ ServletRequestListener 示例（静态注册）
 web.xml 中注册 Listener 的标准写法
 动态注入 Payload（无回显版）
 Listener 与 Filter&#x2F;Servl...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-10T05:00:00.000Z">2026-04-10</time></span><span class="cap breadcrumb" style="color:rgba(160,165,180,0.85)" style="color:rgba(160,165,180,0.85)!important"><span style="color:rgba(160,165,180,0.85)!important">代码审计</span></span></div></article>
-</a><a class="post-card slide-up post" href="/posts/eb030935/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/4d438cbe94b6b665403e80f0294dcfba.jpg"/></div><h2 class="post-title">原理分析 | Servlet —— Tomcat 内存马</h2><div class="excerpt"><p>原理分析 | Servlet —— Tomcat 内存马
-系列：Tomcat 内存马 —— 继 Filter 型之后，聊聊 Servlet 型的动态注入。
-
-
-目录
-一、Servlet 是如何注册和工作的
-二、Filter 和 Servlet 的区别
-三、回顾对比：Filter 型 vs Servlet 型
-四、前置知识：Servlet 动态注册 API
-五、直接调用 addServlet ...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-09T13:10:00.000Z">2026-04-09</time></span><span class="cap breadcrumb" style="color:rgba(160,165,180,0.85)" style="color:rgba(160,165,180,0.85)!important"><span style="color:rgba(160,165,180,0.85)!important">代码审计</span></span></div></article>
 </a></div>
 </div>
 
@@ -225,7 +232,7 @@ Listener 与 Filter&#x2F;Servl...</p></div><div class="meta cap"><span class="ca
 <script>
   // 所有文章数据（用于仅标题布局）
   // eslint-disable-next-line
-  const allPostsData = [{"title":"代码审计 | Struts2 —— S2-016 OGNL 注入原理","path":"posts/a7f2b9d3/","link":""},{"title":"原理分析 | Interceptor —— SpringBoot 内存马","path":"posts/b8e4f2a6/","link":""},{"title":"原理分析 | Controller —— SpringBoot 内存马","path":"posts/a3c7e2f1/","link":""},{"title":"原理分析 | JNDI反序列化注入内存马 —— 内存马补充","path":"posts/a7c3f9e2/","link":""},{"title":"原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地","path":"posts/c3f7a2d9/","link":""},{"title":"原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地","path":"posts/b8e2f4a1/","link":""},{"title":"原理分析 | Agent —— Tomcat 内存马","path":"posts/a3e7f2c9/","link":""},{"title":"原理分析 | Valve —— Tomcat 特有内存马","path":"posts/a7f3c8d2/","link":""},{"title":"原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结","path":"posts/9a18f0c4/","link":""},{"title":"原理分析 | Servlet —— Tomcat 内存马","path":"posts/eb030935/","link":""},{"title":"原理分析 | Filter —— Tomcat 内存马从零到注入","path":"posts/7b9eb72d/","link":""},{"title":"代码审计 | Log4j2 —— CVE-2021-44228  JNDI 注入与递归解析的完整链路分析","path":"posts/d5ebc61e/","link":""},{"title":"代码审计 | Shiro-550 —— CVE-2016-4437 环境搭建 调试分析 漏洞利用","path":"posts/a7f3c8e2/","link":""},{"title":"代码审计 | CB链分析 —— CommonsBeanutils 反序列化利用链","path":"posts/c4b8e2a3/","link":""},{"title":"代码审计 | CC2 链 —— _tfactory 赋值问题 PriorityQueue 新入口","path":"posts/d7f9a3c1/","link":""},{"title":"代码审计 | CC3链 —— 实例化 vs 反序列化 InvokerTransformer vs InstantiateTransformer","path":"posts/c3e8b7f2/","link":""},{"title":"代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial","path":"posts/a7b3c9d2/","link":""},{"title":"代码审计 | CC1 LazyMap 链 —— 动态代理","path":"posts/d4f8a2c1/","link":""},{"title":"代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload","path":"posts/becfd9ce/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","path":"posts/e90faa78/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— TemplatesImpl 链分析","path":"posts/f70df821/","link":""},{"title":"代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析","path":"posts/5ef1061b/","link":""},{"title":"代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43","path":"posts/86d6dbe4/","link":""},{"title":"代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析","path":"posts/3035988a/","link":""}];
+  const allPostsData = [{"title":"代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析","path":"posts/c3d8e7f2/","link":""},{"title":"代码审计 | Struts2 —— S2-016 OGNL 注入原理","path":"posts/a7f2b9d3/","link":""},{"title":"原理分析 | Interceptor —— SpringBoot 内存马","path":"posts/b8e4f2a6/","link":""},{"title":"原理分析 | Controller —— SpringBoot 内存马","path":"posts/a3c7e2f1/","link":""},{"title":"原理分析 | JNDI反序列化注入内存马 —— 内存马补充","path":"posts/a7c3f9e2/","link":""},{"title":"原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地","path":"posts/c3f7a2d9/","link":""},{"title":"原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地","path":"posts/b8e2f4a1/","link":""},{"title":"原理分析 | Agent —— Tomcat 内存马","path":"posts/a3e7f2c9/","link":""},{"title":"原理分析 | Valve —— Tomcat 特有内存马","path":"posts/a7f3c8d2/","link":""},{"title":"原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结","path":"posts/9a18f0c4/","link":""},{"title":"原理分析 | Servlet —— Tomcat 内存马","path":"posts/eb030935/","link":""},{"title":"原理分析 | Filter —— Tomcat 内存马从零到注入","path":"posts/7b9eb72d/","link":""},{"title":"代码审计 | Log4j2 —— CVE-2021-44228  JNDI 注入与递归解析的完整链路分析","path":"posts/d5ebc61e/","link":""},{"title":"代码审计 | Shiro-550 —— CVE-2016-4437 环境搭建 调试分析 漏洞利用","path":"posts/a7f3c8e2/","link":""},{"title":"代码审计 | CB链分析 —— CommonsBeanutils 反序列化利用链","path":"posts/c4b8e2a3/","link":""},{"title":"代码审计 | CC2 链 —— _tfactory 赋值问题 PriorityQueue 新入口","path":"posts/d7f9a3c1/","link":""},{"title":"代码审计 | CC3链 —— 实例化 vs 反序列化 InvokerTransformer vs InstantiateTransformer","path":"posts/c3e8b7f2/","link":""},{"title":"代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial","path":"posts/a7b3c9d2/","link":""},{"title":"代码审计 | CC1 LazyMap 链 —— 动态代理","path":"posts/d4f8a2c1/","link":""},{"title":"代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload","path":"posts/becfd9ce/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","path":"posts/e90faa78/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— TemplatesImpl 链分析","path":"posts/f70df821/","link":""},{"title":"代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析","path":"posts/5ef1061b/","link":""},{"title":"代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43","path":"posts/86d6dbe4/","link":""},{"title":"代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析","path":"posts/3035988a/","link":""}];
   
   // 布局切换功能
   (function() {
@@ -322,7 +329,7 @@ Listener 与 Filter&#x2F;Servl...</p></div><div class="meta cap"><span class="ca
   </a>
 </div>
 <div class="widgets">
-<widget class="widget-wrapper slide-up linklist collapsible-widget"><div class="widget-header dis-select"><span class="name">文章分类</span></div><div class="widget-body fs14"><div class="linklist left style-1" style="grid-template-columns:repeat(1,1fr);"><a class="link" title="其他" href="/categories/%E5%85%B6%E4%BB%96/"><div class="flex"><span>其他</span><span class="count">1</span></div></a><a class="link" title="实战" href="/categories/%E5%AE%9E%E6%88%98/"><div class="flex"><span>实战</span><span class="count">1</span></div></a><div class="category-group"><a class="link active" title="代码审计" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"><div class="flex"><span>代码审计</span><span class="count">24</span></div></a><div class="children-list"><a class="link child-link" title="cc" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/cc/"><div class="flex"><span>cc</span><span class="count">5</span></div></a><a class="link child-link" title="shiro" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/shiro/"><div class="flex"><span>shiro</span><span class="count">2</span></div></a><a class="link child-link" title="内存马" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/%E5%86%85%E5%AD%98%E9%A9%AC/"><div class="flex"><span>内存马</span><span class="count">10</span></div></a><a class="link child-link" title="log4j" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/log4j/"><div class="flex"><span>log4j</span><span class="count">1</span></div></a><a class="link child-link" title="fastjson" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/fastjson/"><div class="flex"><span>fastjson</span><span class="count">5</span></div></a><a class="link child-link" title="struts2" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/struts2/"><div class="flex"><span>struts2</span><span class="count">1</span></div></a></div></div><div class="category-group"><a class="link" title="安全工具" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/"><div class="flex"><span>安全工具</span><span class="count">5</span></div></a><div class="children-list"><a class="link child-link" title="工具魔改" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/%E5%B7%A5%E5%85%B7%E9%AD%94%E6%94%B9/"><div class="flex"><span>工具魔改</span><span class="count">4</span></div></a><a class="link child-link" title="工具" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/%E5%B7%A5%E5%85%B7/"><div class="flex"><span>工具</span><span class="count">1</span></div></a></div></div><div class="category-group"><a class="link" title="Windows" href="/categories/Windows/"><div class="flex"><span>Windows</span><span class="count">2</span></div></a><div class="children-list"><a class="link child-link" title="vpc" href="/categories/Windows/vpc/"><div class="flex"><span>vpc</span><span class="count">2</span></div></a></div></div><div class="category-group"><a class="link" title="linux" href="/categories/linux/"><div class="flex"><span>linux</span><span class="count">10</span></div></a><div class="children-list"><a class="link child-link" title="靶机渗透" href="/categories/linux/%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/"><div class="flex"><span>靶机渗透</span><span class="count">1</span></div></a><a class="link child-link" title="vulnhub-DC" href="/categories/linux/vulnhub-DC/"><div class="flex"><span>vulnhub-DC</span><span class="count">9</span></div></a></div></div><div class="category-group"><a class="link" title="web" href="/categories/web/"><div class="flex"><span>web</span><span class="count">4</span></div></a><div class="children-list"><a class="link child-link" title="DVWA" href="/categories/web/DVWA/"><div class="flex"><span>DVWA</span><span class="count">3</span></div></a><a class="link child-link" title="pikachu" href="/categories/web/pikachu/"><div class="flex"><span>pikachu</span><span class="count">1</span></div></a></div></div><a class="link" title="笔记" href="/categories/%E7%AC%94%E8%AE%B0/"><div class="flex"><span>笔记</span><span class="count">2</span></div></a></div></div></widget>
+<widget class="widget-wrapper slide-up linklist collapsible-widget"><div class="widget-header dis-select"><span class="name">文章分类</span></div><div class="widget-body fs14"><div class="linklist left style-1" style="grid-template-columns:repeat(1,1fr);"><a class="link" title="其他" href="/categories/%E5%85%B6%E4%BB%96/"><div class="flex"><span>其他</span><span class="count">1</span></div></a><a class="link" title="实战" href="/categories/%E5%AE%9E%E6%88%98/"><div class="flex"><span>实战</span><span class="count">1</span></div></a><div class="category-group"><a class="link active" title="代码审计" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"><div class="flex"><span>代码审计</span><span class="count">25</span></div></a><div class="children-list"><a class="link child-link" title="cc" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/cc/"><div class="flex"><span>cc</span><span class="count">5</span></div></a><a class="link child-link" title="shiro" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/shiro/"><div class="flex"><span>shiro</span><span class="count">2</span></div></a><a class="link child-link" title="内存马" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/%E5%86%85%E5%AD%98%E9%A9%AC/"><div class="flex"><span>内存马</span><span class="count">10</span></div></a><a class="link child-link" title="log4j" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/log4j/"><div class="flex"><span>log4j</span><span class="count">1</span></div></a><a class="link child-link" title="struts2" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/struts2/"><div class="flex"><span>struts2</span><span class="count">2</span></div></a><a class="link child-link" title="fastjson" href="/categories/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/fastjson/"><div class="flex"><span>fastjson</span><span class="count">5</span></div></a></div></div><div class="category-group"><a class="link" title="安全工具" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/"><div class="flex"><span>安全工具</span><span class="count">5</span></div></a><div class="children-list"><a class="link child-link" title="工具魔改" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/%E5%B7%A5%E5%85%B7%E9%AD%94%E6%94%B9/"><div class="flex"><span>工具魔改</span><span class="count">4</span></div></a><a class="link child-link" title="工具" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/%E5%B7%A5%E5%85%B7/"><div class="flex"><span>工具</span><span class="count">1</span></div></a></div></div><div class="category-group"><a class="link" title="Windows" href="/categories/Windows/"><div class="flex"><span>Windows</span><span class="count">2</span></div></a><div class="children-list"><a class="link child-link" title="vpc" href="/categories/Windows/vpc/"><div class="flex"><span>vpc</span><span class="count">2</span></div></a></div></div><div class="category-group"><a class="link" title="linux" href="/categories/linux/"><div class="flex"><span>linux</span><span class="count">10</span></div></a><div class="children-list"><a class="link child-link" title="vulnhub-DC" href="/categories/linux/vulnhub-DC/"><div class="flex"><span>vulnhub-DC</span><span class="count">9</span></div></a><a class="link child-link" title="靶机渗透" href="/categories/linux/%E9%9D%B6%E6%9C%BA%E6%B8%97%E9%80%8F/"><div class="flex"><span>靶机渗透</span><span class="count">1</span></div></a></div></div><div class="category-group"><a class="link" title="web" href="/categories/web/"><div class="flex"><span>web</span><span class="count">4</span></div></a><div class="children-list"><a class="link child-link" title="DVWA" href="/categories/web/DVWA/"><div class="flex"><span>DVWA</span><span class="count">3</span></div></a><a class="link child-link" title="pikachu" href="/categories/web/pikachu/"><div class="flex"><span>pikachu</span><span class="count">1</span></div></a></div></div><a class="link" title="笔记" href="/categories/%E7%AC%94%E8%AE%B0/"><div class="flex"><span>笔记</span><span class="count">2</span></div></a></div></div></widget>
 </div></div></aside><div class='float-panel'>
   <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
@@ -746,7 +753,7 @@ Listener 与 Filter&#x2F;Servl...</p></div><div class="meta cap"><span class="ca
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mozjb32g" defer></script>
+<script src="/js/main.js?v=mp2fxa65" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1010,7 +1017,7 @@ Listener 与 Filter&#x2F;Servl...</p></div><div class="meta cap"><span class="ca
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mozjb32h"></script>
+<script src="/js/plugins/achievements.js?v=mp2fxa65"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>
