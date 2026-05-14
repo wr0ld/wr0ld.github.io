@@ -1,7 +1,7 @@
 ---
 title: 代码审计 | CC1 LazyMap 链 —— 动态代理
 cover: >-
-  https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/TranscodedWallpaper.jpg
+  https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/TranscodedWallpaper.jpg
 categories:
   - [代码审计, cc]
 tags:
@@ -70,7 +70,7 @@ Transformer 链本身（`ConstantTransformer` + 三个 `InvokerTransformer`）�
 
 先看 `LazyMap.get()` 的源码，在 `org.apache.commons.collections.map.LazyMap` 里：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1775103218274.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1775103218274.png)
 
 关键逻辑：
 
@@ -90,11 +90,11 @@ public Object get(Object key) {
 
 还有个问题，`LazyMap` 类虽然是 `public` 的，但构造方法是 `protected`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260402125241952.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260402125241952.png)
 
 查找用法找到 `decorate()`，它是 `public` 的并且内部会调用 `LazyMap(map, factory)`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260402125357953.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260402125357953.png)
 
 所以构造方式为：
 
@@ -133,7 +133,7 @@ public static void main(String[] args) throws Exception {
 
 没有问题。`"test"` 可以是任何值，因为 `ChainedTransformer` 第一步是 `ConstantTransformer(Runtime.class)`，会直接忽略传入的 key，固定输出 `Runtime.class`，后面的链跟 key 是什么完全没关系。
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260402130447751.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260402130447751.png)
 
 现在的问题就是：**谁来调用 `lazyMap.get()`？**
 
@@ -143,7 +143,7 @@ public static void main(String[] args) throws Exception {
 
 搜索结果有 1000 条不止，过滤完也还是很多：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260402131902585.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260402131902585.png)
 
 如果是真的挖链，就是一步一步试错加上对 Java 的熟悉程度。这里直接跳到结论——最终找到的是 `AnnotationInvocationHandler.invoke()`。
 
@@ -151,7 +151,7 @@ public static void main(String[] args) throws Exception {
 
 看 `AnnotationInvocationHandler.invoke()` 源码：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260402133226546.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260402133226546.png)
 
 关键部分：
 
@@ -191,7 +191,7 @@ Map proxyMap = (Map) Proxy.newProxyInstance(
 
 回到 `AnnotationInvocationHandler.readObject()` 源码：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260402172916043.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260402172916043.png)
 
 ```java
 private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
@@ -361,7 +361,7 @@ public class CC1LazyMap {
 
 运行效果：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260402174607539.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260402174607539.png)
 
 ---
 

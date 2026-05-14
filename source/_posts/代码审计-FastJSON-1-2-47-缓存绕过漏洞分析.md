@@ -1,6 +1,6 @@
 ---
 title: 代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析
-cover: 'https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image2.png'
+cover: 'https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image2.png'
 categories:
   - [代码审计, fastjson]
 tags:
@@ -34,7 +34,7 @@ date: 2026-03-26 10:00:00
 
 使用 Maven 管理依赖，在 `pom.xml` 里改一下版本号就行。
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image1.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image1.png)
 
 ---
 
@@ -50,7 +50,7 @@ String payload =
     "\"autoCommit\":true}}";
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image2.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image2.png)
 
 > **1.2.47 最厉害的地方在哪？**
 >
@@ -121,7 +121,7 @@ if (clazz != null) {
 
 首先来到 `@type` 的判断逻辑。此时处理的是字段 `a`，判断类型不符合直接跳过的条件：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image3.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image3.png)
 
 于是进入了 `else` 分支，跳过了这一层。
 
@@ -129,37 +129,37 @@ if (clazz != null) {
 
 接着再次进入 `@type` 判断函数，这次判断的是 `a` 里面 `@type` 的值（即 `java.lang.Class`）：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image4.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image4.png)
 
 检测到 `a` 的 `@type`，进入检测函数：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image5.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image5.png)
 
 因为 `java.lang.Class` 是正常的 JDK 类，所以直接放行返回：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image6.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image6.png)
 
 ---
 
 接下来进入反序列化函数内部：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image7.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image7.png)
 
 然后走到了 `loadClass`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image8.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image8.png)
 
 这里 `strVal` 的值就是 `com.sun.rowset.JdbcRowSetImpl`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image9.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image9.png)
 
 注意这里有个关键细节：**返回值里 `cache` 是硬编码的 `true`**：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image10.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image10.png)
 
 所以会进入第二个缓存的写入逻辑，把 `com.sun.rowset.JdbcRowSetImpl` 存入 `mappings` 缓存：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image11.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image11.png)
 
 到这里，第一阶段完成，缓存已经预热好了。
 
@@ -169,47 +169,47 @@ if (clazz != null) {
 
 开始读取字段 `b` 的内容：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image12.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image12.png)
 
 读取到 `typeName = com.sun.rowset.JdbcRowSetImpl`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image13.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image13.png)
 
 进入 `checkAutoType` 检测函数：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image14.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image14.png)
 
 函数开头有几个固定的快速检测（hash 校验），`com.sun.rowset.JdbcRowSetImpl` 不会在这里触发：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image15.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image15.png)
 
 再往后走，这里本来会触发对 `com.sun` 的黑白名单检测：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image16.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image16.png)
 
 **但是！** 在进到黑名单检测之前，有一步从缓存里取值的操作：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image17.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image17.png)
 
 由于第一阶段已经把 `com.sun.rowset.JdbcRowSetImpl` 存入了缓存，这里直接命中，返回了缓存中的 class：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image18.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image18.png)
 
 此时 `class` 的值已经是 `com.sun.rowset.JdbcRowSetImpl`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image19.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image19.png)
 
 `class` 不为空，所以不会进入黑白名单的检测分支：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image20.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image20.png)
 
 条件不成立，直接返回 `class`，值为 `com.sun.rowset.JdbcRowSetImpl`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image21.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image21.png)
 
 退出 `checkAutoType` 检测，`class` 依然是 `com.sun.rowset.JdbcRowSetImpl`，成功绕过了检测机制：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/47_image22.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/47_image22.png)
 
 接下来就是常规流程了：通过反射调用 `setter` 方法，触发 `dataSourceName` 赋值，连接 RMI 服务端，执行远程的恶意代码，最终完成 RCE。
 

@@ -1,6 +1,6 @@
 ---
 title: 代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析
-cover: https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image5.png
+cover: https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image5.png
 categories:
   - [代码审计, fastjson]
 tags:
@@ -64,7 +64,7 @@ FastJson 是阿里巴巴开源的高性能 JSON 解析库，广泛用于 Java �
 
 ### 第一步：建 Maven 项目
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image1.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image1.png)
 
 ### 第二步：添加 FastJson 依赖
 
@@ -82,11 +82,11 @@ FastJson 是阿里巴巴开源的高性能 JSON 解析库，广泛用于 Java �
 
 ### 第三步：下载依赖
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image2.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image2.png)
 
 依赖下载成功后可以看到：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image3.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image3.png)
 
 ---
 
@@ -98,7 +98,7 @@ FastJson 是阿里巴巴开源的高性能 JSON 解析库，广泛用于 Java �
 
 新建文件 `src/main/java/org/example/User.java`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image6.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image6.png)
 
 代码内容如下：
 
@@ -157,7 +157,7 @@ System.out.println(date);
 
 ### 4.3 运行结果
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image7.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image7.png)
 
 可以看到：
 - `@type` 指向的是我们自己创建的类文件
@@ -183,7 +183,7 @@ User user = JSON.parseObject(test, User.class);
 
 运行结果就不一样了：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image8.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image8.png)
 
 `JSON.parseObject(test, User.class)` 只触发了 setter，没有触发任何 getter。
 
@@ -237,7 +237,7 @@ public class Main {
 java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C "calc" -A "172.16.250.1"
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image4.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image4.png)
 
 ### 6.4 修改 Payload 地址
 
@@ -253,7 +253,7 @@ java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C "calc" -A "172.16.250.1
 
 ### 6.5 成功弹出计算器
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image5.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image5.png)
 
 **PoC 验证成功！**
 
@@ -267,31 +267,31 @@ java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C "calc" -A "172.16.250.1
 
 打断点进入函数：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image9.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image9.png)
 
 直接看到用了 `parse()`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image10.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image10.png)
 
 所以 `JSON.parse(payload)` 同样能触发漏洞，不一定要用 `parseObject`。
 
 示例：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195228667.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260324195228667.png)
 
 ### 7.2 @type 字段的识别
 
 进入 `com/alibaba/fastjson/parser/DefaultJSONParser.java`，发现一个判断语句，判断是否有 `@type` 的值：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image12.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image12.png)
 
 判断成功后进入处理逻辑：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image13.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image13.png)
 
 `com.sun.rowset.JdbcRowSetImpl` 被提取出来赋值给了 `typeName`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image14.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image14.png)
 
 ### 7.3 任意类加载：TypeUtils.loadClass
 
@@ -303,7 +303,7 @@ TypeUtils.loadClass(typeName, config.getDefaultClassLoader());
 
 进去看看，一路的 if 语句都没有成立，最后停到了这里：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image15.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image15.png)
 
 ```
 className: "com.sun.rowset.JdbcRowSetImpl"  ← @type 的值
@@ -316,7 +316,7 @@ clazz:     "class com.sun.rowset.JdbcRowSetImpl"  ← 字符串成功变成 Clas
 
 继续往下执行，发现下面有一个 Deserializer，对象就是 `@type` 指定的 `com.sun.rowset.JdbcRowSetImpl`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image16.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image16.png)
 
 ### 7.5 逐步跟踪 setter 调用
 
@@ -329,29 +329,29 @@ clazz:     "class com.sun.rowset.JdbcRowSetImpl"  ← 字符串成功变成 Clas
 
 > 搜索 `setDataSourceName` / `getDataSourceName` 直接搜索搜不到函数，只能找到接口和定义。要找 `setAutoCommit` / `getAutoCommit`，需要用 **双击 Shift** 搜索类名 `JdbcRowSetImpl`，定位到 `JdbcRowSetImpl.class` 后再找对应方法。
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195304383.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260324195304383.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195318140.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260324195318140.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195333100.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260324195333100.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260324195339115.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260324195339115.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image21.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image21.png)
 
 ### 7.6 setDataSourceName 执行过程
 
 再跑一遍调试，进入反序列化函数后，直接跳到下一个断点，到达了 `setDataSourceName`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image22.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image22.png)
 
 `setDataSourceName` 被调用，传入 RMI 地址 `rmi://172.16.250.1:1099/4in98t`，但此时 `dataSource` 为空，进入 else 判断：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image23.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image23.png)
 
 `getDataSourceName` 被调用，但 `dataSource` 为空：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image24.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image24.png)
 
 父类 `setDataSourceName` 执行 `dataSource = name`，把 RMI 地址真正存进去。
 
@@ -361,7 +361,7 @@ clazz:     "class com.sun.rowset.JdbcRowSetImpl"  ← 字符串成功变成 Clas
 method.invoke(object, value);
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image25.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image25.png)
 
 **它做的事：**
 
@@ -383,23 +383,23 @@ object.setAutoCommit(true);
 
 继续：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image26.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image26.png)
 
 进入 `setAutoCommit`，`conn` 为 `null`，走 else 分支：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image27.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image27.png)
 
 执行 `this.conn = this.connect()`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image28.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image28.png)
 
 进入 `connect()`，从 `getDataSourceName` 取值：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image29.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image29.png)
 
 `getDataSourceName` 再次被调用，这次返回了 RMI 地址，不为空，正常执行 try 里面的内容：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fastjson_image30.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fastjson_image30.png)
 
 里面执行了 `lookup()`，就是 **JNDI lookup**，参数就是 RMI 地址。
 

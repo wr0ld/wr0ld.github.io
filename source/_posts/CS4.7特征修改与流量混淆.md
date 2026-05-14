@@ -1,6 +1,6 @@
 ---
 title: 工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆
-cover: 'https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image22.png'
+cover: 'https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image22.png'
 categories:
   - 安全工具
   - 工具魔改
@@ -50,7 +50,7 @@ keytool.exe -list -v -keystore cobaltstrike.store
 
 原本的证书信息长这样，特征很明显：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image1.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image1.png)
 
 ### 生成自定义证书
 
@@ -75,7 +75,7 @@ keytool -genkey -alias cobaltstrike -keyalg RSA -keysize 2048 \
 
 生成完之后确认一下新证书信息：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image2.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image2.png)
 
 ### 修改启动脚本密码
 
@@ -98,7 +98,7 @@ keytool -genkey -alias cobaltstrike -keyalg RSA -keysize 2048 \
 
 客户端连接时会弹出证书指纹确认框：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image3.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image3.png)
 
 这个指纹就是刚才生成证书时看到的 SHA256 值，完全一致，说明服务端用的就是自定义证书，默认的 CS 证书特征（`CN=Major Cobalt Strike`）已经没了。
 
@@ -203,25 +203,25 @@ process-inject {
 
 用 Wireshark 选择对应网卡抓包，过滤器输入 `http`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image4.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image4.png)
 
 上线后查看流量包：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image5.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image5.png)
 
 **原版默认流量（特征明显）：**
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image6.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image6.png)
 
 **修改后的流量：**
 
 响应包：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image7.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image7.png)
 
 请求包：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image8.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image8.png)
 
 可以看到流量完全伪装成了亚马逊购物请求，URI、Host 头、响应头都模拟了亚马逊，beacon 元数据藏在 Cookie 里，UA 也换成了 Chrome/120。
 
@@ -245,7 +245,7 @@ process-inject {
 
 客户端连接时端口也要保持一致：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image9.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image9.png)
 
 ### 关于 CDN 隐匿
 
@@ -261,25 +261,25 @@ process-inject {
 
 用 Java 1.8，把原 jar 作为依赖导入：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image10.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image10.png)
 
 添加模块依赖：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image11.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image11.png)
 
 修改文件保持在 src 目录下：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image12.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image12.png)
 
 添加工件（Artifact）：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image13.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image13.png)
 
 ### 编译运行
 
 重新构建项目、构建工件后直接运行会报错：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image14.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image14.png)
 
 需要添加启动参数：
 
@@ -287,17 +287,17 @@ process-inject {
 -XX:ParallelGCThreads=4 -XX:+AggressiveHeap -XX:+UseParallelGC
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image15.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image15.png)
 
 然后会出现授权校验失败的问题：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image16.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image16.png)
 
 这里是因为原软件需要授权，破解过程就不记了，直接用现成的破解版跳过这步。
 
 正常启动后的界面：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image17.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image17.png)
 
 ### 个性化修改路径
 
@@ -357,7 +357,7 @@ translation.only=N
 
 中文界面配置生效后：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image18.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image18.png)
 
 ---
 
@@ -406,33 +406,33 @@ javac -encoding UTF-8 -classpath cobaltstrike.jar CrackSleeve.java
 java -classpath "cobaltstrike.jar;./" CrackSleeve decode
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image19.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image19.png)
 
 ### 用 IDA 修改异或密钥
 
 以 64 位为例，打开解密后的 `beacon.x64.dll`，按 `Alt+B` 搜索 `xor 0x2e`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image20.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image20.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image21.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image21.png)
 
 双击进去：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image22.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image22.png)
 
 F5 反汇编查看：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image23.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image23.png)
 
 通过 Edit → Patch program → Change byte，把 `2E` 改为自定义的值：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image24.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image24.png)
 
 ### 同步修改 Java 源码
 
 对应修改 `beacon/BeaconPayload.java`，把原本的 `46`（0x2e 的十进制）换成修改后的十进制值：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image25.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image25.png)
 
 ### 重新打包
 
@@ -442,9 +442,9 @@ java -classpath "cobaltstrike.jar;./" CrackSleeve encode
 
 打包编译完成后替换服务端的 jar 包，测试可以正常生成和连接：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image26.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image26.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image27.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image27.png)
 
 ---
 
@@ -463,13 +463,13 @@ https://github.com/Chainski/AES-Encoder
 
 生成 payload：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image28.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image28.png)
 
 效果确实很明显，混淆之后看不出原始代码。
 
 但是测试发现——**经过 CS 加密的 payload 跑不起来**，混淆原项目单独运行是没问题的，只要经过 CS 那层加密就不行了：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image29.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image29.png)
 
 尝试了很多方法都没解决，这条路先放弃了，后续可以换其他的加密脚本再试试。
 

@@ -49,7 +49,7 @@ date: 2026-03-16 12:00:00
 nmap -sn 192.168.168.0/24
 ```
 
-![nmap主机发现](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image1.png)
+![nmap主机发现](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image1.png)
 
 ### 2. 端口与服务扫描
 
@@ -59,13 +59,13 @@ nmap -sn 192.168.168.0/24
 nmap -A -p- 192.168.168.170
 ```
 
-![端口扫描结果](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image2.png)
+![端口扫描结果](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image2.png)
 
 ### 3. CMS 识别
 
 cms是
 
-![CMS识别](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image3.png)
+![CMS识别](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image3.png)
 
 > 💡 **知识点**：识别 CMS 类型是渗透测试的关键一步，常用方法包括查看页面源码、响应头的 `X-Generator` 字段、特定路径（如 `/wp-login.php`、`/user/login`）等。Drupal 的典型特征是 `/user/login` 登录页和 `CHANGELOG.txt` 文件。
 
@@ -77,7 +77,7 @@ dirsearch -u http://192.168.168.170/ --exclude-status=404,403
 
 不显示404、403状态码，过滤无效结果。
 
-![目录枚举结果](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image4.png)
+![目录枚举结果](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image4.png)
 
 ### 5. Drupal 版本探测
 
@@ -87,7 +87,7 @@ droopescan scan drupal -u http://192.168.168.170（版本问题没装成功）
 
 找了一下，有点提示。
 
-![droopescan结果](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image5.png)
+![droopescan结果](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image5.png)
 
 > 💡 **知识点**：`droopescan` 是专门针对 Drupal、WordPress 等 CMS 的扫描工具，可以识别插件版本、主题、用户名等信息。但此处版本信息对直接利用帮助有限。
 
@@ -101,11 +101,11 @@ droopescan scan drupal -u http://192.168.168.170（版本问题没装成功）
 
 🔗 [https://github.com/Dc7User/staffdb](https://github.com/Dc7User/staffdb)
 
-![GitHub搜索](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image6.png)
+![GitHub搜索](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image6.png)
 
 找对了！
 
-![仓库内容](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image7.png)
+![仓库内容](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image7.png)
 
 **配置文件泄露信息**：
 
@@ -118,7 +118,7 @@ $dbname = "Staff";
 
 之前爬目录看到登录界面：
 
-![登录界面](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image8.png)
+![登录界面](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image8.png)
 
 但是密码不对（数据库凭据不能直接用于 Web 登录）。
 
@@ -137,7 +137,7 @@ ssh dc7user@192.168.168.170
 
 **登录成功！**
 
-![SSH登录成功](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image9.png)
+![SSH登录成功](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image9.png)
 
 ---
 
@@ -151,7 +151,7 @@ ssh dc7user@192.168.168.170
 find / -perm -u=s 2>/dev/null
 ```
 
-![SUID查找](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image10.png)
+![SUID查找](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image10.png)
 
 **查看 sudo 权限：**
 
@@ -159,7 +159,7 @@ find / -perm -u=s 2>/dev/null
 sudo -l
 ```
 
-![sudo权限](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image11.png)
+![sudo权限](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image11.png)
 
 该用户无权限。
 
@@ -169,11 +169,11 @@ sudo -l
 
 目录下有两个文件：
 
-![目录文件](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image12.png)
+![目录文件](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image12.png)
 
 全是邮件：
 
-![邮件内容](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image13.png)
+![邮件内容](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image13.png)
 
 > 💡 **关键线索**：邮件中发现 root 通过 cron 定时执行脚本。
 
@@ -189,7 +189,7 @@ Subject: Cron <root@dc-7> /opt/scripts/backups.sh
 
 查看脚本权限：
 
-![文件权限](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image14.png)
+![文件权限](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image14.png)
 
 | 权限 | 用户 |
 |------|------|
@@ -201,7 +201,7 @@ Subject: Cron <root@dc-7> /opt/scripts/backups.sh
 
 查看脚本内容：
 
-![脚本内容](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image15.png)
+![脚本内容](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image15.png)
 
 ```bash
 #!/bin/bash
@@ -239,7 +239,7 @@ nano drush
 chmod +s /bin/bash
 ```
 
-![创建恶意drush](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image16.png)
+![创建恶意drush](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image16.png)
 
 **② 赋予执行权限：**
 
@@ -306,11 +306,11 @@ $databases['default']['default'] = array (
 /usr/local/bin/drush user-password admin --password="password123" --root=/var/www/html
 ```
 
-![修改admin密码](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image17.png)
+![修改admin密码](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image17.png)
 
 **登录后台：**
 
-![Drupal后台](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image18.png)
+![Drupal后台](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image18.png)
 
 **可以看看数据库（虽然没用）：**
 
@@ -323,7 +323,7 @@ DESC users_field_data;
 SELECT uid, name, mail, pass FROM users_field_data;
 ```
 
-![数据库查询](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image19.png)
+![数据库查询](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image19.png)
 
 试过了，哈希在网上解不出来。
 
@@ -331,7 +331,7 @@ SELECT uid, name, mail, pass FROM users_field_data;
 
 返回看 Web 后台：
 
-![Web后台](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image20.png)
+![Web后台](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image20.png)
 
 随便乱插，都被 HTML 实体编码了。
 
@@ -341,17 +341,17 @@ drush status
 
 查看了下版本：
 
-![drush status](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image21.png)
+![drush status](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image21.png)
 
 没有找到对应版本的利用脚本：
 
-![漏洞脚本查找](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image22.png)
+![漏洞脚本查找](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image22.png)
 
 **最后找到利用 PHP Filter 模块！**
 
 但 Drupal 8 默认不启用 PHP 代码解析功能：
 
-![PHP Filter说明](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image23.png)
+![PHP Filter说明](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image23.png)
 
 手动安装 PHP Filter 模块：
 
@@ -359,21 +359,21 @@ drush status
 https://ftp.drupal.org/files/projects/php-8.x-1.0.tar.gz
 ```
 
-![安装PHP模块](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image24.png)
+![安装PHP模块](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image24.png)
 
 添加成功，点击启用。
 
 **`Content → Add content → Basic page`**
 
-![新建页面](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image25.png)
+![新建页面](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image25.png)
 
 要把代码改成 PHP 解析模式：
 
-![设置PHP解析](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image26.png)
+![设置PHP解析](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image26.png)
 
 可以正常执行，然后写木马连接：
 
-![RCE测试](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image27.png)
+![RCE测试](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image27.png)
 
 **写一句话木马：**
 
@@ -404,7 +404,7 @@ nc -lvnp 5566
 
 反弹到 Kali！
 
-![反弹Shell成功](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-7_image28.png)
+![反弹Shell成功](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-7_image28.png)
 
 **升级为交互式终端：**
 

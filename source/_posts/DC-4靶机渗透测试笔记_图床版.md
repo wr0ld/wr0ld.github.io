@@ -30,7 +30,7 @@ date: 2026-03-13 12:00:00
 ifconfig
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image1.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image1.png)
 
 本机 IP：`192.168.168.128`
 
@@ -38,7 +38,7 @@ ifconfig
 nmap -sn 192.168.168.0/24
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image2.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image2.png)
 
 **扫描结果**
 
@@ -54,7 +54,7 @@ nmap -sn 192.168.168.0/24
 nmap -p- -A 192.168.168.130
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image3.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image3.png)
 
 开放了 22 和 80，80 是 Web 服务。
 
@@ -66,11 +66,11 @@ nmap -p- -A 192.168.168.130
 
 访问目标网站，什么都没有：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image4.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image4.png)
 
 页面源码也没什么：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image5.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image5.png)
 
 ### 2.2 目录扫描
 
@@ -80,17 +80,17 @@ dirsearch -u http://192.168.168.130/
 
 好像也没什么：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image6.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image6.png)
 
 插件也什么都没有：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image7.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image7.png)
 
 ### 2.3 检查 SSH 和 Nginx 版本漏洞
 
 对了 SSH 和 Nginx 有没有版本漏洞？
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image8.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image8.png)
 
 感觉都不行，那只能爆破了。
 
@@ -102,13 +102,13 @@ dirsearch -u http://192.168.168.130/
 
 bp 爆破用的 fuzzDicts 字典里的：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image9.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image9.png)
 
 跑出来了：`admin / happy`
 
 登录：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image10.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image10.png)
 
 ### 3.2 Hydra 爆破（更快）
 
@@ -132,7 +132,7 @@ hydra -l admin -P rockyou.txt 192.168.168.169 http-post-form "/login.php:usernam
 - 关键点：如果登录后页面出现了 logout 这个词，说明登录成功了！
 - -F: 只要试对一个密码，就赶紧停下来。
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image15.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image15.png)
 
 很快，半分钟不要就跑出来了。
 
@@ -146,25 +146,25 @@ hydra -l admin -P rockyou.txt 192.168.168.169 http-post-form "/login.php:usernam
 
 点击命令里面：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image11.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image11.png)
 
 List Files：You have selected: ls -l
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image12.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image12.png)
 
 Disk Usage：You have selected: du -h
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image13.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image13.png)
 
 Disk Free：You have selected: df -h
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image14.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image14.png)
 
 ### 4.2 抓包分析
 
 bp 抓包：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image16.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image16.png)
 
 `radio=whoami` 这就是个命令执行的地方。
 
@@ -194,7 +194,7 @@ nc -lvnp 5678
 
 成功监听到：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image17.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image17.png)
 
 ---
 
@@ -202,13 +202,13 @@ nc -lvnp 5678
 
 ### 5.1 查看基础信息
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image18.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image18.png)
 
 ### 5.2 sudo 权限查看
 
 sudo -l 提示无 tty：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image19.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image19.png)
 
 ```bash
 python -c 'import pty;pty.spawn("/bin/bash")'
@@ -216,7 +216,7 @@ python -c 'import pty;pty.spawn("/bin/bash")'
 
 再次输入 sudo -l：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image20.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image20.png)
 
 需要密码，happy 密码错误（正确才奇怪，都不是同一个东西）。
 
@@ -226,7 +226,7 @@ python -c 'import pty;pty.spawn("/bin/bash")'
 find / -perm -u=s 2>/dev/null
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image21.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image21.png)
 
 最后有一个 sh，得注意一下：`/home/jim/test.sh`
 
@@ -238,11 +238,11 @@ cat /etc/passwd
 
 找到点信息，exim4 有很多已知提权漏洞：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image22.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image22.png)
 
 查看到有三个用户：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image23.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image23.png)
 
 charles、jim、sam
 
@@ -250,13 +250,13 @@ charles、jim、sam
 
 分别看看里面有什么：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image24.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image24.png)
 
 ```bash
 cat test.sh
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image25.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image25.png)
 
 "学 bash 吧，他们说。" "bash 很好用，他们说。" "但我宁愿用头撞墙。"
 
@@ -264,17 +264,17 @@ cat test.sh
 
 mbox 没权限：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image26.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image26.png)
 
 有个密码备份：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image27.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image27.png)
 
 ```bash
 cat old-passwords.bak
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image28.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image28.png)
 
 一个密码本，内容不是很多，直接鼠标复制。
 
@@ -292,7 +292,7 @@ echo -e "jim\ncharles\nsammy" > users.txt
 - `>` 为覆盖
 - `>>` 为追加
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image30.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image30.png)
 
 ### 6.2 Hydra 爆破 SSH
 
@@ -315,7 +315,7 @@ hydra -L users.txt -P ./passwd.txt 192.168.168.169 ssh
 
 爆破出一个：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image31.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image31.png)
 
 `login: jim   password: jibril04`
 
@@ -329,7 +329,7 @@ hydra -L users.txt -P ./passwd.txt 192.168.168.169 ssh
 ssh jim@192.168.168.169
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image32.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image32.png)
 
 连接上了，没有 sudo 可用。
 
@@ -337,23 +337,23 @@ ssh jim@192.168.168.169
 
 看一下之前打不开的 mbox：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image33.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image33.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image34.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image34.png)
 
 去邮箱里找，之前找到过 exim4 服务：`Debian-exim:x:108:112::/var/spool/exim4:/bin/false`
 
 /var/spool/exim4 无权限进不去：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image35.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image35.png)
 
 计划任务也没权限看：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image36.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image36.png)
 
 mail 里面有个 www-data 没权限看，只能看 jim：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image37.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image37.png)
 
 在邮件里找到密码：`Password is: ^xHhA&hvim0y`
 
@@ -371,7 +371,7 @@ sudo -l
 
 找到 teehee。
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image38.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image38.png)
 
 ---
 
@@ -392,11 +392,11 @@ su hack
 whoami  # root
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image39.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image39.png)
 
 成功拿到 flag：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image40.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image40.png)
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: 代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload
 cover: >-
-  https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image7.png
+  https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image7.png
 categories:
   - [代码审计, cc]
 tags:
@@ -103,7 +103,7 @@ public class Main {
 
 是可以成功的。
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image1.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image1.png)
 
 ---
 
@@ -162,7 +162,7 @@ JNDI 注入相当于反序列化攻击的**升级版**，有两种利用方式�
 </dependencies>
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image2.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image2.png)
 
 ---
 
@@ -172,7 +172,7 @@ JNDI 注入相当于反序列化攻击的**升级版**，有两种利用方式�
 
 `InvokerTransformer.transform()` 可以，它本质就是**反射调用任意方法**：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image3.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image3.png)
 
 把它配置成：
 
@@ -184,7 +184,7 @@ JNDI 注入相当于反序列化攻击的**升级版**，有两种利用方式�
 
 并且这些参数都是**可控的**：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image4.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image4.png)
 
 因此现在可以构造：
 
@@ -201,7 +201,7 @@ public static void main(String[] args) {
 }
 ```
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image5.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image5.png)
 
 成功执行。
 
@@ -225,7 +225,7 @@ public static void main(String[] args) {
 
 回答问题二：谁来调用 `InvokerTransformer.transform(Runtime实例)`？
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image6.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image6.png)
 
 **`ChainedTransformer.transform()`**——它把每个 `Transformer` 串起来，上一个的输出自动传给下一个。这刚好弥补了需要多次调用 `InvokerTransformer.transform()` 才能实现完整反序列化链的问题。
 
@@ -259,7 +259,7 @@ chain.transform(null); // 入参是 null，因为第一步 ConstantTransformer �
 
 效果：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image7.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image7.png)
 
 ---
 
@@ -269,29 +269,29 @@ chain.transform(null); // 入参是 null，因为第一步 ConstantTransformer �
 
 **`TransformedMap`**——当 Map 的值被修改时，会自动调用 `valueTransformer.transform()`。不过它是 protected 类型，不能直接使用，需要找到调用这个方法的入口。
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image8.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image8.png)
 
 另外还有一个要求：`valueTransformer` 是**可控的**，可控的话只要传入 `chain` 就行。
 
 查找可以传入可控 `valueTransformer` 的方法：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image9.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image9.png)
 
 不过这个也是 protected，不能直接调用，需要找公共的入口方法。
 
 - **第一步**：找公开调用 `checkSetValue` 的方法——用 Alt+F7 或右键查找用法，找到 `setValue`：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image10.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image10.png)
 
 - **第二步**：找公开调用 `TransformedMap` 的方法，找到两个，使用第一个（第二个会使链断掉）：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image11.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image11.png)
 
 使用 `TransformedMap.decorate(map, null, chain)` 就能正常传入我们的链条了：
 
 运行时提示
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image12.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image12.png)
 
 `map` 值不能为空，构造一个：
 
@@ -306,7 +306,7 @@ Map transformedMap = TransformedMap.decorate(innerMap, null, chain);
 
 还差最开始的触发方法，它在两个类的下面：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image13.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image13.png)
 
 ---
 
@@ -314,11 +314,11 @@ Map transformedMap = TransformedMap.decorate(innerMap, null, chain);
 
 右键查找谁调用了 `setValue`，结果有很多：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image14.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image14.png)
 
 最终找到的是 `AnnotationInvocationHandler.class` 里的 `readObject` 方法——这就是我们想要的终点，`readObject` 会被反序列化自动调用，`setValue` 在其 `for` 循环里：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image15.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image15.png)
 
 但是有判断条件需要满足：
 
@@ -344,9 +344,9 @@ if (!var7.isInstance(var8) && !(var8 instanceof ExceptionProxy)) {
 
 先找到 `AnnotationInvocationHandler` 的构造方法，看它需要什么参数：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image17.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image17.png)
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image18.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image18.png)
 
 两个参数：
 
@@ -355,7 +355,7 @@ if (!var7.isInstance(var8) && !(var8 instanceof ExceptionProxy)) {
 
 但是这个类**不能直接引用**：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image19.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image19.png)
 
 所以利用反射调用这个类：
 
@@ -418,7 +418,7 @@ public class test {
 
 效果：
 
-![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image20.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image20.png)
 
 ---
 

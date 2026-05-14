@@ -52,13 +52,13 @@ date: 2026-03-07 12:00:00
 
 
 * **Step 1**：打开登录页面，输入任意账号密码。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302204857300.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302204857300.png)
 * **Step 2**：用 Burp Suite 抓包，发送至 Intruder，标记爆破位置。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302204905757.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302204905757.png)
 * **Step 3**：按响应长度排序，找出不同长度的条目即为正确密码。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302204912741.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302204912741.png)
 * **Step 4**：使用爆破得到的账号密码成功登录。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302204919934.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302204919934.png)
 
 ---
 
@@ -71,9 +71,9 @@ date: 2026-03-07 12:00:00
 ### 🚀 操作过程
 
 * **Step 1**：正常输入 IP，观察 ping 回显。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302204944006.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302204944006.png)
 * **Step 2**：利用管道符注入命令：
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302204951997.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302204951997.png)
 > `127.0.0.1 | whoami`
 > `127.0.0.1 | ipconfig`
 
@@ -90,9 +90,9 @@ date: 2026-03-07 12:00:00
 ### 🚀 操作过程
 
 * **Step 1**：观察修改密码后的 URL，发现密码以明文参数传递。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205001485.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205001485.png)
 * **Step 2**：构造如下链接发送给受害者，受害者点击即改密：
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205011310.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205011310.png)
 > `?password_new=hacked&password_conf=hacked&Change=Change`
 
 
@@ -108,9 +108,9 @@ page 参数直接用于加载文件，无路径过滤，可利用 `../` 目录�
 ### 🚀 操作过程
 
 * **Step 1**：观察 URL 参数规律。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205025022.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205025022.png)
 * **Step 2**：构造目录穿越路径包含其他文件：
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205031158.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205031158.png)
 > `?page=../../../../../1.php`
 > *本地 1.php 内容*：`<?php phpinfo(); ?>`
 
@@ -127,9 +127,9 @@ page 参数直接用于加载文件，无路径过滤，可利用 `../` 目录�
 ### 🚀 操作过程
 
 * **Step 1**：上传 WebShell 文件（如 `shell.php`）。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205038063.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205038063.png)
 * **Step 2**：访问上传路径，使用工具连接 WebShell：
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205043198.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205043198.png)
 > `http://dvwa/hackable/uploads/shell.php`
 
 
@@ -151,10 +151,10 @@ User ID 输入框未过滤，直接拼接至 SQL 查询，可使用 SQLMap 自�
 ### 🚀 操作过程
 
 * **Step 1**：观察注入点。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205105128.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205105128.png)
 * **Step 2**：Burp 抓包保存，注入点标记 `*`，使用 SQLMap。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205135152.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205147065.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205135152.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205147065.png)
 > 📌 *注入成功后可使用 `--tables`、`--dump` 获取数据。*
 
 
@@ -170,10 +170,10 @@ User ID 输入框未过滤，直接拼接至 SQL 查询，可使用 SQLMap 自�
 ### 🚀 操作过程
 
 * **执行 SQLMap**：
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205218648.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205218648.png)
 > `python sqlmap.py -r D:\1.txt --batch --level=3`
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205300233.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205300233.png)
 
 ---
 
@@ -186,9 +186,9 @@ Cookie 中的 `dvwaSession` 每次点击仅自增 1，规律极简单，可枚�
 ### 🚀 操作过程
 
 * **Step 1**：用 HackBar 查看 Cookie 中 `dvwaSession` 参数。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205320955.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205320955.png)
 * **Step 2**：多次请求验证，每次严格 +1。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205328308.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205328308.png)
 
 ---
 
@@ -201,11 +201,11 @@ URL 参数 `default` 被直接插入 DOM，未做过滤，可注入任意 JavaSc
 ### 🚀 操作过程
 
 * **观察正常 URL**：
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205341971.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205341971.png)
 * **注入 Payload**：
 > `?default=<script>alert(1)</script>`
 
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205348683.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205348683.png)
 
 
 
@@ -221,11 +221,11 @@ URL 参数 `default` 被直接插入 DOM，未做过滤，可注入任意 JavaSc
 
 * **观察参数**：
 > `?name=111`
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205404204.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205404204.png)
 
 * **注入 Payload**：
 > `?name=<script>alert(1)</script>`
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205419566.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205419566.png)
 
 
 
@@ -240,11 +240,11 @@ URL 参数 `default` 被直接插入 DOM，未做过滤，可注入任意 JavaSc
 ### 🚀 操作过程
 
 * **Step 1**：在留言框中输入 XSS Payload 并提交。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205442396.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205457812.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205442396.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205457812.png)
 * **Step 2**：刷新页面验证每次访问均触发。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205507244.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205515959.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205507244.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205515959.png)
 ---
 
 ## 13. CSP Bypass --- 内容安全策略绕过
@@ -263,11 +263,11 @@ script-src 'self' https://pastebin.com hastebin.com cdn.jsdelivr.net unpkg.com d
 ### 🚀 操作过程
 
 * **Step 1**：在受信任域托管恶意 JS。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205525837.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205525837.png)
 * **Step 2**：注入外部脚本地址，CSP 允许执行。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205533351.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205533351.png)
 * **恶意脚本内容**：
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205546078.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205546078.png)
 
 ---
 
@@ -284,17 +284,17 @@ Token 由客户端 JS 生成（ROT13 + MD5），通过分析加密逻辑可为�
 ### 🚀 操作过程
 
 * **Step 1**：直接输入 `success`，发现 Token 无效。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205558054.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205558054.png)
 * **Step 2**：查看默认 Token，发现无论输入什么 Token 固定。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205604343.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205614518.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205604343.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205614518.png)
 * **Step 3**：分析加密逻辑，为 `success` 计算正确 Token：
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205621006.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205621006.png)
 > `success` → (ROT13) → `fhpprff` → (MD5) → `38581812b435834ebf84ebcc2c6424d6`
 
 
 * **Step 4**：用 Burp 修改 Token，成功通过验证。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205642679.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205642679.png)
 ---
 
 ## 15. Authorisation Bypass --- 越权访问
@@ -306,11 +306,11 @@ Token 由客户端 JS 生成（ROT13 + MD5），通过分析加密逻辑可为�
 ### 🚀 操作过程
 
 * **Step 1**：管理员登录，查看完整功能页面。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205658431.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205713239.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205658431.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205713239.png)
 * **Step 2**：切换普通用户，直接访问管理员页面 URL，成功越权：
 > `http://dvwa/vulnerabilities/authbypass/`
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205732887.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205732887.png)
 
 
 
@@ -325,18 +325,18 @@ Token 由客户端 JS 生成（ROT13 + MD5），通过分析加密逻辑可为�
 ### 🚀 操作过程
 
 * **Step 1**：观察示例 URL。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205741999.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205751087.png)
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205805560.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205741999.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205751087.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205805560.png)
 * **Step 2**：观察不同 id = 3 值的页面。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205815904.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205815904.png)
 * **Step 3**：查看源码发现 `redirect` 参数。
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205903298.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205903298.png)
 * **Step 4**：构造攻击，成功跳转至外部站点：
 > `?redirect=http://www.baidu.com` ✅
 > `?redirect=//baidu.com` ✅
 > `?redirect=baidu.com` ❌
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205928962.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205928962.png)
 
 ---
 
@@ -353,7 +353,7 @@ Low 级别使用 XOR 异或加密 Token，密钥硬编码在源码中，可轻�
 > 密钥：`$key = "wachtwoord"`
 
 ### 🚀 操作过程
-![](https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/20260302205943298.png)
+![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260302205943298.png)
 ---
 
 **END OF REPORT**
