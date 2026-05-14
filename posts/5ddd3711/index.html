@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-21T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.430Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.036Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="免杀">
 <meta property="article:tag" content="SQL注入">
@@ -67,7 +67,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8md">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbjad">
 
 
   
@@ -76,7 +76,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-21T12:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-21T12:00:00+08:00","description":"","headline":"工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/5ddd3711/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/5ddd3711/","keywords":"免杀, SQL注入, WAF绕过, 工具魔改","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260317180841876.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-21T12:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-03-21T12:00:00+08:00","description":"","headline":"工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/5ddd3711/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/5ddd3711/","keywords":"免杀, SQL注入, WAF绕过, 工具魔改","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180841876.png","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -148,7 +148,7 @@
 <h2 id="🔍-先看原版的”指纹”"><a href="#🔍-先看原版的”指纹”" class="headerlink" title="🔍 先看原版的”指纹”"></a>🔍 先看原版的”指纹”</h2><p>用小蓝鲨抓一下原版 sqlmap 的包，过滤条件：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http.request &amp;&amp; ip.dst == 127.0.0.1</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260317180204114.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180204114.png"></p>
 <p>一眼就能看到问题：</p>
 <ul>
 <li><code>User-Agent: sqlmap/1.9.10#pip (https://sqlmap.org)</code> —— 这不就是自报家门吗 🤦</li>
@@ -239,14 +239,14 @@
 
 <p>改完之后启动效果：</p>
 <p>可以正常运行</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/sqlmap_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/sqlmap_image1.png"></p>
 <p>Banner 已经变了，不再有 sqlmap 字样 ✅</p>
 <hr>
 <h3 id="第二步：补全请求头（lib-request-basic-py）"><a href="#第二步：补全请求头（lib-request-basic-py）" class="headerlink" title="第二步：补全请求头（lib/request/basic.py）"></a>第二步：补全请求头（<code>lib/request/basic.py</code>）</h3><p>在 <code>forgeHeaders()</code> 函数里加入正常浏览器的请求头，让流量看起来更像真实用户：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ===== 魔改 Header 开始 =====</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Accept&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Accept&quot;</span>] = <span class="string">&quot;text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Accept-Language&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Accept-Language&quot;</span>] = <span class="string">&quot;en-US,en;q=0.9&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Accept-Encoding&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Accept-Encoding&quot;</span>] = <span class="string">&quot;gzip, deflate, br&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Connection&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Connection&quot;</span>] = <span class="string">&quot;keep-alive&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Upgrade-Insecure-Requests&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers:</span><br><span class="line">    headers[<span class="string">&quot;Upgrade-Insecure-Requests&quot;</span>] = <span class="string">&quot;1&quot;</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&quot;Referer&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> headers <span class="keyword">and</span> conf.url:</span><br><span class="line">    headers[<span class="string">&quot;Referer&quot;</span>] = conf.url</span><br><span class="line"><span class="comment"># ===== 魔改 Header 结束 =====</span></span><br></pre></td></tr></table></figure>
 
 <p>用小蓝鲨抓包对比，魔改后的请求头：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260317180540816.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180540816.png"></p>
 <p>UA 已经变成 Chrome，各种请求头都补齐了，跟正常浏览器访问几乎一样 ✅</p>
 <hr>
 <h3 id="第三步：Payload-混淆（lib-core-agent-py）"><a href="#第三步：Payload-混淆（lib-core-agent-py）" class="headerlink" title="第三步：Payload 混淆（lib/core/agent.py）"></a>第三步：Payload 混淆（<code>lib/core/agent.py</code>）</h3><p>这是最有意思的部分，三个函数组合出击。</p>
@@ -267,7 +267,7 @@
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> retVal:</span><br><span class="line">    retVal = retVal.replace(BOUNDARY_BACKSLASH_MARKER, <span class="string">&#x27;\\&#x27;</span>)</span><br><span class="line">    <span class="comment"># ===== payload 混淆 =====</span></span><br><span class="line">    retVal = <span class="variable language_">self</span>.random_case_keywords(retVal)</span><br><span class="line">    <span class="keyword">if</span> random.random() &lt; <span class="number">0.5</span>:<span class="comment">#因为可能会让部分场景的payload失效，所以加入随机触发</span></span><br><span class="line">        retVal = <span class="variable language_">self</span>.obfuscate_space(retVal)</span><br><span class="line">    retVal = <span class="variable language_">self</span>.random_padding(retVal)</span><br></pre></td></tr></table></figure>
 
 <p>混淆后的 payload 效果：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260317180841876.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180841876.png"></p>
 <p>随机大小写 + 空格替换+末尾注释都生效了 ✅</p>
 <hr>
 <h3 id="第四步：请求延迟（lib-request-connect-py）"><a href="#第四步：请求延迟（lib-request-connect-py）" class="headerlink" title="第四步：请求延迟（lib/request/connect.py）"></a>第四步：请求延迟（<code>lib/request/connect.py</code>）</h3><p>在 <code>queryPage()</code> 函数里加入随机延迟，模拟真实用户的请求间隔：</p>
@@ -867,7 +867,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8mg" defer></script>
+<script src="/js/main.js?v=mp5jbjag" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1131,7 +1131,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8mg"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbjag"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

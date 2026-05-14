@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-05-14T09:30:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:03:45.635Z">
+<meta property="article:modified_time" content="2026-05-14T13:38:26.793Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="Spring">
@@ -69,7 +69,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8i9">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbj4i">
 
 
   
@@ -78,7 +78,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-14T17:30:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-05-14T17:30:00+08:00","description":"","headline":"一次被报错\"带着走\"的文件上传测试","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/d4e5f6g7/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/d4e5f6g7/","keywords":"Java, Spring, 渗透测试, 文件上传, JSP, WebShell","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514175024077.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-14T17:30:00+08:00","dateModified":"2026-05-14T21:38:26+08:00","datePublished":"2026-05-14T17:30:00+08:00","description":"","headline":"一次被报错\"带着走\"的文件上传测试","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/d4e5f6g7/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/d4e5f6g7/","keywords":"Java, Spring, 渗透测试, 文件上传, JSP, WebShell","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514175024077.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -131,20 +131,20 @@
 <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这次是在某站发现了一个文件上传接口，跟着一步一步的报错提示走，虽然最终没有 GetShell，但整个过程还是挺有意思的——后端的报错信息把自己的逻辑几乎都”说出来”了。记录一下。(已修复)</p>
 <hr>
 <h2 id="目录扫描，发现上传接口"><a href="#目录扫描，发现上传接口" class="headerlink" title="目录扫描，发现上传接口"></a>目录扫描，发现上传接口</h2><p>用 kali 的 dirsearch 扫了一下目录接口。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_iay0.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_iay0.png"></p>
 <p>找到一个 <code>upload/</code> 路径，返回状态码 <strong>200</strong>，用浏览器访问一下：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://xxx/upload/</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_uukh.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_uukh.png"></p>
 <p>页面显示”网站页面请求异常”，但从网页图标判断是 <strong>Spring 框架</strong>，抓包看看啥情况。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_rdli.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_rdli.png"></p>
 <p>返回 200 OK，但响应内容只有一个异常页。</p>
 <hr>
 <h2 id="POST请求，跟着报错走"><a href="#POST请求，跟着报错走" class="headerlink" title="POST请求，跟着报错走"></a>POST请求，跟着报错走</h2><p>既然是文件上传接口，自然要试试 POST 方法。</p>
 <h3 id="第一步：换成POST方法"><a href="#第一步：换成POST方法" class="headerlink" title="第一步：换成POST方法"></a>第一步：换成POST方法</h3><p>Burp 里右键直接”修改请求方法”改成 POST。</p>
-<p><img src="https://cdn.statically.io//gh/wr0ld/BlogImage@main/img/20260514_170043_xcdk.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_xcdk.png"></p>
 <p>意料之中，那个警告没了，但出现了新的报错：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_bto9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_bto9.png"></p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Current request is not a multipart request&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p>翻译一下：**”当前的请求不是一个多部分请求（文件上传请求）”**。</p>
@@ -153,7 +153,7 @@
 </blockquote>
 <hr>
 <h3 id="第二步：补上multipart格式"><a href="#第二步：补上multipart格式" class="headerlink" title="第二步：补上multipart格式"></a>第二步：补上multipart格式</h3><p>Burp 里右键”修改body编码”→ 选 Multipart，直接转换格式。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_w0qq.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_w0qq.png"></p>
 <p>但是直接转换好像没有成功，那自己手动改吧：</p>
 <ol>
 <li>修改 <code>Content-Type</code> 头：</li>
@@ -166,7 +166,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">------WebKitFormBoundary7MA4YWxkTrZu0gW</span><br><span class="line">Content-Disposition: form-data; name=&quot;your_field_name&quot;</span><br><span class="line"></span><br><span class="line">your_value</span><br><span class="line">------WebKitFormBoundary7MA4YWxkTrZu0gW--</span><br></pre></td></tr></table></figure>
 
 <p>这次又有新提示了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage@main/img/20260514_170043_oqva.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_oqva.png"></p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Required request part &#x27;uploadFile&#x27; is not present&quot;</span></span><br></pre></td></tr></table></figure>
 
 <hr>
@@ -178,7 +178,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Disposition: form-data; name=&quot;uploadFile&quot;; filename=&quot;test.txt&quot;</span><br></pre></td></tr></table></figure>
 
 <p>这次又有提示了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_gmjd.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_gmjd.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">非法文件上传</span><br></pre></td></tr></table></figure>
 
 <p>这说明后端对上传的文件做了检测，开始尝试绕过。(其实这个只是一个简单的文件名后缀检测 , 绕了一圈才发现)</p>
@@ -187,7 +187,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: image/jpeg</span><br></pre></td></tr></table></figure>
 
 <p>这次提示变了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage@main/img/20260514_170043_vri5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_vri5.png"></p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="string">&quot;RESTful请求异常&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p>被拒绝了，暂时不清楚原因。</p>
@@ -198,15 +198,15 @@
 <p><strong>知识点：</strong> 文件的”魔术字节”（Magic Bytes）是文件开头的几个特定字节，用于标识文件类型，与文件后缀名无关。比如 GIF 文件以 <code>47 49 46 38</code>（即 <code>GIF8</code>）开头，JPEG 以 <code>FF D8 FF</code> 开头。一些安全意识不足的上传接口会同时校验 Content-Type 和文件头，但这两者都是客户端可控的。</p>
 </blockquote>
 <p>出现了新的报错：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_l5qi.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_l5qi.png"></p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Unexpected block type 115!&quot;</span></span><br></pre></td></tr></table></figure>
 
 <p>问了一下 AI，解释说：这不是普通的 Web 逻辑报错，而是<strong>后端解析引擎在处理文件二进制流时崩溃了</strong>。这意味着后端确实在试图”读取”并”解析”上传文件的内容，而不仅仅是检查后缀名。</p>
 <p>按照 AI 的方案，换成标准的 GIF 二进制头内容，<strong>上传成功了</strong>，而且响应里直接给出了<strong>上传路径</strong>。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_cj1z.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_cj1z.png"></p>
 <hr>
 <h3 id="后缀名黑名单探测"><a href="#后缀名黑名单探测" class="headerlink" title="后缀名黑名单探测"></a>后缀名黑名单探测</h3><p>后来经过自己反复测试，发现这个接口其实只是做了<strong>后缀名黑名单</strong>检测，并没有真正校验文件内容（之前那个”解析崩溃”的报错是因为文件内容格式不对触发了其他逻辑）。只要换成合法后缀，随便传都能成功。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage@main/img/20260514_170043_t2a0.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_t2a0.png"></p>
 <p>测试结果如下：</p>
 <table>
 <thead>
@@ -243,14 +243,14 @@
 <p>分号截断、空格、双后缀、<code>url::$DATA</code> 编码等常见绕过方式全部测试过，均无效。</p>
 <hr>
 <h2 id="尝试GetShell"><a href="#尝试GetShell" class="headerlink" title="尝试GetShell"></a>尝试GetShell</h2><h3 id="上传JSP-Webshell"><a href="#上传JSP-Webshell" class="headerlink" title="上传JSP Webshell"></a>上传JSP Webshell</h3><p>既然 <code>.jsp</code> 能上传，而且知道路径，先试试上传个空 jsp 确认一下。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage@main/img/20260514_170043_o0wb.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_o0wb.png"></p>
 <p>上传成功，路径也有了。那就写一个 JSP 一句话木马：</p>
 <figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;%Runtime.getRuntime().exec(request.getParameter(<span class="string">&quot;c&quot;</span>));%&gt;</span><br></pre></td></tr></table></figure>
 
 <p>结果返回了 <strong>502 Bad Gateway</strong>，感觉像是被 WAF 或安全组件检测拦截了。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_7c8p.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_7c8p.png"></p>
 <p>先不管这个，去直接访问之前上传的那个 jsp 文件看看。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_w1d4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_w1d4.png"></p>
 <p>白高兴一场——<strong>浏览器下载记录直接告诉是下载，不是解析执行</strong>。</p>
 <hr>
 <h3 id="路径穿越尝试"><a href="#路径穿越尝试" class="headerlink" title="路径穿越尝试"></a>路径穿越尝试</h3><p>试了一下路径穿越：</p>
@@ -266,7 +266,7 @@
 <hr>
 <h3 id="为什么JSP不解析"><a href="#为什么JSP不解析" class="headerlink" title="为什么JSP不解析"></a>为什么JSP不解析</h3><p>既然能看到上传的 jsp 文件，直接访问试试，但全都是触发下载，没有任何解析。</p>
 <p>抓包也抓不到下载的包（可能是浏览器直接处理了），于是在 Repeater 里手动发了一个请求，看到响应头：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260514_170043_5evw.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260514_170043_5evw.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: application/octet-stream</span><br></pre></td></tr></table></figure>
 
 <p>这个类型是<strong>二进制流的通用类型</strong>，意思是”我不知道这是什么，你自己处理”。</p>
@@ -753,7 +753,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8ic" defer></script>
+<script src="/js/main.js?v=mp5jbj4l" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1017,7 +1017,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8ic"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbj4m"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

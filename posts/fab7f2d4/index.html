@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-08T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:08:14.831Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.020Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="靶场练习">
 <meta property="article:tag" content="DVWA">
@@ -68,7 +68,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8no">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbjbt">
 
 
   
@@ -77,7 +77,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-08T12:00:00+08:00","dateModified":"2026-05-14T18:08:14+08:00","datePublished":"2026-03-08T12:00:00+08:00","description":"","headline":"DVWA 靶场实验报告 (Medium Level)","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/fab7f2d4/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/fab7f2d4/","keywords":"靶场练习, DVWA, XSS, SQL注入, CSRF","thumbnailUrl":"/images/DVWA.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-08T12:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-03-08T12:00:00+08:00","description":"","headline":"DVWA 靶场实验报告 (Medium Level)","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/fab7f2d4/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/fab7f2d4/","keywords":"靶场练习, DVWA, XSS, SQL注入, CSRF","thumbnailUrl":"/images/DVWA.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -140,34 +140,34 @@
 <li><a href="#cryptography">Cryptography — 密码学</a></li>
 </ul>
 <hr>
-<h2 id="01-Brute-Force-—-暴力破解"><a href="#01-Brute-Force-—-暴力破解" class="headerlink" title="01. Brute Force — 暴力破解"></a>01. Brute Force — 暴力破解</h2><h3 id="中级防御"><a href="#中级防御" class="headerlink" title="中级防御"></a>中级防御</h3><p>后端加入了 <code>sleep(2)</code> 函数，旨在减缓暴力破解的速度。<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303121732286.png"></p>
+<h2 id="01-Brute-Force-—-暴力破解"><a href="#01-Brute-Force-—-暴力破解" class="headerlink" title="01. Brute Force — 暴力破解"></a>01. Brute Force — 暴力破解</h2><h3 id="中级防御"><a href="#中级防御" class="headerlink" title="中级防御"></a>中级防御</h3><p>后端加入了 <code>sleep(2)</code> 函数，旨在减缓暴力破解的速度。<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303121732286.png"></p>
 <h3 id="绕过技巧"><a href="#绕过技巧" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><ul>
 <li><strong>多线程与并发</strong>：虽然有延迟，但攻击者仍可使用 Burp Suite 的多线程模式。</li>
 <li><strong>逻辑绕过</strong>：如果登录失败次数未被锁定，单纯的延迟只能增加攻击时间，无法阻断攻击。</li>
 </ul>
 <hr>
-<h2 id="02-Command-Injection-—-命令注入"><a href="#02-Command-Injection-—-命令注入" class="headerlink" title="02. Command Injection — 命令注入"></a>02. Command Injection — 命令注入</h2><h3 id="中级防御-1"><a href="#中级防御-1" class="headerlink" title="中级防御"></a>中级防御</h3><p>后端设置了黑名单，过滤了 <code>&amp;&amp;</code> 和 <code>;</code> 等常用连接符。<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303121913596.png"></p>
+<h2 id="02-Command-Injection-—-命令注入"><a href="#02-Command-Injection-—-命令注入" class="headerlink" title="02. Command Injection — 命令注入"></a>02. Command Injection — 命令注入</h2><h3 id="中级防御-1"><a href="#中级防御-1" class="headerlink" title="中级防御"></a>中级防御</h3><p>后端设置了黑名单，过滤了 <code>&amp;&amp;</code> 和 <code>;</code> 等常用连接符。<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303121913596.png"></p>
 <h3 id="绕过技巧-1"><a href="#绕过技巧-1" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><ul>
 <li><strong>替换符号</strong>：使用 <code>|</code> 或 <code>&amp;</code> 代替 <code>&amp;&amp;</code>。</li>
-<li><strong>Payload</strong>: <code>127.0.0.1 | whoami</code><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303121941463.png"></li>
+<li><strong>Payload</strong>: <code>127.0.0.1 | whoami</code><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303121941463.png"></li>
 </ul>
 <hr>
-<h2 id="03-CSRF-—-跨站请求伪造"><a href="#03-CSRF-—-跨站请求伪造" class="headerlink" title="03. CSRF — 跨站请求伪造"></a>03. CSRF — 跨站请求伪造</h2><h3 id="中级防御-2"><a href="#中级防御-2" class="headerlink" title="中级防御"></a>中级防御</h3><p>增加了 <code>HTTP_REFERER</code> 检测，验证请求是否来自本站。<br>观察url的参数<br>?password_new&#x3D;admin&amp;password_conf&#x3D;admin&amp;Change&#x3D;%B8%C4%B1%E4#<br>直接访问此url提示不正确<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303121953218.png"><br>源码可以看到有请求的来源检测<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303122056647.png"><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303130104366.png"></p>
+<h2 id="03-CSRF-—-跨站请求伪造"><a href="#03-CSRF-—-跨站请求伪造" class="headerlink" title="03. CSRF — 跨站请求伪造"></a>03. CSRF — 跨站请求伪造</h2><h3 id="中级防御-2"><a href="#中级防御-2" class="headerlink" title="中级防御"></a>中级防御</h3><p>增加了 <code>HTTP_REFERER</code> 检测，验证请求是否来自本站。<br>观察url的参数<br>?password_new&#x3D;admin&amp;password_conf&#x3D;admin&amp;Change&#x3D;%B8%C4%B1%E4#<br>直接访问此url提示不正确<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303121953218.png"><br>源码可以看到有请求的来源检测<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303122056647.png"><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303130104366.png"></p>
 <h3 id="绕过技巧-2"><a href="#绕过技巧-2" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><ul>
-<li><strong>Referer 伪造&#x2F;绕过</strong>：如果后端只判断域名是否包含关键字，可构造文件名包含关键字的恶意页面。<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303130115929.png"></li>
+<li><strong>Referer 伪造&#x2F;绕过</strong>：如果后端只判断域名是否包含关键字，可构造文件名包含关键字的恶意页面。<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303130115929.png"></li>
 <li><strong>利用跨站漏洞</strong>：结合 XSS 漏洞在同源环境下发起请求，此时 Referer 验证将失效。</li>
 </ul>
 <hr>
-<h2 id="04-File-Inclusion-—-文件包含"><a href="#04-File-Inclusion-—-文件包含" class="headerlink" title="04. File Inclusion — 文件包含"></a>04. File Inclusion — 文件包含</h2><h3 id="中级防御-3"><a href="#中级防御-3" class="headerlink" title="中级防御"></a>中级防御</h3><p>过滤了 <code>../</code> 等相对路径跳转符。<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303122234537.png"></p>
+<h2 id="04-File-Inclusion-—-文件包含"><a href="#04-File-Inclusion-—-文件包含" class="headerlink" title="04. File Inclusion — 文件包含"></a>04. File Inclusion — 文件包含</h2><h3 id="中级防御-3"><a href="#中级防御-3" class="headerlink" title="中级防御"></a>中级防御</h3><p>过滤了 <code>../</code> 等相对路径跳转符。<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303122234537.png"></p>
 <h3 id="绕过技巧-3"><a href="#绕过技巧-3" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><ul>
-<li><strong>双写绕过</strong>：使用 <code>....//</code>。当后端删除一组 <code>../</code> 后，剩下的字符会自动组成新的 <code>../</code>。<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303122325427.png"></li>
-<li><strong>Payload</strong>: <code>?page=..././..././..././etc/passwd</code><br>访问url<br>vulnerabilities&#x2F;fi&#x2F;?page&#x3D;….&#x2F;&#x2F;….&#x2F;&#x2F;….&#x2F;&#x2F;….&#x2F;&#x2F;….&#x2F;&#x2F;1.php<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303122354312.png"><br>也可以进行远程地址访问<br>vulnerabilities&#x2F;fi&#x2F;?page&#x3D;htt<a target="_blank" rel="noopener" href="http://p//baidu.com">http://p://baidu.com</a><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303122413385.png"></li>
+<li><strong>双写绕过</strong>：使用 <code>....//</code>。当后端删除一组 <code>../</code> 后，剩下的字符会自动组成新的 <code>../</code>。<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303122325427.png"></li>
+<li><strong>Payload</strong>: <code>?page=..././..././..././etc/passwd</code><br>访问url<br>vulnerabilities&#x2F;fi&#x2F;?page&#x3D;….&#x2F;&#x2F;….&#x2F;&#x2F;….&#x2F;&#x2F;….&#x2F;&#x2F;….&#x2F;&#x2F;1.php<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303122354312.png"><br>也可以进行远程地址访问<br>vulnerabilities&#x2F;fi&#x2F;?page&#x3D;htt<a target="_blank" rel="noopener" href="http://p//baidu.com">http://p://baidu.com</a><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303122413385.png"></li>
 </ul>
 <hr>
 <h2 id="05-File-Upload-—-文件上传"><a href="#05-File-Upload-—-文件上传" class="headerlink" title="05. File Upload — 文件上传"></a>05. File Upload — 文件上传</h2><h3 id="中级防御-4"><a href="#中级防御-4" class="headerlink" title="中级防御"></a>中级防御</h3><p>检查了上传文件的 <code>Content-Type</code>（MIME 类型）。</p>
-<p>直接上传webshell提示失败<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303122829111.png"></p>
+<p>直接上传webshell提示失败<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303122829111.png"></p>
 <h3 id="绕过技巧-4"><a href="#绕过技巧-4" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><ul>
-<li><strong>抓包修改 MIME</strong>：将 <code>application/octet-stream</code> 改为 <code>image/jpeg</code>。<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303122905027.png"><br>成功绕过<br>后续就是连接webshell了</li>
+<li><strong>抓包修改 MIME</strong>：将 <code>application/octet-stream</code> 改为 <code>image/jpeg</code>。<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303122905027.png"><br>成功绕过<br>后续就是连接webshell了</li>
 <li><strong>截断绕过</strong>：在某些老旧环境中，可使用 <code>%00</code> 截断。</li>
 </ul>
 <hr>
@@ -176,47 +176,47 @@
 <li><strong>参数篡改</strong>：在抓包时手动添加或修改 <code>step=2</code> 及验证通过的标识参数，直接跳过图形验证逻辑。</li>
 </ul>
 <hr>
-<h2 id="07-SQL-Injection-—-SQL-注入"><a href="#07-SQL-Injection-—-SQL-注入" class="headerlink" title="07. SQL Injection — SQL 注入"></a>07. SQL Injection — SQL 注入</h2><h3 id="中级防御-6"><a href="#中级防御-6" class="headerlink" title="中级防御"></a>中级防御</h3><p>简单的sql注入，不过是要在post请求包里修改<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123013978.png"></p>
-<h3 id="绕过技巧-6"><a href="#绕过技巧-6" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>可以保存数据包用sqlmap跑也可以自己手注入，因为比较简单就用手注入<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123044038.png"></p>
+<h2 id="07-SQL-Injection-—-SQL-注入"><a href="#07-SQL-Injection-—-SQL-注入" class="headerlink" title="07. SQL Injection — SQL 注入"></a>07. SQL Injection — SQL 注入</h2><h3 id="中级防御-6"><a href="#中级防御-6" class="headerlink" title="中级防御"></a>中级防御</h3><p>简单的sql注入，不过是要在post请求包里修改<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123013978.png"></p>
+<h3 id="绕过技巧-6"><a href="#绕过技巧-6" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>可以保存数据包用sqlmap跑也可以自己手注入，因为比较简单就用手注入<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123044038.png"></p>
 <p>order by检测为2<br>联合注入显示其他信息<br>后续注入数据库 表 列 值即可</p>
 <hr>
-<h2 id="08-SQL-Injection-Blind-—-SQL-盲注"><a href="#08-SQL-Injection-Blind-—-SQL-盲注" class="headerlink" title="08. SQL Injection (Blind) — SQL 盲注"></a>08. SQL Injection (Blind) — SQL 盲注</h2><h3 id="绕过技巧-7"><a href="#绕过技巧-7" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>同上，利用数字型注入点进行布尔或时间盲注。<br>盲注，直接用sqlmap吧，<br>sqlmap -r D:\Backup\桌面\1.txt –dbs –batch<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123148814.png"><br>直接跑出来了，不过用的是布尔盲注和时间盲注</p>
+<h2 id="08-SQL-Injection-Blind-—-SQL-盲注"><a href="#08-SQL-Injection-Blind-—-SQL-盲注" class="headerlink" title="08. SQL Injection (Blind) — SQL 盲注"></a>08. SQL Injection (Blind) — SQL 盲注</h2><h3 id="绕过技巧-7"><a href="#绕过技巧-7" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>同上，利用数字型注入点进行布尔或时间盲注。<br>盲注，直接用sqlmap吧，<br>sqlmap -r D:\Backup\桌面\1.txt –dbs –batch<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123148814.png"><br>直接跑出来了，不过用的是布尔盲注和时间盲注</p>
 <hr>
-<h2 id="09-Weak-Session-IDs-—-弱会话-ID"><a href="#09-Weak-Session-IDs-—-弱会话-ID" class="headerlink" title="09. Weak Session IDs — 弱会话 ID"></a>09. Weak Session IDs — 弱会话 ID</h2><h3 id="中级防御-7"><a href="#中级防御-7" class="headerlink" title="中级防御"></a>中级防御</h3><p>Session ID 基于当前时间戳生成。<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123211715.png"></p>
+<h2 id="09-Weak-Session-IDs-—-弱会话-ID"><a href="#09-Weak-Session-IDs-—-弱会话-ID" class="headerlink" title="09. Weak Session IDs — 弱会话 ID"></a>09. Weak Session IDs — 弱会话 ID</h2><h3 id="中级防御-7"><a href="#中级防御-7" class="headerlink" title="中级防御"></a>中级防御</h3><p>Session ID 基于当前时间戳生成。<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123211715.png"></p>
 <h3 id="破解思路"><a href="#破解思路" class="headerlink" title="破解思路"></a>破解思路</h3><ul>
-<li><strong>时间同步攻击</strong>：通过预测服务器时间，计算可能的 Session ID 进行碰撞劫持。<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123243200.png"></li>
+<li><strong>时间同步攻击</strong>：通过预测服务器时间，计算可能的 Session ID 进行碰撞劫持。<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123243200.png"></li>
 </ul>
 <hr>
-<h2 id="10-XSS-DOM-—-DOM-型跨站脚本"><a href="#10-XSS-DOM-—-DOM-型跨站脚本" class="headerlink" title="10. XSS (DOM) — DOM 型跨站脚本"></a>10. XSS (DOM) — DOM 型跨站脚本</h2><h3 id="绕过技巧-8"><a href="#绕过技巧-8" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>中级通常会对 <code>&lt;script&gt;</code> 标签做基础过滤，可以尝试使用图片标签的 <code>onerror</code> 事件：<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123311648.png"></p>
+<h2 id="10-XSS-DOM-—-DOM-型跨站脚本"><a href="#10-XSS-DOM-—-DOM-型跨站脚本" class="headerlink" title="10. XSS (DOM) — DOM 型跨站脚本"></a>10. XSS (DOM) — DOM 型跨站脚本</h2><h3 id="绕过技巧-8"><a href="#绕过技巧-8" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>中级通常会对 <code>&lt;script&gt;</code> 标签做基础过滤，可以尝试使用图片标签的 <code>onerror</code> 事件：<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123311648.png"></p>
 <ul>
-<li><strong>Payload</strong>: <code>&lt;img src=x onerror=alert(1)&gt;</code><br>访问<code>?default=&lt;img src=x onerror=&quot;alert(1)&quot;&gt;</code><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123339473.png"></li>
+<li><strong>Payload</strong>: <code>&lt;img src=x onerror=alert(1)&gt;</code><br>访问<code>?default=&lt;img src=x onerror=&quot;alert(1)&quot;&gt;</code><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123339473.png"></li>
 </ul>
 <hr>
-<h2 id="11-XSS-Reflected-—-反射型跨站脚本"><a href="#11-XSS-Reflected-—-反射型跨站脚本" class="headerlink" title="11. XSS (Reflected) — 反射型跨站脚本"></a>11. XSS (Reflected) — 反射型跨站脚本</h2><h3 id="中级防御-8"><a href="#中级防御-8" class="headerlink" title="中级防御"></a>中级防御</h3><p>过滤了 <code>&lt;script&gt;</code> 标签。<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123419441.png"><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123541002.png"></p>
+<h2 id="11-XSS-Reflected-—-反射型跨站脚本"><a href="#11-XSS-Reflected-—-反射型跨站脚本" class="headerlink" title="11. XSS (Reflected) — 反射型跨站脚本"></a>11. XSS (Reflected) — 反射型跨站脚本</h2><h3 id="中级防御-8"><a href="#中级防御-8" class="headerlink" title="中级防御"></a>中级防御</h3><p>过滤了 <code>&lt;script&gt;</code> 标签。<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123419441.png"><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123541002.png"></p>
 <h3 id="绕过技巧-9"><a href="#绕过技巧-9" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><ul>
 <li><strong>大小写绕过</strong>：<code>&lt;sCript&gt;alert(1)&lt;/sCript&gt;</code></li>
-<li><strong>双写绕过</strong>：<code>&lt;scr&lt;script&gt;ipt&gt;alert(1)&lt;/script&gt;</code><br><code>&lt;img src=x onerror=&quot;alert(‘xss’)&quot;&gt;</code><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123441642.png"></li>
+<li><strong>双写绕过</strong>：<code>&lt;scr&lt;script&gt;ipt&gt;alert(1)&lt;/script&gt;</code><br><code>&lt;img src=x onerror=&quot;alert(‘xss’)&quot;&gt;</code><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123441642.png"></li>
 </ul>
 <hr>
-<h2 id="12-XSS-Stored-—-存储型跨站脚本"><a href="#12-XSS-Stored-—-存储型跨站脚本" class="headerlink" title="12. XSS (Stored) — 存储型跨站脚本"></a>12. XSS (Stored) — 存储型跨站脚本</h2><h3 id="绕过技巧-10"><a href="#绕过技巧-10" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><h2 id="除了上述标签绕过，中级往往只限制了-message-字段。message过滤比较严格，无法攻击但是name参数过滤简单-多点测试：尝试在-Name-字段进行注入（可能需要通过-F12-修改输入框长度限制）。alert-1-但遇到一个问题，前端做了简单的输入框长度检测简单，在源代码里面修改长度即可成功"><a href="#除了上述标签绕过，中级往往只限制了-message-字段。message过滤比较严格，无法攻击但是name参数过滤简单-多点测试：尝试在-Name-字段进行注入（可能需要通过-F12-修改输入框长度限制）。alert-1-但遇到一个问题，前端做了简单的输入框长度检测简单，在源代码里面修改长度即可成功" class="headerlink" title="除了上述标签绕过，中级往往只限制了 message 字段。message过滤比较严格，无法攻击但是name参数过滤简单* 多点测试：尝试在 Name 字段进行注入（可能需要通过 F12 修改输入框长度限制）。&lt;Script&gt;alert(1)&lt;/Script&gt;但遇到一个问题，前端做了简单的输入框长度检测简单，在源代码里面修改长度即可成功"></a>除了上述标签绕过，中级往往只限制了 <code>message</code> 字段。<br>message过滤比较严格，无法攻击<br>但是name参数过滤简单<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123622989.png"><br>* <strong>多点测试</strong>：尝试在 <code>Name</code> 字段进行注入（可能需要通过 F12 修改输入框长度限制）。<br><code>&lt;Script&gt;alert(1)&lt;/Script&gt;</code><br>但遇到一个问题，前端做了简单的输入框长度检测<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123658967.png"><br>简单，在源代码里面修改长度即可<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123708529.png"><br>成功<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123717352.png"><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303123753686.png"></h2><h2 id="13-CSP-Bypass-—-CSP-策略绕过"><a href="#13-CSP-Bypass-—-CSP-策略绕过" class="headerlink" title="13. CSP Bypass — CSP 策略绕过"></a>13. CSP Bypass — CSP 策略绕过</h2><h3 id="绕过技巧-11"><a href="#绕过技巧-11" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>寻找 CSP 白名单中的 CDN 资源，利用这些资源中的 JSONP 接口来执行恶意代码。<br>查看源代码，有多个csp参数过滤</p>
+<h2 id="12-XSS-Stored-—-存储型跨站脚本"><a href="#12-XSS-Stored-—-存储型跨站脚本" class="headerlink" title="12. XSS (Stored) — 存储型跨站脚本"></a>12. XSS (Stored) — 存储型跨站脚本</h2><h3 id="绕过技巧-10"><a href="#绕过技巧-10" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><h2 id="除了上述标签绕过，中级往往只限制了-message-字段。message过滤比较严格，无法攻击但是name参数过滤简单-多点测试：尝试在-Name-字段进行注入（可能需要通过-F12-修改输入框长度限制）。alert-1-但遇到一个问题，前端做了简单的输入框长度检测简单，在源代码里面修改长度即可成功"><a href="#除了上述标签绕过，中级往往只限制了-message-字段。message过滤比较严格，无法攻击但是name参数过滤简单-多点测试：尝试在-Name-字段进行注入（可能需要通过-F12-修改输入框长度限制）。alert-1-但遇到一个问题，前端做了简单的输入框长度检测简单，在源代码里面修改长度即可成功" class="headerlink" title="除了上述标签绕过，中级往往只限制了 message 字段。message过滤比较严格，无法攻击但是name参数过滤简单* 多点测试：尝试在 Name 字段进行注入（可能需要通过 F12 修改输入框长度限制）。&lt;Script&gt;alert(1)&lt;/Script&gt;但遇到一个问题，前端做了简单的输入框长度检测简单，在源代码里面修改长度即可成功"></a>除了上述标签绕过，中级往往只限制了 <code>message</code> 字段。<br>message过滤比较严格，无法攻击<br>但是name参数过滤简单<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123622989.png"><br>* <strong>多点测试</strong>：尝试在 <code>Name</code> 字段进行注入（可能需要通过 F12 修改输入框长度限制）。<br><code>&lt;Script&gt;alert(1)&lt;/Script&gt;</code><br>但遇到一个问题，前端做了简单的输入框长度检测<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123658967.png"><br>简单，在源代码里面修改长度即可<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123708529.png"><br>成功<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123717352.png"><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303123753686.png"></h2><h2 id="13-CSP-Bypass-—-CSP-策略绕过"><a href="#13-CSP-Bypass-—-CSP-策略绕过" class="headerlink" title="13. CSP Bypass — CSP 策略绕过"></a>13. CSP Bypass — CSP 策略绕过</h2><h3 id="绕过技巧-11"><a href="#绕过技巧-11" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>寻找 CSP 白名单中的 CDN 资源，利用这些资源中的 JSONP 接口来执行恶意代码。<br>查看源代码，有多个csp参数过滤</p>
 <hr>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;?php</span><br><span class="line"></span><br><span class="line">$headerCSP = &quot;Content-Security-Policy: script-src &#x27;self&#x27; &#x27;unsafe-inline&#x27; &#x27;nonce-TmV2ZXIgZ29pbmcgdG8gZ2l2ZSB5b3UgdXA=&#x27;;&quot;;</span><br><span class="line"></span><br><span class="line">header($headerCSP);</span><br><span class="line"></span><br><span class="line">// Disable XSS protections so that inline alert boxes will work</span><br><span class="line">header (&quot;X-XSS-Protection: 0&quot;);</span><br><span class="line"></span><br><span class="line"># &lt;script nonce=&quot;TmV2ZXIgZ29pbmcgdG8gZ2l2ZSB5b3UgdXA=&quot;&gt;alert(1)&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">?&gt;</span><br></pre></td></tr></table></figure>
-<p>本来过滤很严格的，但是多了一个unsafe-inline这个<br>导致其他只允许部分内联函数的限制失效了，允许所有的内联函数了<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124155575.png"><br>所有我们直接自己构造就好了，无限制</p>
+<p>本来过滤很严格的，但是多了一个unsafe-inline这个<br>导致其他只允许部分内联函数的限制失效了，允许所有的内联函数了<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124155575.png"><br>所有我们直接自己构造就好了，无限制</p>
 <hr>
 <h2 id="14-JavaScript-Attacks-—-JavaScript-攻击"><a href="#14-JavaScript-Attacks-—-JavaScript-攻击" class="headerlink" title="14. JavaScript Attacks — JavaScript 攻击"></a>14. JavaScript Attacks — JavaScript 攻击</h2><h3 id="实验过程"><a href="#实验过程" class="headerlink" title="实验过程"></a>实验过程</h3><p>提交原本参数用hackbar查看发包的数据</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124228408.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124228408.png"></p>
 <p>然后用success提交再次查看发包数据<br>提示无效的token</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124302688.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124302688.png"></p>
 <p>我们发现token没变<br>token是changeme的倒叙然后前后加xx<br>我们更具此规律构造success的token<br>XXsseccusXX<br>提交正确</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124315675.png"><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124321324.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124315675.png"><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124321324.png"></p>
 <hr>
-<h2 id="15-Authorisation-Bypass-—-越权访问"><a href="#15-Authorisation-Bypass-—-越权访问" class="headerlink" title="15. Authorisation Bypass — 越权访问"></a>15. Authorisation Bypass — 越权访问</h2><h3 id="逻辑分析"><a href="#逻辑分析" class="headerlink" title="逻辑分析"></a>逻辑分析</h3><p>admin用户可以正常查看修改<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124542645.png"><br>修改到普通用户我们看不那那个界面的选项卡了<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124550897.png"><br>直接访问目录会提示无权限<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124608930.png"><br>但是我们通过翻admin的网络数据包时发现，他把数据写到一个php文件之后才加载的<br>而此php文件没有做权限鉴权<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124624241.png"><br>可以通过直接访问这个php文件来查看数据，信息泄露<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124638129.png"></p>
+<h2 id="15-Authorisation-Bypass-—-越权访问"><a href="#15-Authorisation-Bypass-—-越权访问" class="headerlink" title="15. Authorisation Bypass — 越权访问"></a>15. Authorisation Bypass — 越权访问</h2><h3 id="逻辑分析"><a href="#逻辑分析" class="headerlink" title="逻辑分析"></a>逻辑分析</h3><p>admin用户可以正常查看修改<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124542645.png"><br>修改到普通用户我们看不那那个界面的选项卡了<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124550897.png"><br>直接访问目录会提示无权限<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124608930.png"><br>但是我们通过翻admin的网络数据包时发现，他把数据写到一个php文件之后才加载的<br>而此php文件没有做权限鉴权<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124624241.png"><br>可以通过直接访问这个php文件来查看数据，信息泄露<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124638129.png"></p>
 <hr>
-<h2 id="16-Open-HTTP-Redirect-—-开放重定向"><a href="#16-Open-HTTP-Redirect-—-开放重定向" class="headerlink" title="16. Open HTTP Redirect — 开放重定向"></a>16. Open HTTP Redirect — 开放重定向</h2><h3 id="绕过技巧-12"><a href="#绕过技巧-12" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>如果后端过滤了 <code>http://</code>，可以尝试使用 <code>//</code> 协议相对路径或者进行 URL 编码绕过。<br>查看网页代码，看到重定向的文件的参数<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124732742.png"><br>尝试直接构造</p>
+<h2 id="16-Open-HTTP-Redirect-—-开放重定向"><a href="#16-Open-HTTP-Redirect-—-开放重定向" class="headerlink" title="16. Open HTTP Redirect — 开放重定向"></a>16. Open HTTP Redirect — 开放重定向</h2><h3 id="绕过技巧-12"><a href="#绕过技巧-12" class="headerlink" title="绕过技巧"></a>绕过技巧</h3><p>如果后端过滤了 <code>http://</code>，可以尝试使用 <code>//</code> 协议相对路径或者进行 URL 编码绕过。<br>查看网页代码，看到重定向的文件的参数<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124732742.png"><br>尝试直接构造</p>
 <p><code>vulnerabilities/open_redirect/source/medium.php?redirect=http://baidu.com</code><br>提示不允许绝对url，显然对参数进行了过滤</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124814874.png"><br>我们将http删除，直接用&#x2F;&#x2F;来实现远程地址访问<br><code>vulnerabilities/open_redirect/source/medium.php?redirect=//baidu.com</code><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124908403.png"><br>查看源代码发现确实对http的https进行了检测过滤<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124929161.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124814874.png"><br>我们将http删除，直接用&#x2F;&#x2F;来实现远程地址访问<br><code>vulnerabilities/open_redirect/source/medium.php?redirect=//baidu.com</code><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124908403.png"><br>查看源代码发现确实对http的https进行了检测过滤<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124929161.png"></p>
 <hr>
-<h2 id="17-Cryptography-—-密码学"><a href="#17-Cryptography-—-密码学" class="headerlink" title="17. Cryptography — 密码学"></a>17. Cryptography — 密码学</h2><h3 id="进阶内容"><a href="#进阶内容" class="headerlink" title="进阶内容"></a>进阶内容</h3><p>查看源代码<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303124947269.png"><br>对密码有个简单的硬加密，可以直接破解<br>2.要同时满足三个条件：<br>user 等于 sweep<br>ex 大于当前时间戳（未过期）<br>level 等于 admin<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303125008525.png"><br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303125017369.png"><br>篡改token密钥实现admin登录<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260303125027377.png"></p>
+<h2 id="17-Cryptography-—-密码学"><a href="#17-Cryptography-—-密码学" class="headerlink" title="17. Cryptography — 密码学"></a>17. Cryptography — 密码学</h2><h3 id="进阶内容"><a href="#进阶内容" class="headerlink" title="进阶内容"></a>进阶内容</h3><p>查看源代码<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303124947269.png"><br>对密码有个简单的硬加密，可以直接破解<br>2.要同时满足三个条件：<br>user 等于 sweep<br>ex 大于当前时间戳（未过期）<br>level 等于 admin<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303125008525.png"><br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303125017369.png"><br>篡改token密钥实现admin登录<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260303125027377.png"></p>
 <hr>
 </article>
 <div class="article-footer slide-up">
@@ -668,7 +668,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8nq" defer></script>
+<script src="/js/main.js?v=mp5jbjbv" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -932,7 +932,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8nr"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbjbv"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

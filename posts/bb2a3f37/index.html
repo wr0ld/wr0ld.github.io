@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-04-01T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.417Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.003Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="Cobalt Strike">
 <meta property="article:tag" content="免杀">
@@ -66,7 +66,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8lo">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbj9c">
 
 
   
@@ -75,7 +75,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-01T12:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-04-01T12:00:00+08:00","description":"","headline":"工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/bb2a3f37/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/bb2a3f37/","keywords":"Cobalt Strike, 免杀, 流量混淆","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image22.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-01T12:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-04-01T12:00:00+08:00","description":"","headline":"工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/bb2a3f37/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/bb2a3f37/","keywords":"Cobalt Strike, 免杀, 流量混淆","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image22.png","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -139,7 +139,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Djavax.net.ssl.keyStorePassword=123456</span><br></pre></td></tr></table></figure>
 
 <p>原本的证书信息长这样，特征很明显：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image1.png"></p>
 <h3 id="生成自定义证书"><a href="#生成自定义证书" class="headerlink" title="生成自定义证书"></a>生成自定义证书</h3><p>把证书伪装成 Microsoft 更新服务，运行以下命令：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">keytool -genkey -<span class="built_in">alias</span> cobaltstrike -keyalg RSA -keysize 2048 \</span><br><span class="line">-storetype JKS -keystore cobaltstrike.store -validity 3650</span><br></pre></td></tr></table></figure>
 
@@ -147,7 +147,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">您的名字与姓氏是什么?      → www.microsoft.com</span><br><span class="line">您的组织单位名称是什么?    → Microsoft Corporation</span><br><span class="line">您的组织名称是什么?        → Microsoft</span><br><span class="line">您所在的城市或区域名称是什么? → Redmond</span><br><span class="line">您所在的省/市/自治区名称是什么? → Washington</span><br><span class="line">该单位的双字母国家/地区代码是什么? → US</span><br><span class="line">密钥库口令                 → 自己设一个，记住</span><br></pre></td></tr></table></figure>
 
 <p>生成完之后确认一下新证书信息：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image2.png"></p>
 <h3 id="修改启动脚本密码"><a href="#修改启动脚本密码" class="headerlink" title="修改启动脚本密码"></a>修改启动脚本密码</h3><p>打开 <code>./teamserver</code> 启动脚本，把密码改成和新证书一致：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Djavax.net.ssl.keyStorePassword=123456</span><br></pre></td></tr></table></figure>
 
@@ -158,7 +158,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./teamserver 172.16.250.128 kali</span><br><span class="line"><span class="comment"># 格式：./teamserver [修改了密码的启动方式文件] [连接ip] [连接密码]</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="验证效果"><a href="#验证效果" class="headerlink" title="验证效果"></a>验证效果</h3><p>客户端连接时会弹出证书指纹确认框：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image3.png"></p>
 <p>这个指纹就是刚才生成证书时看到的 SHA256 值，完全一致，说明服务端用的就是自定义证书，默认的 CS 证书特征（<code>CN=Major Cobalt Strike</code>）已经没了。</p>
 <hr>
 <h2 id="二、Malleable-C2-Profile-流量混淆"><a href="#二、Malleable-C2-Profile-流量混淆" class="headerlink" title="二、Malleable C2 Profile 流量混淆"></a>二、Malleable C2 Profile 流量混淆</h2><p>证书换了之后，CS 默认的心跳流量特征还是很明显，蓝队一抓包就能识别。Malleable C2 Profile 可以把 beacon 的流量伪装成正常的业务请求。</p>
@@ -220,16 +220,16 @@
 <h3 id="加载-Profile-启动"><a href="#加载-Profile-启动" class="headerlink" title="加载 Profile 启动"></a>加载 Profile 启动</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./teamserver 172.16.250.128 123456 amazon.profile</span><br></pre></td></tr></table></figure>
 
 <h3 id="流量对比验证"><a href="#流量对比验证" class="headerlink" title="流量对比验证"></a>流量对比验证</h3><p>用 Wireshark 选择对应网卡抓包，过滤器输入 <code>http</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image4.png"></p>
 <p>上线后查看流量包：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image5.png"></p>
 <p><strong>原版默认流量（特征明显）：</strong></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image6.png"></p>
 <p><strong>修改后的流量：</strong></p>
 <p>响应包：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image7.png"></p>
 <p>请求包：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image8.png"></p>
 <p>可以看到流量完全伪装成了亚马逊购物请求，URI、Host 头、响应头都模拟了亚马逊，beacon 元数据藏在 Cookie 里，UA 也换成了 Chrome&#x2F;120。</p>
 <hr>
 <h2 id="三、修改服务端端口"><a href="#三、修改服务端端口" class="headerlink" title="三、修改服务端端口"></a>三、修改服务端端口</h2><p>默认 50050 端口特征太明显，改一下：</p>
@@ -240,29 +240,29 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Dcobaltstrike.server_port=54321</span><br></pre></td></tr></table></figure>
 
 <p>客户端连接时端口也要保持一致：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image9.png"></p>
 <h3 id="关于-CDN-隐匿"><a href="#关于-CDN-隐匿" class="headerlink" title="关于 CDN 隐匿"></a>关于 CDN 隐匿</h3><p>虽然用了 Profile，但流量依然是直连，蓝队还是能查到真实 IP。更进一步的做法是通过 Cloudflare 等 CDN 转发流量（域前置），让蓝队只能查到 CDN 的 IP，查不到真实的服务器 IP，把 <code>172.16.250.128</code> 换成域名上线即可。这块后续再研究。</p>
 <hr>
 <h2 id="四、CS-源码编译与个性化修改"><a href="#四、CS-源码编译与个性化修改" class="headerlink" title="四、CS 源码编译与个性化修改"></a>四、CS 源码编译与个性化修改</h2><p>接下来折腾源码层面的修改，需要把 CS 的 jar 包反编译出来重新编译。</p>
 <h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><p>用 Java 1.8，把原 jar 作为依赖导入：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image10.png"></p>
 <p>添加模块依赖：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image11.png"></p>
 <p>修改文件保持在 src 目录下：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image12.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image12.png"></p>
 <p>添加工件（Artifact）：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image13.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image13.png"></p>
 <h3 id="编译运行"><a href="#编译运行" class="headerlink" title="编译运行"></a>编译运行</h3><p>重新构建项目、构建工件后直接运行会报错：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image14.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image14.png"></p>
 <p>需要添加启动参数：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:ParallelGCThreads=4 -XX:+AggressiveHeap -XX:+UseParallelGC</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image15.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image15.png"></p>
 <p>然后会出现授权校验失败的问题：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image16.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image16.png"></p>
 <p>这里是因为原软件需要授权，破解过程就不记了，直接用现成的破解版跳过这步。</p>
 <p>正常启动后的界面：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image17.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image17.png"></p>
 <h3 id="个性化修改路径"><a href="#个性化修改路径" class="headerlink" title="个性化修改路径"></a>个性化修改路径</h3><p>折腾了一下发现各个地方的修改路径，记录一下备用：</p>
 <table>
 <thead>
@@ -319,7 +319,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-XX:ParallelGCThreads=4 -XX:+AggressiveHeap -XX:+UseParallelGC -javaagent:CSAgent.jar=CSAgent.properties</span><br></pre></td></tr></table></figure>
 
 <p>中文界面配置生效后：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image18.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image18.png"></p>
 <hr>
 <h2 id="六、Checksum8-与-Stager-特征"><a href="#六、Checksum8-与-Stager-特征" class="headerlink" title="六、Checksum8 与 Stager 特征"></a>六、Checksum8 与 Stager 特征</h2><p>CS 有一个比较经典的流量特征——Checksum8 算法，蓝队可以用这个识别 CS 流量。</p>
 <p><strong>Checksum8 算法：</strong> ASCII 码之和 % 256</p>
@@ -351,23 +351,23 @@
 <p>编译并解密：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">javac -encoding UTF-8 -classpath cobaltstrike.jar CrackSleeve.java</span><br><span class="line">java -classpath <span class="string">&quot;cobaltstrike.jar;./&quot;</span> CrackSleeve decode</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image19.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image19.png"></p>
 <h3 id="用-IDA-修改异或密钥"><a href="#用-IDA-修改异或密钥" class="headerlink" title="用 IDA 修改异或密钥"></a>用 IDA 修改异或密钥</h3><p>以 64 位为例，打开解密后的 <code>beacon.x64.dll</code>，按 <code>Alt+B</code> 搜索 <code>xor 0x2e</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image20.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image21.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image20.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image21.png"></p>
 <p>双击进去：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image22.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image22.png"></p>
 <p>F5 反汇编查看：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image23.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image23.png"></p>
 <p>通过 Edit → Patch program → Change byte，把 <code>2E</code> 改为自定义的值：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image24.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image24.png"></p>
 <h3 id="同步修改-Java-源码"><a href="#同步修改-Java-源码" class="headerlink" title="同步修改 Java 源码"></a>同步修改 Java 源码</h3><p>对应修改 <code>beacon/BeaconPayload.java</code>，把原本的 <code>46</code>（0x2e 的十进制）换成修改后的十进制值：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image25.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image25.png"></p>
 <h3 id="重新打包"><a href="#重新打包" class="headerlink" title="重新打包"></a>重新打包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -classpath <span class="string">&quot;cobaltstrike.jar;./&quot;</span> CrackSleeve encode</span><br></pre></td></tr></table></figure>
 
 <p>打包编译完成后替换服务端的 jar 包，测试可以正常生成和连接：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image26.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image27.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image26.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image27.png"></p>
 <hr>
 <h2 id="八、PowerShell-混淆尝试"><a href="#八、PowerShell-混淆尝试" class="headerlink" title="八、PowerShell 混淆尝试"></a>八、PowerShell 混淆尝试</h2><p>试了一下给 PowerShell payload 加混淆。</p>
 <p><strong>涉及文件：</strong></p>
@@ -378,10 +378,10 @@
 <p>下载 AES 加密混淆脚本放到根目录：</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/Chainski/AES-Encoder">https://github.com/Chainski/AES-Encoder</a></p>
 <p>生成 payload：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image28.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image28.png"></p>
 <p>效果确实很明显，混淆之后看不出原始代码。</p>
 <p>但是测试发现——<strong>经过 CS 加密的 payload 跑不起来</strong>，混淆原项目单独运行是没问题的，只要经过 CS 那层加密就不行了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cs_image29.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cs_image29.png"></p>
 <p>尝试了很多方法都没解决，这条路先放弃了，后续可以换其他的加密脚本再试试。</p>
 <hr>
 <blockquote>
@@ -842,7 +842,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8lq" defer></script>
+<script src="/js/main.js?v=mp5jbj9e" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1106,7 +1106,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8lq"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbj9e"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

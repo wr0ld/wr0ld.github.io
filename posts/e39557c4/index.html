@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-22T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.428Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.023Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="免杀">
 <meta property="article:tag" content="工具魔改">
@@ -67,7 +67,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8mh">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbja8">
 
 
   
@@ -76,7 +76,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-22T12:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-22T12:00:00+08:00","description":"","headline":"工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/e39557c4/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/e39557c4/","keywords":"免杀, 工具魔改, 内网扫描, fscan","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image3.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-22T12:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-03-22T12:00:00+08:00","description":"","headline":"工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/e39557c4/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/e39557c4/","keywords":"免杀, 工具魔改, 内网扫描, fscan","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image3.png","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -154,7 +154,7 @@
 <blockquote>
 <p>⚠️ 测试结果：只改变编译模式，火绒直接杀了，说明单纯去符号表不够用。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image1.png"></p>
 <hr>
 <h2 id="三、特征字符串清除"><a href="#三、特征字符串清除" class="headerlink" title="三、特征字符串清除"></a>三、特征字符串清除</h2><p>原版二进制里包含大量明显特征，杀软直接按字符串匹配就能识别，需要逐一清除。</p>
 <h3 id="3-1-修改包名"><a href="#3-1-修改包名" class="headerlink" title="3.1 修改包名"></a>3.1 修改包名</h3><p><strong>第一步：改 <code>go.mod</code></strong></p>
@@ -186,23 +186,23 @@
 <blockquote>
 <p>✅ 火绒过</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image2.png"></p>
 <blockquote>
 <p>✅ 360 静态过、杀毒、安全卫士、核晶体全过？？？？？？？？？</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image3.png"></p>
 <blockquote>
 <p>动态也能过？？？？？？？？</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image4.png"></p>
 <blockquote>
 <p>Defender 动态也能过？？？？？？？？</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image5.png"></p>
 <blockquote>
 <p>❌ 卡巴斯基静态被杀</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image6.png"></p>
 <hr>
 <h2 id="四、编译层混淆（garble）"><a href="#四、编译层混淆（garble）" class="headerlink" title="四、编译层混淆（garble）"></a>四、编译层混淆（garble）</h2><blockquote>
 <p>单纯清字符串对卡巴斯基这类引擎不够，它会分析代码结构。garble 能把函数名、变量名、字符串全部随机化，让杀软看不出来是什么工具。</p>
@@ -220,24 +220,24 @@
 </blockquote>
 <h3 id="4-2-基础混淆"><a href="#4-2-基础混淆" class="headerlink" title="4.2 基础混淆"></a>4.2 基础混淆</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">garble -seed=random build -o scanner.exe main.go</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image7.png"></p>
 <blockquote>
 <p>✅ 火绒能过</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image8.png"></p>
 <blockquote>
 <p>❌ 卡巴斯基依旧被杀</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image9.png"></p>
 <h3 id="4-3-试-UPX-加壳"><a href="#4-3-试-UPX-加壳" class="headerlink" title="4.3 试 UPX 加壳"></a>4.3 试 UPX 加壳</h3><p>下载地址：<a target="_blank" rel="noopener" href="https://github.com/upx/upx/releases">https://github.com/upx/upx/releases</a></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upx --best scanner.exe -o scanner_upx.exe</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image10.png"></p>
 <blockquote>
 <p>❌ 卡巴斯基依旧被杀，然后 Defender 也杀了，加壳反而不行，过了段时间 360 也报了。<strong>加壳适得其反，不建议使用。</strong></p>
 </blockquote>
 <h3 id="4-4-PE-资源伪装"><a href="#4-4-PE-资源伪装" class="headerlink" title="4.4 PE 资源伪装"></a>4.4 PE 资源伪装</h3><p>使用 <strong>Restorator.exe</strong> 修改 PE 资源信息，添加图标、版本号、公司名等，伪装成正常软件：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image11.png"></p>
 <blockquote>
 <p>⚠️ 没有效果。PE 资源伪装主要对付人眼识别，对杀软引擎的启发式检测基本没用。</p>
 </blockquote>
@@ -252,11 +252,11 @@
 <blockquote>
 <p>✅ 结果：卡巴斯基静态能过，Defender 被检测但只是禁止运行没有删除，应该是被 AMSI 检测了。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image12.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image12.png"></p>
 <blockquote>
 <p>⚠️ 卡巴斯基动态运行一半就被杀了，检测到 POC 加载触发了，如果没扫到 POC 应该还是能稳一下的。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image13.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image13.png"></p>
 <hr>
 <h2 id="五、DLL-加载免杀"><a href="#五、DLL-加载免杀" class="headerlink" title="五、DLL 加载免杀"></a>五、DLL 加载免杀</h2><h3 id="5-1-思路"><a href="#5-1-思路" class="headerlink" title="5.1 思路"></a>5.1 思路</h3><p>把 fscan 编译成 DLL，再用一个 C 写的 loader 去加载它。<strong>杀软扫 loader 本身看不出是 fscan</strong>，从而绕过动态检测。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scanner_loader.exe（C语言，干净）</span><br><span class="line">      ↓ 加载</span><br><span class="line">fscan.dll（实际功能）</span><br></pre></td></tr></table></figure>
@@ -275,22 +275,22 @@
 <h3 id="5-7-运行测试"><a href="#5-7-运行测试" class="headerlink" title="5.7 运行测试"></a>5.7 运行测试</h3><p>将 <code>scanner_loader.exe</code> 和 <code>fscan.dll</code> 放在同一目录：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\scanner_loader.exe -h 192.168.168.0/24</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image14.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image14.png"></p>
 <blockquote>
 <p>✅ 可以正常运行，扫描结果完整输出。</p>
 </blockquote>
 <blockquote>
 <p>✅ 360 正常都能过</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image15.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image15.png"></p>
 <blockquote>
 <p>✅ Defender 都能过</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image16.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image16.png"></p>
 <blockquote>
 <p>❌ 卡巴斯基静态把 DLL 删了</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image17.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image17.png"></p>
 <blockquote>
 <p>💡 卡巴删的是 DLL，说明检测的是 DLL 内的 POC 行为特征，不是 loader。进一步绕过方向：内存加载 DLL（后续文章）。</p>
 </blockquote>
@@ -309,7 +309,7 @@
 
 <h3 id="6-4-重新编译测试"><a href="#6-4-重新编译测试" class="headerlink" title="6.4 重新编译测试"></a>6.4 重新编译测试</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">go build -o scanner.exe main.go</span><br><span class="line">.\scanner.exe -h 192.168.168.128 -p 2181</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image18.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image18.png"></p>
 <blockquote>
 <p>✅ 成功检测到 Zookeeper 未授权访问，插件列表里也能看到 <code>zookeeper</code> 已注册。</p>
 </blockquote>
@@ -860,7 +860,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8mj" defer></script>
+<script src="/js/main.js?v=mp5jbjab" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1124,7 +1124,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8mk"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbjac"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

