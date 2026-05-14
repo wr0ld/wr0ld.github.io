@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-04-06T13:00:00.000Z">
-<meta property="article:modified_time" content="2026-04-07T08:04:25.356Z">
+<meta property="article:modified_time" content="2026-05-14T10:03:45.591Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -68,7 +68,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa37">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8l4">
 
 
   
@@ -77,7 +77,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-06T21:00:00+08:00","dateModified":"2026-04-07T16:04:25+08:00","datePublished":"2026-04-06T21:00:00+08:00","description":"","headline":"代码审计 | CB链分析 —— CommonsBeanutils 反序列化利用链","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c4b8e2a3/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c4b8e2a3/","keywords":"代码审计, Java, 反序列化, CB链, CommonsBeanutils","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/ae5d8412cf7c09231d7128dfe41be18f-scaled.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-06T21:00:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-04-06T21:00:00+08:00","description":"","headline":"代码审计 | CB链分析 —— CommonsBeanutils 反序列化利用链","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c4b8e2a3/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c4b8e2a3/","keywords":"代码审计, Java, 反序列化, CB链, CommonsBeanutils","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/ae5d8412cf7c09231d7128dfe41be18f-scaled.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -136,23 +136,23 @@
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>commons-beanutils<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-beanutils<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.9.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>CB 链本身只需要 <code>commons-beanutils</code>，但 1.9.2 内部依赖了 CC，调试方便起见加上就行。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image1.png"></p>
 <p>CB 链本身只需要 commons-beanutils，但 1.9.2 内部依赖了 CC</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image2.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image2.png"></p>
 <p>（用 maven 下载源码才能搜到原代码）</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image3.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image3.png"></p>
 <p>JDK 8u65</p>
 <hr>
 <h2 id="CB链的执行终点"><a href="#CB链的执行终点" class="headerlink" title="CB链的执行终点"></a>CB链的执行终点</h2><p>CB 链还是用的 TemplatesImpl 加载恶意字节码，这点和之前的 CC 链一样。</p>
 <p>之前用的都是 <code>TemplatesImpl.newTransformer()</code> 为起点，然后一路走下去：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image4.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image4.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TemplatesImpl.getOutputProperties() → getTransletInstance() → 恶意类.newInstance() → Runtime.exec()</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image5.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image5.png"></p>
 <p>CB 链不再利用 <code>TemplatesImpl</code> 的 <code>newTransformer</code> 调用 <code>getOutputProperties</code> 方法，而是换了一种触发方式。</p>
 <hr>
 <h2 id="怎么触发-getOutputProperties"><a href="#怎么触发-getOutputProperties" class="headerlink" title="怎么触发 getOutputProperties()"></a>怎么触发 getOutputProperties()</h2><p>核心在 <code>BeanComparator</code> 类的 <code>compare</code> 方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image6.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image6.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">value1</span> <span class="operator">=</span> PropertyUtils.getProperty( o1, property );</span><br><span class="line"><span class="type">Object</span> <span class="variable">value2</span> <span class="operator">=</span> PropertyUtils.getProperty( o2, property );</span><br></pre></td></tr></table></figure>
 
 <p><code>PropertyUtils.getProperty(obj, &quot;outputProperties&quot;)</code> 内部用反射找到 <code>getOutputProperties()</code> 方法然后调用。</p>
@@ -160,47 +160,47 @@
 <hr>
 <h2 id="跟源码"><a href="#跟源码" class="headerlink" title="跟源码"></a>跟源码</h2><p>简单跟一下调用链：</p>
 <p><strong>compare</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image7.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image7.png"></p>
 <p><strong>getProperty</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image8.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image8.png"></p>
 <p><strong>getProperty（PropertyUtilsBean）</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image9.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image9.png"></p>
 <p><strong>getNestedProperty</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image10.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image10.png"></p>
 <p><strong>getSimpleProperty</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image11.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image11.png"></p>
 <p><code>invokeMethod(readMethod, bean, EMPTY_OBJECT_ARRAY)</code> 就是反射调 getter，通过反射调用了 <code>getOutputProperties()</code>。</p>
 <hr>
 <h2 id="入口：PriorityQueue"><a href="#入口：PriorityQueue" class="headerlink" title="入口：PriorityQueue"></a>入口：PriorityQueue</h2><p><code>BeanComparator</code> 的 <code>compare</code> 方法签名：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image12.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image12.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compare( T o1, T o2 )</span><br></pre></td></tr></table></figure>
 
 <p>非常眼熟，正是 CC2 的 <code>PriorityQueue</code> 里面用的那套。</p>
 <p><code>PriorityQueue.readObject()</code> → <code>heapify()</code> → <code>siftDown()</code> → <code>siftDownUsingComparator()</code>，和 CC2 分析的是一样的。</p>
 <p><strong>readObject</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image15.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image15.png"></p>
 <p><strong>heapify</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image16.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image16.png"></p>
 <p><strong>siftDown</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image17.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image17.png"></p>
 <p><strong>siftDownUsingComparator</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image18.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image18.png"></p>
 <p><code>c</code> 和 <code>queue[right]</code> 都需要用到 <code>add</code> → <code>offer</code> 传入。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Object</span> <span class="variable">c</span> <span class="operator">=</span> queue[child];</span><br><span class="line"><span class="type">int</span> <span class="variable">right</span> <span class="operator">=</span> child + <span class="number">1</span>;</span><br></pre></td></tr></table></figure>
 
 <p><strong>add</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image19.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image19.png"></p>
 <p><code>offer</code> 就是写入数组的方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image20.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image20.png"></p>
 <hr>
 <h2 id="CB-链-vs-CC2-对比"><a href="#CB-链-vs-CC2-对比" class="headerlink" title="CB 链 vs CC2 对比"></a>CB 链 vs CC2 对比</h2><p>回到 <code>BeanComparator</code> 的 <code>compare</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image12.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image12.png"></p>
 <p><strong>补充对比：</strong></p>
 <p>CC2 里的 <code>compare</code> 是 <code>TransformingComparator</code> 的，但 <code>TransformingComparator</code> 是有版本限制的——CC4 版本的 <code>TransformingComparator</code> 才继承了 <code>Serializable</code> 接口，可以被反序列化从而被利用。</p>
 <p><code>TransformingComparator</code> 是通过触发 <code>transform</code> 来触发反射达到目的：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image13.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image13.png"></p>
 <p><code>BeanComparator</code> 是通过特殊的处理方式调用 getter，传入 <code>outputProperties</code> 触发 <code>getOutputProperties()</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image14.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image14.png"></p>
 <p>这两个 <code>compare</code> 都能被 <code>PriorityQueue.readObject()</code> 调用，入口是一样的。</p>
 <hr>
 <h2 id="构造参数分析"><a href="#构造参数分析" class="headerlink" title="构造参数分析"></a>构造参数分析</h2><p>回到核心问题，<code>PropertyUtils.getProperty(o1, property)</code> 需要：</p>
@@ -214,10 +214,10 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="title class_">BeanComparator</span>(<span class="string">&quot;outputProperties&quot;</span>);</span><br></pre></td></tr></table></figure>
 
 <p>注意是小写 <code>o</code>，属性名规则是把 getter 方法 <code>getOutputProperties</code> 去掉 <code>get</code> 然后首字母小写。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image21.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image21.png"></p>
 <hr>
 <h2 id="BeanComparator-构造方法的坑"><a href="#BeanComparator-构造方法的坑" class="headerlink" title="BeanComparator 构造方法的坑"></a>BeanComparator 构造方法的坑</h2><p><code>BeanComparator</code> 有两个构造方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image22.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image22.png"></p>
 <p>区别就在于第二个参数 <code>comparator</code>，不填的话默认是 <code>ComparableComparator.getInstance()</code>。</p>
 <p><code>BeanComparator</code> 默认构造方法会调用 <code>ComparableComparator.getInstance()</code> 作为第二个参数，而 <code>ComparableComparator</code> 是 CC 包里的类。</p>
 <p>本地环境有 CC 3.2.1，序列化反序列化都没问题。但打 Shiro 时，Shiro 自带 CC 4.0，两个版本 <code>ComparableComparator</code> 的 <code>serialVersionUID</code> 不一致，反序列化直接 <code>InvalidClassException</code>，payload 作废。</p>
@@ -230,15 +230,15 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">queue.add(templates);</span><br><span class="line">queue.add(templates);</span><br></pre></td></tr></table></figure>
 
 <p>再替换成真的 <code>outputProperties</code>，</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406210816691.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406210816691.png"></p>
 <p>直接运行会报错：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image24.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image24.png"></p>
 <p><code>property</code> 是 null 时，<code>BeanComparator.compare()</code> 拿不到属性值，直接把对象本身丢给内部的 <code>ComparableComparator</code> 比较，<code>TemplatesImpl</code> 没实现 <code>Comparable</code>，还是炸。</p>
 <p>所以根本原因不是 <code>property</code> 的值，是 <strong>add 时传入的对象不能是 TemplatesImpl</strong>，换成 <code>1</code> 占位就解决了。</p>
 <p>先 <code>queue.add(1); queue.add(1);</code>，然后再反射赋值：</p>
 <p><strong>为什么要两个相同元素</strong></p>
 <p><code>PriorityQueue</code> 在 <code>heapify()</code> 时会调用 <code>compare</code> 比较父子节点。两个相同对象（都是 <code>templates</code>）可以确保无论怎么比，都能触发 <code>getOutputProperties()</code>。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image25.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image25.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> PriorityQueue.class.getDeclaredField(<span class="string">&quot;queue&quot;</span>);</span><br><span class="line">f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">Object[] queueArr = (Object[]) f.get(queue);</span><br><span class="line">queueArr[<span class="number">0</span>] = templates;</span><br><span class="line">queueArr[<span class="number">1</span>] = templates;</span><br></pre></td></tr></table></figure>
 
 <p><code>queue</code> 字段是个数组，不是普通字段，不能直接 <code>f.set(obj, value)</code> 替换整个数组，只能拿到数组引用之后按下标改元素。</p>
@@ -259,13 +259,13 @@
 </ul>
 <p>相当于强行绕过 private 修饰符改字段值，之前 CC 链里一直在用这个。</p>
 <p><strong>效果</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image26.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image26.png"></p>
 <hr>
 <h2 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h2><h3 id="1-tfactory-字段的必要性"><a href="#1-tfactory-字段的必要性" class="headerlink" title="1. _tfactory 字段的必要性"></a>1. <code>_tfactory</code> 字段的必要性</h3><p>在 JDK 8u121 及之后，<code>TemplatesImpl</code> 的 <code>getTransletInstance()</code> 会检查 <code>_tfactory</code> 是否为 null，若为 null 会抛出 <code>NullPointerException</code>，导致无法实例化恶意类。因此高版本下必须反射设置 <code>_tfactory</code> 为一个 <code>TransformerFactoryImpl</code> 实例：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setFieldValue(templates, <span class="string">&quot;_tfactory&quot;</span>, <span class="keyword">new</span> <span class="title class_">TransformerFactoryImpl</span>());</span><br></pre></td></tr></table></figure>
 
 <p>CC2 篇详细讲过。</p>
-<h3 id="2-为什么-EvilClass-必须继承-AbstractTranslet"><a href="#2-为什么-EvilClass-必须继承-AbstractTranslet" class="headerlink" title="2. 为什么 EvilClass 必须继承 AbstractTranslet"></a>2. 为什么 EvilClass 必须继承 AbstractTranslet</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cb_image27.png"></p>
+<h3 id="2-为什么-EvilClass-必须继承-AbstractTranslet"><a href="#2-为什么-EvilClass-必须继承-AbstractTranslet" class="headerlink" title="2. 为什么 EvilClass 必须继承 AbstractTranslet"></a>2. 为什么 EvilClass 必须继承 AbstractTranslet</h3><p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cb_image27.png"></p>
 <hr>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>CB 链整体结构和 CC2 非常像，入口都是 <code>PriorityQueue</code>，执行终点都是 <code>TemplatesImpl</code>，核心区别就是中间那一环换掉了：</p>
 <table>
@@ -751,7 +751,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa39" defer></script>
+<script src="/js/main.js?v=mp5bt8l6" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1015,7 +1015,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa3a"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8l6"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

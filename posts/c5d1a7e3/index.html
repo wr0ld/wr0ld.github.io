@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-04-30T03:29:00.000Z">
-<meta property="article:modified_time" content="2026-04-30T03:30:45.299Z">
+<meta property="article:modified_time" content="2026-05-14T10:03:45.615Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="反序列化">
 <meta property="article:tag" content="Shiro">
@@ -67,7 +67,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa1a">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8ja">
 
 
   
@@ -76,7 +76,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-30T11:29:00+08:00","dateModified":"2026-04-30T11:30:45+08:00","datePublished":"2026-04-30T11:29:00+08:00","description":"","headline":"记一次常态化渗透测试：从域名到 Getshell 的思路","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c5d1a7e3/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c5d1a7e3/","keywords":"反序列化, Shiro, 渗透测试, 鉴权绕过","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/o8UyinNBiAABrhcAMPAB5SZHwAIavYgxBEQ11~tplv-dy-vqe2-sr-v2_1920_1079_q80.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-30T11:29:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-04-30T11:29:00+08:00","description":"","headline":"记一次常态化渗透测试：从域名到 Getshell 的思路","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c5d1a7e3/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c5d1a7e3/","keywords":"反序列化, Shiro, 渗透测试, 鉴权绕过","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/o8UyinNBiAABrhcAMPAB5SZHwAIavYgxBEQ11~tplv-dy-vqe2-sr-v2_1920_1079_q80.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -155,7 +155,7 @@
 <hr>
 <h2 id="二、登录框测试"><a href="#二、登录框测试" class="headerlink" title="二、登录框测试"></a>二、登录框测试</h2><p>说实话不是很想测登录框这种东西，大概看了看，就没打算抓包仔细测了。</p>
 <p>登录方式有两种：账号密码 和 手机号。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image1.png"></p>
 <p>随便用了几个弱口令，比如 <code>admin</code>、<code>admin123</code>，登录失败，<strong>发现验证码没有刷新</strong>，这是个可以记一下的点——但是有账号错误次数限制，爆破也不现实。</p>
 <p>手机号那边也不能随便填，会提示账号不存在，说明是先校验了账号是否存在再做后续逻辑，这样爆破也没意义。</p>
 <blockquote>
@@ -171,16 +171,16 @@
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span>alert(1)<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>页面上什么都没显示：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image2.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image2.png"></p>
 <p>右键搜索也没找到自己写的内容，看起来有过滤，不急，先继续收集信息。</p>
 <p>用 BP 登录后抓包，回显的却是 302 重定向：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image3.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image3.png"></p>
 <p>猜测评论接口需要登录鉴权。因为用的是 BP 内置浏览器，没有登录的,  换成登录状态后发包，正常返回 200，但不管发什么内容都是固定回显：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image4.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image4.png"></p>
 <p>没什么直接利用价值，先放着。</p>
 <hr>
 <h2 id="四、目录扫描——发现关键接口"><a href="#四、目录扫描——发现关键接口" class="headerlink" title="四、目录扫描——发现关键接口"></a>四、目录扫描——发现关键接口</h2><p>用 Kali 的 <strong>Dirsearch</strong> 扫了一下目录：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260429181803549.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260429181803549.png"></p>
 <p>这里有<strong>重大发现</strong>，扫出了两个关键路径：</p>
 <ul>
 <li><code>/;admin</code> — Shiro 鉴权绕过路径</li>
@@ -201,9 +201,9 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/login_toLogin.do</span><br></pre></td></tr></table></figure>
 
 <p>返回结果全是空白页面，抓包发现是 302 重定向：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image6.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image6.png"></p>
 <p>利用分号绕过，访问 <code>/;admin/login_toLogin.do</code>，返回 200 但是”非法访问”：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image7.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image7.png"></p>
 <p>换成 POST 发包还是一样，看来是<strong>参数问题</strong>，但不知道具体参数名是什么，暂时放弃这条路。</p>
 <blockquote>
 <p><strong>思路</strong>：遇到这种情况可以考虑基于 HTTP 状态码差分分析做黑盒参数探测——对不同参数名&#x2F;值逐一测试，通过响应差异推断后端逻辑。</p>
@@ -211,7 +211,7 @@
 <hr>
 <h2 id="七、上传接口黑盒测试"><a href="#七、上传接口黑盒测试" class="headerlink" title="七、上传接口黑盒测试"></a>七、上传接口黑盒测试</h2><p>开始测试 <code>/common/upload.do</code>。</p>
 <p>直接 GET 访问，返回 <strong>405</strong>（Method Not Allowed）：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image8.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image8.png"></p>
 <p>换成 POST，返回 <strong>200 OK，但响应体里包着 500 异常</strong>。这种现象很典型——请求格式对了，但参数不对，服务端逻辑跑到一半报错了。</p>
 <p>在 Java SpringMVC 框架里，后端接收文件通常用 <code>MultipartFile file</code> 参数，所以构造一个 <code>multipart/form-data</code> 请求：</p>
 <figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">POST</span> <span class="string">/common/upload.do</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Content-Type</span><span class="punctuation">: </span>multipart/form-data; boundary=----WebKitFormBoundaryCheckParam</span><br><span class="line"><span class="attribute">Connection</span><span class="punctuation">: </span>keep-alive</span><br><span class="line"></span><br><span class="line"><span class="language-pgsql"><span class="comment">------WebKitFormBoundaryCheckParam</span></span></span><br><span class="line"><span class="language-pgsql">Content-Disposition: form-data; <span class="type">name</span>=&quot;file&quot;; filename=&quot;test.txt&quot;</span></span><br><span class="line"><span class="language-pgsql">Content-<span class="keyword">Type</span>: <span class="type">text</span>/plain</span></span><br><span class="line"><span class="language-pgsql"></span></span><br><span class="line"><span class="language-pgsql">test_content</span></span><br><span class="line"><span class="language-pgsql"><span class="comment">------WebKitFormBoundaryCheckParam--</span></span></span><br></pre></td></tr></table></figure>
@@ -225,7 +225,7 @@
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;path&quot;</span><span class="punctuation">:</span><span class="string">&quot;/upload/null/20260429/test_423.pdf&quot;</span><span class="punctuation">,</span><span class="attr">&quot;fileNewName&quot;</span><span class="punctuation">:</span><span class="string">&quot;test_423.pdf&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
 
 <p>直接访问这个路径，文件确实可以访问：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image9.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image9.png"></p>
 <p>这里有个很有意思的细节——<strong>路径里有个 <code>null</code> 文件夹</strong>。</p>
 <p>这说明后端在拼接路径的时候，代码逻辑大概是这样的：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">savePath = <span class="string">&quot;/upload/&quot;</span> + dir + <span class="string">&quot;/&quot;</span> + date + <span class="string">&quot;/&quot;</span> + filename;</span><br></pre></td></tr></table></figure>
@@ -259,11 +259,11 @@
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"><span class="title function_">alert</span>(<span class="variable language_">document</span>.<span class="property">cookie</span>);</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>上传后访问，cookie 弹窗正常触发：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image10.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image10.png"></p>
 <p>这个存储型 XSS 是确实存在的，但 Cookie 能不能利用还得看有没有 <code>HttpOnly</code>，这里先记录，换个思路继续挖。</p>
 <hr>
 <h2 id="十、JS-接口挖掘（幻影插件）"><a href="#十、JS-接口挖掘（幻影插件）" class="headerlink" title="十、JS 接口挖掘（幻影插件）"></a>十、JS 接口挖掘（幻影插件）</h2><p>换个方向，从 JS 代码里找接口。用的是<strong>幻影</strong>这个插件，做深度扫描：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image11.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image11.png"></p>
 <p>扫出来的内容还挺多，还能导出 Excel，很方便。</p>
 <hr>
 <h2 id="十一、越权接口"><a href="#十一、越权接口" class="headerlink" title="十一、越权接口"></a>十一、越权接口</h2><p>在扫描结果里，找到了和评论功能相关的三个接口，经过测试，在未授权&#x2F;越权状态下均可操作：</p>
@@ -279,7 +279,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/druid/index.html</span><br></pre></td></tr></table></figure>
 
 <p>访问后需要账号密码：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image12.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image12.png"></p>
 <p>去网上查了一下默认密码，对不上，暂时先放着。</p>
 <blockquote>
 <p><strong>Druid 监控台</strong>（<code>com.alibaba.druid</code>）是 Java 应用常见的连接池监控组件，默认配置下可能暴露 SQL 查询记录、会话信息、接口调用统计等，是信息收集的好地方。默认密码一般是 <code>admin/admin</code> 或者 <code>druid/druid</code>。</p>
@@ -289,25 +289,25 @@
 <p><code>/;admin</code> 越权本质上是 Shiro 的漏洞，虽然登录框没有”记住我”这种明显入口，但抓包发现部分回显包里有：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rememberMe=deleteMe</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image13.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image13.png"></p>
 <p>这就说明后端用了 Shiro，<code>deleteMe</code> 是 Shiro 在认为 Cookie 无效时的固定回应，反而把自己暴露了。既然确认了 Shiro，那就顺着测一下反序列化。</p>
 <p><strong>Key 爆破</strong></p>
 <p>用的是 GitHub 上的工具：<a target="_blank" rel="noopener" href="https://github.com/SummerSec/ShiroAttack2">ShiroAttack2</a></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image14.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image14.png"></p>
 <p>直接填域名检测不到 Shiro，因为并不是所有页面都走 Shiro 鉴权，要找一个有鉴权的目录填进去，才能正常爆破。</p>
 <p>但爆破的时候提示”未读取到可用于爆破的 Key 列表”，应该是工具没找到字典，换了一个工具继续尝试，惊喜出现了：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[++] 找到 key：4AvVhmFLUs0KTA3Kprsdag==</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260429182705483.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260429182705483.png"></p>
 <p>这个 Key 就是 Shiro 的 <code>rememberMe</code> Cookie 加解密密钥，很多系统用的默认密钥或者弱密钥，网上有现成字典。</p>
 <p><strong>链爆破</strong></p>
 <p>把密钥填回 ShiroAttack2，点击”全部链爆破”——<strong>结果全部失败</strong>。</p>
 <p>刚准备自己用 URLDNS 链测一下的时候，AI 提醒我可能是 Cookie 的问题，一下就点醒我了，填上了一行正确的 Cookie 后再试：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CommonsBeanutils1（CB1）链成功</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260429182808529.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260429182808529.png"></p>
 <p>切换到命令执行界面，<code>whoami</code>、<code>id</code>、<code>ifconfig</code> 一顿乱敲，完全没有问题，而且是 <strong>root 权限</strong>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image17.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image17.png"></p>
 <blockquote>
 <p><strong>关于 CB1 链</strong>：<code>CommonsBeanutils1</code> 是利用 <code>commons-beanutils</code> 组件的反序列化链，不依赖 <code>commons-collections</code>，在很多裁剪了 CC 依赖的环境里依然可用，是 Shiro 利用的高频链之一。这里 Cookie 问题指的是请求里的 Session Cookie 影响了服务端的反序列化处理逻辑，加上对应的认证 Cookie 后请求才能被正确路由。</p>
 </blockquote>
@@ -333,7 +333,7 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /opt/xxx/tomcat/webapps/ROOT/WEB-INF/web.xml</span><br></pre></td></tr></table></figure>
 
 <p>找到了 Druid 的账号密码，直接登录监控后台：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E6%96%87%E7%AB%A0_image18.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E6%96%87%E7%AB%A0_image18.png"></p>
 <p>看了一下里面的内容，对于已经有命令执行权限的我来说，Druid 后台能给的信息价值相对就没那么大了。</p>
 <p><strong>历史命令 &amp; 数据库配置</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /root/.bash_history</span><br></pre></td></tr></table></figure>
@@ -819,7 +819,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa1c" defer></script>
+<script src="/js/main.js?v=mp5bt8jc" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1083,7 +1083,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa1c"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8jc"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

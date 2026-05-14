@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-04-09T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-05-01T02:36:28.133Z">
+<meta property="article:modified_time" content="2026-05-14T10:03:45.605Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -69,7 +69,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa2t">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8ks">
 
 
   
@@ -78,7 +78,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-09T12:00:00+08:00","dateModified":"2026-05-01T10:36:28+08:00","datePublished":"2026-04-09T12:00:00+08:00","description":"","headline":"原理分析 | Filter —— Tomcat 内存马从零到注入","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/7b9eb72d/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/7b9eb72d/","keywords":"代码审计, Java, Tomcat, Filter, 内存马, RCE","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/a53ac47220f258c36a78197dace351f3-scaled.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-09T12:00:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-04-09T12:00:00+08:00","description":"","headline":"原理分析 | Filter —— Tomcat 内存马从零到注入","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/7b9eb72d/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/7b9eb72d/","keywords":"代码审计, Java, Tomcat, Filter, 内存马, RCE","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/a53ac47220f258c36a78197dace351f3-scaled.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -145,27 +145,27 @@
 </ul>
 <hr>
 <h2 id="一、快速搭建环境"><a href="#一、快速搭建环境" class="headerlink" title="一、快速搭建环境"></a>一、快速搭建环境</h2><h3 id="创建项目"><a href="#创建项目" class="headerlink" title="创建项目"></a>创建项目</h3><p>先在 IDEA 里快速创建一个 Jakarta EE（原 Java EE）项目。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image1.png"></p>
 <p>注意：Jakarta EE 高版本需要高版本的 JDK，这里换成低版本的 Java EE 8 就行。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image2.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image2.png"></p>
 <h3 id="导入-Tomcat-依赖"><a href="#导入-Tomcat-依赖" class="headerlink" title="导入 Tomcat 依赖"></a>导入 Tomcat 依赖</h3><p>导入 Tomcat 的本地依赖 <code>lib/</code>，把整个 lib 目录加进去（也可以用 Maven 重新下载）。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image3.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image3.png"></p>
 <h3 id="配置热加载"><a href="#配置热加载" class="headerlink" title="配置热加载"></a>配置热加载</h3><p>修改配置支持热加载（也可以在 xml 里配置）。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image4.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image4.png"></p>
 <blockquote>
 <p>如果终端出现中文乱码，可以添加启动参数 <code>-Dfile.encoding=UTF-8</code></p>
 </blockquote>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image5.png"></p>
-<h3 id="直接启动"><a href="#直接启动" class="headerlink" title="直接启动"></a>直接启动</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image6.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image5.png"></p>
+<h3 id="直接启动"><a href="#直接启动" class="headerlink" title="直接启动"></a>直接启动</h3><p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image6.png"></p>
 <p>没有报错，环境搭好了。</p>
 <hr>
 <h2 id="二、Filter-是什么，正常怎么用"><a href="#二、Filter-是什么，正常怎么用" class="headerlink" title="二、Filter 是什么，正常怎么用"></a>二、Filter 是什么，正常怎么用</h2><p>先写一个最简单的 Filter 例子，比如”记录每次请求的 IP”。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> org.example.filter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> javax.servlet.*;</span><br><span class="line"><span class="keyword">import</span> javax.servlet.annotation.WebFilter;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"></span><br><span class="line"><span class="meta">@WebFilter(&quot;/*&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LogFilter</span> <span class="keyword">implements</span> <span class="title class_">Filter</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">(FilterConfig filterConfig)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;LogFilter 初始化&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">doFilter</span><span class="params">(ServletRequest request, ServletResponse response, FilterChain chain)</span></span><br><span class="line">            <span class="keyword">throws</span> IOException, ServletException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">ip</span> <span class="operator">=</span> request.getRemoteAddr();</span><br><span class="line">        System.out.println(<span class="string">&quot;请求来自：&quot;</span> + ip);</span><br><span class="line">        <span class="comment">// 放行，继续执行后续 Filter 或 Servlet</span></span><br><span class="line">        chain.doFilter(request, response);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">destroy</span><span class="params">()</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;LogFilter 销毁&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>启动 web 后随便访问一个网页 <code>http://localhost:8080/</code>，控制台输出了一次初始化，每次请求都会多一条记录。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image7.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image7.png"></p>
 <p>点击红色方框停止服务。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image8.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image8.png"></p>
 <p>显示 <code>LogFilter 销毁</code>。</p>
 <hr>
 <h3 id="代码解释"><a href="#代码解释" class="headerlink" title="代码解释"></a>代码解释</h3><p><strong><code>@WebFilter(&quot;/*&quot;)</code></strong></p>
@@ -209,7 +209,7 @@
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 声明 Filter：给 Filter 起个内部名字，并指定它对应的 Java 类 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>logFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-class</span>&gt;</span>org.example.filter.LogFilter<span class="tag">&lt;/<span class="name">filter-class</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- 映射 Filter：告诉 Tomcat 这个 Filter 要拦截哪些 URL --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">filter-mapping</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">filter-name</span>&gt;</span>logFilter<span class="tag">&lt;/<span class="name">filter-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>/*<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">filter-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>效果：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image9.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image9.png"></p>
 <p><strong><code>&lt;filter&gt;</code> 部分：</strong></p>
 <table>
 <thead>
@@ -251,7 +251,7 @@
 </tr>
 </tbody></table>
 <p>此时把代码注释后，仍然可以以相同的方式触发 Filter（因为 web.xml 里已经配好了）。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/Filter_image10.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/Filter_image10.png"></p>
 <hr>
 <h3 id="两种静态注册方式对比"><a href="#两种静态注册方式对比" class="headerlink" title="两种静态注册方式对比"></a>两种静态注册方式对比</h3><table>
 <thead>
@@ -912,7 +912,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa2x" defer></script>
+<script src="/js/main.js?v=mp5bt8kv" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1176,7 +1176,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa2x"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8kv"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

