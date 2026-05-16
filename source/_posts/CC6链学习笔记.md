@@ -1,7 +1,7 @@
 ---
 title: 代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial
 cover: >-
-  https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/0815e0c55ab65f736be46eb2a8a7d9ca.webp
+  https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/0815e0c55ab65f736be46eb2a8a7d9ca.webp
 categories:
   - [代码审计, cc]
 tags:
@@ -136,11 +136,11 @@ Map lazyMap = LazyMap.decorate(innerMap, chain);
 
 TiedMapEntry 也是 commons-collections 里的一个类，它持有一个 map 和一个 key。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image1.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image1.png)
 
 它的 getValue() 方法：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image2.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image2.png)
 
 ```java
 public Object getValue() {
@@ -161,7 +161,7 @@ entry.getValue(); // 此时可以直接触发
 
 key 的值没有严格要求，随便写一个字符串就行。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image3.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image3.png)
 
 ---
 
@@ -169,9 +169,9 @@ key 的值没有严格要求，随便写一个字符串就行。
 
 在 TiedMapEntry 的同一个文件里，找到了 hashCode() 方法，它内部会调用 getValue()：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image4.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image4.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image5.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image5.png)
 
 看到这里可能会觉得：`getValue()` 和 `hashCode()` 不都能直接触发吗，有什么区别？
 
@@ -183,7 +183,7 @@ key 的值没有严格要求，随便写一个字符串就行。
 
 看一下 HashSet 的 readObject() 方法：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image6.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image6.png)
 
 ```java
 // HashSet.readObject() 简化逻辑
@@ -195,11 +195,11 @@ for (int i = 0; i < size; i++) {
 
 跟进 `map.put(e, PRESENT)` 会发现内部会调用 put 函数：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image7.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image7.png)
 
 然后是 hash 函数：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image8.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image8.png)
 
 这里的 key 就是 `map.put(e, PRESENT)` 里的 e，也就是我们的 TiedMapEntry，所以最终会调用 `TiedMapEntry.hashCode()`。
 
@@ -211,7 +211,7 @@ for (int i = 0; i < size; i++) {
 
 调用链搞清楚之后，开始动手构造 HashSet 对象。可以看到 HashSet 的构造方法不需要传参：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image9.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image9.png)
 
 但如果直接写成这样：
 
@@ -225,7 +225,7 @@ HashSet hashSet = new HashSet();
 
 此时 HashSet 和 TiedMapEntry 还没有关联，没有效果：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image10.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image10.png)
 
 需要把 TiedMapEntry 添加进 HashSet，才能在 readObject 的 for 循环里被遍历到。构造方法不传参，所以用 add：
 
@@ -237,7 +237,7 @@ hashSet.add(entry);
 
 但这里就碰到问题了。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image11.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image11.png)
 
 **add() 方法内部也会调用 `map.put(e, PRESENT)`**，这意味着在本地添加元素的时候就已经触发了一次 hashCode()，链子直接在序列化阶段就跑了。
 
@@ -261,11 +261,11 @@ try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("paylo
 
 序列化的时候就被触发了：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image12.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image12.png)
 
 反序列化的时候反而没有触发：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image13.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image13.png)
 
 ---
 
@@ -273,7 +273,7 @@ try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("paylo
 
 问题出在 LazyMap 的 get() 方法里的缓存机制：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image14.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image14.png)
 
 ```java
 public Object get(Object key) {
@@ -354,11 +354,11 @@ public class CC6Simple {
 
 运行效果：序列化时弹一次（因为 add 触发），但 innerMap 已被清空：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image15.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image15.png)
 
 反序列化时正常触发：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image16.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image16.png)
 
 ---
 
@@ -444,15 +444,15 @@ ysoserial 里也有 CC6 的实现，可以直接用：
 java -jar ysoserial.jar CommonsCollections6 "calc" > cc6.ser
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image17.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image17.png)
 
 把生成的 cc6.ser 放到项目根目录，用之前写的反序列化代码跑一下，可以正常触发：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image18.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image18.png)
 
 在 `ysoserial/payloads/` 下能找到 CommonsCollections6.class：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/cc6_image19.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/cc6_image19.png)
 
 看了下源码，ysoserial 的实现思路大差不差，不过它不是先传假链，而是直接传了一个无害字符串占位，然后通过反射直接修改底层的链条。另外原版还做了更多细节处理来保证兼容性，总体思路是一致的。
 

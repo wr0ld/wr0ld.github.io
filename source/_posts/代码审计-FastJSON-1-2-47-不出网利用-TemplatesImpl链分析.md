@@ -8,7 +8,7 @@ tags:
   - RCE
   - TemplatesImpl
 cover: >-
-  https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image2.png
+  https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image2.png
 abbrlink: f70df821
 date: 2026-03-27 00:00:00
 ---
@@ -44,7 +44,7 @@ date: 2026-03-27 00:00:00
 |---|---|---|
 | 是否出网 | ✅ 需要出网（JNDI 连接 RMI/LDAP）| ❌ 不需要出网 |
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image1.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image1.png)
 
 TemplatesImpl 链利用缓存机制，无需开启：
 
@@ -177,7 +177,7 @@ public class BytecodeGenerator {
 
 **效果：**
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image2.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image2.png)
 
 ---
 
@@ -185,7 +185,7 @@ public class BytecodeGenerator {
 
 前面步骤差不多，直接跳到读取检测完 step2 的 `com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl` 值这里开始。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image3.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image3.png)
 
 FastJSON 检测到 `_outputProperties:{}` 之后，根据 FastJSON 的特性会去执行对应的 getter 方法，写成 `outputProperties:{}` 也可以，FastJSON 会自动处理下划线的问题。
 
@@ -207,11 +207,11 @@ public synchronized Properties getOutputProperties() {
 
 调用了 `newTransformer().getOutputProperties()`，跟进去。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image4.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image4.png)
 
 进入 `new TransformerImpl(getTransletInstance(), _outputProperties, _indentNumber, _tfactory)`
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image5.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image5.png)
 
 ---
 
@@ -227,7 +227,7 @@ if (_name == null) return null; // ← _name 不能为 null！
 
 **`_name` 必须不为 null**，第一行就判断，`_name` 是 null 直接 return，后面什么都不执行。所以前面 Payload 里的 `_name` 值必须有值，什么字符串都可以，随便写。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image6.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image6.png)
 
 ---
 
@@ -237,7 +237,7 @@ if (_name == null) return null; // ← _name 不能为 null！
 
 在这里可以看到要开始加载 `_bytecodes` 了，但显然是有值的，不会停在这里。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image7.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image7.png)
 
 ---
 
@@ -255,7 +255,7 @@ TransletClassLoader loader = new TransletClassLoader(
 
 > 注意：这个调用只在低版本 JDK 里存在，高版本 JDK 已经去掉了这行，直接构造 ClassLoader 不再依赖 `_tfactory`。所以这里的行为跟你的 JDK 版本有关。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image8.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image8.png)
 
 ---
 
@@ -263,7 +263,7 @@ TransletClassLoader loader = new TransletClassLoader(
 
 接着来到这里，这里就是加载 `_bytecodes` 的地方，把读取的内容给了 `superClass`。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image9.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image9.png)
 
 ---
 
@@ -289,7 +289,7 @@ if (_transletIndex < 0) {
 
 > 另外 `AbstractTranslet` 有两个抽象方法必须实现，否则编译就过不了，在恶意类里空实现一下就行，不需要写任何逻辑。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image10.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image10.png)
 
 ---
 
@@ -297,7 +297,7 @@ if (_transletIndex < 0) {
 
 退出来后执行了 `.newInstance()`，计算器就弹出来了——实例化触发，构造方法里的 `exec` 执行。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image11.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/%E4%B8%8D%E5%87%BA%E7%BD%9147TemplatesImpl%20%E9%93%BE_image11.png)
 
 ---
 

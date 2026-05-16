@@ -1,6 +1,6 @@
 ---
 title: 工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展
-cover: https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image3.png
+cover: https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image3.png
 categories:
   - 安全工具
   - 工具魔改
@@ -74,7 +74,7 @@ go build -ldflags="-s -w -H=windowsgui" -trimpath -o fscan_no_window.exe main.go
 
 > ⚠️ 测试结果：只改变编译模式，火绒直接杀了，说明单纯去符号表不够用。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image1.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image1.png)
 
 ---
 
@@ -154,23 +154,23 @@ go build -o scanner.exe main.go
 
 > ✅ 火绒过
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image2.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image2.png)
 
 > ✅ 360 静态过、杀毒、安全卫士、核晶体全过？？？？？？？？？
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image3.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image3.png)
 
 > 动态也能过？？？？？？？？
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image4.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image4.png)
 
 > Defender 动态也能过？？？？？？？？
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image5.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image5.png)
 
 > ❌ 卡巴斯基静态被杀
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image6.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image6.png)
 
 ---
 
@@ -202,15 +202,15 @@ go mod tidy
 garble -seed=random build -o scanner.exe main.go
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image7.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image7.png)
 
 > ✅ 火绒能过
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image8.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image8.png)
 
 > ❌ 卡巴斯基依旧被杀
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image9.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image9.png)
 
 ### 4.3 试 UPX 加壳
 
@@ -220,7 +220,7 @@ garble -seed=random build -o scanner.exe main.go
 upx --best scanner.exe -o scanner_upx.exe
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image10.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image10.png)
 
 > ❌ 卡巴斯基依旧被杀，然后 Defender 也杀了，加壳反而不行，过了段时间 360 也报了。**加壳适得其反，不建议使用。**
 
@@ -228,7 +228,7 @@ upx --best scanner.exe -o scanner_upx.exe
 
 使用 **Restorator.exe** 修改 PE 资源信息，添加图标、版本号、公司名等，伪装成正常软件：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image11.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image11.png)
 
 > ⚠️ 没有效果。PE 资源伪装主要对付人眼识别，对杀软引擎的启发式检测基本没用。
 
@@ -246,11 +246,11 @@ garble -seed=random -literals build -o scanner.exe main.go
 
 > ✅ 结果：卡巴斯基静态能过，Defender 被检测但只是禁止运行没有删除，应该是被 AMSI 检测了。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image12.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image12.png)
 
 > ⚠️ 卡巴斯基动态运行一半就被杀了，检测到 POC 加载触发了，如果没扫到 POC 应该还是能稳一下的。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image13.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image13.png)
 
 ---
 
@@ -359,21 +359,21 @@ x86_64-w64-mingw32-gcc -o scanner_loader.exe main.c -static
 .\scanner_loader.exe -h 192.168.168.0/24
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image14.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image14.png)
 
 > ✅ 可以正常运行，扫描结果完整输出。
 
 > ✅ 360 正常都能过
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image15.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image15.png)
 
 > ✅ Defender 都能过
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image16.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image16.png)
 
 > ❌ 卡巴斯基静态把 DLL 删了
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image17.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image17.png)
 
 > 💡 卡巴删的是 DLL，说明检测的是 DLL 内的 POC 行为特征，不是 loader。进一步绕过方向：内存加载 DLL（后续文章）。
 
@@ -437,7 +437,7 @@ go build -o scanner.exe main.go
 .\scanner.exe -h 192.168.168.128 -p 2181
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/fscan_image18.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/fscan_image18.png)
 
 > ✅ 成功检测到 Zookeeper 未授权访问，插件列表里也能看到 `zookeeper` 已注册。
 

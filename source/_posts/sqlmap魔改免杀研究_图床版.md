@@ -1,6 +1,6 @@
 ---
 title: 工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗
-cover: https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260317180841876.png
+cover: https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180841876.png
 categories:
   - 安全工具
   - 工具魔改
@@ -81,7 +81,7 @@ docker logs modsec-waf > waf_log.txt 2>&1
 http.request && ip.dst == 127.0.0.1
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260317180204114.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180204114.png)
 
 一眼就能看到问题：
 
@@ -187,7 +187,7 @@ def checkSums():
 
 可以正常运行
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/sqlmap_image1.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/sqlmap_image1.png)
 
 Banner 已经变了，不再有 sqlmap 字样 ✅
 
@@ -216,7 +216,7 @@ if "Referer" not in headers and conf.url:
 
 用小蓝鲨抓包对比，魔改后的请求头：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260317180540816.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180540816.png)
 
 UA 已经变成 Chrome，各种请求头都补齐了，跟正常浏览器访问几乎一样 ✅
 
@@ -297,7 +297,7 @@ if retVal:
 
 混淆后的 payload 效果：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260317180841876.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260317180841876.png)
 
 随机大小写 + 空格替换+末尾注释都生效了 ✅
 

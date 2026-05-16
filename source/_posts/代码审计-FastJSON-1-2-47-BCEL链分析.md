@@ -8,7 +8,7 @@ tags:
   - BCEL
   - RCE
 cover: >-
-  https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png
+  https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png
 abbrlink: e90faa78
 date: 2026-03-28 15:00:00
 ---
@@ -70,11 +70,11 @@ FastJSON 反序列化完成之后，会主动扫描类里所有的方法，满�
 
 举个对比例子，TemplatesImpl 链里的 payload 是这样的：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image1.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image1.png)
 
 会触发 `getOutputProperties()`：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image2.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image2.png)
 
 其实 `_outputProperties` 这个字段写不写都行，即使删掉了也依然能执行成功——因为 `getOutputProperties()` 同样满足自动扫描的条件，FastJSON 会自己触发它。
 
@@ -108,7 +108,7 @@ JSON 里有 "driverClassName"  →  找 setDriverClassName()  →  调用
 </dependency>
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image3.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image3.png)
 
 ---
 
@@ -205,7 +205,7 @@ setDriverClassLoader(final ClassLoader driverClassLoader)
 
 效果：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image4.png)
 
 ---
 
@@ -225,7 +225,7 @@ setDriverClassLoader(final ClassLoader driverClassLoader)
 
 这里传入的是一个类对象，因此前面的 payload 里 `driverClassLoader` 必须用 `@type` 实例化一个类，不然不能正常运行。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image5.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image5.png)
 
 可以看到传进来的参数 `driverClassLoader: ClassLoader@852`，是一个真实的 BCEL ClassLoader 实例，不是 null，赋值前 `this.driverClassLoader` 是 null，这行执行完就注入进去了。
 
@@ -233,7 +233,7 @@ setDriverClassLoader(final ClassLoader driverClassLoader)
 
 接着来到 `setDriverClassName`：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image6.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image6.png)
 
 把 `$$BCEL$$...` 字符串注入进去。
 
@@ -241,7 +241,7 @@ setDriverClassLoader(final ClassLoader driverClassLoader)
 
 接着看到了 `method.invoke(object, value)` 反射调用：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image7.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image7.png)
 
 这就是 FastJSON setter 触发的底层实现，不是直接调 `setDriverClassName()`，而是通过反射调用，所以看到的是 `method.invoke` 而不是直接的方法调用。
 
@@ -249,7 +249,7 @@ setDriverClassLoader(final ClassLoader driverClassLoader)
 
 setter 阶段完成后，FastJSON 自动扫描到 `getConnection()` 符合条件，主动触发：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image8.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image8.png)
 
 `IS_SECURITY_ENABLED = false`，直接走最后一行：
 
@@ -261,15 +261,15 @@ return createDataSource().getConnection();
 
 进入 `createDataSource()`：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image9.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image9.png)
 
 接着进入 `createConnectionFactory()`：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image10.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image10.png)
 
 因为 `driverClassName` 不为空可以继续执行：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image11.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image11.png)
 
 就是之前写的 `$$BCEL$$$l$8b$I$A$A$A$A$A...`
 
@@ -281,7 +281,7 @@ return createDataSource().getConnection();
 driverFromCCL = Class.forName(driverClassName, true, driverClassLoader);
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/1.2.47%20BCEL%20%E9%93%BE_image12.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/1.2.47%20BCEL%20%E9%93%BE_image12.png)
 
 三个参数各司其职：
 

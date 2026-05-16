@@ -108,8 +108,8 @@ footer:
 category_order:
   - 其他
   - 实战
-  - 代码审计
   - 安全工具
+  - 代码审计
   - Windows
   - linux
   - web
@@ -118,14 +118,15 @@ category_order:
 ######## Subcategory Order ########
 subcategory_order:
   代码审计:
+    - struts2
     - 内存马
     - log4j
     - shiro
     - cc
     - fastjson
   安全工具:
-    - 工具魔改
     - 工具
+    - 工具魔改
   linux:
     - 靶机渗透
     - vulnhub-DC

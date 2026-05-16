@@ -15,18 +15,27 @@ icon: 📋
 items:
   - content: 内存马 → 检测查杀
     status: doing
+    
+  - content: rootkit 的 shellcode 嵌入
+    status: doing
+
+  - content: docker容器逃逸 
+    status: doing
+
+  - content: js原型链污染
+    status: doing
 
   - content: log4j 内存马+jndi urldns grov
     status: doing
 
-  - content: EDUSRC实战漏洞挖掘复盘脱敏
-    status: doing
+
+
+
 
   - content: 小迪vpc1-5 Windows系统web内网横向域内
     status: doing
     
-  - content: rootkit 的 shellcode 嵌入
-    status: doing
+
     
   - content: fastjson 1.2.68 → 1.2.80
     status: doing
@@ -46,7 +55,8 @@ items:
   - content: 云上服务
     status: doing
 
-  - content: docker容器逃逸 
+  - content: EDUSRC实战漏洞挖掘复盘脱敏
     status: doing
+
 # 你也可以添加带优先级的待办
 # priority: high(高) / medium(中) / low(低)

