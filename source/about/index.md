@@ -19,10 +19,10 @@ menu_id: about
       <span class="label">GitHub：</span>
       <span class="value"><a href="https://github.com/wr0ld" target="_blank">github.com/wr0ld</a></span>
     </div>
-    <div class="info-item">
+    <!-- <div class="info-item">
       <span class="label">博客园：</span>
       <span class="value"><a href="https://www.cnblogs.com/wrold" target="_blank">cnblogs.com/wrold</a></span>
-    </div>
+    </div> -->
     <div class="info-item">
       <span class="label">公众号：</span>
       <span class="value">弹不出的5h3ll</span>
