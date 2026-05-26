@@ -27,6 +27,18 @@ page.rightbar = 'catnav'
     
     var customOrder = theme.category_order || ['其他', '实战', '代码审计', '工具魔改', 'Windows', 'linux', 'web', '笔记'];
     
+    function getChildPostIds(parentCat) {
+      var ids = {};
+      site.categories.each(function(cat) {
+        if (cat.parent && cat.parent === parentCat._id) {
+          cat.posts.each(function(post) {
+            ids[post._id] = true;
+          });
+        }
+      });
+      return ids;
+    }
+    
     var rootCategories = [];
     site.categories.each(function(cat) {
       if (!cat.parent) {
@@ -106,6 +118,24 @@ page.rightbar = 'catnav'
                   </div>
                 </div>
               <% }) %>
+              <%
+                var childPostIds = getChildPostIds(parentCat);
+                var directPosts = [];
+                parentCat.posts.each(function(post) {
+                  if (!childPostIds[post._id]) {
+                    directPosts.push(post);
+                  }
+                });
+              %>
+              <% if (directPosts.length > 0) { %>
+                <div class="card-articles parent-articles">
+                  <% directPosts.sort(function(a,b){return b.date - a.date}).forEach(function(post){ %>
+                    <a href="<%= url_for(post.path) %>" class="card-article-link">
+                      <span class="article-title-text"><%- post.title %></span>
+                    </a>
+                  <% }) %>
+                </div>
+              <% } %>
             <% } else { %>
               <div class="card-articles">
                 <% parentCat.posts.sort('-date').each(function(post){ %>
@@ -154,6 +184,26 @@ page.rightbar = 'catnav'
                         <% }) %>
                       </div>
                     <% }) %>
+                    <%
+                      var childPostIds2 = getChildPostIds(parentCat);
+                      var directPosts2 = [];
+                      parentCat.posts.each(function(post) {
+                        if (!childPostIds2[post._id]) {
+                          directPosts2.push(post);
+                        }
+                      });
+                    %>
+                    <% if (directPosts2.length > 0) { %>
+                      <div class="parent-articles-section">
+                        <% directPosts2.sort(function(a,b){return b.date - a.date}).slice(0,5).forEach(function(post){ %>
+                          <a href="<%= url_for(post.path) %>" class="article-link">
+                            <span class="article-bullet"></span>
+                            <span class="article-title"><%- post.title %></span>
+                            <span class="article-date"><%= date(post.date, 'YYYY-MM-DD') %></span>
+                          </a>
+                        <% }) %>
+                      </div>
+                    <% } %>
                   <% } else { %>
                     <% parentCat.posts.sort('-date').limit(5).each(function(post){ %>
                       <a href="<%= url_for(post.path) %>" class="article-link">
@@ -299,6 +349,14 @@ page.rightbar = 'catnav'
 .categories-style-1 .card-count {
   font-size: 12px;
   color: #fff;
+}
+
+.categories-style-1 .parent-articles {
+  margin-bottom: 12px;
+}
+
+.categories-style-1 .parent-articles .card-article-link {
+  color: var(--text-p1, #ddd);
 }
 
 .categories-style-1 .child-category {
