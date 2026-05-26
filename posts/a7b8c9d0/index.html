@@ -1,0 +1,1308 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞 - blog</title>
+
+  
+    <meta name="description" content="拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞 目录 前言 环境搭建 项目结构分析 入口审计：Controller + Security 认证接口测试：&#x2F;auth&#x2F;** 漏洞发现：&#x2F;transaction&#x2F;** 未鉴权 漏洞复现 漏洞总结   前言网上找的一个简单的开源代码审计项目，其实漏洞很简单，只是自己第一次做人工审计，记录一下整">
+<meta property="og:type" content="article">
+<meta property="og:title" content="拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞">
+<meta property="og:url" content="https://wr0ld.github.io/posts/a7b8c9d0/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞 目录 前言 环境搭建 项目结构分析 入口审计：Controller + Security 认证接口测试：&#x2F;auth&#x2F;** 漏洞发现：&#x2F;transaction&#x2F;** 未鉴权 漏洞复现 漏洞总结   前言网上找的一个简单的开源代码审计项目，其实漏洞很简单，只是自己第一次做人工审计，记录一下整">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-05-26T09:00:00.000Z">
+<meta property="article:modified_time" content="2026-05-26T07:50:17.769Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="代码审计">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="SpringBoot">
+<meta property="article:tag" content="Spring Security">
+<meta property="article:tag" content="JWT">
+<meta property="article:tag" content="未授权访问">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="代码审计,Java,SpringBoot,Spring Security,JWT,未授权访问">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=mpmcsjo4">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-05-26T17:00:00+08:00","dateModified":"2026-05-26T15:50:17+08:00","datePublished":"2026-05-26T17:00:00+08:00","description":"","headline":"拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/a7b8c9d0/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/a7b8c9d0/","keywords":"代码审计, Java, SpringBoot, Spring Security, JWT, 未授权访问","thumbnailUrl":"https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145837036.png","image":1}</script>
+  
+</head>
+<body><div class="reading-progress-bar"></div>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><div class="menu-divider"></div><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="相册" href="/gallery/" style="color:#FF9FF3"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12" opacity=".5"/><path fill="currentColor" d="M8.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/><path fill="currentColor" fill-rule="evenodd" d="M12 12c0-.943 0-1.414.293-1.707S13.057 10 14 10h2c.943 0 1.414 0 1.707.293S18 11.057 18 12v2c0 .943 0 1.414-.293 1.707S16.943 16 16 16h-2c-.943 0-1.414 0-1.707-.293S12 14.943 12 14zM2 12c0 4.714 0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464C2 4.93 2 7.286 2 12m1 6l3.296-3.296a1.117 1.117 0 0 1 1.58 0l.374.373a1.117 1.117 0 0 0 1.58 0l3.17-3.17a1.117 1.117 0 0 1 1.58 0L18 14" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets">
+<div class="search-wrapper" id="search-wrapper"><form class="search-form"><a class="search-button" onclick="document.getElementById(&quot;search-input&quot;).focus();"><svg t="1705074644177" viewBox="0 0 1025 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1560" width="200" height="200"><path d="M1008.839137 935.96571L792.364903 719.491476a56.783488 56.783488 0 0 0-80.152866 0 358.53545 358.53545 0 1 1 100.857314-335.166073 362.840335 362.840335 0 0 1-3.689902 170.145468 51.248635 51.248635 0 1 0 99.217358 26.444296 462.057693 462.057693 0 1 0-158.255785 242.303546l185.930047 185.725053a51.248635 51.248635 0 0 0 72.568068 0 51.248635 51.248635 0 0 0 0-72.978056z" p-id="1561"></path><path d="M616.479587 615.969233a50.428657 50.428657 0 0 0-61.498362-5.534852 174.655348 174.655348 0 0 1-177.525271 3.484907 49.403684 49.403684 0 0 0-58.833433 6.76482l-3.074918 2.869923a49.403684 49.403684 0 0 0 8.609771 78.10292 277.767601 277.767601 0 0 0 286.992355-5.739847 49.403684 49.403684 0 0 0 8.404776-76.667958z" p-id="1562"></path></svg></a><input type="text" class="search-input" id="search-input" placeholder="站内搜索"></form><div id="search-result"></div><div class="search-no-result">没有找到内容！</div></div>
+
+<widget class="widget-wrapper slide-up todo-widget collapsible-widget"><div class="widget-header dis-select"><span class="name">任务简报 <span class="todo-count">(14)</span></span></div><div class="widget-body fs14"><div class="todo-list"><div class="todo-item doing"><span class="todo-content">内存马 → 检测查杀</span></div><div class="todo-item doing"><span class="todo-content">rootkit 的 shellcode 嵌入</span></div><div class="todo-item doing"><span class="todo-content">docker容器逃逸</span></div><div class="todo-item doing"><span class="todo-content">k8s</span></div><div class="todo-item doing"><span class="todo-content">js原型链污染</span></div><div class="todo-item doing"><span class="todo-content">log4j 内存马+jndi urldns grov</span></div><div class="todo-item doing"><span class="todo-content">小迪vpc1-5 Windows系统web内网横向域内</span></div><div class="todo-item doing"><span class="todo-content">fastjson 1.2.68 → 1.2.80</span></div><div class="todo-item doing"><span class="todo-content">java cc4 5 7</span></div><div class="todo-item doing"><span class="todo-content">Shiro 721</span></div><div class="todo-item doing"><span class="todo-content">信息收集</span></div><div class="todo-item doing"><span class="todo-content">PHP反序列化 + Pop Chain构造</span></div><div class="todo-item doing"><span class="todo-content">云上服务</span></div><div class="todo-item doing"><span class="todo-content">EDUSRC实战漏洞挖掘复盘脱敏</span></div></div></div></widget>
+</div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner slide-up top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%AE%9E%E6%88%98/">实战</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E5%AE%9E%E6%88%98/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/">代码审计</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-05-26T09:00:00.000Z">2026-05-26</time></span><span class="sep"></span><span class="text word-count">字数：8964</span><span class="sep"></span><span class="text img-count">图片：44</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><h1 id="拿个简单开源-SpringBoot-项目审计练手，顺手找了个未授权漏洞"><a href="#拿个简单开源-SpringBoot-项目审计练手，顺手找了个未授权漏洞" class="headerlink" title="拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞"></a>拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞</h1><hr>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E5%89%8D%E8%A8%80">前言</a></li>
+<li><a href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA">环境搭建</a></li>
+<li><a href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90">项目结构分析</a></li>
+<li><a href="#%E5%85%A5%E5%8F%A3%E5%AE%A1%E8%AE%A1controller--security">入口审计：Controller + Security</a></li>
+<li><a href="#%E8%AE%A4%E8%AF%81%E6%8E%A5%E5%8F%A3%E6%B5%8B%E8%AF%95auth">认证接口测试：&#x2F;auth&#x2F;**</a></li>
+<li><a href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0transaction-%E6%9C%AA%E9%89%B4%E6%9D%83">漏洞发现：&#x2F;transaction&#x2F;** 未鉴权</a></li>
+<li><a href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0">漏洞复现</a></li>
+<li><a href="#%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93">漏洞总结</a></li>
+</ul>
+<hr>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>网上找的一个简单的开源代码审计项目，其实漏洞很简单，只是自己第一次做人工审计，记录一下整个思路过程。</p>
+<hr>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><p>下载源码，发现只有后端代码，没有前端，是个 Maven 项目，数据库用的是 PostgreSQL , 用 Docker 替代搭建一下环境。</p>
+<p>看看项目的结构，50 个文件左右，文件算少的了。</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145658293.png"></p>
+<hr>
+<h2 id="项目结构分析"><a href="#项目结构分析" class="headerlink" title="项目结构分析"></a>项目结构分析</h2><h3 id="目录划分"><a href="#目录划分" class="headerlink" title="目录划分"></a>目录划分</h3><p>先大概分析一下各目录的职责：</p>
+<ul>
+<li><strong>config</strong>：放配置类，比如 OpenAPI、Swagger 之类</li>
+<li><strong>controller</strong>：外部入口，HTTP 请求先到这里，SpringBoot 控制器，之前的内存马也是这个层</li>
+<li><strong>entity</strong>：里面都是实体对象</li>
+</ul>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145700198.png"></p>
+<ul>
+<li><strong>exception</strong>：异常处理，全局报错怎么返回</li>
+<li><strong>mapper</strong>：实体转换相关</li>
+</ul>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145702324.png"></p>
+<ul>
+<li><strong>security</strong>：安全相关，JWT、过滤器、权限配置。<strong>这里很值得关注，往往这里就存在漏洞或者不严格的鉴权</strong></li>
+<li><strong>utils</strong>：工具类</li>
+<li><strong>BankManagementSystemApplication</strong>：程序启动入口</li>
+<li><strong>resources&#x2F;application.properties</strong>：配置文件，数据库连接等通常在这里</li>
+</ul>
+<hr>
+<h3 id="MVC-架构补充"><a href="#MVC-架构补充" class="headerlink" title="MVC 架构补充"></a>MVC 架构补充</h3><p>顺带理一下这个项目用的 MVC 架构是什么：</p>
+<p>MVC &#x3D; <strong>M</strong>odel + <strong>V</strong>iew + <strong>C</strong>ontroller，是一种把程序分工拆开的思路。</p>
+<p><strong>1. Controller（控制器）</strong></p>
+<p>负责：接收用户请求、决定调用谁处理、把结果返回出去。在 Web 项目里通常就是：处理 URL、处理 GET&#x2F;POST、接收参数、返回 JSON &#x2F; 页面。</p>
+<p>Controller 总共 5 个文件：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145704033.png"></p>
+<p>都是标准的 Controller 文件写法，用来处理 URL 路由规则的。</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145705696.png"></p>
+<p><strong>2. View（视图）</strong></p>
+<p>负责：把结果展示给用户看。传统 MVC 里，这通常是 HTML 页面、JSP、Thymeleaf、模板引擎页面。</p>
+<p><strong>这个项目里几乎没有 View</strong>，因为这是个前后端分离&#x2F;纯后端 API 项目，它不负责渲染页面，只是返回 JSON。</p>
+<p><strong>3. Model（模型）</strong></p>
+<p>负责：业务数据、业务规则、数据处理。但在现代 Spring 项目里，Model 往往不会只放一个目录，而是拆成很多层。</p>
+<p>在这个项目里，Model 被拆成了：</p>
+<ul>
+<li><code>entity</code>：数据库实体</li>
+<li><code>model</code>：请求&#x2F;响应数据结构</li>
+<li><code>service</code>：业务逻辑</li>
+<li><code>repository</code>：数据库读写</li>
+<li><code>mapper</code>：对象转换</li>
+</ul>
+<p>文件看着挺多：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145708772.png"></p>
+<p>但实际上的代码因为分得比较细，每个文件内容都很少。</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145710900.png"></p>
+<hr>
+<h2 id="入口审计：Controller-Security"><a href="#入口审计：Controller-Security" class="headerlink" title="入口审计：Controller + Security"></a>入口审计：Controller + Security</h2><p>先看看入口和安全类，重点就是 <strong>controller + security</strong> 这两块。</p>
+<h3 id="AccountController-初探"><a href="#AccountController-初探" class="headerlink" title="AccountController 初探"></a>AccountController 初探</h3><p>先看 <code>AccountController.java</code>：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145713551.png"></p>
+<p>第一个接口是 <code>/accounts</code>，里面有 POST 和 GET：</p>
+<ul>
+<li>POST：创建用户</li>
+<li>GET：查看用户信息</li>
+</ul>
+<p>直接试了试 GET 和 POST 的请求，返回的都是 403：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145716186.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145718484.png"></p>
+<p>被禁止了，说明有鉴权。但是看 AccountController 代码里面，并没有任何检测或者鉴权的代码，说明 HTTP 请求还没进入这里就已经被拦截了。</p>
+<p>尝试直接找 <code>/accounts</code> 看有没有被拦截的路由规则，但是只找到原本的那一个：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145720726.png"></p>
+<p>接下来的思路应该是断点看看到底哪里被拦截了，不过因为代码比较少，就直接随便翻翻了。</p>
+<hr>
+<h3 id="定位鉴权逻辑：SecurityConfiguration"><a href="#定位鉴权逻辑：SecurityConfiguration" class="headerlink" title="定位鉴权逻辑：SecurityConfiguration"></a>定位鉴权逻辑：SecurityConfiguration</h3><p>在 <code>security/SecurityConfiguration.java</code> 里找到了类似的信息：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145723142.png"></p>
+<p>这一看就是路径检测的地方：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145725680.png"></p>
+<p>这里用到了 <code>@Bean</code> 和 <code>SecurityFilterChain</code>（这是返回的对象类型，不是名字）。</p>
+<ul>
+<li><code>@Bean</code>：Spring 会把这个方法返回的对象注册成一个 Bean</li>
+<li><code>SecurityFilterChain</code>：Spring Security 自带的类型，这个方法返回了一个 Spring Security 认识的安全过滤链配置对象，相当于”请求经过时要怎么鉴权”的规则集合</li>
+</ul>
+<p>里面几个关键方法需要关注：</p>
+<ul>
+<li><code>.requestMatchers(...)</code>：看列了哪些路径</li>
+<li><code>.permitAll()</code>：这些路径不需要认证，刚刚 <code>/accounts</code> 路径不在里面，所以直接访问才被禁止了</li>
+<li><code>.anyRequest().authenticated()</code>：其他所有请求都要认证</li>
+<li><code>.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)</code>：说明它用了 JWT 认证过滤器</li>
+</ul>
+<p><code>addFilterBefore</code> 这个非常熟悉，就是在过滤器链最前面注册 <code>jwtAuthFilter</code>。</p>
+<p>这里注册的是 Filter 而不是 Spring 里的 Interceptor——虽然 Interceptor 也在 Controller 之前，但它们偏 MVC 层，Servlet 的东西都是在 Filter 之后。认证机制越早越好，一般都是放在 Filter 甚至更早。</p>
+<blockquote>
+<p>Interceptor 常做：日志、统计耗时、简单权限补充判断、请求参数预处理、某些业务级检查。而不像 Filter 那样承担”整套安全认证入口”的职责。</p>
+</blockquote>
+<p>从前面的 <code>private final JwtAuthenticationFilter jwtAuthFilter;</code> 可以看到，<code>jwtAuthFilter</code> 来自 <code>JwtAuthenticationFilter</code>，这是作者自己写的类。</p>
+<p>这里有个有意思的地方：他的定义不是直接 <code>new</code> 一个 <code>JwtAuthenticationFilter</code>，而是直接声明字段——说明是依赖注入进来的，来看看 <code>JwtAuthenticationFilter</code> 的代码：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145727774.png"></p>
+<p>可以看到这就是一个 Filter，但是和之前学的 Tomcat 内存马里手动注册的 Filter 不太一样，这是 Spring 的托管版本。</p>
+<p>其中 <code>@Component</code> 注解能被 Spring 检测、创建并注入，托管到 Bean 容器。类似的注解还有：</p>
+<ul>
+<li><code>@Component</code></li>
+<li><code>@Service</code></li>
+<li><code>@Repository</code></li>
+<li><code>@Configuration</code></li>
+<li>通过 <code>@Bean</code> 手动注册</li>
+</ul>
+<p><code>SecurityConfiguration</code> 里有 <code>@Configuration</code>，也会被 Spring 托管。所以 <code>private final JwtAuthenticationFilter jwtAuthFilter</code> 和 <code>private final AuthenticationProvider authenticationProvider</code> 这些依赖，Spring 都会自动注入进来。</p>
+<hr>
+<p>回到正题，已知这部分路径是不需要鉴权的：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145730016.png"></p>
+<p>真正业务上公开放行的只有：<code>/auth/**</code> 和 <code>/transaction/**</code> 这两个，其他的都是 Swagger 相关的。实际上 Swagger 这种 API 文档接口最好也不要随意公开泄露。</p>
+<hr>
+<h2 id="认证接口测试：-auth"><a href="#认证接口测试：-auth" class="headerlink" title="认证接口测试：&#x2F;auth&#x2F;**"></a>认证接口测试：&#x2F;auth&#x2F;**</h2><p>先试试 <code>/auth</code>，在 <code>AuthenticationController</code> 里找到：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145732216.png"></p>
+<ul>
+<li>POST <code>/auth/register</code></li>
+<li>POST <code>/auth/login</code></li>
+</ul>
+<p>试了试 GET 访问，返回的还是 403：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145734415.png"></p>
+<p>换 POST 试试：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145736871.png"></p>
+<p>虽然 500，但至少不是鉴权失败了，证明之前的分析没问题。这个 500 的意思大概就是<strong>请求体（request body）缺失</strong>。</p>
+<p>随便添加数据：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145739464.png"></p>
+<p>不仅这里能看到请求体需要 JSON 数据，源代码也能体现：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145741926.png"></p>
+<hr>
+<h3 id="RequestBody-与-Valid-说明"><a href="#RequestBody-与-Valid-说明" class="headerlink" title="@RequestBody 与 @Valid 说明"></a>@RequestBody 与 @Valid 说明</h3><p>重点看这里：<code>@RequestBody RegisterRequestModel request</code></p>
+<p><strong><code>@RequestBody</code> 的意思</strong>：把 HTTP 请求体里的内容，解析成一个 Java 对象。在这种 REST API 项目里，通常就是请求体是 JSON，Spring 把 JSON 转成对应的 Model 类。</p>
+<p><strong>为什么没传 body 会报错</strong>：因为 Spring 在看到 <code>@RequestBody</code> 时，会强制去请求体里找数据，没给就报 <code>Required request body is missing</code>。</p>
+<p><strong><code>@Valid</code> 是干什么的</strong>：在 <code>@Valid @RequestBody RegisterRequestModel request</code> 里，<code>@RequestBody</code> 要求有 body，<code>@Valid</code> 还要校验 body 里的字段是否符合规则，比如是否为空、长度是否符合、数值是否有效。</p>
+<p><strong>那怎么知道 JSON 里要传哪些字段</strong>：看参数对应的类：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145744148.png"></p>
+<p>看里面字段：<code>name</code>、<code>phone</code>、<code>email</code>、<code>password</code>，再看有没有注解 <code>@NotNull</code>、<code>@Size</code>、<code>@Min</code>，这样就能知道要传哪些字段、哪些必须有、规则是什么。</p>
+<hr>
+<h3 id="注册与登录验证"><a href="#注册与登录验证" class="headerlink" title="注册与登录验证"></a>注册与登录验证</h3><p><code>/auth/register</code> 构造好参数：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;username&quot;</span><span class="punctuation">:</span> <span class="string">&quot;zhangsan_2026&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;password&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Password@123&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;email&quot;</span><span class="punctuation">:</span> <span class="string">&quot;zhangsan_20260525@test.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;张三&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;phone&quot;</span><span class="punctuation">:</span> <span class="string">&quot;15012348888&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145746508.png"></p>
+<p>响应：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;CREATED&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;success&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;token&quot;</span><span class="punctuation">:</span> <span class="string">&quot;eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ6aGFuZ3Nhbl8yMDI2MDUyNUB0ZXN0LmNvbSIsImlhdCI6MTc3OTY4NDk4MSwiZXhwIjoxNzc5ODI4OTgxfQ.rlrqCIB0c9ST3joFxOAd7wuF7G7wCu2hV6EGFJPHR-4&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;errors&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>可以拿到一个 JWT，正常。</p>
+<p>试试 <code>/login</code>：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145749166.png"></p>
+<p>可以登录，也是返回 JWT。测试发现不同时间登录返回的 JWT 也不同，正常。</p>
+<p>解码 Payload（载荷）：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145751504.png"></p>
+<p>里面有 JWT 时间限制，正常。再次用相同账号注册，返回已存在，正常：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145753719.png"></p>
+<hr>
+<h2 id="漏洞发现：-transaction-未鉴权"><a href="#漏洞发现：-transaction-未鉴权" class="headerlink" title="漏洞发现：&#x2F;transaction&#x2F;** 未鉴权"></a>漏洞发现：&#x2F;transaction&#x2F;** 未鉴权</h2><p>换个接口，<code>/transaction/**</code>，这个路径是公开放行的，但不确定里面是否还有内部的 JWT 检测。</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145755988.png"></p>
+<h3 id="TransactionController-分析"><a href="#TransactionController-分析" class="headerlink" title="TransactionController 分析"></a>TransactionController 分析</h3><p>两个 POST 接口：</p>
+<ul>
+<li><code>POST /transaction/deposit</code>（存款）</li>
+<li><code>POST /transaction/withdraw</code>（取款）</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">deposit(<span class="meta">@Valid</span> <span class="meta">@RequestBody</span> DepositRequestModel request)</span><br><span class="line">withdraw(<span class="meta">@Valid</span> <span class="meta">@RequestBody</span> WithdrawRequestModel request)</span><br></pre></td></tr></table></figure>
+
+<p>两个都需要 JSON 对象。</p>
+<p>看 <code>DepositRequestModel</code>：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145758640.png"></p>
+<p>只需要 <code>card_number</code> 和 <code>amount</code>。</p>
+<p>看 <code>WithdrawRequestModel</code>：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145800730.png"></p>
+<p>需要 <code>card_number</code>、<code>cvv</code>、<code>amount</code>，比 DepositRequestModel 多了个 <code>cvv</code>。</p>
+<p>初步看来似乎并不需要 Token 之类的 JWT 参数。不过 JWT 不仅能放 body 里，也能放在 Cookie、请求头里，还不能下结论：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145802861.png"></p>
+<hr>
+<h3 id="业务逻辑追踪"><a href="#业务逻辑追踪" class="headerlink" title="业务逻辑追踪"></a>业务逻辑追踪</h3><p>可以看到业务处理在 <code>transactionService</code> 里：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145805346.png"></p>
+<p>点击跳转，这明显就是项目自己定义的接口，而实现这个方法的就是 <code>TransactionServiceImpl</code>：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145807298.png"></p>
+<p>里面有 <code>deposit</code> 和 <code>withdraw</code> 方法，进去看看。</p>
+<p>第一个 <code>deposit</code> 方法里面：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145809844.png"></p>
+<p>这里就三件事：</p>
+<ol>
+<li><code>findByCardNumber</code>：从 JSON 里 get 出 <code>card_number</code>（这个 get 方法是因为 <code>DepositRequestModel</code> 有 <code>@Data</code> 注解，会自动生成 set&#x2F;get&#x2F;toString 等方法）</li>
+</ol>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145812322.png"></p>
+<ol start="2">
+<li><code>performDeposit</code>：用来计算金额的</li>
+<li><code>toResponseModel</code>：处理返回响应的内容</li>
+</ol>
+<p><code>withdraw</code> 也是差不多的，按目前看来，确实不需要什么认证验证，只需要知道 CVV 和卡号。</p>
+<hr>
+<h3 id="卡号和-CVV-的来源"><a href="#卡号和-CVV-的来源" class="headerlink" title="卡号和 CVV 的来源"></a>卡号和 CVV 的来源</h3><p>在 <code>model</code> 里找到 <code>AccountResponseModel</code>：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145814614.png"></p>
+<p>这里直接定义了 <code>card_number</code> 和 <code>cvv</code>。<code>AccountMapperImpl</code> 是用来获取数值的：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145816937.png"></p>
+<p><code>AccountServiceImpl</code> 实现了 <code>AccountService</code> 方法：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145819115.png"></p>
+<p>里面就有 <code>createNewAccount</code> 和 <code>getMyAccounts</code> 方法，重点看 <code>createNewAccount</code>，这个卡号和 CVV 怎么来的：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145821619.png"></p>
+<p>大概有四个关键点：</p>
+<ol>
+<li><code>getAuthentication</code>：这一看就是鉴权的，需要 JWT</li>
+<li><code>findByEmail</code>：找账号的，不存在会提示 Not Found，说明创建账户之前还是需要注册一个账号，鉴权也需要注册时生成的 JWT</li>
+<li><code>.cardNumber(generateUniqueCardNumber()).cvv(Utils.generateCVV())</code>：这两个是创建卡号和 CVV 的</li>
+<li><code>toResponseModel</code>：处理响应内容</li>
+</ol>
+<p>但这里还有个问题——回显里能看到卡号和 CVV 吗？</p>
+<p><code>toResponseModel</code> 是 <code>accountMapper</code> 的方法，<code>accountMapper</code> 是 <code>AccountMapper</code> 类型：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145824063.png"></p>
+<p><code>AccountMapper</code> 只是一个接口：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145825751.png"></p>
+<p>找实现类 <code>AccountMapperImpl</code>：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145827459.png"></p>
+<p><code>AccountMapperImpl</code> 实现了 <code>AccountMapper</code>，里面返回的是 <code>AccountResponseModel</code>，包含了卡号和 CVV 等信息：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145830185.png"></p>
+<p>在 <code>AccountResponseModel</code> 里有注解 <code>@Builder</code>，对应的 builder 调用就是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.builder()</span><br><span class="line">.card_number(account.getCardNumber())</span><br><span class="line">.cvv(account.getCvv())</span><br><span class="line">.balance(account.getBalance())</span><br><span class="line">.build();</span><br></pre></td></tr></table></figure>
+
+<p>等价于：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">AccountResponseModel.setCard_number(account.getCardNumber());</span><br><span class="line">AccountResponseModel.setCvv(account.getCvv());</span><br><span class="line">AccountResponseModel.setBalance(account.getBalance());</span><br></pre></td></tr></table></figure>
+
+<p><strong>所以是有回显的，卡号和 CVV 都会在响应里返回。</strong></p>
+<p>再看看 <code>getAuthentication</code> 是怎么工作的，回到 <code>JwtAuthenticationFilter</code>：</p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145832260.png"></p>
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145834435.png"></p>
+<p>可以看出来，JWT 是在请求头 <code>Authorization</code> 里检测的，格式是 <code>Bearer </code> + JWT。</p>
+<hr>
+<p><strong>总结整个流程</strong>：先注册一个用户拿到 JWT，利用 JWT 创建账户并从回显里拿到卡号和 CVV，而用这两个信息可以直接对 <code>/transaction/**</code> 接口执行资金操作，<strong>不需要任何 JWT 认证</strong>。</p>
+<blockquote>
+<p>知道卡号即可未认证存钱，知道卡号和 CVV 即可未认证取钱。</p>
+</blockquote>
+<hr>
+<h2 id="漏洞复现"><a href="#漏洞复现" class="headerlink" title="漏洞复现"></a>漏洞复现</h2><p><strong>第一步</strong>：注册一个新用户</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl.exe -X POST <span class="string">&quot;http://localhost:8080/auth/register&quot;</span> \</span><br><span class="line">  -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123;&quot;name&quot;:&quot;test&quot;,&quot;phone&quot;:&quot;13912345678&quot;,&quot;email&quot;:&quot;test123@example.com&quot;,&quot;password&quot;:&quot;Passw0rd!&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>从注册响应中取出 <code>data.token</code>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;CREATED&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;success&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="attr">&quot;token&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&lt;jwt_token&gt;&quot;</span> <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;errors&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>第二步</strong>：使用 JWT 创建账户，拿到 <code>card_number</code> 和 <code>cvv</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl.exe -X POST <span class="string">&quot;http://localhost:8080/accounts&quot;</span> `</span><br><span class="line">  -H <span class="string">&quot;Authorization: Bearer &lt;jwt_token&gt;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>响应：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;CREATED&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;success&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;card_number&quot;</span><span class="punctuation">:</span> <span class="string">&quot;7599654302553651&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;cvv&quot;</span><span class="punctuation">:</span> <span class="string">&quot;637&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;balance&quot;</span><span class="punctuation">:</span> <span class="number">0.0</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;errors&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>第三步</strong>：在不发送任何 Authorization 请求头的情况下，直接存款</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl.exe -X POST <span class="string">&quot;http://localhost:8080/transaction/deposit&quot;</span> \</span><br><span class="line">  -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123;&quot;card_number&quot;:&quot;&lt;card_number&gt;&quot;,&quot;amount&quot;:50&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>响应：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;OK&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;success&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">26</span><span class="punctuation">,</span> <span class="attr">&quot;amount&quot;</span><span class="punctuation">:</span> <span class="number">50.0</span><span class="punctuation">,</span> <span class="attr">&quot;balance&quot;</span><span class="punctuation">:</span> <span class="number">50.0</span> <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;errors&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>第四步</strong>：同样不带认证，直接取款</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl.exe -X POST <span class="string">&quot;http://localhost:8080/transaction/withdraw&quot;</span> \</span><br><span class="line">  -H <span class="string">&quot;Content-Type: application/json&quot;</span> \</span><br><span class="line">  -d <span class="string">&#x27;&#123;&quot;card_number&quot;:&quot;&lt;card_number&gt;&quot;,&quot;cvv&quot;:&quot;&lt;cvv&gt;&quot;,&quot;amount&quot;:20&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>响应：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;OK&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;success&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="attr">&quot;id&quot;</span><span class="punctuation">:</span> <span class="number">27</span><span class="punctuation">,</span> <span class="attr">&quot;amount&quot;</span><span class="punctuation">:</span> <span class="number">20.0</span><span class="punctuation">,</span> <span class="attr">&quot;balance&quot;</span><span class="punctuation">:</span> <span class="number">30.0</span> <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;errors&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>第五步</strong>：带 JWT 查看账户余额确认变更</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl.exe <span class="string">&quot;http://localhost:8080/accounts&quot;</span> `</span><br><span class="line">  -H <span class="string">&quot;Authorization: Bearer &lt;jwt_token&gt;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>响应：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="string">&quot;OK&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;success&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">true</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="punctuation">&#123;</span><span class="attr">&quot;card_number&quot;</span><span class="punctuation">:</span><span class="string">&quot;4494984739494771&quot;</span><span class="punctuation">,</span><span class="attr">&quot;cvv&quot;</span><span class="punctuation">:</span><span class="string">&quot;862&quot;</span><span class="punctuation">,</span><span class="attr">&quot;balance&quot;</span><span class="punctuation">:</span><span class="number">30.0</span><span class="punctuation">&#125;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;errors&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://cdn.statically.io/gh/wr0ld/BlogImage/main/img/20260526145837036.png"></p>
+<hr>
+<h2 id="漏洞总结"><a href="#漏洞总结" class="headerlink" title="漏洞总结"></a>漏洞总结</h2><p><strong>预期行为</strong>：<code>/transaction/deposit</code> 和 <code>/transaction/withdraw</code> 两个接口都应要求用户认证，并在处理交易前校验目标账户归属，而不应仅凭请求体中的 <code>card_number</code> 或 <code>card_number + cvv</code> 直接执行资金操作。</p>
+<p><strong>实际行为</strong>：两个请求在未认证情况下均成功执行，并直接修改目标账户余额。</p>
+<p><strong>影响</strong>：攻击者无需持有有效登录会话即可执行未经授权的资金操作。对于存款，只要知道有效卡号即可调用；对于取款，只要知道有效卡号和 CVV 即可调用。由于系统将资金操作的访问控制错误地退化为”知道交易标识信息即可”，一旦这些值因客户端泄露、日志泄露、前端暴露、会话泄露或其他方式被获取，攻击者即可直接发起交易请求。</p>
+<p><strong>根本原因</strong>：<code>SecurityConfiguration</code> 中 <code>/transaction/**</code> 被配置为 <code>permitAll()</code>，但 <code>TransactionServiceImpl</code> 内部并没有做任何身份校验，也没有校验操作的账户是否属于当前登录用户。正确的做法是在 Security 配置中要求 <code>/transaction/**</code> 认证，或者在 Service 层通过 <code>SecurityContextHolder.getContext().getAuthentication()</code> 获取当前用户，再校验目标卡号的归属。</p>
+</article>
+<div class="article-footer slide-up">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
+<div class="rightbar-top-btn">
+  <a class="top" onclick="util.scrollTop()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg>
+    <span>回到顶部</span>
+  </a>
+</div>
+<div class="widgets">
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select" onclick="sidebar.toggleTOC()"><span class="name">本文目录</span></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%8B%BF%E4%B8%AA%E7%AE%80%E5%8D%95%E5%BC%80%E6%BA%90-SpringBoot-%E9%A1%B9%E7%9B%AE%E5%AE%A1%E8%AE%A1%E7%BB%83%E6%89%8B%EF%BC%8C%E9%A1%BA%E6%89%8B%E6%89%BE%E4%BA%86%E4%B8%AA%E6%9C%AA%E6%8E%88%E6%9D%83%E6%BC%8F%E6%B4%9E"><span class="toc-text">拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="toc-text">环境搭建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90"><span class="toc-text">项目结构分析</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95%E5%88%92%E5%88%86"><span class="toc-text">目录划分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MVC-%E6%9E%B6%E6%9E%84%E8%A1%A5%E5%85%85"><span class="toc-text">MVC 架构补充</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%A5%E5%8F%A3%E5%AE%A1%E8%AE%A1%EF%BC%9AController-Security"><span class="toc-text">入口审计：Controller + Security</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#AccountController-%E5%88%9D%E6%8E%A2"><span class="toc-text">AccountController 初探</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9A%E4%BD%8D%E9%89%B4%E6%9D%83%E9%80%BB%E8%BE%91%EF%BC%9ASecurityConfiguration"><span class="toc-text">定位鉴权逻辑：SecurityConfiguration</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AE%A4%E8%AF%81%E6%8E%A5%E5%8F%A3%E6%B5%8B%E8%AF%95%EF%BC%9A-auth"><span class="toc-text">认证接口测试：&#x2F;auth&#x2F;**</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#RequestBody-%E4%B8%8E-Valid-%E8%AF%B4%E6%98%8E"><span class="toc-text">@RequestBody 与 @Valid 说明</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C%E4%B8%8E%E7%99%BB%E5%BD%95%E9%AA%8C%E8%AF%81"><span class="toc-text">注册与登录验证</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%8F%91%E7%8E%B0%EF%BC%9A-transaction-%E6%9C%AA%E9%89%B4%E6%9D%83"><span class="toc-text">漏洞发现：&#x2F;transaction&#x2F;** 未鉴权</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#TransactionController-%E5%88%86%E6%9E%90"><span class="toc-text">TransactionController 分析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91%E8%BF%BD%E8%B8%AA"><span class="toc-text">业务逻辑追踪</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%A1%E5%8F%B7%E5%92%8C-CVV-%E7%9A%84%E6%9D%A5%E6%BA%90"><span class="toc-text">卡号和 CVV 的来源</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0"><span class="toc-text">漏洞复现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%BC%8F%E6%B4%9E%E6%80%BB%E7%BB%93"><span class="toc-text">漏洞总结</span></a></li></ol></li></ol></div><div class="widget-footer"></div></widget>
+</div></div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const l_body = document.querySelector('.l_body');
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=mpmcsjo9" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
+  });
+</script>
+<script defer type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    mermaid.initialize({
+      theme: "default",
+      logLevel: 3
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js?v=mpmcsjo9"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- 默认设置配置文件 -->
+<script src="/settings/defaults.js"></script>
+<script>
+// 将 defaults.js 的默认值应用到 localStorage 空缺项
+(function() {
+  if (!window._siteDefaults) return;
+  for (var k in window._siteDefaults) {
+    if (localStorage.getItem(k) === null) {
+      localStorage.setItem(k, window._siteDefaults[k]);
+    }
+  }
+})();
+</script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: scale(var(--waifu-scale, 1)) !important;
+    transform-origin: bottom right !important;
+    /* 不覆盖 display，由 autoload.js 和 waifu.css 控制显隐 */
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
