@@ -50,22 +50,22 @@ menubar:
 ######## Main ########
 site_tree:
   home:
-    leftbar: welcome
+    leftbar: welcome, todo
     rightbar: categories
   index_blog:
-    leftbar: welcome
+    leftbar: welcome, todo
     rightbar: categories
   post:
-    leftbar: 
+    leftbar: todo
     rightbar: toc
   archives:
-    leftbar: welcome
+    leftbar: welcome, todo
     rightbar: categories
   category:
-    leftbar: welcome
+    leftbar: welcome, todo
     rightbar: categories
   tag:
-    leftbar: welcome
+    leftbar: welcome, todo
     rightbar: categories
   page:
     leftbar: 
