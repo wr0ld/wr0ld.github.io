@@ -1429,6 +1429,11 @@ pre.mermaid svg {
     border-radius: 14px;
   }
 }
+body.nav-hidden .menu .nav-item,
+body.nav-hidden .menu .menu-divider,
+body.nav-hidden .widget-wrapper.todo-widget {
+  display: none !important;
+}
 @-moz-keyframes waifuFadeIn {
   to {
     opacity: 1;
