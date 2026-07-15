@@ -329,18 +329,22 @@ menu_id: settings
 }
 
 .settings-section {
-  background: var(--card, #fff);
-  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(18, 23, 32, 0.82), rgba(18, 23, 32, 0.68));
+  border-radius: 18px;
   padding: 24px;
   margin-bottom: 24px;
-  border: 1px solid var(--border, #e0e0e0);
+  border: 1px solid rgba(140, 165, 210, 0.2);
+  box-shadow: 0 14px 34px rgba(0,0,0,0.24);
+  backdrop-filter: blur(12px) saturate(130%);
+  -webkit-backdrop-filter: blur(12px) saturate(130%);
 }
 
 .settings-section h2 {
   margin-top: 0;
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--border, #e0e0e0);
+  border-bottom: 1px solid rgba(180, 200, 230, 0.22);
+  color: rgba(245, 248, 255, 0.94);
 }
 
 .collapsible-header {
@@ -356,7 +360,7 @@ menu_id: settings
 }
 
 .collapsible-header:hover {
-  background: var(--card-hover, rgba(0,0,0,0.05));
+  background: rgba(58, 167, 255, 0.08);
 }
 
 .toggle-icon {
@@ -378,7 +382,7 @@ menu_id: settings
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px dashed var(--border, #e0e0e0);
+  border-bottom: 1px dashed rgba(180, 200, 230, 0.18);
 }
 
 .setting-item:last-child {

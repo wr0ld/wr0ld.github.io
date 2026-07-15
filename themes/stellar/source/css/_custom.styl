@@ -1475,3 +1475,286 @@ body.nav-hidden .menu .nav-item,
 body.nav-hidden .menu .menu-divider,
 body.nav-hidden .widget-wrapper.todo-widget
   display: none !important
+
+// ---------- 14. Visual cleanup: cyber minimal reset ----------
+// 目标：保留安全/赛博气质，降低背景和毛玻璃噪声，修复移动端横向溢出。
+:root
+  --wr-card-bg: rgba(16, 20, 28, 0.78)
+  --wr-card-bg-strong: rgba(18, 23, 32, 0.9)
+  --wr-card-border: rgba(140, 165, 210, 0.18)
+  --wr-card-shadow: 0 18px 48px rgba(0, 0, 0, 0.28)
+  --wr-soft-shadow: 0 10px 28px rgba(0, 0, 0, 0.22)
+  --wr-accent: #3aa7ff
+  --wr-accent-2: #7b5cff
+
+html, body
+  max-width: 100%
+  overflow-x: hidden
+
+body
+  background: radial-gradient(circle at 30% 0%, rgba(35, 72, 110, 0.22), transparent 34%), #080b10
+
+// 背景特效降噪：功能还在，但不再压过内容。
+#particle-network-bg
+  opacity: 0.22 !important
+
+#hacker-bg
+  opacity: 0.06 !important
+
+@media screen and (max-width: $device-mobile-max)
+  #particle-network-bg
+    opacity: 0.12 !important
+  #hacker-bg
+    display: none !important
+
+// 主布局回收之前的负边距，避免移动端和窄屏破版。
+.l_body
+  grid-gap: calc(var(--gap-margin) * 2.2)
+
+.l_main#main
+  margin-left: 0 !important
+  margin-right: 0 !important
+  padding-left: 0
+  padding-right: 0
+  min-width: 0
+
+.l_main
+  min-width: 0
+
+// 侧栏：降低大面积亮色玻璃，改为更稳的暗色面板。
+.l_left,
+.l_right
+  .sidebg
+    opacity: 0.45
+  .leftbar-container,
+  .rightbar-container
+    background: var(--wr-card-bg) !important
+    border: 1px solid var(--wr-card-border)
+    box-shadow: var(--wr-soft-shadow)
+    backdrop-filter: blur(16px) saturate(140%) !important
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important
+    &:before,
+    &:after
+      opacity: 0.28
+
+.l_left .sidebg
+  filter: saturate(120%) blur(64px) opacity(0.42) !important
+
+.l_right .sidebg
+  background: rgba(18, 23, 32, 0.52) !important
+  backdrop-filter: blur(12px) saturate(120%) !important
+  -webkit-backdrop-filter: blur(12px) saturate(120%) !important
+
+.nav-area .menu
+  grid-gap: 10px
+  .nav-item
+    min-height: 48px
+    background: rgba(255, 255, 255, 0.055)
+    border: 1px solid rgba(255, 255, 255, 0.08)
+    &:hover,
+    &.active
+      background: rgba(58, 167, 255, 0.14)
+      border-color: rgba(58, 167, 255, 0.28)
+
+// 顶部导航：减少胶囊发光感，保留当前项识别。
+.navbar
+  top: var(--gap-margin)
+
+.navbar-blur
+  margin: 0 1rem
+  border: 1px solid rgba(255, 255, 255, 0.12)
+  background: rgba(18, 23, 32, 0.76) !important
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25)
+  backdrop-filter: blur(14px) saturate(130%) !important
+  -webkit-backdrop-filter: blur(14px) saturate(130%) !important
+
+.navbar-container
+  overflow-x: auto !important
+  overflow-y: hidden !important
+
+.navbar nav a
+  font-weight: 600
+  letter-spacing: 0.01em
+  &:hover
+    box-shadow: none
+  &.active
+    background: linear-gradient(135deg, rgba(58, 167, 255, 0.95), rgba(123, 92, 255, 0.86)) !important
+    color: #fff !important
+    box-shadow: none
+
+// 首页/列表卡片：统一比例和间距，降低标题压迫感。
+.l_main .post-list
+  margin: 1.15rem
+
+.post-list.grid
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important
+  gap: 1.35rem
+  @media screen and (max-width: $device-laptop)
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important
+
+.post-list.post.grid
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important
+  @media screen and (max-width: $device-laptop)
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important
+
+.post-list .post-card
+  min-width: 0
+  border: 1px solid var(--wr-card-border) !important
+  border-radius: 18px !important
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)) !important
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18) !important
+  overflow: hidden
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease
+  &:hover
+    transform: translateY(-3px)
+    border-color: rgba(58, 167, 255, 0.38) !important
+    box-shadow: var(--wr-card-shadow) !important
+
+.post-list .post-card .post-cover,
+.post-list .post-card .post-cover a
+  display: block
+  aspect-ratio: 16 / 9
+  overflow: hidden
+
+.post-list .post-card .post-cover img
+  width: 100%
+  height: 100%
+  object-fit: cover
+  filter: saturate(0.92) contrast(1.02)
+
+.l_main .post-list .post-title
+  font-size: 'calc(%s + 2px)' % var(--fsp)
+  line-height: 1.32
+  font-weight: 750
+  letter-spacing: -0.01em
+
+.post-list .post-card .meta,
+.post-list .post-card .excerpt
+  color: rgba(220, 230, 245, 0.68)
+
+// 通用内容块：让设置页/关于页更像同一套设计系统。
+.md-text .tag-plugin,
+.md-text .note,
+.md-text .about-card,
+.md-text .settings-card,
+.md-text section,
+.widget-wrapper
+  border-color: var(--wr-card-border)
+
+.md-text .tag-plugin,
+.md-text .settings-section,
+.md-text .about-section,
+.md-text > .block,
+.widget-wrapper
+  background: var(--wr-card-bg) !important
+  box-shadow: var(--wr-soft-shadow)
+
+// 右侧分类/目录降低存在感。
+.linklist.left .link
+  border-radius: 10px
+  margin: 2px 6px
+  color: rgba(235, 242, 255, 0.78)
+  &:hover
+    background: rgba(58, 167, 255, 0.1)
+    color: #fff
+
+.linklist.left .link .count
+  background: rgba(255, 255, 255, 0.075)
+  color: rgba(235, 242, 255, 0.72)
+
+// 布局切换器别盖内容，移动端只保留更小浮层。
+.layout-switcher
+  z-index: 40 !important
+  .layout-toggle-btn
+    width: 44px
+    height: 10px
+    opacity: 0.55
+  &:hover .layout-toggle-btn
+    opacity: 1
+
+// 移动端：核心修复，去掉横向溢出，文章单列，侧栏作为抽屉。
+@media screen and (max-width: $device-mobile-max)
+  :root
+    --gap-margin: 12px
+    --gap-padding: 14px
+
+  body
+    min-width: 0
+
+  .l_body
+    width: 100%
+    max-width: 100vw
+    overflow-x: hidden
+
+  .l_body .l_main
+    width: 100%
+    max-width: 100vw
+    overflow: hidden !important
+
+  .navbar
+    top: 10px !important
+    padding: 0 10px
+
+  .navbar-blur
+    margin: 0
+    max-width: calc(100vw - 20px)
+    border-radius: 18px
+
+  .navbar-container
+    max-width: 100%
+    overflow-x: auto !important
+    -webkit-overflow-scrolling: touch
+
+  .navbar nav
+    min-width: max-content
+    font-size: 12px
+    a
+      padding: 0.18rem 0.58rem
+      margin: 0.22rem
+    a[href*="srk-toolbox"],
+    a[href*="payloader"]
+      display: none
+
+  .l_main .post-list
+    margin: 0.85rem 12px
+    width: auto
+
+  .post-list.grid,
+  .post-list.post.grid,
+  .post-list.list,
+  .post-list.compact
+    display: grid
+    grid-template-columns: minmax(0, 1fr) !important
+    gap: 1rem
+
+  .post-list .post-card
+    width: 100%
+    max-width: 100%
+    box-sizing: border-box
+    border-radius: 16px !important
+
+  .l_main .post-list .post-title
+    font-size: 'calc(%s + 1px)' % var(--fsp)
+    line-height: 1.34
+
+  .l_left
+    max-width: calc(100vw - 24px)
+    width: calc(100vw - 24px)
+    .leftbar-container
+      width: 100%
+
+  .l_right
+    max-width: calc(100vw - 24px)
+    width: calc(100vw - 24px)
+
+  .layout-switcher
+    right: 12px
+    left: auto
+    bottom: 74px
+    .layout-toggle-btn
+      width: 40px
+      height: 40px
+      border-radius: 16px
+
+  #waifu
+    display: none !important
