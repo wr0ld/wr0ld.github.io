@@ -51,12 +51,12 @@ menubar:
 site_tree:
   home:
     leftbar: welcome, todo
-    rightbar: categories
+    rightbar:
   index_blog:
     leftbar: welcome, todo
-    rightbar: categories
+    rightbar:
   post:
-    leftbar: todo
+    leftbar:
     rightbar: toc
   archives:
     leftbar: welcome, todo
