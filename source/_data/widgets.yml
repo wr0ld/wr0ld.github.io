@@ -16,3 +16,7 @@ categories:
 recent:
   layout: recent
   limit: 10
+
+# 任务简报
+todo:
+  layout: todo
