@@ -2224,6 +2224,128 @@ body
     .l_left
       display: none !important
 
+// ---------- 18. Mobile layout normalization ----------
+// 手机端统一各页面宽度、边距和滚动行为，避免桌面侧栏/目录规则泄漏到小屏。
+@media screen and (max-width: 768px)
+  html,
+  body
+    width: 100% !important
+    max-width: 100% !important
+    overflow-x: hidden !important
+
+  :root
+    --gap-margin: 12px
+
+  .l_body,
+  .l_body[layout="post"],
+  .l_body:not([rightbar])
+    display: block !important
+    width: 100% !important
+    max-width: 100% !important
+    margin: 0 !important
+    padding: 0 !important
+    overflow-x: hidden !important
+
+  .l_main,
+  .l_body[layout="post"] .l_main,
+  .l_body:not([rightbar]) .l_main
+    width: 100% !important
+    max-width: 100% !important
+    margin: 0 !important
+    padding: 0 !important
+    overflow-x: hidden !important
+
+  .l_body[layout="post"] .l_right,
+  .l_body[layout="post"][rightbar] .l_right
+    display: none !important
+    visibility: hidden !important
+    opacity: 0 !important
+    width: 0 !important
+    height: 0 !important
+    pointer-events: none !important
+
+  .post-list,
+  .post-list.grid,
+  .post-list.post.grid,
+  .l_body:not([rightbar]) .post-list.grid,
+  .l_body:not([rightbar]) .post-list.post.grid
+    display: grid !important
+    grid-template-columns: minmax(0, 1fr) !important
+    gap: 14px !important
+    width: auto !important
+    margin: 0 12px 18px !important
+    padding: 0 !important
+
+  .post-list .post-card,
+  .post-list .post
+    width: 100% !important
+    max-width: 100% !important
+    margin: 0 !important
+    border-radius: 16px !important
+
+  .article.banner,
+  .l_body[layout="post"] .article.banner
+    width: auto !important
+    margin: 0 12px 12px !important
+    border-radius: 16px !important
+    .content
+      padding: 1.2rem 0.2rem 0.7rem !important
+      .bottom .title span
+        font-size: clamp(1.28rem, 7vw, 1.72rem) !important
+        line-height: 1.28 !important
+
+  article.md-text.content,
+  .l_body[layout="post"] article.md-text.content
+    width: auto !important
+    max-width: none !important
+    margin: 0 12px 18px !important
+    padding: 1.1rem 1rem 1.45rem !important
+    border-radius: 16px !important
+    font-size: 15px !important
+    line-height: 1.82 !important
+    overflow-x: hidden !important
+    h1
+      font-size: 1.58rem !important
+    h2
+      font-size: 1.28rem !important
+      margin-top: 1.55rem !important
+    h3
+      font-size: 1.08rem !important
+      margin-top: 1.25rem !important
+    p
+      margin: 0.78rem 0 !important
+    ul, ol
+      padding-left: 1.15rem !important
+
+  article.md-text.content img,
+  .l_body[layout="post"] article.md-text.content img
+    max-width: 100% !important
+    height: auto !important
+
+  article.md-text.content .highlight,
+  article.md-text.content pre,
+  article.md-text.content table,
+  .l_body[layout="post"] article.md-text.content .highlight,
+  .l_body[layout="post"] article.md-text.content pre,
+  .l_body[layout="post"] article.md-text.content table
+    max-width: 100% !important
+    overflow-x: auto !important
+    -webkit-overflow-scrolling: touch
+
+  .highlight table
+    width: max-content !important
+    min-width: 100% !important
+
+  .article-footer,
+  .related-posts,
+  #comments
+    margin-left: 12px !important
+    margin-right: 12px !important
+
+  .widgets,
+  .widget-wrapper
+    max-width: 100% !important
+
 // 强覆盖：文章页右侧目录做成「竖线 + 短横」索引。
 @media screen and (min-width: 1181px)
   .l_body[layout="post"] .l_right .widget-wrapper.toc .widget-body
