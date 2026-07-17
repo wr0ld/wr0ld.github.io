@@ -12,17 +12,17 @@
     if (visible) {
       localStorage.setItem(STORAGE_KEY, 'true');
       document.body.classList.remove('nav-hidden');
+      document.body.classList.add('nav-admin-visible');
     } else {
       localStorage.setItem(STORAGE_KEY, 'false');
       document.body.classList.add('nav-hidden');
+      document.body.classList.remove('nav-admin-visible');
     }
   }
   
   // 页面加载时根据 localStorage 决定初始状态
   document.addEventListener('DOMContentLoaded', function() {
-    if (!isVisible()) {
-      document.body.classList.add('nav-hidden');
-    }
+    setVisible(isVisible());
   });
   
   Object.defineProperty(window, 'admin', {
