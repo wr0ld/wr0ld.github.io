@@ -1472,7 +1472,11 @@ for n in (1..20)
     padding: 1rem 1rem 1.5rem !important
     border-radius: 14px
 
-// 导航菜单和任务简报默认隐藏，控制台输入 admin 切换显示（持久化）
+// 导航菜单和任务简报默认隐藏，控制台输入 admin 切换显示（持久化）。
+// 默认隐藏是为了避免无痕/首次访问时 JS 写入 body class 前出现闪现。
+body:not(.nav-admin-visible) .menu .nav-item,
+body:not(.nav-admin-visible) .menu .menu-divider,
+body:not(.nav-admin-visible) .widget-wrapper.todo-widget,
 body.nav-hidden .menu .nav-item,
 body.nav-hidden .menu .menu-divider,
 body.nav-hidden .widget-wrapper.todo-widget
@@ -1790,18 +1794,18 @@ body
   .l_left .leftbar-container
     background: rgba(16, 21, 29, 0.72) !important
 
-  body:not(.nav-hidden) .nav-area .menu
+  body.nav-admin-visible .nav-area .menu
     display: flex !important
     flex-direction: column
     gap: 7px
     margin: 12px 0
 
-  body:not(.nav-hidden) .nav-area .menu .menu-divider
+  body.nav-admin-visible .nav-area .menu .menu-divider
     width: 100%
     margin: 6px 0
     flex: 0 0 1px
 
-  body:not(.nav-hidden) .nav-area .menu .nav-item
+  body.nav-admin-visible .nav-area .menu .nav-item
     min-height: 42px
     padding: 8px 10px
     flex-direction: row
@@ -1840,7 +1844,7 @@ body
       transform: translateY(-50%)
 
   // 任务简报默认只保留标题，避免把侧栏撑成管理后台。
-  body:not(.nav-hidden) .widget-wrapper.todo-widget
+  body.nav-admin-visible .widget-wrapper.todo-widget
     margin-top: 12px
     border-radius: 14px
     background: rgba(255, 255, 255, 0.045) !important
@@ -1865,24 +1869,24 @@ body
         max-height: 280px
         opacity: 1
 
-  body:not(.nav-hidden) .widget-wrapper.todo-widget .todo-list
+  body.nav-admin-visible .widget-wrapper.todo-widget .todo-list
     padding: 8px 8px 12px
     max-height: 240px
     overflow-y: auto
 
-  body:not(.nav-hidden) .widget-wrapper.todo-widget .todo-list > *
+  body.nav-admin-visible .widget-wrapper.todo-widget .todo-list > *
     border-radius: 9px
     background: rgba(255, 255, 255, 0.045)
     margin-bottom: 7px
     padding: 8px 10px
 
 @media screen and (max-width: $device-mobile-max)
-  body:not(.nav-hidden) .nav-area .menu
+  body.nav-admin-visible .nav-area .menu
     display: flex !important
     flex-direction: column
     gap: 8px
 
-  body:not(.nav-hidden) .nav-area .menu .nav-item
+  body.nav-admin-visible .nav-area .menu .nav-item
     min-height: 44px
     flex-direction: row
     justify-content: flex-start
@@ -1890,7 +1894,7 @@ body
     padding: 8px 12px
     text-align: left
 
-  body:not(.nav-hidden) .widget-wrapper.todo-widget .widget-body
+  body.nav-admin-visible .widget-wrapper.todo-widget .widget-body
     max-height: 220px
     overflow-y: auto
 
@@ -2184,8 +2188,8 @@ body
             padding: 0.36rem 0
             border-radius: 0
             color: rgba(235, 242, 255, 0.48)
-            font-size: 0.76rem
-            line-height: 1.35
+            font-size: 0.84rem
+            line-height: 1.48
             background: transparent !important
             border: none !important
             box-shadow: none !important
@@ -2194,11 +2198,11 @@ body
             transition: color 0.16s ease, transform 0.16s ease
             .toc-text
               display: block
-              max-width: 170px
-              overflow: hidden
-              text-overflow: ellipsis
-              white-space: nowrap
-              word-break: keep-all
+              max-width: 245px
+              overflow: visible
+              text-overflow: clip
+              white-space: normal
+              word-break: break-word
             &:before
               display: none !important
               content: none !important
@@ -2214,7 +2218,7 @@ body
                 display: none !important
           .toc-level-3 a.toc-link
             padding-left: 12px
-            font-size: 0.74rem
+            font-size: 0.8rem
             color: rgba(235, 242, 255, 0.38)
             &:before
               display: none !important
@@ -2346,6 +2350,108 @@ body
   .widget-wrapper
     max-width: 100% !important
 
+// ---------- 19. Minimal top post navbar ----------
+// 顶部「近期发布 / 分类 / 归档」去掉厚重胶囊框，改成轻量标签栏。
+html
+  scroll-behavior: smooth
+
+.navbar
+  top: 18px
+
+.navbar-blur
+  margin: 0 !important
+  border: none !important
+  border-radius: 0 !important
+  background: transparent !important
+  box-shadow: none !important
+  text-shadow: none !important
+  backdrop-filter: none !important
+  -webkit-backdrop-filter: none !important
+  &:before,
+  &:after
+    display: none !important
+    content: none !important
+
+.navbar-container
+  margin: 0 !important
+  border-radius: 0 !important
+  overflow-x: auto !important
+  overflow-y: hidden !important
+  scrollbar-width: none
+  &::-webkit-scrollbar
+    display: none
+
+.navbar nav.post
+  align-items: center
+  min-height: 34px
+  gap: 18px
+  padding: 0 2px
+  border-bottom: none !important
+
+.navbar nav.post a
+  margin: 0 !important
+  padding: 0 0 0.48rem !important
+  border-radius: 0 !important
+  color: rgba(235, 242, 255, 0.46) !important
+  background: transparent !important
+  box-shadow: none !important
+  border: none !important
+  font-size: 0.86rem
+  font-weight: 520
+  line-height: 1.4
+  letter-spacing: 0.02em
+  text-shadow: none !important
+  filter: none !important
+  transition: color 0.16s ease
+  &:hover
+    color: rgba(245, 249, 255, 0.92) !important
+    background: transparent !important
+  &.active
+    color: rgba(245, 249, 255, 0.94) !important
+    background: transparent !important
+    pointer-events: none
+    &:after
+      content: ''
+      position: absolute
+      left: 0
+      right: 0
+      bottom: 0
+      height: 2px
+      border-radius: 2px
+      background: rgba(122, 191, 255, 0.9)
+
+.navbar nav.post span
+  min-width: 24px
+
+@media screen and (max-width: 768px)
+  .navbar
+    top: 10px !important
+    margin: 0 12px 10px !important
+
+  .navbar nav.post
+    min-height: 40px
+    gap: 14px
+    padding-bottom: 3px
+
+  .navbar nav.post a
+    padding: 0 0 0.42rem !important
+    font-size: 0.82rem
+
+// ---------- 20. Smooth TOC navigation ----------
+// 点击文章右侧目录时使用平滑滚动，并让当前目录项切换更柔和。
+.l_body[layout="post"] .l_right .widget-wrapper.toc .toc a.toc-link
+  transition: color 0.22s ease, transform 0.22s ease, opacity 0.22s ease !important
+
+.l_body[layout="post"] .l_right .widget-wrapper.toc .toc a.toc-link:hover
+  transform: translateX(3px)
+
+.l_body[layout="post"] .l_right .widget-wrapper.toc .toc a.toc-link.active
+  transition: color 0.22s ease, transform 0.22s ease, font-weight 0.22s ease !important
+
+@media (prefers-reduced-motion: reduce)
+  html
+    scroll-behavior: auto
+
 // 强覆盖：文章页右侧目录做成「竖线 + 短横」索引。
 @media screen and (min-width: 1181px)
   .l_body[layout="post"] .l_right .widget-wrapper.toc .widget-body
@@ -2367,8 +2473,8 @@ body
     border: none !important
     box-shadow: none !important
     color: rgba(235, 242, 255, 0.5) !important
-    font-size: 0.76rem !important
-    line-height: 1.35 !important
+    font-size: 0.84rem !important
+    line-height: 1.48 !important
 
   .l_body[layout="post"] .l_right .widget-wrapper.toc .toc a.toc-link::before
     display: none !important
@@ -2376,10 +2482,11 @@ body
 
   .l_body[layout="post"] .l_right .widget-wrapper.toc .toc a.toc-link .toc-text
     display: block !important
-    max-width: 240px !important
-    overflow: hidden !important
-    text-overflow: ellipsis !important
-    white-space: nowrap !important
+    max-width: 245px !important
+    overflow: visible !important
+    text-overflow: clip !important
+    white-space: normal !important
+    word-break: break-word !important
 
   .l_body[layout="post"] .l_right .widget-wrapper.toc .toc a.toc-link.active
     color: #a9d6ff !important
