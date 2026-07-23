@@ -1485,20 +1485,42 @@ body.nav-hidden .widget-wrapper.todo-widget
 // ---------- 14. Visual cleanup: cyber minimal reset ----------
 // 目标：保留安全/赛博气质，降低背景和毛玻璃噪声，修复移动端横向溢出。
 :root
-  --wr-card-bg: rgba(16, 20, 28, 0.78)
-  --wr-card-bg-strong: rgba(18, 23, 32, 0.9)
-  --wr-card-border: rgba(140, 165, 210, 0.18)
-  --wr-card-shadow: 0 18px 48px rgba(0, 0, 0, 0.28)
-  --wr-soft-shadow: 0 10px 28px rgba(0, 0, 0, 0.22)
+  --wr-bg: #080b10
+  --wr-bg-radial: rgba(35, 72, 110, 0.22)
+  --wr-card: rgba(16, 20, 28, 0.78)
+  --wr-card-strong: rgba(18, 23, 32, 0.9)
+  --wr-card-soft: rgba(255, 255, 255, 0.045)
+  --wr-card-hover: rgba(255, 255, 255, 0.065)
+  --wr-card-faint: rgba(255, 255, 255, 0.018)
+  --wr-border: rgba(140, 165, 210, 0.18)
+  --wr-border-soft: rgba(150, 165, 190, 0.12)
+  --wr-text: rgba(238, 244, 255, 0.92)
+  --wr-text-strong: rgba(246, 249, 255, 0.96)
+  --wr-muted: rgba(220, 230, 245, 0.68)
+  --wr-muted-2: rgba(235, 242, 255, 0.48)
   --wr-accent: #3aa7ff
+  --wr-accent-soft: rgba(58, 167, 255, 0.12)
+  --wr-accent-border: rgba(58, 167, 255, 0.3)
+  --wr-accent-text: #a9d6ff
+  --wr-accent-line: rgba(122, 191, 255, 0.9)
   --wr-accent-2: #7b5cff
+  --wr-shadow-card: 0 18px 48px rgba(0, 0, 0, 0.28)
+  --wr-shadow-soft: 0 10px 28px rgba(0, 0, 0, 0.22)
+  --wr-shadow-float: 0 10px 30px rgba(0, 0, 0, 0.25)
+  // Backward aliases for older custom blocks.
+  --wr-card-bg: var(--wr-card)
+  --wr-card-bg-strong: var(--wr-card-strong)
+  --wr-card-border: var(--wr-border)
+  --wr-card-border-soft: var(--wr-border-soft)
+  --wr-card-shadow: var(--wr-shadow-card)
+  --wr-soft-shadow: var(--wr-shadow-soft)
 
 html, body
   max-width: 100%
   overflow-x: hidden
 
 body
-  background: radial-gradient(circle at 30% 0%, rgba(35, 72, 110, 0.22), transparent 34%), #080b10
+  background: radial-gradient(circle at 30% 0%, var(--wr-bg-radial), transparent 34%), var(--wr-bg)
 
 // 背景特效降噪：功能还在，但不再压过内容。
 #particle-network-bg
@@ -1547,7 +1569,7 @@ body
   filter: saturate(120%) blur(64px) opacity(0.42) !important
 
 .l_right .sidebg
-  background: rgba(18, 23, 32, 0.52) !important
+  background: var(--wr-card-strong) !important
   backdrop-filter: blur(12px) saturate(120%) !important
   -webkit-backdrop-filter: blur(12px) saturate(120%) !important
 
@@ -1555,12 +1577,12 @@ body
   grid-gap: 10px
   .nav-item
     min-height: 48px
-    background: rgba(255, 255, 255, 0.055)
-    border: 1px solid rgba(255, 255, 255, 0.08)
+    background: var(--wr-card-soft)
+    border: 1px solid var(--wr-border-soft)
     &:hover,
     &.active
-      background: rgba(58, 167, 255, 0.14)
-      border-color: rgba(58, 167, 255, 0.28)
+      background: var(--wr-accent-soft)
+      border-color: var(--wr-accent-border)
 
 // 顶部导航：减少胶囊发光感，保留当前项识别。
 .navbar
@@ -1568,9 +1590,9 @@ body
 
 .navbar-blur
   margin: 0 1rem
-  border: 1px solid rgba(255, 255, 255, 0.12)
-  background: rgba(18, 23, 32, 0.76) !important
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25)
+  border: 1px solid var(--wr-border-soft)
+  background: var(--wr-card) !important
+  box-shadow: var(--wr-shadow-float)
   backdrop-filter: blur(14px) saturate(130%) !important
   -webkit-backdrop-filter: blur(14px) saturate(130%) !important
 
@@ -1584,8 +1606,8 @@ body
   &:hover
     box-shadow: none
   &.active
-    background: linear-gradient(135deg, rgba(58, 167, 255, 0.95), rgba(123, 92, 255, 0.86)) !important
-    color: #fff !important
+    background: linear-gradient(135deg, var(--wr-accent), var(--wr-accent-2)) !important
+    color: var(--wr-text-strong) !important
     box-shadow: none
 
 // 首页/列表卡片：统一比例和间距，降低标题压迫感。
@@ -1607,13 +1629,13 @@ body
   min-width: 0
   border: 1px solid var(--wr-card-border) !important
   border-radius: 18px !important
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018)) !important
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18) !important
+  background: linear-gradient(180deg, var(--wr-card-soft), var(--wr-card-faint)) !important
+  box-shadow: var(--wr-shadow-soft) !important
   overflow: hidden
   transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease
   &:hover
     transform: translateY(-3px)
-    border-color: rgba(58, 167, 255, 0.38) !important
+    border-color: var(--wr-accent-border) !important
     box-shadow: var(--wr-card-shadow) !important
 
 .post-list .post-card .post-cover,
@@ -1636,7 +1658,7 @@ body
 
 .post-list .post-card .meta,
 .post-list .post-card .excerpt
-  color: rgba(220, 230, 245, 0.68)
+  color: var(--wr-muted)
 
 // 通用内容块：让设置页/关于页更像同一套设计系统。
 .md-text .tag-plugin,
@@ -1659,14 +1681,14 @@ body
 .linklist.left .link
   border-radius: 10px
   margin: 2px 6px
-  color: rgba(235, 242, 255, 0.78)
+  color: var(--wr-text)
   &:hover
-    background: rgba(58, 167, 255, 0.1)
-    color: #fff
+    background: var(--wr-accent-soft)
+    color: var(--wr-text-strong)
 
 .linklist.left .link .count
-  background: rgba(255, 255, 255, 0.075)
-  color: rgba(235, 242, 255, 0.72)
+  background: var(--wr-card-soft)
+  color: var(--wr-muted)
 
 // 布局切换器别盖内容，移动端只保留更小浮层。
 .layout-switcher
@@ -1792,7 +1814,7 @@ body
     opacity: 0.92
 
   .l_left .leftbar-container
-    background: rgba(16, 21, 29, 0.72) !important
+    background: var(--wr-card) !important
 
   body.nav-admin-visible .nav-area .menu
     display: flex !important
@@ -1813,8 +1835,8 @@ body
     gap: 10px
     text-align: left
     border-radius: 12px
-    color: rgba(235, 242, 255, 0.72)
-    background: rgba(255, 255, 255, 0.045)
+    color: var(--wr-muted)
+    background: var(--wr-card-soft)
     img, svg
       width: 20px
       height: 20px
@@ -1830,9 +1852,9 @@ body
     &:hover,
     &.active
       transform: translateX(2px)
-      background: rgba(58, 167, 255, 0.12)
-      color: #fff
-      border-color: rgba(58, 167, 255, 0.3)
+      background: var(--wr-accent-soft)
+      color: var(--wr-text-strong)
+      border-color: var(--wr-accent-border)
       img, svg
         filter: unset
     &.active:after
@@ -1847,8 +1869,8 @@ body
   body.nav-admin-visible .widget-wrapper.todo-widget
     margin-top: 12px
     border-radius: 14px
-    background: rgba(255, 255, 255, 0.045) !important
-    border: 1px solid rgba(255, 255, 255, 0.08)
+    background: var(--wr-card-soft) !important
+    border: 1px solid var(--wr-border-soft)
     overflow: hidden
     transition: border-color 0.2s ease, background 0.2s ease
     .widget-header
@@ -1863,8 +1885,8 @@ body
       transition: max-height 0.25s ease, opacity 0.18s ease
     &:hover,
     &:focus-within
-      background: rgba(255, 255, 255, 0.065) !important
-      border-color: rgba(58, 167, 255, 0.22)
+      background: var(--wr-card-hover) !important
+      border-color: var(--wr-accent-border)
       .widget-body
         max-height: 280px
         opacity: 1
@@ -1876,7 +1898,7 @@ body
 
   body.nav-admin-visible .widget-wrapper.todo-widget .todo-list > *
     border-radius: 9px
-    background: rgba(255, 255, 255, 0.045)
+    background: var(--wr-card-soft)
     margin-bottom: 7px
     padding: 8px 10px
 
@@ -1911,20 +1933,20 @@ body
         font-size: 0.88rem
         line-height: 1.8
         a
-          color: rgba(235, 242, 255, 0.78)
+          color: var(--wr-muted)
           text-decoration: none
           &:hover
-            color: #fff
+            color: var(--wr-text-strong)
       .bottom
         margin-top: 0.55rem
         .title
           text-align: left
-          color: rgba(238, 244, 255, 0.94) !important
+          color: var(--wr-text-strong) !important
           text-shadow: none !important
           margin: 0 !important
           span
             animation: none !important
-            color: rgba(238, 244, 255, 0.94) !important
+            color: var(--wr-text-strong) !important
             font-size: clamp(1.45rem, 2vw, 2.05rem) !important
             line-height: 1.28 !important
             letter-spacing: -0.03em
@@ -1937,20 +1959,20 @@ body
 .l_body[layout="post"] article.md-text.content
   margin: 0 var(--gap-margin) 2rem
   padding: 1.55rem 2.05rem 2.1rem !important
-  border: 1px solid rgba(150, 165, 190, 0.1) !important
+  border: 1px solid var(--wr-border-soft) !important
   border-radius: 16px !important
-  background: rgba(10, 13, 19, 0.42) !important
+  background: var(--wr-card) !important
   box-shadow: none !important
   backdrop-filter: none !important
   -webkit-backdrop-filter: none !important
-  color: rgba(238, 244, 255, 0.91)
+  color: var(--wr-text)
   line-height: 1.92
 
 .l_body[layout="post"] article.md-text.content
   > h1:first-child
     display: none !important
   h1, h2, h3, h4, h5, h6
-    color: rgba(246, 249, 255, 0.96)
+    color: var(--wr-text-strong)
     text-shadow: none !important
     letter-spacing: -0.02em
   h2
@@ -1958,7 +1980,7 @@ body
     margin-bottom: 0.85rem
     padding: 0 0 0.36rem !important
     font-size: 1.42rem
-    border-bottom: 1px solid rgba(160, 180, 220, 0.12)
+    border-bottom: 1px solid var(--wr-border-soft)
     &:before,
     &:after
       display: none !important
@@ -1978,7 +2000,7 @@ body
       box-shadow: none !important
   p
     margin: 0.9rem 0
-    color: rgba(238, 244, 255, 0.88)
+    color: var(--wr-text)
   ul, ol
     padding-left: 1.35rem
   li
@@ -1988,30 +2010,30 @@ body
       transform: none !important
       background: transparent !important
   a:not([class])
-    color: #7abfff
+    color: var(--wr-accent)
     background-image: none !important
     text-decoration: underline
-    text-decoration-color: rgba(122, 191, 255, 0.35)
+    text-decoration-color: var(--wr-accent-border)
     text-underline-offset: 4px
     &:hover
-      color: #a9d6ff
+      color: var(--wr-accent-text)
       text-decoration-color: currentColor
   hr
     height: 1px
     margin: 2rem 0
-    background: rgba(160, 180, 220, 0.16) !important
+    background: var(--wr-border-soft) !important
     animation: none !important
     opacity: 1
   blockquote
     margin: 1.25rem 0
     padding: 0.7rem 1rem
-    border-left: 3px solid rgba(122, 191, 255, 0.55) !important
+    border-left: 3px solid var(--wr-accent-line) !important
     border-radius: 0 12px 12px 0
-    background: rgba(255, 255, 255, 0.04) !important
+    background: var(--wr-card-soft) !important
     transition: none !important
     &:hover
       border-left-width: 3px !important
-      background: rgba(255, 255, 255, 0.04) !important
+      background: var(--wr-card-soft) !important
   img:not([class]),
   p>img
     border-radius: 12px !important
@@ -2023,18 +2045,18 @@ body
   table:not(.highlight table)
     border-radius: 12px
     overflow: hidden
-    border: 1px solid rgba(160, 180, 220, 0.14)
+    border: 1px solid var(--wr-border-soft)
     tr:hover
       background: transparent !important
   code:not([class*="language"])
-    background: rgba(122, 191, 255, 0.1) !important
-    color: #a9d6ff !important
-    border: 1px solid rgba(122, 191, 255, 0.13)
+    background: var(--wr-accent-soft) !important
+    color: var(--wr-accent-text) !important
+    border: 1px solid var(--wr-accent-border)
     border-radius: 5px
     padding: 0.12em 0.38em
     transition: none !important
   .highlight
-    border: 1px solid rgba(160, 180, 220, 0.14)
+    border: 1px solid var(--wr-border-soft)
     border-radius: 12px !important
     box-shadow: none !important
     transition: none !important
@@ -2052,13 +2074,13 @@ body
 
 // 文章页右侧目录也收敛成普通目录，不再跳动发光。
 .l_body[layout="post"] .l_right .widget-wrapper.toc
-  background: rgba(12, 15, 22, 0.48) !important
-  border: 1px solid rgba(150, 165, 190, 0.12)
+  background: var(--wr-card) !important
+  border: 1px solid var(--wr-border-soft)
   box-shadow: none !important
   .widget-header
     opacity: 0.78
   .toc .toc-link.active
-    color: #a9d6ff
+    color: var(--wr-accent-text)
     &:after
       display: none !important
       content: none !important
@@ -2118,7 +2140,7 @@ body
         bottom: -18px
         width: 2px
         border-radius: 2px
-        background: rgba(122, 191, 255, 0.34)
+        background: var(--wr-accent-line)
       .sidebg
         display: none !important
       .rightbar-container
@@ -2187,7 +2209,7 @@ body
             display: block
             padding: 0.36rem 0
             border-radius: 0
-            color: rgba(235, 242, 255, 0.48)
+            color: var(--wr-muted-2)
             font-size: 0.84rem
             line-height: 1.48
             background: transparent !important
@@ -2207,19 +2229,19 @@ body
               display: none !important
               content: none !important
             &:hover
-              color: rgba(235, 242, 255, 0.88)
+              color: var(--wr-text)
               transform: translateX(2px)
               &:before
                 display: none !important
             &.active
-              color: #a9d6ff !important
+              color: var(--wr-accent-text) !important
               font-weight: 600
               &:before
                 display: none !important
           .toc-level-3 a.toc-link
             padding-left: 12px
             font-size: 0.8rem
-            color: rgba(235, 242, 255, 0.38)
+            color: var(--wr-muted-2)
             &:before
               display: none !important
 
@@ -2392,7 +2414,7 @@ html
   margin: 0 !important
   padding: 0 0 0.48rem !important
   border-radius: 0 !important
-  color: rgba(235, 242, 255, 0.46) !important
+  color: var(--wr-muted-2) !important
   background: transparent !important
   box-shadow: none !important
   border: none !important
@@ -2404,10 +2426,10 @@ html
   filter: none !important
   transition: color 0.16s ease
   &:hover
-    color: rgba(245, 249, 255, 0.92) !important
+    color: var(--wr-text) !important
     background: transparent !important
   &.active
-    color: rgba(245, 249, 255, 0.94) !important
+    color: var(--wr-text-strong) !important
     background: transparent !important
     pointer-events: none
     &:after
@@ -2418,7 +2440,7 @@ html
       bottom: 0
       height: 2px
       border-radius: 2px
-      background: rgba(122, 191, 255, 0.9)
+      background: var(--wr-accent-line)
 
 .navbar nav.post span
   min-width: 24px
@@ -2472,7 +2494,7 @@ html
     background: transparent !important
     border: none !important
     box-shadow: none !important
-    color: rgba(235, 242, 255, 0.5) !important
+    color: var(--wr-muted-2) !important
     font-size: 0.84rem !important
     line-height: 1.48 !important
 
@@ -2489,7 +2511,7 @@ html
     word-break: break-word !important
 
   .l_body[layout="post"] .l_right .widget-wrapper.toc .toc a.toc-link.active
-    color: #a9d6ff !important
+    color: var(--wr-accent-text) !important
     font-weight: 700 !important
 
   .l_body[layout="post"] .l_right .widget-wrapper.toc .toc a.toc-link.active::before
