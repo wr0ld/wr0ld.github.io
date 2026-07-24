@@ -1,78 +1,121 @@
 .paginator-wrap
-  margin: 0.25rem 1rem
+  margin: 1.35rem 1rem 0.65rem
   display: flex
-  justify-content: space-between
+  justify-content: center
   align-items: center
-  gap: 2px
-  padding: 8px 12px
-  background: var(--card)
-  border-radius: 12px
-  backdrop-filter: blur(10px)
-  -webkit-backdrop-filter: blur(10px)
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06)
+  gap: 8px
+  padding: 0
+  background: transparent
+  border-radius: 0
+  backdrop-filter: none
+  -webkit-backdrop-filter: none
+  box-shadow: none
 
   .page-number
     display: inline-flex
     align-items: center
     justify-content: center
-    flex: 1
-    min-width: 36px
-    height: 36px
-    padding: 0 8px
-    border-radius: 8px
-    font-size: 14px
-    font-weight: 500
-    trans1 all
+    flex: 0 0 auto
+    min-width: 38px
+    height: 38px
+    padding: 0 12px
+    border: 1px solid var(--wr-border-soft, rgba(150, 165, 190, 0.12))
+    border-radius: 12px
+    background: var(--wr-card-soft, rgba(255, 255, 255, 0.045))
+    color: var(--wr-muted, var(--text-p2))
+    font-size: 13px
+    font-weight: 650
+    line-height: 1
+    text-decoration: none
+    transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, transform 0.18s ease
 
   a.page-number
-    color: var(--text-p3)
+    color: var(--wr-muted, var(--text-p3))
     &:hover
-      color: var(--text)
-      background: var(--block)
-      transform: translateY(-1px)
+      color: var(--wr-text-strong, var(--text))
+      background: var(--wr-accent-soft, var(--block))
+      border-color: var(--wr-accent-border, var(--theme))
+      transform: translateY(-2px)
 
   .current
-    background: linear-gradient(135deg, var(--theme), #7B2FBE)
-    color: #fff !important
-    font-weight: 600
-    box-shadow: 0 2px 8px rgba(123, 47, 190, 0.3)
+    color: var(--wr-text-strong, #fff) !important
+    background: linear-gradient(135deg, var(--wr-accent, var(--theme)), var(--wr-accent-2, #7B2FBE))
+    border-color: transparent
+    font-weight: 760
+    box-shadow: 0 10px 24px rgba(58, 167, 255, 0.16)
     &:hover
       transform: none !important
-      background: linear-gradient(135deg, var(--theme), #7B2FBE) !important
+      background: linear-gradient(135deg, var(--wr-accent, var(--theme)), var(--wr-accent-2, #7B2FBE)) !important
 
   .space
     display: inline-flex
     align-items: center
     justify-content: center
     flex: none
-    width: 24px
-    height: 36px
-    color: var(--text-p3)
+    width: 20px
+    height: 38px
+    color: var(--wr-muted-2, var(--text-p3))
     font-size: 14px
-    letter-spacing: 2px
+    letter-spacing: 1px
 
   .extend
     display: inline-flex
     align-items: center
     justify-content: center
-    padding: 0 12px
-    height: 36px
-    border-radius: 8px
-    font-size: 14px
+    min-width: 82px
+    height: 38px
+    padding: 0 14px
+    border: 1px solid var(--wr-border-soft, rgba(150, 165, 190, 0.12))
+    border-radius: 12px
+    background: transparent
+    color: var(--wr-muted, var(--text-p2))
+    font-size: 13px
+    font-weight: 620
     line-height: 1
     white-space: nowrap
-    trans1 all
+    text-decoration: none
+    transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, transform 0.18s ease
 
   a.extend
-    color: var(--text-p2)
-    background: var(--block)
+    color: var(--wr-muted, var(--text-p2))
+    background: transparent
     &:hover
-      color: var(--text)
-      background: var(--block-border)
-      transform: translateY(-1px)
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1)
+      color: var(--wr-text-strong, var(--text))
+      background: var(--wr-card-soft, var(--block))
+      border-color: var(--wr-accent-border, var(--theme))
+      transform: translateY(-2px)
 
   span.extend
-    opacity: 0.25
+    opacity: 0.28
     cursor: default
     pointer-events: none
+
+@media screen and (max-width: $device-mobile-max)
+  .paginator-wrap
+    margin: 1rem 12px 0.5rem
+    gap: 6px
+    .page-number
+      min-width: 34px
+      height: 34px
+      padding: 0 10px
+      border-radius: 11px
+      font-size: 12px
+    .extend
+      min-width: 34px
+      width: 34px
+      height: 34px
+      padding: 0
+      border-radius: 11px
+      font-size: 0
+      overflow: hidden
+    .space
+      width: 14px
+      height: 34px
+    .extend.prev:before,
+    .extend.next:before
+      font-size: 16px
+      line-height: 1
+    .extend.prev:before
+      content: '‹'
+    .extend.next:before
+      content: '›'
