@@ -1614,6 +1614,9 @@ body
 .l_body[layout="post"] article.md-text.content
   > h1:first-child
     display: none !important
+  > h2[id="目录"],
+  > h2[id="目录"] + ul
+    display: none !important
   h1, h2, h3, h4, h5, h6
     color: var(--wr-text-strong)
     text-shadow: none !important
