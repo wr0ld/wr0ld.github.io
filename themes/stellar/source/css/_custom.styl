@@ -732,10 +732,6 @@ html.reverse-both
   scrollbar-width: thin
   scrollbar-color: rgba(120, 120, 120, 0.3) transparent
 
-// 隐藏不必要的滚动条
-.navbar-container
-  overflow: visible !important
-
 .post-list
   overflow: visible !important
   perspective: 3600px
@@ -754,80 +750,6 @@ html.reverse-both
   display: flex !important
   width: 100% !important
   justify-content: flex-start !important
-
-// 主内容区负边距扩展
-.l_main#main
-  padding-left: 0
-  padding-right: 0
-  margin-top: 0
-  margin-bottom: 0
-  margin-left: -50px
-  margin-right: -50px
-
-// 文章页面右侧目录显示修复
-.l_body[layout="post"] .l_right
-  display: block !important
-  visibility: visible !important
-  opacity: 1 !important
-
-// 右侧边栏回到顶部按钮
-.rightbar-top-btn
-  margin: 0 var(--gap-margin) 8px
-  a.top
-    display: flex
-    align-items: center
-    gap: 6px
-    padding: 8px 12px
-    border-radius: 8px
-    color: var(--text-p2)
-    font-size: $fs-13
-    background: var(--bg-a30)
-    transition: all 0.2s
-    cursor: pointer
-    svg
-      height: 16px
-      width: auto
-    &:hover
-      background: var(--bg-a60)
-      color: var(--text-p1)
-
-.l_body[layout="post"] .l_right .widgets
-  display: block !important
-  visibility: visible !important
-
-.l_body[layout="post"] .l_right .widget-wrapper.toc
-  display: block !important
-  visibility: visible !important
-
-// 大屏幕下文章目录始终显示在右侧
-@media screen and (min-width: 1181px)
-  .l_body[layout="post"] .l_right
-    position: fixed !important
-    top: 50% !important
-    left: 75vw !important
-    right: auto !important
-    transform: translateY(-50%) !important
-    width: 280px !important
-    max-height: 58vh !important
-    overflow: visible !important
-    z-index: 8 !important
-
-// 小屏幕下文章目录通过按钮切换显示
-@media screen and (max-width: 1180px)
-  .l_body[layout="post"] .l_right
-    position: fixed !important
-    transform: translateX(320px) !important
-    transition: transform 0.38s ease-out !important
-    right: 8px !important
-    top: calc(var(--gap-margin) * 2) !important
-    max-height: calc(100vh - var(--gap-margin) * 2 - 96px) !important
-    z-index: 10 !important
-    background: var(--card) !important
-    border-radius: 24px !important
-    padding: 16px !important
-  
-  .l_body[layout="post"][rightbar] .l_right
-    transform: translateX(0) !important
 
 // 分类数量显示样式
 .linklist.left .link .flex
@@ -1106,57 +1028,9 @@ a.post-card .breadcrumb span
   margin-right: 0 !important
   padding: 2px 6px !important
 
-// 网格布局卡片间距缩小
-.post-list.grid
-  gap: 0.4rem !important
-
 // ============================================================
 // 动画系统（入场动画由 scrollreveal 负责，此处仅保留悬停交互）
 // ============================================================
-
-// ---------- 导航栏悬停 ----------
-.navbar nav a
-  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease !important
-  &:hover
-    transform: translateY(-1px) !important
-
-// ---------- 卡片悬停增强 ----------
-.post-card
-  position: relative
-  transform-style: preserve-3d
-  transform-origin: center center
-  will-change: transform
-  animation: cardFadeIn 0.3s ease both
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important
-  // 伪元素 translateZ 强制 GPU 渲染层，不干扰主 transform 动画
-  &::after
-    content: ''
-    position: absolute
-    inset: 0
-    transform: translateZ(0)
-    pointer-events: none
-  &:hover
-    transform: translateY(-3px) scale(1.005)
-    box-shadow: 0 0 6px -2px rgba(255, 255, 255, 0.7), 0 0 40px -8px rgba(255, 255, 255, 0.35) !important
-
-.post-list.grid .post-card:hover
-  transform: translateY(-3px) scale(1.003)
-
-.post-list.list .post-card:hover
-  transform: translateY(-1px) scale(1.0005)
-
-// 卡片入场动画（逐个出现，40ms 间隔，快速但有序）
-@keyframes cardFadeIn
-  from
-    opacity: 0
-    transform: translateY(12px) scale(0.98)
-  to
-    opacity: 1
-    transform: translateY(0) scale(1)
-
-for n in (1..20)
-  .post-card:nth-child({n})
-    animation-delay: (n - 1) * 40ms
 
 // ---------- 分类卡片悬停 ----------
 .category-card
@@ -1198,204 +1072,6 @@ pre.mermaid svg
   max-width: 100% !important
   height: auto !important
 
-// ============================================================
-// 文章详情页增强动画（scrollreveal 负责入场，此处增强交互体验）
-// ============================================================
-
-// ---------- 1. 文章标题渐入 ----------
-.article.banner .content .bottom .title span
-  display: inline-block
-  animation: titleSlideIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both
-
-@keyframes titleSlideIn
-  from
-    opacity: 0
-    transform: translateY(12px)
-  to
-    opacity: 1
-    transform: translateY(0)
-
-// ---------- 2. 面包屑导航滑入 ----------
-.article.banner .content .top
-  animation: breadSlideIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both
-
-@keyframes breadSlideIn
-  from
-    opacity: 0
-    transform: translateY(-8px)
-  to
-    opacity: 1
-    transform: translateY(0)
-
-// ---------- 3. 标题左侧渐变装饰线 + 底部渐变横条 ----------
-.md-text.content h2
-  position: relative
-  padding-left: 1rem !important
-  padding-bottom: 0.4em !important
-  &:before
-    content: ''
-    position: absolute
-    left: 0
-    top: 50%
-    transform: translateY(-50%)
-    width: 4px
-    height: 70%
-    border-radius: 2px
-    background: linear-gradient(180deg, var(--accent), var(--theme))
-    opacity: 0.85
-    transition: height 0.3s ease, opacity 0.3s ease
-  &:hover:before
-    height: 90%
-    opacity: 1
-  &:after
-    content: ''
-    position: absolute
-    left: 0
-    bottom: 0
-    width: 80px
-    height: 3px
-    border-radius: 2px
-    background: linear-gradient(90deg, #4A90D9, #7B2FBE, #2D1B69, #000000)
-    background-size: 200% 100%
-    animation: headingGlow 3s ease-in-out infinite
-    box-shadow: 0 0 6px rgba(74, 144, 217, 0.3), 0 0 12px rgba(123, 47, 190, 0.2)
-
-.md-text.content h3
-  position: relative
-  padding-left: 0.8rem !important
-  padding-bottom: 0.3em !important
-  &:before
-    content: ''
-    position: absolute
-    left: 0
-    top: 50%
-    transform: translateY(-50%)
-    width: 3px
-    height: 60%
-    border-radius: 2px
-    background: var(--theme)
-    opacity: 0.6
-    transition: height 0.3s ease, opacity 0.3s ease
-  &:hover:before
-    height: 80%
-    opacity: 0.9
-  &:after
-    content: ''
-    position: absolute
-    left: 0
-    bottom: 0
-    width: 40px
-    height: 2px
-    border-radius: 2px
-    background: linear-gradient(90deg, #4A90D9, #7B2FBE, transparent)
-    background-size: 200% 100%
-    animation: headingGlow 3s ease-in-out infinite
-    opacity: 0.6
-
-@keyframes headingGlow
-  0%, 100%
-    background-position: 0% 50%
-  50%
-    background-position: 100% 50%
-
-// ---------- 4. 代码块增强 ----------
-.md-text .highlight
-  position: relative
-  border-radius: $border-card
-  overflow: hidden
-  transition: box-shadow 0.3s ease, transform 0.2s ease
-  &:hover
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15)
-    transform: translateY(-1px)
-
-// ---------- 5. 引用块左侧动画边框 ----------
-.md-text blockquote
-  position: relative
-  border-left: 3px solid var(--theme) !important
-  transition: border-left-width 0.3s ease, background 0.3s ease
-  &:hover
-    border-left-width: 5px !important
-    background: var(--block-hover) !important
-
-// ---------- 6. 文章页脚卡片悬浮 ----------
-.article-footer
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important
-  &:hover
-    transform: translateY(-2px) !important
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important
-
-// ---------- 7. 表格行悬浮效果 ----------
-.md-text table tr
-  transition: background 0.2s ease
-  &:hover
-    background: var(--block-hover) !important
-
-// ---------- 8. 文章内链接下划线动画 ----------
-.md-text p a:not([class])
-  background-image: linear-gradient(var(--theme), var(--theme))
-  background-size: 0% 2px
-  background-position: left bottom
-  background-repeat: no-repeat
-  transition: background-size 0.3s ease, color 0.2s ease
-  &:hover
-    background-size: 100% 2px
-    color: var(--theme)
-
-// ---------- 9. 文章图片边框光晕 ----------
-.md-text p>img
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease !important
-  &:hover
-    transform: scale(1.02) !important
-    box-shadow: 0 8px 30px rgba(100, 100, 255, 0.15) !important
-
-// ---------- 10. 代码行内样式 ----------
-.md-text code:not([class*="language"])
-  background: var(--theme-a10)
-  color: var(--theme)
-  padding: 2px 6px
-  border-radius: 4px
-  font-size: 0.9em
-  transition: background 0.2s ease
-  &:hover
-    background: var(--theme-a20)
-
-// ---------- 11. 有序/无序列表项入场（由 scrollreveal 触发） ----------
-.md-text ul li, .md-text ol li
-  transition: transform 0.2s ease, background 0.2s ease
-  border-radius: 4px
-  &:hover
-    transform: translateX(4px)
-
-// ---------- 12. TOC 目录活跃项动画 ----------
-.toc .toc-link.active
-  position: relative
-  &:after
-    content: ''
-    position: absolute
-    right: -8px
-    top: 50%
-    transform: translateY(-50%)
-    width: 6px
-    height: 6px
-    border-radius: 50%
-    background: var(--theme)
-    animation: tocDot 1.5s ease-in-out infinite
-
-@keyframes tocDot
-  0%, 100%
-    opacity: 0.6
-    transform: translateY(-50%) scale(1)
-  50%
-    opacity: 1
-    transform: translateY(-50%) scale(1.4)
-
-// ---------- 13. 相关文章卡片 ----------
-.related-posts .post-card
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease !important
-  &:hover
-    transform: translateY(-3px) !important
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important
-
 // ---------- 减少动画偏好支持（无障碍）----------
 @media (prefers-reduced-motion: reduce)
   *, *::before, *::after
@@ -1421,17 +1097,6 @@ pre.mermaid svg
   50%
     opacity: 0
 
-// 黑客分隔线
-.md-text hr
-  border: none
-  height: 2px
-  background: linear-gradient(90deg, transparent, #4A90D9, #7B2FBE, #000000, transparent)
-  background-size: 200% 100%
-  animation: headingGlow 3s ease-in-out infinite
-  margin: 2em 0
-  border-radius: 1px
-  opacity: 0.6
-
 // 侧边栏波浪展开动画
 .widget-wrapper.collapsible-widget .widget-body .todo-list > *,
 .widget-wrapper.collapsible-widget .widget-body .linklist > *
@@ -1449,28 +1114,6 @@ for n in (1..20)
   to
     opacity: 1
     transform: translateY(0)
-
-// 文章正文边框卡片
-.l_body[layout="post"] article.md-text.content
-  margin: 0 var(--gap-margin) var(--gap-margin)
-  padding: 1.25rem 1.35rem 2rem !important
-  border: 1px solid rgba(120, 140, 180, 0.22)
-  border-radius: 18px
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015))
-  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.04)
-  backdrop-filter: blur(8px)
-  -webkit-backdrop-filter: blur(8px)
-
-:root[data-theme="dark"] .l_body[layout="post"] article.md-text.content
-  border-color: rgba(255, 255, 255, 0.14)
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018))
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.05)
-
-@media screen and (max-width: $device-mobile-max)
-  .l_body[layout="post"] article.md-text.content
-    margin: 0 0.5rem 0.75rem
-    padding: 1rem 1rem 1.5rem !important
-    border-radius: 14px
 
 // 导航菜单和任务简报默认隐藏，控制台输入 admin 切换显示（持久化）。
 // 默认隐藏是为了避免无痕/首次访问时 JS 写入 body class 前出现闪现。
