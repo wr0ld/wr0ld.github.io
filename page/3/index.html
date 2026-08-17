@@ -62,7 +62,7 @@
   <!-- feed -->
   
 
-  <link rel="stylesheet" href="/css/main.css?v=ms2rk2h7">
+  <link rel="stylesheet" href="/css/main.css?v=msxgxmnf">
 
 
   
@@ -118,7 +118,25 @@
 </div>
 
 <div id="post-container">
-  <div class="post-list post grid"><a class="post-card slide-up post" href="/posts/9a18f0c4/">
+  <div class="post-list post grid"><a class="post-card slide-up post" href="/posts/a7f3c8d2/">
+<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/owQBfADXeNBEQF9knoiGUAeAwE0cElaIAAyDEP~tplv-dy-vqe2-sr-v2_1920_1079_q80.jpg"/></div><h2 class="post-title">原理分析 | Valve —— Tomcat 特有内存马</h2><div class="excerpt"><p>
+Tomcat 特有，比 Filter 更底层、更隐蔽。
+
+
+目录
+一、什么是 Valve？
+二、Pipeline 是什么？
+三、Valve 在 Pipeline 中是”单向链表”
+四、Valve 与 Filter 的关键区别
+五、静态注册 Valve
+六、动态注入（内存马核心）
+七、Valve 的层级扩展（Engine &#x2F; Host 级别注入）
+八、四种内存马对比总结
+总结
+
+
+...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-11T15:30:00.000Z">2026-04-11</time></span><span class="cap breadcrumb" style="color:rgba(160,165,180,0.85)" style="color:rgba(160,165,180,0.85)!important"><span style="color:rgba(160,165,180,0.85)!important">代码审计</span></span></div></article>
+</a><a class="post-card slide-up post" href="/posts/9a18f0c4/">
 <article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/oMBqEeiBAifEs2uANzhcAcJIQAiAweAr4FE1Pw~tplv-dy-vqe2-sr-v2_1920_1334_q80.jpg"/></div><h2 class="post-title">原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结</h2><div class="excerpt"><p>原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结目录
 前置：StandardContext 回顾
 ApplicationEventDispatcher
@@ -239,23 +257,13 @@ newInstance 触发实验
 
 构造恶意 Class：EvilClass
 ...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-04T04:00:00.000Z">2026-04-04</time></span><span class="cap breadcrumb" style="color:rgba(160,165,180,0.85)" style="color:rgba(160,165,180,0.85)!important"><span style="color:rgba(160,165,180,0.85)!important">代码审计</span></span></div></article>
-</a><a class="post-card slide-up post" href="/posts/a7b3c9d2/">
-<article class="md-text"><div class="post-cover"><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/0815e0c55ab65f736be46eb2a8a7d9ca.webp"/></div><h2 class="post-title">代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial</h2><div class="excerpt"><p>代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial
-为什么需要 CC6？CC1 的限制
-CC6 存在的意义
-调用链全貌
-一步步构造 CC6
-第一步：用 ChainedTransformer 串联恶意链
-第二步：LazyMap.get() 触发 transform
-第三步：谁调用 get()？——TiedMapEntry.getValue()
-第四步：谁调用 ge...</p></div><div class="meta cap"><span class="cap" id="post-meta"><time datetime="2026-04-03T02:00:00.000Z">2026-04-03</time></span><span class="cap breadcrumb" style="color:rgba(160,165,180,0.85)" style="color:rgba(160,165,180,0.85)!important"><span style="color:rgba(160,165,180,0.85)!important">代码审计</span></span></div></article>
 </a></div>
 </div>
 
 <div id="paginator-wrapper">
   
   <div class='paginator-wrap dis-select slide-up'>
-  <a class="extend prev" rel="prev" href="/page/2/">‹ 上一页</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/4/">下一页 ›</a>
+  <a class="extend prev" rel="prev" href="/page/2/">‹ 上一页</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/4/">下一页 ›</a>
   </div>
 
 
@@ -264,7 +272,7 @@ CC6 存在的意义
 <script>
   // 所有文章数据（用于仅标题布局）
   // eslint-disable-next-line
-  const allPostsData = [{"title":"一次从 YAML 配置切入的代码审计思路 | RuoYi-Vue-Pro","path":"posts/i5j6k7l8/","link":""},{"title":"审了个百k项目，没想到真出洞了 | RuoYi-Vue-Pro 任意文件上传 \u0026 路径穿越","path":"posts/e1f2g3h4/","link":""},{"title":"拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞","path":"posts/a7b8c9d0/","link":""},{"title":"一次被报错\"带着走\"的文件上传测试","path":"posts/d4e5f6g7/","link":""},{"title":"代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析","path":"posts/c3d8e7f2/","link":""},{"title":"代码审计 | Struts2 —— S2-016 OGNL 注入原理","path":"posts/a7f2b9d3/","link":""},{"title":"小迪VPC3内网打靶全流程记录","path":"posts/b8e3f9c1/","link":""},{"title":"YsoGUI —— Java 反序列化测试 GUI 工具","path":"posts/f9e8d7c6/","link":""},{"title":"小迪VPC1内网打靶全流程记录","path":"posts/271aabd0/","link":""},{"title":"Ghost Bits：高位截断如何让 Java WAF 形同虚设","path":"posts/6a920a7a/","link":""},{"title":"记一次常态化渗透测试：从域名到 Getshell 的思路","path":"posts/c5d1a7e3/","link":""},{"title":"原理分析 | Interceptor —— SpringBoot 内存马","path":"posts/b8e4f2a6/","link":""},{"title":"原理分析 | Controller —— SpringBoot 内存马","path":"posts/a3c7e2f1/","link":""},{"title":"原理分析 | JNDI反序列化注入内存马 —— 内存马补充","path":"posts/a7c3f9e2/","link":""},{"title":"原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地","path":"posts/c3f7a2d9/","link":""},{"title":"原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地","path":"posts/b8e2f4a1/","link":""},{"title":"原理分析 | Agent —— Tomcat 内存马","path":"posts/a3e7f2c9/","link":""},{"title":"原理分析 | Valve —— Tomcat 特有内存马","path":"posts/a7f3c8d2/","link":""},{"title":"原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结","path":"posts/9a18f0c4/","link":""},{"title":"原理分析 | Servlet —— Tomcat 内存马","path":"posts/eb030935/","link":""},{"title":"原理分析 | Filter —— Tomcat 内存马从零到注入","path":"posts/7b9eb72d/","link":""},{"title":"代码审计 | Log4j2 —— CVE-2021-44228  JNDI 注入与递归解析的完整链路分析","path":"posts/d5ebc61e/","link":""},{"title":"代码审计 | Shiro-550 —— CVE-2016-4437 环境搭建 调试分析 漏洞利用","path":"posts/a7f3c8e2/","link":""},{"title":"代码审计 | CB链分析 —— CommonsBeanutils 反序列化利用链","path":"posts/c4b8e2a3/","link":""},{"title":"代码审计 | CC2 链 —— _tfactory 赋值问题 PriorityQueue 新入口","path":"posts/d7f9a3c1/","link":""},{"title":"代码审计 | CC3链 —— 实例化 vs 反序列化 InvokerTransformer vs InstantiateTransformer","path":"posts/c3e8b7f2/","link":""},{"title":"代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial","path":"posts/a7b3c9d2/","link":""},{"title":"代码审计 | CC1 LazyMap 链 —— 动态代理","path":"posts/d4f8a2c1/","link":""},{"title":"工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆","path":"posts/bb2a3f37/","link":""},{"title":"代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload","path":"posts/becfd9ce/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","path":"posts/e90faa78/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— TemplatesImpl 链分析","path":"posts/f70df821/","link":""},{"title":"代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析","path":"posts/5ef1061b/","link":""},{"title":"代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43","path":"posts/86d6dbe4/","link":""},{"title":"代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析","path":"posts/3035988a/","link":""},{"title":"THP-CSK 靶场 Linux 内网横向渗透全流程","path":"posts/5532e4a/","link":""},{"title":"工具魔改 | 魔改哥斯拉 - 反编译重打包与Webshell免杀对抗","path":"posts/55d71cb8/","link":""},{"title":"工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展","path":"posts/e39557c4/","link":""},{"title":"工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗","path":"posts/5ddd3711/","link":""},{"title":"笔记 | 常见Linux权限提升笔记","path":"posts/a6c6e02f/","link":""},{"title":"笔记 | CTF 伪协议","path":"posts/58685328/","link":""},{"title":"VulnHub DC-9 靶机渗透测试笔记","path":"posts/f10adb67/","link":""},{"title":"VulnHub DC-8 靶机渗透测试笔记","path":"posts/16177df0/","link":""},{"title":"VulnHub DC-7 靶机渗透测试笔记","path":"posts/9bfd2b6a/","link":""},{"title":"VulnHub DC-6 靶机渗透测试笔记","path":"posts/7ce08dfd/","link":""},{"title":"VulnHub DC-5 靶机渗透测试笔记","path":"posts/8eb76005/","link":""},{"title":"VulnHub DC-4 靶机渗透测试笔记","path":"posts/69aac692/","link":""},{"title":"VulnHub DC-3 靶机渗透测试笔记","path":"posts/b169bdb4/","link":""},{"title":"VulnHub DC-2 靶机渗透测试笔记","path":"posts/56741b23/","link":""},{"title":"VulnHub DC-1 靶机渗透测试笔记","path":"posts/a423f6db/","link":""},{"title":"DVWA 靶场实验报告 (High Level)","path":"posts/f46202bc/","link":""},{"title":"DVWA 靶场实验报告 (Medium Level)","path":"posts/fab7f2d4/","link":""},{"title":"DVWA 靶场实验报告 (Low Level)","path":"posts/f02c2786/","link":""},{"title":"Pikachu 靶场通关笔记","path":"posts/31fdd992/","link":""}];
+  const allPostsData = [{"title":"天狐工具箱框架 V4.0 · 轻便版","path":"posts/168b539f/","link":""},{"title":"一次从 YAML 配置切入的代码审计思路 | RuoYi-Vue-Pro","path":"posts/i5j6k7l8/","link":""},{"title":"审了个百k项目，没想到真出洞了 | RuoYi-Vue-Pro 任意文件上传 \u0026 路径穿越","path":"posts/e1f2g3h4/","link":""},{"title":"拿个简单开源 SpringBoot 项目审计练手，顺手找了个未授权漏洞","path":"posts/a7b8c9d0/","link":""},{"title":"一次被报错\"带着走\"的文件上传测试","path":"posts/d4e5f6g7/","link":""},{"title":"代码审计 | Struts2 —— S2-045 OGNL 注入与三重沙箱绕过分析","path":"posts/c3d8e7f2/","link":""},{"title":"代码审计 | Struts2 —— S2-016 OGNL 注入原理","path":"posts/a7f2b9d3/","link":""},{"title":"小迪VPC3内网打靶全流程记录","path":"posts/b8e3f9c1/","link":""},{"title":"YsoGUI —— Java 反序列化测试 GUI 工具","path":"posts/f9e8d7c6/","link":""},{"title":"小迪VPC1内网打靶全流程记录","path":"posts/271aabd0/","link":""},{"title":"Ghost Bits：高位截断如何让 Java WAF 形同虚设","path":"posts/6a920a7a/","link":""},{"title":"记一次常态化渗透测试：从域名到 Getshell 的思路","path":"posts/c5d1a7e3/","link":""},{"title":"原理分析 | Interceptor —— SpringBoot 内存马","path":"posts/b8e4f2a6/","link":""},{"title":"原理分析 | Controller —— SpringBoot 内存马","path":"posts/a3c7e2f1/","link":""},{"title":"原理分析 | JNDI反序列化注入内存马 —— 内存马补充","path":"posts/a7c3f9e2/","link":""},{"title":"原理分析 | JNDI注入内存马 —— ldap + Tomcat Filter + 无文件落地","path":"posts/c3f7a2d9/","link":""},{"title":"原理分析 | 反序列化内存马 —— CC2 + Tomcat三种组件 + 无文件落地","path":"posts/b8e2f4a1/","link":""},{"title":"原理分析 | Agent —— Tomcat 内存马","path":"posts/a3e7f2c9/","link":""},{"title":"原理分析 | Valve —— Tomcat 特有内存马","path":"posts/a7f3c8d2/","link":""},{"title":"原理分析 | Listener —— Tomcat 内存马 回显问题 反射总结","path":"posts/9a18f0c4/","link":""},{"title":"原理分析 | Servlet —— Tomcat 内存马","path":"posts/eb030935/","link":""},{"title":"原理分析 | Filter —— Tomcat 内存马从零到注入","path":"posts/7b9eb72d/","link":""},{"title":"代码审计 | Log4j2 —— CVE-2021-44228  JNDI 注入与递归解析的完整链路分析","path":"posts/d5ebc61e/","link":""},{"title":"代码审计 | Shiro-550 —— CVE-2016-4437 环境搭建 调试分析 漏洞利用","path":"posts/a7f3c8e2/","link":""},{"title":"代码审计 | CB链分析 —— CommonsBeanutils 反序列化利用链","path":"posts/c4b8e2a3/","link":""},{"title":"代码审计 | CC2 链 —— _tfactory 赋值问题 PriorityQueue 新入口","path":"posts/d7f9a3c1/","link":""},{"title":"代码审计 | CC3链 —— 实例化 vs 反序列化 InvokerTransformer vs InstantiateTransformer","path":"posts/c3e8b7f2/","link":""},{"title":"代码审计 | CC6 链 —— 反向构造 payload 与 ysoserial","path":"posts/a7b3c9d2/","link":""},{"title":"代码审计 | CC1 LazyMap 链 —— 动态代理","path":"posts/d4f8a2c1/","link":""},{"title":"工具魔改 | Cobalt Strike 4.7 特征修改与流量混淆","path":"posts/bb2a3f37/","link":""},{"title":"代码审计 | CC1 TransformedMap 链 ——前言  反向调试 构造Payload","path":"posts/becfd9ce/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— BCEL 链分析 | setter 与 getter 触发对比","path":"posts/e90faa78/","link":""},{"title":"代码审计 | FastJSON 1.2.47 不出网利用 —— TemplatesImpl 链分析","path":"posts/f70df821/","link":""},{"title":"代码审计 | FastJSON 1.2.47 缓存绕过漏洞分析","path":"posts/5ef1061b/","link":""},{"title":"代码审计 | FastJSON 反序列化分析：1.2.25 / 1.2.42 / 1.2.43","path":"posts/86d6dbe4/","link":""},{"title":"代码审计 | FastJson 1.2.24 反序列化 RCE 漏洞分析","path":"posts/3035988a/","link":""},{"title":"THP-CSK 靶场 Linux 内网横向渗透全流程","path":"posts/5532e4a/","link":""},{"title":"工具魔改 | 魔改哥斯拉 - 反编译重打包与Webshell免杀对抗","path":"posts/55d71cb8/","link":""},{"title":"工具魔改 | Fscan 魔改二开 - 特征消除与功能扩展","path":"posts/e39557c4/","link":""},{"title":"工具魔改 | sqlmap 魔改研究 - 从流量特征到 WAF 对抗","path":"posts/5ddd3711/","link":""},{"title":"笔记 | 常见Linux权限提升笔记","path":"posts/a6c6e02f/","link":""},{"title":"笔记 | CTF 伪协议","path":"posts/58685328/","link":""},{"title":"VulnHub DC-9 靶机渗透测试笔记","path":"posts/f10adb67/","link":""},{"title":"VulnHub DC-8 靶机渗透测试笔记","path":"posts/16177df0/","link":""},{"title":"VulnHub DC-7 靶机渗透测试笔记","path":"posts/9bfd2b6a/","link":""},{"title":"VulnHub DC-6 靶机渗透测试笔记","path":"posts/7ce08dfd/","link":""},{"title":"VulnHub DC-5 靶机渗透测试笔记","path":"posts/8eb76005/","link":""},{"title":"VulnHub DC-4 靶机渗透测试笔记","path":"posts/69aac692/","link":""},{"title":"VulnHub DC-3 靶机渗透测试笔记","path":"posts/b169bdb4/","link":""},{"title":"VulnHub DC-2 靶机渗透测试笔记","path":"posts/56741b23/","link":""},{"title":"VulnHub DC-1 靶机渗透测试笔记","path":"posts/a423f6db/","link":""},{"title":"DVWA 靶场实验报告 (High Level)","path":"posts/f46202bc/","link":""},{"title":"DVWA 靶场实验报告 (Medium Level)","path":"posts/fab7f2d4/","link":""},{"title":"DVWA 靶场实验报告 (Low Level)","path":"posts/f02c2786/","link":""},{"title":"Pikachu 靶场通关笔记","path":"posts/31fdd992/","link":""}];
   
   // 布局切换功能
   (function() {
@@ -783,7 +791,7 @@ CC6 存在的意义
 </script>
 
 <!-- required -->
-<script src="/js/main.js?v=ms2rk2h7" defer></script>
+<script src="/js/main.js?v=msxgxmng" defer></script>
 
 <script type="text/javascript">
   const applyTheme = (theme) => {
@@ -1050,7 +1058,7 @@ CC6 存在的意义
 <script src="/js/plugins/nav-admin.js"></script>
 
 <!-- Achievements / Card System -->
-<script src="/js/plugins/achievements.js?v=ms2rk2h8"></script>
+<script src="/js/plugins/achievements.js?v=msxgxmnh"></script>
 
 <!-- Special Days - 节日彩蛋系统 -->
 <script src="/js/plugins/special-days.js"></script>
