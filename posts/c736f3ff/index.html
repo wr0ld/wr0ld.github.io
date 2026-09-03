@@ -1,0 +1,1182 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>Docker 内网靶场自建实战：suo5 隧道、socks 多种用法与 vshell 的结合 - blog</title>
+
+  
+    <meta name="description" content="目录 一、docker 靶场环境自建 docker-compose.yml —— 三容器编排 Dockerfile —— 自建 tomcat 镜像 index.jsp —— tomcat 首页探针 default.conf —— nginx 反代配置 index.html —— 内网目标页面 网络拓扑图   二、suo5 使用：socks 的多种玩法 玩法一：yakit 设置 socks 代理发包">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker 内网靶场自建实战：suo5 隧道、socks 多种用法与 vshell 的结合">
+<meta property="og:url" content="https://wr0ld.github.io/posts/c736f3ff/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="目录 一、docker 靶场环境自建 docker-compose.yml —— 三容器编排 Dockerfile —— 自建 tomcat 镜像 index.jsp —— tomcat 首页探针 default.conf —— nginx 反代配置 index.html —— 内网目标页面 网络拓扑图   二、suo5 使用：socks 的多种玩法 玩法一：yakit 设置 socks 代理发包">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-08-23T17:20:00.000Z">
+<meta property="article:modified_time" content="2026-09-03T05:14:22.688Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="内存马">
+<meta property="article:tag" content="内网渗透">
+<meta property="article:tag" content="suo5">
+<meta property="article:tag" content="socks">
+<meta property="article:tag" content="隧道">
+<meta property="article:tag" content="docker">
+<meta property="article:tag" content="vshell">
+<meta property="article:tag" content="正向连接">
+<meta property="article:tag" content="nginx">
+<meta property="article:tag" content="tomcat">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="内存马,内网渗透,suo5,socks,隧道,docker,vshell,正向连接,nginx,tomcat">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=mtl2m84k">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-08-24T01:20:00+08:00","dateModified":"2026-09-03T13:14:22+08:00","datePublished":"2026-08-24T01:20:00+08:00","description":"","headline":"Docker 内网靶场自建实战：suo5 隧道、socks 多种用法与 vshell 的结合","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/c736f3ff/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/c736f3ff/","keywords":"内存马, 内网渗透, suo5, socks, 隧道, docker, vshell, 正向连接, nginx, tomcat","thumbnailUrl":"https://cdn.nlark.com/yuque/0/2026/png/48488607/1788323376588-289183ce-138f-47d1-8665-800dc2fc274c.png","image":1}</script>
+  
+</head>
+<body><div class="reading-progress-bar"></div>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><div class="menu-divider"></div><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="相册" href="/gallery/" style="color:#FF9FF3"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12" opacity=".5"/><path fill="currentColor" d="M8.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/><path fill="currentColor" fill-rule="evenodd" d="M12 12c0-.943 0-1.414.293-1.707S13.057 10 14 10h2c.943 0 1.414 0 1.707.293S18 11.057 18 12v2c0 .943 0 1.414-.293 1.707S16.943 16 16 16h-2c-.943 0-1.414 0-1.707-.293S12 14.943 12 14zM2 12c0 4.714 0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464C2 4.93 2 7.286 2 12m1 6l3.296-3.296a1.117 1.117 0 0 1 1.58 0l.374.373a1.117 1.117 0 0 0 1.58 0l3.17-3.17a1.117 1.117 0 0 1 1.58 0L18 14" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets"></div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner slide-up top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/">安全工具</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/%E6%95%99%E7%A8%8B/">教程</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-08-23T17:20:00.000Z">2026-08-24</time></span><span class="sep"></span><span class="text word-count">字数：6037</span><span class="sep"></span><span class="text img-count">图片：15</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>Docker 内网靶场自建实战：suo5 隧道、socks 多种用法与 vshell 的结合</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><strong>一、docker 靶场环境自建</strong><ul>
+<li>docker-compose.yml —— 三容器编排</li>
+<li>Dockerfile —— 自建 tomcat 镜像</li>
+<li>index.jsp —— tomcat 首页探针</li>
+<li>default.conf —— nginx 反代配置</li>
+<li>index.html —— 内网目标页面</li>
+<li>网络拓扑图</li>
+</ul>
+</li>
+<li><strong>二、suo5 使用：socks 的多种玩法</strong><ul>
+<li>玩法一：yakit 设置 socks 代理发包</li>
+<li>玩法二：浏览器插件转发流量</li>
+<li>玩法三：代理工具（ProxyBridge）</li>
+</ul>
+</li>
+<li><strong>三、vshell：内网正向连接上马</strong></li>
+<li><strong>四、总结与注意事项</strong></li>
+</ul>
+<hr>
+<h2 id="一、docker-靶场环境自建"><a href="#一、docker-靶场环境自建" class="headerlink" title="一、docker 靶场环境自建"></a>一、docker 靶场环境自建</h2><p><em>整体结构：三个容器 + 两张网络，把”公网 → 边界 → 内网”的距离拉开。</em></p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788326561963-6ca8cc25-2eaf-40bc-b1d6-fc38e6cba368.png"></p>
+<h3 id="docker-compose-yml-——-三容器编排"><a href="#docker-compose-yml-——-三容器编排" class="headerlink" title="docker-compose.yml —— 三容器编排"></a>docker-compose.yml —— 三容器编排</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="attr">nginx:</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">nginx:alpine</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">suo5-nginx</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&quot;127.0.0.1:8070:80&quot;</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro</span></span><br><span class="line">    <span class="attr">depends_on:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">tomcat</span></span><br><span class="line">    <span class="attr">networks:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">webnet</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">tomcat:</span></span><br><span class="line">    <span class="attr">build:</span> <span class="string">./tomcat</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">suo5-tomcat</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">./webapps/ROOT:/opt/apache-tomcat-9.0.121/webapps/ROOT</span></span><br><span class="line">    <span class="attr">networks:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">webnet</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">intranet</span></span><br><span class="line"></span><br><span class="line">  <span class="attr">internal:</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">nginx:alpine</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">suo5-internal</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">./internal/index.html:/usr/share/nginx/html/index.html:ro</span></span><br><span class="line">    <span class="attr">networks:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">intranet</span></span><br><span class="line">    <span class="comment"># 不映射任何宿主端口：内网服务只能通过 suo5 隧道访问</span></span><br><span class="line"></span><br><span class="line"><span class="attr">networks:</span></span><br><span class="line">  <span class="attr">webnet:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">suo5-webnet</span></span><br><span class="line">    <span class="attr">driver:</span> <span class="string">bridge</span></span><br><span class="line">  <span class="attr">intranet:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">suo5-intranet</span></span><br><span class="line">    <span class="attr">driver:</span> <span class="string">bridge</span></span><br><span class="line">    <span class="attr">internal:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p><strong>nginx 服务（docker-compose.yml:2-12）—— 公网入口</strong></p>
+<ul>
+<li><code>image: nginx:alpine</code>：不写 Dockerfile，直接用现成镜像，由 Docker 自动从仓库拉取。</li>
+<li><code>ports: &quot;127.0.0.1:8070:80&quot;</code>：只绑定回环地址，宿主机以外访问不到，是安全的暴露姿势。</li>
+<li><code>volumes: ./nginx/default.conf → /etc/nginx/conf.d/default.conf:ro</code>：把本地写好的反代配置挂载覆盖进容器，<code>:ro</code> 只读，改配置只需重启 nginx 容器，不用重新构建镜像。</li>
+<li><code>depends_on: tomcat</code>：保证 tomcat 先启动再起 nginx（仅控制顺序，不等就绪）。</li>
+</ul>
+</li>
+<li><p><strong>tomcat 服务（docker-compose.yml:14-21）—— 边界机，模拟”被攻破的 Web 服务”</strong></p>
+<ul>
+<li><code>build: ./tomcat</code>：这是唯一用 Dockerfile 本地构建的服务，没有 image 字段。</li>
+<li>挂载 <code>./webapps/ROOT</code> 到容器 webapps 目录：suo5.jsp &#x2F; index.jsp 直接以磁盘文件形式塞进 Tomcat，改页面不用重建镜像。</li>
+<li>同时挂 webnet 和 intranet 两个网络：一台机器两张”网卡”——公网能访问它，它又能访问内网，这正是内网横向跳板角色的精髓。</li>
+</ul>
+</li>
+<li><p><strong>internal 服务（docker-compose.yml:23-30）—— 纯内网靶机</strong></p>
+<ul>
+<li>同样 nginx:alpine，只挂载内部页面，不映射任何宿主端口，仅接入 intranet。宿主机直接访问不到它，只能经 suo5 隧道。</li>
+</ul>
+</li>
+<li><p><strong>两个网络的精妙处（docker-compose.yml:32-39）</strong></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">intranet:</span></span><br><span class="line">  <span class="attr">driver:</span> <span class="string">bridge</span></span><br><span class="line">  <span class="attr">internal:</span> <span class="literal">true</span> <span class="comment"># 关键！</span></span><br></pre></td></tr></table></figure>
+
+<p><code>internal: true</code> 是 Docker 的完全隔离网络：该网段无默认网关、无法出外网、外部也无法直连。所以 internal 这台”内网机器”是真正意义上的内网，只能靠 tomcat 这张 intranet 网卡做跳板，与真实渗透场景完全一致。</p>
+</li>
+</ol>
+<blockquote>
+<p><strong>小知识</strong>：compose 的内置 DNS 只在”同一网络内”生效。nginx 和 tomcat 同在 webnet，所以 nginx 配置里敢直接写 <code>proxy_pass http://tomcat:8080</code> 服务名；而 nginx 不在 intranet，它连 internal 的存在都感知不到——内外网从网络层面就是”断”的，只能靠 tomcat 转达。</p>
+</blockquote>
+<h3 id="Dockerfile-——-自建-tomcat-镜像"><a href="#Dockerfile-——-自建-tomcat-镜像" class="headerlink" title="Dockerfile —— 自建 tomcat 镜像"></a>Dockerfile —— 自建 tomcat 镜像</h3><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> eclipse-temurin:<span class="number">8</span>-jdk</span><br><span class="line"></span><br><span class="line"><span class="keyword">ENV</span> CATALINA_HOME=/opt/apache-tomcat-<span class="number">9.0</span>.<span class="number">121</span></span><br><span class="line"><span class="keyword">ENV</span> PATH=$&#123;CATALINA_HOME&#125;/bin:$&#123;PATH&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">ADD</span><span class="language-bash"> apache-tomcat-9.0.121.tar.gz /opt/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">8080</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> [<span class="string">&quot;/opt/apache-tomcat-9.0.121/bin/catalina.sh&quot;</span>, <span class="string">&quot;run&quot;</span>]</span></span><br></pre></td></tr></table></figure>
+
+<p>带注释版本：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> eclipse-temurin:<span class="number">8</span>-jdk <span class="comment"># 拉取官方 Java 8 JDK 基础镜像（符合 jsp 老漏洞环境）</span></span><br><span class="line"><span class="keyword">ENV</span> CATALINA_HOME=... <span class="comment"># 定义环境变量，供 PATH 使用</span></span><br><span class="line"><span class="keyword">ADD</span><span class="language-bash"> apache-tomcat-9.0.121.tar.gz /opt/ <span class="comment"># ADD 会自动解压 tar.gz，一步到位</span></span></span><br><span class="line"><span class="keyword">EXPOSE</span> <span class="number">8080</span></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> [<span class="string">&quot;.../catalina.sh&quot;</span>, <span class="string">&quot;run&quot;</span>] <span class="comment"># 前台启动！容器存活必须前台进程</span></span></span><br></pre></td></tr></table></figure>
+
+<p>技巧点：用 <code>ADD ...tar.gz</code> 解压而非手动 <code>tar -xf</code>，镜像层数更少、写法更简。</p>
+<h3 id="index-jsp-——-tomcat-首页探针"><a href="#index-jsp-——-tomcat-首页探针" class="headerlink" title="index.jsp —— tomcat 首页探针"></a>index.jsp —— tomcat 首页探针</h3><figure class="highlight jsp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;%@ page contentType=<span class="string">&quot;text/html;charset=UTF-8&quot;</span> %&gt;</span><br><span class="line">&lt;html&gt;</span><br><span class="line">&lt;head&gt;&lt;meta charset=<span class="string">&quot;utf-8&quot;</span>&gt;&lt;title&gt;Tomcat OK&lt;/title&gt;&lt;/head&gt;</span><br><span class="line">&lt;body&gt;</span><br><span class="line">&lt;h1&gt;Tomcat 运行正常&lt;/h1&gt;</span><br><span class="line">&lt;p&gt;Server: &lt;%= application.getServerInfo() %&gt;&lt;/p&gt;</span><br><span class="line">&lt;p&gt;suo5.jsp 位于 &lt;a href=<span class="string">&quot;suo5.jsp&quot;</span>&gt;suo5.jsp&lt;/a&gt;&lt;/p&gt;</span><br><span class="line">&lt;/body&gt;</span><br><span class="line">&lt;/html&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="default-conf-——-nginx-反代配置"><a href="#default-conf-——-nginx-反代配置" class="headerlink" title="default.conf —— nginx 反代配置"></a>default.conf —— nginx 反代配置</h3><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">server</span> &#123;</span><br><span class="line">    <span class="attribute">listen</span> <span class="number">80</span>;</span><br><span class="line">    <span class="attribute">server_name</span> _;</span><br><span class="line">    <span class="attribute">client_max_body_size</span> <span class="number">100m</span>;</span><br><span class="line"></span><br><span class="line">    <span class="section">location</span> /suo5.jsp &#123;</span><br><span class="line">        <span class="attribute">proxy_pass</span> http://tomcat:8080;</span><br><span class="line">        <span class="attribute">proxy_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Forwarded-For <span class="variable">$proxy_add_x_forwarded_for</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Connection <span class="string">&quot;&quot;</span>;</span><br><span class="line">        <span class="attribute">proxy_buffering</span> <span class="literal">off</span>;</span><br><span class="line">        <span class="attribute">proxy_read_timeout</span> <span class="number">3600s</span>;</span><br><span class="line">        <span class="attribute">proxy_send_timeout</span> <span class="number">3600s</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="section">location</span> / &#123;</span><br><span class="line">        <span class="attribute">proxy_pass</span> http://tomcat:8080/;</span><br><span class="line">        <span class="attribute">proxy_http_version</span> <span class="number">1</span>.<span class="number">1</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Host <span class="variable">$host</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">        <span class="attribute">proxy_set_header</span> Connection <span class="string">&quot;&quot;</span>;</span><br><span class="line">        <span class="attribute">proxy_buffering</span> <span class="literal">off</span>;</span><br><span class="line">        <span class="attribute">proxy_read_timeout</span> <span class="number">3600s</span>;</span><br><span class="line">        <span class="attribute">proxy_send_timeout</span> <span class="number">3600s</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>几个关键点：</p>
+<ul>
+<li><code>proxy_pass http://tomcat:8080</code>：直接写 compose 服务名当 DNS，Docker 自动解析到 webnet 里 tomcat 的 IP，无需手填 172.18.x.x（拓扑图里写死了反而易错）。</li>
+<li><code>proxy_buffering off</code> + <code>proxy_read_timeout 3600s</code>：suo5 是双向长连接隧道，Nginx 默认的缓冲和 60 秒超时会掐断隧道，这两个必须关&#x2F;拉长。</li>
+<li><code>proxy_set_header Connection &quot;&quot;</code> + <code>proxy_http_version 1.1</code>：关闭 Nginx 默认的 <code>Connection: close</code> 语义，允许上游 HTTP&#x2F;1.1 keep-alive 复用连接——隧道密集发包全靠它。</li>
+</ul>
+<h3 id="index-html-——-内网目标页面"><a href="#index-html-——-内网目标页面" class="headerlink" title="index.html —— 内网目标页面"></a>index.html —— 内网目标页面</h3><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;utf-8&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">title</span>&gt;</span>内网目标<span class="tag">&lt;/<span class="name">title</span>&gt;</span><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>内网测试服务<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>这个页面只能通过 suo5 隧道访问。<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="网络拓扑图"><a href="#网络拓扑图" class="headerlink" title="网络拓扑图"></a>网络拓扑图</h3><p>进入 <code>suo5-lab/</code> 目录，一条命令拉起环境：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker compose up <span class="literal">-d</span> <span class="literal">--build</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>小知识</strong>：首次启动时，<code>nginx:alpine</code> 和 <code>eclipse-temurin:8-jdk</code> 会从 Docker Hub 自动拉取（同 tag 多处引用只拉一次），tomcat 镜像则走本地 Dockerfile 构建；<code>--build</code> 表示每次都重新构建，平时纯启动可去掉。国内拉不动镜像的话，可以在 Docker 引擎配置里加 registry-mirrors 加速源再重试。</p>
+</blockquote>
+<p>跑起来后整条链路：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Windows 宿主机</span><br><span class="line"> │</span><br><span class="line"> ▼ http://127.0.0.1:8070/suo5.jsp</span><br><span class="line">suo5-nginx (172.18.0.3)</span><br><span class="line"> │</span><br><span class="line"> ▼</span><br><span class="line">suo5-tomcat (172.18.0.2 webnet / 172.19.0.2 intranet) ← suo5.jsp</span><br><span class="line"> │</span><br><span class="line"> ▼ http://internal/</span><br><span class="line">suo5-internal (172.19.0.3) ← 内网测试目标</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>tomcat 同时出现在 172.18 &#x2F; 172.19 两个网段，正是接了 webnet、intranet 两块网卡；容器 IP 是启动时动态分配的，以实际 <code>docker inspect</code> 结果为准。</p>
+</blockquote>
+<hr>
+<h2 id="二、suo5-使用：socks-的多种玩法"><a href="#二、suo5-使用：socks-的多种玩法" class="headerlink" title="二、suo5 使用：socks 的多种玩法"></a>二、suo5 使用：socks 的多种玩法</h2><p>把 suo5.jsp 放进挂载目录 <code>webapps/ROOT</code>，Tomcat 自动加载，内存马就位：</p>
+<p><a target="_blank" rel="noopener" href="http://127.0.0.1:8070/suo5.jsp">http://127.0.0.1:8070/suo5.jsp</a>（suo5 的内存马）</p>
+<p>127.0.0.1:1080 监听本地 socks 代理端口</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788321988595-fb4c808f-99f4-44e6-aa27-2ed325951208.png"></p>
+<h3 id="玩法一：使用-yakit-设置-socks-代理发包，收到内网回显"><a href="#玩法一：使用-yakit-设置-socks-代理发包，收到内网回显" class="headerlink" title="玩法一：使用 yakit 设置 socks 代理发包，收到内网回显"></a>玩法一：使用 yakit 设置 socks 代理发包，收到内网回显</h3><p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788321951992-8c641432-e101-49cf-b07c-1a6d701c7bc4.png"></p>
+<h3 id="玩法二：通过浏览器插件转发流量"><a href="#玩法二：通过浏览器插件转发流量" class="headerlink" title="玩法二：通过浏览器插件转发流量"></a>玩法二：通过浏览器插件转发流量</h3><p>配置代理</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788321858003-183abcd7-3fce-4fb1-97f1-127049e1d57f.png"></p>
+<p>选择 socks 代理，成功访问内网</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788321818106-24d5ecb1-0c23-491b-b427-e1eb2d01487d.png"></p>
+<h3 id="玩法三：通过代理工具"><a href="#玩法三：通过代理工具" class="headerlink" title="玩法三：通过代理工具"></a>玩法三：通过代理工具</h3><p>例如 ProxyBridge</p>
+<p>设置代理</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788322256265-d3f34d8f-1d4b-447d-a55f-3eeabd149770.png"></p>
+<p>设置连接规则</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788322276189-703773c1-75b2-49b4-a4ba-abb23740cf92.png"></p>
+<p>代理生效</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788322239064-3d8591a6-cbf0-44a5-beea-074aa5936b5f.png"></p>
+<p>选择默认系统代理即可访问内网</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788322218662-70d2cd55-5e90-4866-89f1-d43225970d57.png"></p>
+<hr>
+<h2 id="三、vshell：内网正向连接上马"><a href="#三、vshell：内网正向连接上马" class="headerlink" title="三、vshell：内网正向连接上马"></a>三、vshell：内网正向连接上马</h2><p>内网使用正向连接</p>
+<p>新建正向监听器的载荷</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788323376588-289183ce-138f-47d1-8665-800dc2fc274c.png"></p>
+<p>不出意外被杀</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788322911382-7b62efa5-ad2a-4229-af02-fb441e3a17f6.png"></p>
+<blockquote>
+<p><strong>思路</strong>：载荷落地被查杀拦了——真实环境里这就是免杀对抗的起点。靶场里先换一种”落地”方式验证后面的链路：用 docker 命令直接把二进制送进内网容器，模拟文件上传成功后的状态（真实攻击中这一步通常由文件上传漏洞或命令执行完成），落地后的操作逻辑是一致的。</p>
+</blockquote>
+<p>使用 docker 命令直接上传运行，模拟文件上传和开启监听：</p>
+<ol>
+<li><p>复制进容器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">cp</span> <span class="string">&#x27;D:\Backup\桌面\tcp_linux_amd64&#x27;</span> suo5-internal:/tmp/tcp_linux_amd64</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>加执行权限并后台运行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> -d suo5-internal sh -c <span class="string">&quot;chmod +x /tmp/tcp_linux_amd64 &amp;&amp; /tmp/tcp_linux_amd64&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>验证是否成功监听</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">exec</span> suo5-internal sh -c <span class="string">&quot;ps -ef | grep tcp_linux | grep -v grep; netstat -tlnp 2&gt;/dev/null&quot;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788323487734-b42ff627-a1a0-4d3d-bd3a-2667e2a93951.png"></p>
+<p>内网开启监听端口，使用 vshell 连接时需要通过 suo5 的 socks 代理才能访问内网，因此要保持代理工具的开启（不建议使用浏览器插件，不稳定，大流量也容易崩）。</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788324874267-c9fe4b97-b201-4f3e-9bcd-c1b2e4c50e24.png"></p>
+<p>vshell 开启连接</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788324688437-0a87e985-fed2-4e66-ba7e-aa1de8a29b0a.png"></p>
+<p>成功上马内网</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/0/2026/png/48488607/1788324894505-e1351b95-0ee5-4cdf-b593-25683526466e.png"></p>
+<hr>
+<h2 id="四、总结与注意事项"><a href="#四、总结与注意事项" class="headerlink" title="四、总结与注意事项"></a>四、总结与注意事项</h2><ul>
+<li><strong>主线</strong>：docker compose 拉起”nginx 入口 + tomcat 双网卡跳板 + internal 隔离内网”，<code>internal: true</code> 网络把内网从路由层面真正隔断。</li>
+<li><strong>隧道可达性</strong>：suo5 内存马部署在 tomcat，隧道建立后本机 1080 出现 socks 代理，yakit、浏览器插件、ProxyBridge 三种方式均成功访问内网。</li>
+<li><strong>载荷落地</strong>：vshell 正向监听载荷首次落地被杀，改用 docker 命令模拟文件上传后成功运行监听，vshell 经 socks 代理连入，内网上马成功。</li>
+</ul>
+<p>几个值得记住的点：</p>
+<ol>
+<li><strong>拓扑即攻防</strong>：compose 的双网络写法（webnet + intranet）天然复现了”边界机双网卡”的经典内网结构，<code>internal: true</code> 是精髓；</li>
+<li><strong>服务名即 DNS</strong>：同网络内容器可用服务名互相访问，跨网络则完全不可见，配置里手写 IP 反而容易翻车；</li>
+<li><strong>代理工具选型</strong>：看页面用浏览器插件最方便，跑 vshell 这类大流量、长连接操作还是系统级代理工具更稳；</li>
+<li><strong>正向连接场景</strong>：内网出网受限时，”内网开监听 + 隧道够得着”的正向思路往往比反向回连更实用。</li>
+</ol>
+</article>
+<div class="article-footer slide-up">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
+<div class="rightbar-top-btn">
+  <a class="top" onclick="util.scrollTop()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg>
+    <span>回到顶部</span>
+  </a>
+</div>
+<div class="widgets">
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select" onclick="sidebar.toggleTOC()"><span class="name">本文目录</span></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81docker-%E9%9D%B6%E5%9C%BA%E7%8E%AF%E5%A2%83%E8%87%AA%E5%BB%BA"><span class="toc-text">一、docker 靶场环境自建</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#docker-compose-yml-%E2%80%94%E2%80%94-%E4%B8%89%E5%AE%B9%E5%99%A8%E7%BC%96%E6%8E%92"><span class="toc-text">docker-compose.yml —— 三容器编排</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dockerfile-%E2%80%94%E2%80%94-%E8%87%AA%E5%BB%BA-tomcat-%E9%95%9C%E5%83%8F"><span class="toc-text">Dockerfile —— 自建 tomcat 镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#index-jsp-%E2%80%94%E2%80%94-tomcat-%E9%A6%96%E9%A1%B5%E6%8E%A2%E9%92%88"><span class="toc-text">index.jsp —— tomcat 首页探针</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#default-conf-%E2%80%94%E2%80%94-nginx-%E5%8F%8D%E4%BB%A3%E9%85%8D%E7%BD%AE"><span class="toc-text">default.conf —— nginx 反代配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#index-html-%E2%80%94%E2%80%94-%E5%86%85%E7%BD%91%E7%9B%AE%E6%A0%87%E9%A1%B5%E9%9D%A2"><span class="toc-text">index.html —— 内网目标页面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BD%91%E7%BB%9C%E6%8B%93%E6%89%91%E5%9B%BE"><span class="toc-text">网络拓扑图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81suo5-%E4%BD%BF%E7%94%A8%EF%BC%9Asocks-%E7%9A%84%E5%A4%9A%E7%A7%8D%E7%8E%A9%E6%B3%95"><span class="toc-text">二、suo5 使用：socks 的多种玩法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%A9%E6%B3%95%E4%B8%80%EF%BC%9A%E4%BD%BF%E7%94%A8-yakit-%E8%AE%BE%E7%BD%AE-socks-%E4%BB%A3%E7%90%86%E5%8F%91%E5%8C%85%EF%BC%8C%E6%94%B6%E5%88%B0%E5%86%85%E7%BD%91%E5%9B%9E%E6%98%BE"><span class="toc-text">玩法一：使用 yakit 设置 socks 代理发包，收到内网回显</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%A9%E6%B3%95%E4%BA%8C%EF%BC%9A%E9%80%9A%E8%BF%87%E6%B5%8F%E8%A7%88%E5%99%A8%E6%8F%92%E4%BB%B6%E8%BD%AC%E5%8F%91%E6%B5%81%E9%87%8F"><span class="toc-text">玩法二：通过浏览器插件转发流量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8E%A9%E6%B3%95%E4%B8%89%EF%BC%9A%E9%80%9A%E8%BF%87%E4%BB%A3%E7%90%86%E5%B7%A5%E5%85%B7"><span class="toc-text">玩法三：通过代理工具</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81vshell%EF%BC%9A%E5%86%85%E7%BD%91%E6%AD%A3%E5%90%91%E8%BF%9E%E6%8E%A5%E4%B8%8A%E9%A9%AC"><span class="toc-text">三、vshell：内网正向连接上马</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%9B%E3%80%81%E6%80%BB%E7%BB%93%E4%B8%8E%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-text">四、总结与注意事项</span></a></li></ol></div><div class="widget-footer"></div></widget>
+</div></div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const l_body = document.querySelector('.l_body');
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=mtl2m84n" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
+  });
+</script>
+<script defer type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    mermaid.initialize({
+      theme: "default",
+      logLevel: 3
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Nav Admin - 控制台输入 admin 显示导航菜单 -->
+<script src="/js/plugins/nav-admin.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js?v=mtl2m84o"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- 默认设置配置文件 -->
+<script src="/settings/defaults.js"></script>
+<script>
+// 将 defaults.js 的默认值应用到 localStorage 空缺项
+(function() {
+  if (!window._siteDefaults) return;
+  for (var k in window._siteDefaults) {
+    if (localStorage.getItem(k) === null) {
+      localStorage.setItem(k, window._siteDefaults[k]);
+    }
+  }
+})();
+</script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: scale(var(--waifu-scale, 1)) !important;
+    transform-origin: bottom right !important;
+    /* 不覆盖 display，由 autoload.js 和 waifu.css 控制显隐 */
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
