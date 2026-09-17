@@ -1,0 +1,1528 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║                                                              ║
+  ║   🎮 CTF Easter Egg Challenge!                               ║
+  ║                                                              ║
+  ║   Congratulations! You found the hidden comment!             ║
+  ║                                                              ║
+  ║   Here's your clue: The flag is the site owner's name        ║
+  ║   in lowercase letters.                                      ║
+  ║                                                              ║
+  ║   Open browser console and type:                             ║
+  ║   secret.flag("your_answer")                                 ║
+  ║                                                              ║
+  ║   Or try: secret.hint() for more clues                       ║
+  ║                                                              ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+
+<!DOCTYPE html><html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <style id="waifu-preload">#waifu{opacity:0;background:transparent;}#waifu canvas,#waifu #live2d,#waifu-toolbar{background:transparent;}</style>
+  <meta name="hexo-theme" content="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.33.1" theme-name="Stellar" theme-version="1.33.1">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Blog">
+  
+  
+  <meta name="generator" content="Hexo 7.3.0">
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
+  <meta name="theme-color" content="#f9fafb">
+  <title>基于 LangChain 与 LangGraph，花了一周 vibecoding 了一个渗透测试 Agent-v1.0 - blog</title>
+
+  
+    <meta name="description" content="项目地址：https:&#x2F;&#x2F;github.com&#x2F;wr0ld&#x2F;security-agent  目录 一、前言 二、技术架构 三、运行示例 结语  一、前言Security Agent 是之前用 vibecoding 从零写的一个渗透测试 Agent，技术栈是 LangChain + LangGraph。刚开始完全没有思路。后来读了 CyberStrikeAI 的思路，借鉴一部分。 前后写了一到两周">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 LangChain 与 LangGraph，花了一周 vibecoding 了一个渗透测试 Agent-v1.0">
+<meta property="og:url" content="https://wr0ld.github.io/posts/6df6c8be/">
+<meta property="og:site_name" content="blog">
+<meta property="og:description" content="项目地址：https:&#x2F;&#x2F;github.com&#x2F;wr0ld&#x2F;security-agent  目录 一、前言 二、技术架构 三、运行示例 结语  一、前言Security Agent 是之前用 vibecoding 从零写的一个渗透测试 Agent，技术栈是 LangChain + LangGraph。刚开始完全没有思路。后来读了 CyberStrikeAI 的思路，借鉴一部分。 前后写了一到两周">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://wr0ld.github.io/avatar.png">
+<meta property="article:published_time" content="2026-09-17T05:40:07.000Z">
+<meta property="article:modified_time" content="2026-09-17T05:40:07.323Z">
+<meta property="article:author" content="wr0ld">
+<meta property="article:tag" content="AI">
+<meta property="article:tag" content="渗透测试">
+<meta property="article:tag" content="LangChain">
+<meta property="article:tag" content="LangGraph">
+<meta property="article:tag" content="Agent">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="vibecoding">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://wr0ld.github.io/avatar.png">
+  
+  
+  
+  <meta name="keywords" content="AI,渗透测试,LangChain,LangGraph,Agent,Python,vibecoding">
+
+  <!-- feed -->
+  
+
+  <link rel="stylesheet" href="/css/main.css?v=mu53p3ca">
+
+
+  
+    <link rel="shortcut icon" href="/avatar.png">
+  
+
+  
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"wr0ld","sameAs":[],"image":"/avatar.png"},"dateCreated":"2026-09-17T13:40:07+08:00","dateModified":"2026-09-17T13:40:07+08:00","datePublished":"2026-09-17T13:40:07+08:00","description":"","headline":"基于 LangChain 与 LangGraph，花了一周 vibecoding 了一个渗透测试 Agent-v1.0","mainEntityOfPage":{"@type":"WebPage","@id":"https://wr0ld.github.io/posts/6df6c8be/"},"publisher":{"@type":"Organization","name":"wr0ld","sameAs":[],"image":"/avatar.png","logo":{"@type":"ImageObject","url":"/avatar.png"}},"url":"https://wr0ld.github.io/posts/6df6c8be/","keywords":"AI, 渗透测试, LangChain, LangGraph, Agent, Python, vibecoding","thumbnailUrl":"https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133938_tTi6omIQVB4RgWgZ.png","image":1}</script>
+  
+</head>
+<body><div class="reading-progress-bar"></div>
+
+<div class="l_body content" id="start" layout="post" type="tech" ><aside class="l_left"><div class="sidebg"></div><div class="leftbar-container">
+
+
+<header class="header"><div class="logo-wrap"><a class="avatar" href="/about/"><div class="bg" style="opacity:0;background-image:url(https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/rainbow64@3x.webp);"></div><img no-lazy class="avatar" src="/avatar.png" onerror="javascript:this.classList.add('error');this.src='https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/image/2659360.svg';"></a><a class="title" href="/"><div class="main">blog</div></a></div></header>
+
+<div class="nav-area">
+
+<nav class="menu dis-select"><a class="nav-item active" title="博客" href="/" style="color:#1BCDFC"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.879 2.879C5 3.757 5 5.172 5 8v8c0 2.828 0 4.243.879 5.121C6.757 22 8.172 22 11 22h2c2.828 0 4.243 0 5.121-.879C19 20.243 19 18.828 19 16V8c0-2.828 0-4.243-.879-5.121C17.243 2 15.828 2 13 2h-2c-2.828 0-4.243 0-5.121.879M8.25 17a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 0 1.5H9a.75.75 0 0 1-.75-.75M9 12.25a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5zM8.25 9A.75.75 0 0 1 9 8.25h6a.75.75 0 0 1 0 1.5H9A.75.75 0 0 1 8.25 9" clip-rule="evenodd"/><path fill="currentColor" d="M5.235 4.058C5 4.941 5 6.177 5 8v8c0 1.823 0 3.058.235 3.942L5 19.924c-.975-.096-1.631-.313-2.121-.803C2 18.243 2 16.828 2 14v-4c0-2.829 0-4.243.879-5.121c.49-.49 1.146-.707 2.121-.803zm13.53 15.884C19 19.058 19 17.822 19 16V8c0-1.823 0-3.059-.235-3.942l.235.018c.975.096 1.631.313 2.121.803C22 5.757 22 7.17 22 9.999v4c0 2.83 0 4.243-.879 5.122c-.49.49-1.146.707-2.121.803z" opacity=".5"/></svg></a><a class="nav-item" title="关于" href="/about/" style="color:#3DC550"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4s-4 1.79-4 4s1.79 4 4 4" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="设置" href="/settings/" style="color:#9B59B6"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c-1.5 0-2.5 1.5-2.5 3v.5c0 .5-.5 1-1 1H7c-1.5 0-2.5 1-3 2.5l-.5 2c-.5 1.5.5 3 2 3.5l.5.2c.5.2 1 .7 1 1.3v.5c0 .5-.5 1-1 1.3l-.5.2c-1.5.5-2.5 2-2 3.5l.5 2c.5 1.5 1.5 2.5 3 2.5h1.5c.5 0 1-.5 1-1V20c0-.5.5-1 1-1h2c.5 0 1 .5 1 1v.5c0 .5.5 1 1 1H17c1.5 0 2.5-1 3-2.5l.5-2c.5-1.5-.5-3-2-3.5l-.5-.2c-.5-.2-1-.7-1-1.3v-.5c0-.5.5-1 1-1.3l.5-.2c1.5-.5 2.5-2 2-3.5l-.5-2c-.5-1.5-1.5-2.5-3-2.5h-1.5c-.5 0-1 .5-1 1V6c0 .5-.5 1-1 1h-2c-.5 0-1-.5-1-1v-.5c0-.5-.5-1-1-1" opacity=".5"/><path fill="currentColor" d="M12 15a3 3 0 1 0 0-6a3 3 0 0 0 0 6" clip-rule="evenodd"/></svg></a><div class="menu-divider"></div><a class="nav-item" title="实验室" href="/lab/" style="color:#F39C12"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.47 8.47a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.75.75 0 1 1-1.06-1.06L8.94 11L7.47 9.53a.75.75 0 0 1 0-1.06M12 14.25a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a><a class="nav-item" title="相册" href="/gallery/" style="color:#FF9FF3"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12" opacity=".5"/><path fill="currentColor" d="M8.5 9.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/><path fill="currentColor" fill-rule="evenodd" d="M12 12c0-.943 0-1.414.293-1.707S13.057 10 14 10h2c.943 0 1.414 0 1.707.293S18 11.057 18 12v2c0 .943 0 1.414-.293 1.707S16.943 16 16 16h-2c-.943 0-1.414 0-1.707-.293S12 14.943 12 14zM2 12c0 4.714 0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464C2 4.93 2 7.286 2 12m1 6l3.296-3.296a1.117 1.117 0 0 1 1.58 0l.374.373a1.117 1.117 0 0 0 1.58 0l3.17-3.17a1.117 1.117 0 0 1 1.58 0L18 14" clip-rule="evenodd"/></svg></a><a class="nav-item" title="游戏" href="/games/" style="color:#FF6B6B"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M2 9.5c0-2.496 0-3.744.494-4.696a4.5 4.5 0 0 1 1.81-1.81C5.256 2.5 6.504 2.5 9 2.5h6c2.496 0 3.744 0 4.696.494a4.5 4.5 0 0 1 1.81 1.81C22 5.756 22 7.004 22 9.5v5c0 2.496 0 3.744-.494 4.696a4.5 4.5 0 0 1-1.81 1.81C18.744 21.5 17.496 21.5 15 21.5H9c-2.496 0-3.744 0-4.696-.494a4.5 4.5 0 0 1-1.81-1.81C2 18.244 2 16.996 2 14.5z" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M6.25 12a.75.75 0 0 1 .75-.75h2.25V9a.75.75 0 0 1 1.5 0v2.25H13a.75.75 0 0 1 0 1.5h-2.25V15a.75.75 0 0 1-1.5 0v-2.25H7a.75.75 0 0 1-.75-.75m9.5-1a1 1 0 1 0 0 2a1 1 0 0 0 0-2m2 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0" clip-rule="evenodd"/></svg></a><a class="nav-item" title="卡牌" href="javascript:if(window.CardSystem)window.CardSystem.showPanel()" style="color:#E91E63"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M3.464 3.464C2 4.93 2 7.286 2 12s0 7.071 1.464 8.535C4.93 22 7.286 22 12 22s7.071 0 8.535-1.465C22 19.072 22 16.714 22 12s0-7.071-1.465-8.536C19.072 2 16.714 2 12 2S4.929 2 3.464 3.464" opacity=".5"/><path fill="currentColor" fill-rule="evenodd" d="M7.5 6.75a.75.75 0 0 0-.75.75v1.5c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-1.5a.75.75 0 0 0-.75-.75zm-.75 5.25a.75.75 0 0 1 .75-.75h4.5a.75.75 0 0 1 0 1.5H7.5a.75.75 0 0 1-.75-.75m.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5z" clip-rule="evenodd"/></svg></a></nav>
+</div>
+<div class="widgets"></div>
+
+</div></aside><div class="l_main" id="main">
+
+
+
+
+
+<div class="article banner slide-up top">
+  <div class="content">
+    <div class="top bread-nav footnote"><div class="left"><div class="flex-row" id="breadcrumb"><a class="cap breadcrumb" href="/">主页</a>
+<span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/">安全工具</a> <span class="sep"></span> <a class="cap breadcrumb-link" href="/categories/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7/%E5%B7%A5%E5%85%B7/">工具</a></div>
+<div class="flex-row" id="post-meta"><span class="text created">发布于：<time datetime="2026-09-17T05:40:07.000Z">2026-09-17</time></span><span class="sep"></span><span class="text word-count">字数：11121</span><span class="sep"></span><span class="text img-count">图片：16</span></div></div></div>
+    
+    <div class="bottom only-title">
+      
+      <div class="text-area">
+        <h1 class="text title"><span>基于 LangChain 与 LangGraph，花了一周 vibecoding 了一个渗透测试 Agent-v1.0</span></h1>
+        
+      </div>
+    </div>
+    
+  </div>
+  </div><article class="md-text content slide-up"><blockquote>
+<p>项目地址：<a target="_blank" rel="noopener" href="https://github.com/wr0ld/security-agent">https://github.com/wr0ld/security-agent</a></p>
+</blockquote>
+<h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E5%89%8D%E8%A8%80">一、前言</a></li>
+<li><a href="#%E5%BD%93%E5%89%8D%E6%8A%80%E6%9C%AF%E8%BE%B9%E7%95%8C%E4%B8%8E%E6%BC%94%E8%BF%9B%E6%96%B9%E5%90%91">二、技术架构</a></li>
+<li><a href="#token-%E7%BC%93%E5%AD%98">三、运行示例</a></li>
+<li><a href="#%E7%BB%93%E8%AF%AD">结语</a></li>
+</ul>
+<h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>Security Agent 是之前用 vibecoding 从零写的一个渗透测试 Agent，技术栈是 LangChain + LangGraph。刚开始完全没有思路。后来读了 CyberStrikeAI 的思路，借鉴一部分。</p>
+<p>前后写了一到两周，空余时间看看。很多第一眼像「调个参数」的问题，写下去才发现是结构问题：状态放哪一层、证据谁来回收、已确认的结论怎么才不重复验证。基础部分写完，效果还算明显——Pikachu 靶场的大部分漏洞能自己找到并落地成报告。当然比不上大佬的作品，这个项目更多还是当学习作品。目前只是 v1 基础版本，Skill、MCP 都还没适配，能用的是内置工具和 YAML 声明的命令行工具。</p>
+<p>话说：这东西能当毕业设计吗？vibecoding 也要学吗？</p>
+<h2 id="二、技术架构"><a href="#二、技术架构" class="headerlink" title="二、技术架构"></a>二、技术架构</h2><p>Security Agent 是基于 LangGraph 与 LangChain 的单 Agent Web 安全测试系统。核心不是固定扫描流水线，而是由持久化 State 驱动 <code>规划 → 执行 → 证据回收 → 状态归并 → 知识沉淀 → 再规划</code> 的完整闭环。</p>
+<p>这部分面向架构评审与团队协作，重点说明系统分层、核心链路、关键工程处理和当前技术边界。</p>
+<h3 id="架构总览"><a href="#架构总览" class="headerlink" title="架构总览"></a>架构总览</h3><p>Web 安全测试的后续动作依赖实时响应、认证状态和新证据，长任务还需要恢复、停止和过程观测。系统因此将模型决策、工具执行、状态持久化与 Web 连接拆成独立层，通过 State 和统一协议协作。</p>
+<table>
+<thead>
+<tr>
+<th>层级</th>
+<th>核心职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LangGraph 控制层</td>
+<td>节点编排、条件路由、Action 循环、Fact Sync、恢复入口与终止判定</td>
+</tr>
+<tr>
+<td>LangChain 模型层</td>
+<td>Provider 适配、流式响应、原生 Tool Calling、结构化输出与 Prompt Cache</td>
+</tr>
+<tr>
+<td>Tool Runtime</td>
+<td>工具注册、Schema 可见性、运行开关、调用复检、进程执行与结果归一化</td>
+</tr>
+<tr>
+<td>State &#x2F; Storage</td>
+<td>Agent State、Checkpoint、Project Fact、Vulnerability、Artifact 与遥测持久化</td>
+</tr>
+<tr>
+<td>Web Runtime</td>
+<td>后台任务、SSE 订阅、断线续接、State 查询、运行控制与前端可观测性</td>
+</tr>
+</tbody></table>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/__mermaid_v3/cc0322146f9ccaac0be5effd9d66bde3.svg"></p>
+<p>图中实线表示主控制与数据链路，虚线表示不改变主路由的旁路能力，包括节点级 Checkpoint 和运行事件流。</p>
+<h4 id="核心术语"><a href="#核心术语" class="headerlink" title="核心术语"></a>核心术语</h4><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>项目内含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Agent State</td>
+<td>Conversation 级决策黑板，保存当前控制状态、Action、摘要和索引</td>
+</tr>
+<tr>
+<td>Action &#x2F; Completed Action</td>
+<td>Planner 生成的工具执行指令，以及 Executor 写回的实际执行记录</td>
+</tr>
+<tr>
+<td>Run</td>
+<td>Conversation 内一次独立执行实例，拥有自己的状态、Checkpoint 和输出目录</td>
+</tr>
+<tr>
+<td>Checkpoint</td>
+<td>节点完成后保存的可恢复 State 快照</td>
+</tr>
+<tr>
+<td>Project Fact</td>
+<td>从真实 Action 中沉淀、可跨 Conversation 复用的项目认知</td>
+</tr>
+<tr>
+<td>Vulnerability</td>
+<td>满足复现条件并进入交付链路的结构化漏洞记录</td>
+</tr>
+<tr>
+<td>Artifact</td>
+<td>工具输出、HTTP 响应和 Transcript 等完整原始证据</td>
+</tr>
+<tr>
+<td>Resident &#x2F; Dynamic Tool</td>
+<td>始终提供完整 Schema 的常驻工具，以及在延迟加载启用时按需解锁的动态工具</td>
+</tr>
+</tbody></table>
+<h3 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h3><p>首次部署使用 <code>setup.ps1</code> 创建 <code>.venv</code> 并安装、校验依赖：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\scripts\setup.ps1</span><br></pre></td></tr></table></figure>
+
+<p>启动 Web 服务：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.\.venv\Scripts\python.exe web_app.py</span><br></pre></td></tr></table></figure>
+
+<p>模型和运行参数通过 Web 设置页配置，保存于本机 <code>memory/*.json</code>；<code>config_examples/</code> 提供手工配置模板。<code>memory/</code> 已被 Git 忽略，不提交密钥和机器级运行差异。</p>
+<h3 id="LangGraph-控制回环"><a href="#LangGraph-控制回环" class="headerlink" title="LangGraph 控制回环"></a>LangGraph 控制回环</h3><p>固定扫描顺序无法适应不断变化的目标状态；一次生成过长计划又容易继续执行已经失效的假设。控制层因此采用”小批次决策、逐项执行、结果回写、重新规划”的循环，并由 <code>route_next</code> 统一决定下一跳。</p>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>输入职责</th>
+<th>输出职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>parse</code></td>
+<td>新任务与初始上下文</td>
+<td>初始化完整可执行 State</td>
+</tr>
+<tr>
+<td><code>resume</code></td>
+<td>最近 Checkpoint 与本轮新输入</td>
+<td>恢复已发生事实并清理失效执行意图</td>
+</tr>
+<tr>
+<td><code>planner</code></td>
+<td>目标、Action 历史、摘要、事实&#x2F;漏洞索引与可见工具</td>
+<td>Tool Call 批次或结束判断</td>
+</tr>
+<tr>
+<td><code>executor</code></td>
+<td><code>action_queue[0]</code></td>
+<td>Completed Action、Artifact 引用、错误与工具状态更新</td>
+</tr>
+<tr>
+<td><code>fact_sync</code></td>
+<td>尚未沉淀的 Action 结果</td>
+<td>可跨 Conversation 复用的 Project Fact</td>
+</tr>
+<tr>
+<td><code>route_next</code></td>
+<td>当前完整 State</td>
+<td><code>planner</code>、<code>executor</code>、<code>fact_sync</code> 或结束</td>
+</tr>
+</tbody></table>
+<h4 id="Planner"><a href="#Planner" class="headerlink" title="Planner"></a>Planner</h4><p>Planner 使用 LangChain 原生 Tool Calling，不要求模型生成自定义计划 JSON。Tool Call 转换为 Action 前，后端执行确定性处理：</p>
+<ul>
+<li>只接受当前可见且启用的工具；</li>
+<li>过滤 Schema 未声明参数，补充默认值，检查必填项与枚举值；</li>
+<li>对名为 <code>url</code>、<code>base_url</code> 的参数执行基础格式处理和有效性检查；</li>
+<li>单轮 Action 上限由 <code>max_actions_per_plan</code> 控制，默认值为 5。</li>
+</ul>
+<p>超出上限的 Action 不进入队列，其工具名与参数作为”未执行信息”反馈给下一轮 Planner，避免模型误认为已完成。</p>
+<p>提高 <code>max_actions_per_plan</code> 可以减少 Planner 往返次数，但会扩大同一批次基于旧信息连续执行的范围；降低该值会增加规划频率，但每次决策能更快吸收最新工具结果。</p>
+<h4 id="Executor"><a href="#Executor" class="headerlink" title="Executor"></a>Executor</h4><p>Planner 生成的 Action 批次进入队列后，Executor 每次只消费一个 Action。调用前再次检查工具注册和启用状态，并建立 Project、Conversation、Run、Action 的归属上下文；执行结果统一封装后写入 <code>completed_actions</code>。队列清空后回到 Planner，使一次模型决策的盲执行窗口限制在一个小批次内。</p>
+<h4 id="Fact-Sync"><a href="#Fact-Sync" class="headerlink" title="Fact Sync"></a>Fact Sync</h4><p>Fact Sync 在达到 Action 间隔、上下文压缩前、任务结束前和状态恢复后触发。它只处理同步游标之后的新 Action，并将稳定认知写入 Project Fact Store。控制回环由此不仅消费工具结果，还能把已验证认知带入后续 Run 和其他 Conversation。</p>
+<h3 id="State-与持久化模型"><a href="#State-与持久化模型" class="headerlink" title="State 与持久化模型"></a>State 与持久化模型</h3><p>控制状态、长期知识、漏洞交付、原始证据和运行遥测具有不同生命周期。如果全部进入 State，不仅会放大 Checkpoint 和模型上下文，也会使恢复语义与数据归属混乱。系统因此按职责拆分数据源：</p>
+<table>
+<thead>
+<tr>
+<th>数据模型</th>
+<th>Scope</th>
+<th>权威存储</th>
+<th>生命周期与用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Agent State</td>
+<td>Conversation</td>
+<td>当前内存状态 &#x2F; Run Checkpoint</td>
+<td>当前控制流、Action、摘要、错误和工具解锁状态</td>
+</tr>
+<tr>
+<td>Run Checkpoint</td>
+<td>Conversation &#x2F; Run</td>
+<td>Checkpoint 文件</td>
+<td>节点级恢复点与最终运行状态</td>
+</tr>
+<tr>
+<td>Project Fact</td>
+<td>Project</td>
+<td>SQLite</td>
+<td>跨 Conversation 复用的目标、认证态、技术栈、入口和约束</td>
+</tr>
+<tr>
+<td>Vulnerability</td>
+<td>Project</td>
+<td>SQLite</td>
+<td>已确认漏洞、POC、复现步骤和关键证据</td>
+</tr>
+<tr>
+<td>Artifact</td>
+<td>Project &#x2F; Conversation &#x2F; Run &#x2F; Action</td>
+<td>文件系统</td>
+<td>完整工具输出、HTTP 响应和 Transcript</td>
+</tr>
+<tr>
+<td>Process Event</td>
+<td>Conversation &#x2F; Turn</td>
+<td>SQLite <code>process_events</code></td>
+<td>节点、工具、进度和执行时间线</td>
+</tr>
+<tr>
+<td>LLM Usage</td>
+<td>Project &#x2F; Conversation &#x2F; Run</td>
+<td>SQLite <code>llm_usage</code></td>
+<td>Token、缓存命中与模型调用耗时</td>
+</tr>
+</tbody></table>
+<p>Agent State 负责控制流，Project Fact 负责长期认知，Vulnerability 负责交付，Artifact 负责原始证据，Process Event 与 LLM Usage 负责运行观测。各层只交换必要索引和引用。</p>
+<h4 id="Artifact-Scope-与不可覆盖证据"><a href="#Artifact-Scope-与不可覆盖证据" class="headerlink" title="Artifact Scope 与不可覆盖证据"></a>Artifact Scope 与不可覆盖证据</h4><p>Executor 在工具调用期间建立包含 <code>project_id</code>、<code>conversation_id</code> 和 <code>run_id</code> 的 Artifact Context：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">artifacts/projects/&#123;project_id&#125;/</span><br><span class="line">├── project-scoped artifacts</span><br><span class="line">└── conversations/&#123;conversation_id&#125;/</span><br><span class="line">    └── outputs/&#123;run_id&#125;/</span><br><span class="line">        ├── actions/&#123;action_id&#125;/attempt_NNNN/</span><br><span class="line">        ├── context_history/</span><br><span class="line">        └── tool_results/</span><br></pre></td></tr></table></figure>
+
+<p><code>project://</code> 与 <code>conversation://</code> 分别绑定当前项目和会话。路径解析执行 canonical path 校验，拒绝越出 Scope 的相对路径；Fact 与 Vulnerability 工具的归属 ID 由 Executor 注入，不依赖模型传参维持隔离。</p>
+<p>YAML Command Artifact 采用 Action &#x2F; Attempt 两级追加式存储。不同 Action 的输出物理隔离；同一 Action 重试时分配新的 <code>attempt_NNNN</code>，已存在文件拒绝覆盖，从而保留每次执行的独立证据和时间顺序。该策略只约束自动产物，<code>write_file</code>、<code>edit_file</code> 仍保留显式修改语义。</p>
+<h4 id="SQLite-自检与迁移"><a href="#SQLite-自检与迁移" class="headerlink" title="SQLite 自检与迁移"></a>SQLite 自检与迁移</h4><p>数据库文件位于 <code>artifacts/security_agent.db</code>。启动时通过 <code>schema_version</code> 比较当前版本与程序支持版本，并顺序执行缺失 Migration；单个 Migration 使用 <code>BEGIN IMMEDIATE</code> 事务，失败整体回滚。数据库版本高于程序支持版本时拒绝写入，连接统一启用 Foreign Key、WAL 和 Busy Timeout。</p>
+<p>该机制使 Conversation、Project Fact、Vulnerability、遥测等结构可以随程序版本原地升级，同时避免半迁移状态继续运行。</p>
+<h3 id="上下文工程（Context-Engineering）"><a href="#上下文工程（Context-Engineering）" class="headerlink" title="上下文工程（Context Engineering）"></a>上下文工程（Context Engineering）</h3><p>上下文压力主要来自 Tool Schema 数量、单次工具大结果和多轮 Action 历史。系统不使用一种摘要策略处理全部数据，而是在内容进入模型、写入 State 和保存 Checkpoint 的不同阶段分别控制规模。</p>
+<h4 id="Prompt-分层与缓存"><a href="#Prompt-分层与缓存" class="headerlink" title="Prompt 分层与缓存"></a>Prompt 分层与缓存</h4><p>Planner Prompt 按变化频率拆分为 System Prompt、Tool Catalog、Project Memory 和 Turn State。稳定前缀与高频变化状态分离：OpenAI 路径使用 Responses API Prompt Cache Key，Anthropic 路径对稳定内容块设置 <code>cache_control</code>，减少重复输入成本和缓存失效范围。</p>
+<h4 id="分阶段规模控制"><a href="#分阶段规模控制" class="headerlink" title="分阶段规模控制"></a>分阶段规模控制</h4><table>
+<thead>
+<tr>
+<th>机制</th>
+<th>解决的问题</th>
+<th>触发条件</th>
+<th>State &#x2F; Prompt 保留内容</th>
+<th>完整内容位置</th>
+<th>是否调用 LLM</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tool Schema 延迟加载</td>
+<td>工具数量扩大 Prompt</td>
+<td>启用业务工具达到阈值，默认 20</td>
+<td>Resident 完整 Schema、Dynamic 名称索引及已解锁 Schema</td>
+<td>YAML Registry</td>
+<td>否</td>
+</tr>
+<tr>
+<td>Tool Result 卸载</td>
+<td>单次结果过大</td>
+<td>序列化结果超过字符阈值</td>
+<td>元数据、头尾预览和 Artifact 引用</td>
+<td><code>outputs/&#123;run_id&#125;/tool_results/</code></td>
+<td>否</td>
+</tr>
+<tr>
+<td>Action 历史摘要</td>
+<td>多轮历史累计过大</td>
+<td>预计上下文达到上限的 80%</td>
+<td>累计摘要 + 最近约 30,000 Token Action 原文</td>
+<td><code>outputs/&#123;run_id&#125;/context_history/</code></td>
+<td>是</td>
+</tr>
+<tr>
+<td>Checkpoint Action 裁剪</td>
+<td>Checkpoint 重复保存已归档正文</td>
+<td>Action 已完成摘要和 Fact Sync</td>
+<td>Action 基本字段 + 结果状态、数量和路径</td>
+<td>Transcript &#x2F; Tool Artifact</td>
+<td>否</td>
+</tr>
+</tbody></table>
+<p>启用业务工具数量未达到阈值时，Planner 获得全部已启用工具 Schema；达到或超过阈值后，Dynamic Tool 先以名称索引提供给模型。阈值由 <code>tool_search_min_tools</code> 控制：降低该值会更早减少 Prompt 中的完整 Schema，但可能增加 Tool Search 次数；提高该值则相反。</p>
+<p><code>tool_search</code> 命中的工具写入 Conversation State 的 <code>unlocked_tools</code>，下一轮开始注入完整 Schema，后续 Run 也可恢复该集合。该字段减少重复检索，但长期累积会重新增加 Prompt 中的 Schema 规模。</p>
+<p>历史摘要触发前先执行 Fact Sync，随后把将被压缩的 Action 完整写入 Transcript Artifact，再与既有摘要合并。下一轮只携带累计摘要和近期 Action 原文；需要核对细节时，模型可通过文件工具按路径和行号回读原始 Transcript。</p>
+<p>Checkpoint Action 裁剪不重新总结内容，只从已有可靠副本且完成知识沉淀的旧 <code>result</code> JSON 中删除正文、重复预览等大字段。它与 Tool Result 卸载、Action 历史摘要分别处理单个结果、推理历史和持久化快照三个规模问题。</p>
+<p><code>context_metrics</code> 是唯一进入 State 的上下文指标快照，用于记录当前估算与压缩结果；该字段每轮覆盖。Token、耗时和缓存明细不随历史进入 Planner。</p>
+<h3 id="工具运行时（Tool-Runtime）"><a href="#工具运行时（Tool-Runtime）" class="headerlink" title="工具运行时（Tool Runtime）"></a>工具运行时（Tool Runtime）</h3><p>命令行扫描器与 Python 内置工具具有不同的启动方式、参数结构和返回格式。如果每个工具都实现独立执行链，Executor 会与具体工具耦合，新增工具也会重复实现校验、超时、输出解析和 Artifact 管理。Tool Runtime 因此以统一协议隔离模型、控制层和真实执行代码。</p>
+<h4 id="三类协议对象"><a href="#三类协议对象" class="headerlink" title="三类协议对象"></a>三类协议对象</h4><table>
+<thead>
+<tr>
+<th>对象</th>
+<th>生产方 → 消费方</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Tool Schema</td>
+<td>YAML Registry → LLM</td>
+<td>工具名称、描述和参数约束</td>
+</tr>
+<tr>
+<td>Tool Call</td>
+<td>LLM → Planner</td>
+<td>工具名称、参数和 Provider Call ID</td>
+</tr>
+<tr>
+<td>Tool Result</td>
+<td>Tool Runtime → Executor</td>
+<td>统一的 <code>status/data/error</code> 执行结果</td>
+</tr>
+</tbody></table>
+<p>YAML 同时承载”给模型看的工具声明”和”给后端看的执行配方”，Tool Registry 将工具名称映射为统一 Python callable。</p>
+<p><img referrerpolicy="no-referrer" src="https://cdn.nlark.com/yuque/__mermaid_v3/09e936081b94a477149f1b96b17421ca.svg"></p>
+<h4 id="执行适配"><a href="#执行适配" class="headerlink" title="执行适配"></a>执行适配</h4><p>生成 Tool Schema 时只提取名称、描述和参数约束；<code>command</code>、<code>cwd</code>、<code>timeout</code>、输出源和 Artifact 模板等后端细节不发送给模型。</p>
+<table>
+<thead>
+<tr>
+<th>工具类型</th>
+<th>实际执行方式</th>
+<th>统一处理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Command Tool</td>
+<td>根据 YAML 渲染命令并启动子进程</td>
+<td>默认值与枚举、Profile、超时&#x2F;取消、流式输出、<code>text/json/jsonl</code> 解析</td>
+</tr>
+<tr>
+<td>Builtin Tool</td>
+<td>直接调用注册的 Python 函数</td>
+<td>Scope 注入、运行状态复检和 Tool Result 封装</td>
+</tr>
+</tbody></table>
+<p>Executor 只依赖统一 callable 和 Tool Result，不感知底层工具类型。新增 CLI 工具主要通过 YAML 声明接入，无需改动主控制回环。</p>
+<h4 id="工具分类与运行开关"><a href="#工具分类与运行开关" class="headerlink" title="工具分类与运行开关"></a>工具分类与运行开关</h4><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>Schema 可见性</th>
+<th>运行开关</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Resident</td>
+<td>始终注入完整 Schema</td>
+<td>强制启用，不允许前端关闭</td>
+</tr>
+<tr>
+<td>Dynamic</td>
+<td>按 Context Engineering 的阈值与会话解锁状态注入</td>
+<td>支持前端启停</td>
+</tr>
+</tbody></table>
+<p>YAML <code>enabled</code> 定义版本库默认状态，<code>memory/tool_settings.json</code> 只保存当前机器相对默认值的 override。工具关闭后会从启用列表、Planner 可见集合、Tool Schema 和 Tool Search 结果中移除；Executor 调用前仍执行最终复检，避免历史 Action 绕过当前运行策略。</p>
+<h3 id="证据与知识闭环"><a href="#证据与知识闭环" class="headerlink" title="证据与知识闭环"></a>证据与知识闭环</h3><p>工具输出既不等于可复用知识，也不等于已确认漏洞。系统将”当前决策依据””跨会话认知””漏洞交付”和”原始证据”分开处理，并用来源 Action 建立追溯关系。</p>
+<table>
+<thead>
+<tr>
+<th>输入</th>
+<th>处理链路</th>
+<th>最终用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>普通工具结果</td>
+<td>Completed Action + Artifact</td>
+<td>当前 Planner 决策与原始证据回读</td>
+</tr>
+<tr>
+<td>尚未沉淀的 Action</td>
+<td><code>fact_sync</code> → Project Fact Store</td>
+<td>跨 Conversation 复用的稳定认知</td>
+</tr>
+<tr>
+<td>满足复现条件的发现</td>
+<td><code>record_vulnerability</code> → Vulnerability Store</td>
+<td>漏洞交付、去重与复现</td>
+</tr>
+</tbody></table>
+<p>Project Fact 保存来源 Conversation 和 Action。模型提出的每条 Fact 必须引用当前同步批次中的真实 Action ID，服务端复核后才允许写入，避免无证据结论进入项目记忆。</p>
+<p>Vulnerability 保存入口、参数、请求方法、POC、复现步骤、响应证据、严重程度和来源 Action，并使用项目、漏洞类型、方法、标准化 URL 与参数生成稳定去重键；重复发现更新原记录并累计出现次数。</p>
+<p>完整扫描结果保存在 Artifact，State 和业务表只保存推理索引、交付字段及证据引用。最终链路为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">工具证据 → Completed Action → Planner 判断</span><br><span class="line">                       ├→ Project Fact → 后续 Conversation / Run</span><br><span class="line">                       └→ Vulnerability → 漏洞交付与复现</span><br></pre></td></tr></table></figure>
+
+<h3 id="Checkpoint、恢复与停止"><a href="#Checkpoint、恢复与停止" class="headerlink" title="Checkpoint、恢复与停止"></a>Checkpoint、恢复与停止</h3><p>长时间扫描可能因用户停止、进程异常或服务重启中断。系统需要保留已验证证据，但不能机械重放中断时尚未执行的队列，否则可能重复触发扫描、写文件或其他带副作用操作。</p>
+<h4 id="节点级-Checkpoint"><a href="#节点级-Checkpoint" class="headerlink" title="节点级 Checkpoint"></a>节点级 Checkpoint</h4><p>Web Runtime 在每个 LangGraph 节点完成后保存 Run Checkpoint，并通过临时文件替换保证原子写入。正常完成、用户停止和异常分别写入最终 Run 状态。</p>
+<p>Checkpoint 保存清理后的 Agent State：</p>
+<ul>
+<li>剥离 Token、耗时等遥测字段；</li>
+<li>将 Artifact 绝对路径转换为项目&#x2F;会话相对引用；</li>
+<li>按 Context Engineering 规则裁剪已完成知识沉淀的旧 Action。</li>
+</ul>
+<p>每个 Run 复用同一 Checkpoint 文件进行节点级原子覆盖，避免重复保留整份状态历史。</p>
+<h4 id="State-级恢复"><a href="#State-级恢复" class="headerlink" title="State 级恢复"></a>State 级恢复</h4><p>当前 <code>resume</code> 是 State 重建与重新规划，不是从中断节点机械续跑。恢复遵循”保留已经发生的事实，丢弃尚未执行的意图”：</p>
+<ul>
+<li>保留 Completed Action、上下文摘要、Tool Search 解锁结果以及摘要和 Fact Sync 游标；</li>
+<li>从 SQLite 重新加载最新 Project Fact 与 Vulnerability，避免继续使用 Checkpoint 中的过期项目索引；</li>
+<li>清空未执行队列、当前 Action 和瞬时结束状态，结合本轮新输入重新规划；</li>
+<li>历史 Action 尚未完成知识沉淀时，先执行 Fact Sync，再进入 Planner。</li>
+</ul>
+<p>Checkpoint 不恢复外部工具进程、进行中的 HTTP&#x2F;LLM 请求或 LangGraph 精确节点指针，恢复目标是重建决策依据。</p>
+<h4 id="取消信号与进程树停止"><a href="#取消信号与进程树停止" class="headerlink" title="取消信号与进程树停止"></a>取消信号与进程树停止</h4><p>停止控制使用独立运行时控制面。每个活动 Run 注册内存 <code>threading.Event</code>，停止接口只设置 Event；取消信号不进入 Agent State、Checkpoint、SQLite 或 Planner Prompt。</p>
+<p>Executor 只向声明支持取消的工具注入内部 <code>_cancel_event</code>，该参数不进入 Tool Schema。YAML Command Tool 与 <code>search_files</code> 已接入统一 Command Runner，执行循环通过 <code>Event.wait(0.2)</code> 阻塞等待，停止时立即唤醒；超时和用户取消复用同一进程树终止入口。</p>
+<p>Windows 下优先通过 Job Object 终止父进程和全部派生进程，并以 <code>taskkill /T /F</code> 兜底；其他平台按进程组终止。已经产生的部分输出和 Artifact 保留，Tool Result 标记为 <code>stopped</code>，未执行队列被清空，最终 State 以停止状态写入 Checkpoint。</p>
+<h3 id="Web-运行时与可观测性"><a href="#Web-运行时与可观测性" class="headerlink" title="Web 运行时与可观测性"></a>Web 运行时与可观测性</h3><p>扫描任务通常长于一次浏览器连接，运行状态、控制台日志和性能数据的频率也完全不同。Web Runtime 将任务执行、SSE 订阅、高频输出和遥测持久化拆开，避免页面生命周期或日志流量影响 Agent。</p>
+<table>
+<thead>
+<tr>
+<th>通道</th>
+<th>实现</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Agent 执行</td>
+<td>独立后台线程</td>
+<td>任务生命周期不依赖页面连接</td>
+</tr>
+<tr>
+<td>状态事件</td>
+<td><code>AgentEventStream</code> + SSE</td>
+<td>模型增量、节点状态、工具进度和结果推送</td>
+</tr>
+<tr>
+<td>控制台日志</td>
+<td><code>tool_console_tails</code> 快照</td>
+<td>隔离高频 stdout&#x2F;stderr</td>
+</tr>
+<tr>
+<td>运行遥测</td>
+<td><code>process_events</code> &#x2F; <code>llm_usage</code></td>
+<td>执行时间线、Token、缓存命中和耗时</td>
+</tr>
+<tr>
+<td>State 查询</td>
+<td>项目黑板与 Run API</td>
+<td>展示持久化后的真实 State 和业务数据</td>
+</tr>
+</tbody></table>
+<h4 id="后台执行与-SSE-续接"><a href="#后台执行与-SSE-续接" class="headerlink" title="后台执行与 SSE 续接"></a>后台执行与 SSE 续接</h4><p>SSE 只是 <code>AgentEventStream</code> 的订阅者，不承载 Agent 任务本身。页面刷新、关闭或网络断开只移除当前订阅，后台线程和 LangGraph 链路继续运行。</p>
+<p>事件流为每条事件分配连续序号并保留最近一段内存历史。前端重连时提交最后收到的序号，服务端先补发遗漏事件，再恢复实时推送；轮次标识用于隔离同一 Conversation 中的不同任务，避免重复展示和跨轮混合。</p>
+<h4 id="高频工具输出隔离"><a href="#高频工具输出隔离" class="headerlink" title="高频工具输出隔离"></a>高频工具输出隔离</h4><p>外部工具可能持续产生大量 stdout&#x2F;stderr。如果逐行写入 SSE 重放历史和 <code>process_events</code>，长任务会放大内存、数据库与页面恢复成本。当前在线页面仍可实时接收输出，但后台按 Action、stdout&#x2F;stderr 分别维护最近 120 行、单流最多 64 KB 的滚动窗口，并以快照写入 <code>tool_console_tails</code>。</p>
+<p>页面刷新后恢复最近控制台记录；工具正式结果仍进入 Tool Result 与 Artifact 链路。Console Tail 只负责运行过程展示，不替代原始证据。</p>
+<h4 id="遥测与-State-可见性"><a href="#遥测与-State-可见性" class="headerlink" title="遥测与 State 可见性"></a>遥测与 State 可见性</h4><p>Node、Tool、Agent 耗时和过程事件写入 <code>process_events</code>；模型 Token、缓存命中和调用耗时写入 <code>llm_usage</code>。运行中通过 SSE 推送，页面刷新后从 SQLite 重建，不进入 Agent State、Checkpoint 或 Planner Prompt。</p>
+<p>前端项目黑板直接查询持久化数据，可查看：</p>
+<ul>
+<li>Project Fact 与 Vulnerability；</li>
+<li>项目下全部 Conversation 及其最新 State；</li>
+<li>Conversation 历史 Run、运行状态、步骤数和 Action 数；</li>
+<li>指定 Run 的原始 Checkpoint JSON。</li>
+</ul>
+<p>Run 状态覆盖 <code>running</code>、<code>completed</code>、<code>stopped</code>、<code>error</code>，并对历史遗留状态派生 <code>interrupted</code>、<code>superseded</code> 和 <code>read_error</code>。前端按项目、Conversation、Run 分级加载，避免一次性反序列化全部 Checkpoint。</p>
+<h3 id="当前技术边界与演进方向"><a href="#当前技术边界与演进方向" class="headerlink" title="当前技术边界与演进方向"></a>当前技术边界与演进方向</h3><p>以下方向用于说明现有边界，不代表已经实现：</p>
+<table>
+<thead>
+<tr>
+<th>领域</th>
+<th>当前边界</th>
+<th>可演进方向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>取消覆盖</td>
+<td>YAML Command Tool 与 <code>search_files</code> 可立即停止；等待中的 LLM 请求和未接入取消协议的 Builtin Tool 需等待返回或超时</td>
+<td>Provider 请求取消、统一 Builtin 协作式取消接口</td>
+</tr>
+<tr>
+<td>恢复粒度</td>
+<td>只恢复 State，不恢复外部进程、进行中的 HTTP&#x2F;LLM 请求或精确节点指针</td>
+<td>Action 执行日志、租约与结果对账</td>
+</tr>
+<tr>
+<td>副作用窗口</td>
+<td>工具已产生副作用但 State 尚未提交时，重新规划可能重复执行</td>
+<td>幂等键、Write-Ahead Action Journal</td>
+</tr>
+<tr>
+<td>事件流</td>
+<td><code>AgentEventStream</code> 与重放缓冲位于进程内存，服务重启后实时事件不可恢复</td>
+<td>持久化事件流与分布式订阅</td>
+</tr>
+<tr>
+<td>数据库</td>
+<td>SQLite 适合当前单实例部署</td>
+<td>共享数据库、分布式任务队列和事件总线</td>
+</tr>
+<tr>
+<td>Dynamic Tool 解锁</td>
+<td>解锁集合随 Conversation State 持久化，长期会话可能持续累积</td>
+<td>TTL、LRU 或阶段性回收策略</td>
+</tr>
+</tbody></table>
+<h2 id="三、运行示例"><a href="#三、运行示例" class="headerlink" title="三、运行示例"></a>三、运行示例</h2><h3 id="登录与鉴权"><a href="#登录与鉴权" class="headerlink" title="登录与鉴权"></a>登录与鉴权</h3><p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133931_c8xetPeMZZqcEfcf.png" alt="登录控制台"></p>
+<h3 id="主界面"><a href="#主界面" class="headerlink" title="主界面"></a>主界面</h3><p>登录后进入主界面：左侧可以新建、删除项目或者会话，同一个项目下的所有会话共享项目黑板（关键信息和漏洞报告）；右侧显示当前注册的工具，分为常驻工具和动态工具两类，动态工具可以自定义开关。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133933_AJT17yupemZGh2Jg.png" alt="主界面与工具面板"></p>
+<h3 id="靶场实测"><a href="#靶场实测" class="headerlink" title="靶场实测"></a>靶场实测</h3><p>本次测试目标是 Pikachu 靶场 <code>http://192.168.3.1/pikachu/</code>。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133936_qaBBMrwVF8tNTxG0.png" alt="靶场渗透测试对话"></p>
+<p>简单漏洞可以被很快发现，这一阶段总共耗时 4 分 57 秒，完成了阶段性验证并确认了 4 个漏洞：除了漏洞本身，Agent 还沉淀了两条补充事实：并据此给出下一步的推进建议。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133938_tTi6omIQVB4RgWgZ.png" alt="阶段性漏洞汇总"></p>
+<h3 id="过程可观测"><a href="#过程可观测" class="headerlink" title="过程可观测"></a>过程可观测</h3><p>任务执行过程是完全可展开的。任务执行流程面板中可以看到节点流程图（<code>planner</code> → <code>executor</code> → <code>planner</code> → <code>fact_sync</code>）、LLM Token 统计（调用次数、累计 Token、缓存读取量、缓存命中率与当前上下文占用）、关键事件列表和工具执行记录。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133941_mDsrxestMriXVbp5.png" alt="任务执行流程与令牌统计"></p>
+<p>点击任意节点可以查看更详细的信息：执行序号、状态、耗时、处理事件数，节点处理过程中的 Token 使用与 Fact Sync 结果，以及节点开始和完成时的原始数据。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133944_PI2Q4FFjRD7QDPqZ.png" alt="节点详情弹窗"></p>
+<h3 id="中断与续跑"><a href="#中断与续跑" class="headerlink" title="中断与续跑"></a>中断与续跑</h3><p>长任务难免会因为各种情况中断。Agent 对各类终止场景都做了适配，不会卡住进程；已经确认并落地的漏洞记录与当前执行状态都会保留下来，前端页面刷新也不会影响流式输出的显示。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133946_HpklwcWq2yhylgPu.png" alt="任务停止与状态保留"></p>
+<p>中断之后再次对话，可以接着上次的信息继续推进，不需要从头再来一遍。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133949_F7RNBHvbS2zklpXh.png" alt="多轮对话接着上次继续"></p>
+<h3 id="项目黑板"><a href="#项目黑板" class="headerlink" title="项目黑板"></a>项目黑板</h3><p>项目黑板是整个项目的共享面板，分为项目事实、漏洞管理和会话 State 三个视图。</p>
+<p><strong>项目事实</strong>是同一个项目下不同会话共同维护的知识信息库。每条事实都有归属模块、状态与确认来源，例如「不安全文件下载模块暴露下载端点」被标记为 <code>surface / confirmed</code>，而「XXE 练习入口……」因为只完成了概述层面的判断，标记为 <code>surface / observed</code>。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133952_vGhkzMEuEDsRqu5Q.png" alt="项目黑板项目事实"></p>
+<p><strong>漏洞管理</strong>里是找到并落地的漏洞。下面这次测试大概总共花了 20 分钟，落地了 10 个漏洞，覆盖 CRITICAL、HIGH、MEDIUM 三个级别。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133954_H040GMMw4Nd8a8Kk.png" alt="漏洞管理列表"></p>
+<p>点击任意一条可以看到对应的漏洞报告，包括 POC、复现步骤、验证证据（一路记录到具体的执行产物路径）、以及漏洞 ID、严重程度、CWE 和首次&#x2F;最后发现时间等记录信息。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133957_OrxbPXkyLq0EgIqP.png" alt="漏洞报告详情"></p>
+<p><strong>会话 State</strong> 保存的是最原始的信息。不同会话、不同对话的 State 都有保存并且能直接查看，也能切换查看该会话的历史 Run（运行状态、Action 数量、Checkpoint 体积），排查问题时相当方便。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_133959_7T0IDvZ0hLgBZNhL.png" alt="会话状态与运行历史"></p>
+<h3 id="模型与运行设置"><a href="#模型与运行设置" class="headerlink" title="模型与运行设置"></a>模型与运行设置</h3><p>设置页左侧是接入的 AI 模型，适配了两种协议，可以填写模型名称、Base URL 和 API Key，并支持一键检测连接、获取模型列表；系统提示词按 Planner 和 Fact Sync 分开维护，直接以 Markdown 文件的形式查看和编辑。</p>
+<p>右侧是运行参数，包括上下文管理（最大上下文 Token、摘要触发比例、近期动作保留 Token）和 Agent 运行限制（LangGraph 最大递归步数、单轮最大 Action 数、Tool Search 启用阈值），都可以按需自定义修改。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_134002_mdZTpGxCbhtxsRqa.png" alt="模型与运行设置"></p>
+<h3 id="Token-缓存"><a href="#Token-缓存" class="headerlink" title="Token 缓存"></a>Token 缓存</h3><p>上下文成本也做了考虑：Prompt 按变化频率分层之后，稳定前缀可以命中部分缓存。在模型的调用记录里能直接看到每一次请求的缓存命中率，命中的部分会明显降低 Token 消耗和费用。</p>
+<img title="" src="https://cdn.jsdelivr.net/gh/wr0ld/BlogImage@main/img/20260917_134005_6yWq64Xija8RrER6.jpg" alt="接口调用缓存命中" width="743" data-align="inline" />
+
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>以上就是这个项目的全部内容：一个基于 LangGraph 的渗透测试 Agent，从架构到落地跑通了一遍。前面「当前技术边界」里列出的那些问题都真实存在，距离真正能用的产品还有不少距离。</p>
+</article>
+<div class="article-footer slide-up">
+    <section id="license">
+      <div class="header"><span>许可协议</span></div>
+      <div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+</div>
+    </section>
+    
+
+</div>
+
+
+
+
+
+
+<footer class="page-footer slide-up footnote"><div class="welcome-text" style="text-align: center; padding: 10px 0; font-size: 14px; color: #fff;">欢迎入侵本站</div><div class="text"></div></footer>
+<div class="main-mask" onclick="sidebar.dismiss()"></div></div><aside class="l_right"><div class="sidebg"></div><div class="rightbar-container">
+<div class="rightbar-top-btn">
+  <a class="top" onclick="util.scrollTop()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"><path stroke-linejoin="round" d="m9 15.5l3-3l3 3m-6-4l3-3l3 3"/><path d="M7 3.338A9.95 9.95 0 0 1 12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12c0-1.821.487-3.53 1.338-5"/></g></svg>
+    <span>回到顶部</span>
+  </a>
+</div>
+<div class="widgets">
+
+<widget class="widget-wrapper slide-up toc" id="data-toc" collapse="false"><div class="widget-header dis-select" onclick="sidebar.toggleTOC()"><span class="name">本文目录</span></div><div class="widget-body"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95"><span class="toc-text">目录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%89%8D%E8%A8%80"><span class="toc-text">一、前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84"><span class="toc-text">二、技术架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E6%80%BB%E8%A7%88"><span class="toc-text">架构总览</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E6%9C%AF%E8%AF%AD"><span class="toc-text">核心术语</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%90%E8%A1%8C"><span class="toc-text">运行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LangGraph-%E6%8E%A7%E5%88%B6%E5%9B%9E%E7%8E%AF"><span class="toc-text">LangGraph 控制回环</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Planner"><span class="toc-text">Planner</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Executor"><span class="toc-text">Executor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Fact-Sync"><span class="toc-text">Fact Sync</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#State-%E4%B8%8E%E6%8C%81%E4%B9%85%E5%8C%96%E6%A8%A1%E5%9E%8B"><span class="toc-text">State 与持久化模型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Artifact-Scope-%E4%B8%8E%E4%B8%8D%E5%8F%AF%E8%A6%86%E7%9B%96%E8%AF%81%E6%8D%AE"><span class="toc-text">Artifact Scope 与不可覆盖证据</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SQLite-%E8%87%AA%E6%A3%80%E4%B8%8E%E8%BF%81%E7%A7%BB"><span class="toc-text">SQLite 自检与迁移</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%8A%E4%B8%8B%E6%96%87%E5%B7%A5%E7%A8%8B%EF%BC%88Context-Engineering%EF%BC%89"><span class="toc-text">上下文工程（Context Engineering）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Prompt-%E5%88%86%E5%B1%82%E4%B8%8E%E7%BC%93%E5%AD%98"><span class="toc-text">Prompt 分层与缓存</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%86%E9%98%B6%E6%AE%B5%E8%A7%84%E6%A8%A1%E6%8E%A7%E5%88%B6"><span class="toc-text">分阶段规模控制</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E8%BF%90%E8%A1%8C%E6%97%B6%EF%BC%88Tool-Runtime%EF%BC%89"><span class="toc-text">工具运行时（Tool Runtime）</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%89%E7%B1%BB%E5%8D%8F%E8%AE%AE%E5%AF%B9%E8%B1%A1"><span class="toc-text">三类协议对象</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%89%A7%E8%A1%8C%E9%80%82%E9%85%8D"><span class="toc-text">执行适配</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B7%A5%E5%85%B7%E5%88%86%E7%B1%BB%E4%B8%8E%E8%BF%90%E8%A1%8C%E5%BC%80%E5%85%B3"><span class="toc-text">工具分类与运行开关</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AF%81%E6%8D%AE%E4%B8%8E%E7%9F%A5%E8%AF%86%E9%97%AD%E7%8E%AF"><span class="toc-text">证据与知识闭环</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Checkpoint%E3%80%81%E6%81%A2%E5%A4%8D%E4%B8%8E%E5%81%9C%E6%AD%A2"><span class="toc-text">Checkpoint、恢复与停止</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%8A%82%E7%82%B9%E7%BA%A7-Checkpoint"><span class="toc-text">节点级 Checkpoint</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#State-%E7%BA%A7%E6%81%A2%E5%A4%8D"><span class="toc-text">State 级恢复</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%96%E6%B6%88%E4%BF%A1%E5%8F%B7%E4%B8%8E%E8%BF%9B%E7%A8%8B%E6%A0%91%E5%81%9C%E6%AD%A2"><span class="toc-text">取消信号与进程树停止</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Web-%E8%BF%90%E8%A1%8C%E6%97%B6%E4%B8%8E%E5%8F%AF%E8%A7%82%E6%B5%8B%E6%80%A7"><span class="toc-text">Web 运行时与可观测性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%8E%E5%8F%B0%E6%89%A7%E8%A1%8C%E4%B8%8E-SSE-%E7%BB%AD%E6%8E%A5"><span class="toc-text">后台执行与 SSE 续接</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%AB%98%E9%A2%91%E5%B7%A5%E5%85%B7%E8%BE%93%E5%87%BA%E9%9A%94%E7%A6%BB"><span class="toc-text">高频工具输出隔离</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%81%A5%E6%B5%8B%E4%B8%8E-State-%E5%8F%AF%E8%A7%81%E6%80%A7"><span class="toc-text">遥测与 State 可见性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%BD%93%E5%89%8D%E6%8A%80%E6%9C%AF%E8%BE%B9%E7%95%8C%E4%B8%8E%E6%BC%94%E8%BF%9B%E6%96%B9%E5%90%91"><span class="toc-text">当前技术边界与演进方向</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E3%80%81%E8%BF%90%E8%A1%8C%E7%A4%BA%E4%BE%8B"><span class="toc-text">三、运行示例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%99%BB%E5%BD%95%E4%B8%8E%E9%89%B4%E6%9D%83"><span class="toc-text">登录与鉴权</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BB%E7%95%8C%E9%9D%A2"><span class="toc-text">主界面</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9D%B6%E5%9C%BA%E5%AE%9E%E6%B5%8B"><span class="toc-text">靶场实测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%87%E7%A8%8B%E5%8F%AF%E8%A7%82%E6%B5%8B"><span class="toc-text">过程可观测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E4%B8%8E%E7%BB%AD%E8%B7%91"><span class="toc-text">中断与续跑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A1%B9%E7%9B%AE%E9%BB%91%E6%9D%BF"><span class="toc-text">项目黑板</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E5%9E%8B%E4%B8%8E%E8%BF%90%E8%A1%8C%E8%AE%BE%E7%BD%AE"><span class="toc-text">模型与运行设置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Token-%E7%BC%93%E5%AD%98"><span class="toc-text">Token 缓存</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-text">结语</span></a></li></ol></div><div class="widget-footer"></div></widget>
+</div></div></aside><div class='float-panel'>
+  <button type='button' style='display:none' class='laptop-only rightbar-toggle mobile' onclick='sidebar.rightbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6h11m-11 6h11m-11 6h11M4 6h1v4m-1 0h2m0 8H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+  </button>
+  <button type='button' style='display:none' class='mobile-only leftbar-toggle mobile' onclick='sidebar.leftbar()'>
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11c0-3.771 0-5.657 1.172-6.828C4.343 3 6.229 3 10 3h4c3.771 0 5.657 0 6.828 1.172C22 5.343 22 7.229 22 11v2c0 3.771 0 5.657-1.172 6.828C19.657 21 17.771 21 14 21h-4c-3.771 0-5.657 0-6.828-1.172C2 18.657 2 16.771 2 13z"/><path id="sep" stroke-linecap="round" d="M5.5 10h6m-5 4h4m4.5 7V3"/></g></svg>
+  </button>
+</div>
+</div><div class="scripts">
+
+
+<script type="text/javascript">
+  window.canonical = {"originalHost":null,"officialHosts":["localhost"],"encoded":""};
+  const ctx = {
+    date_suffix: {
+      just: `刚刚`,
+      min: `分钟前`,
+      hour: `小时前`,
+      day: `天前`,
+    },
+    root : `/`,
+    tag_plugins: {
+      chat: Object.assign({"api":"https://siteinfo.listentothewind.cn/api/v1"}),
+    }
+  };
+
+  // required plugins (only load if needs)
+  if (`local_search`) {
+    ctx.search = {};
+    ctx.search.service = `local_search`;
+    if (ctx.search.service == 'local_search') {
+      let service_obj = Object.assign({}, `{"field":"all","path":"/search.json","content":true,"skip_search":null,"sort":"-date"}`);
+      ctx.search[ctx.search.service] = service_obj;
+    }
+  }
+  const def = {
+    avatar: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/avatar/round/3442075.svg`,
+    cover: `https://gcore.jsdelivr.net/gh/cdn-x/placeholder@1.0.12/cover/76b86c0226ffd.svg`,
+    loading: `https://api.iconify.design/eos-icons:three-dots-loading.svg?color=%231cd0fd`,
+  };
+  const deps = {
+    jquery: `https://gcore.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js`,
+    marked: `https://gcore.jsdelivr.net/npm/marked@13.0/lib/marked.umd.min.js`,
+    lazyload: `/%5Bobject%20Object%5D`
+  }
+  
+
+</script>
+
+<script type="text/javascript">
+  
+  function RunItem() {
+    this.list = []; // 存放回调函数
+    this.start = () => {
+      for (var i = 0; i < this.list.length; i++) {
+        this.list[i].run();
+      }
+    };
+    this.push = (fn, name, setRequestAnimationFrame = true) => {
+      let myfn = fn
+      if (setRequestAnimationFrame) {
+        myfn = () => {
+          utils.requestAnimationFrame(fn)
+        }
+      }
+      var f = new Item(myfn, name);
+      this.list.push(f);
+    };
+    this.remove = (name) => {
+      for (let index = 0; index < this.list.length; index++) {
+        const e = this.list[index];
+        if (e.name == name) {
+          this.list.splice(index, 1);
+        }
+      }
+    }
+    // 构造一个可以run的对象
+    function Item(fn, name) {
+      // 函数名称
+      this.name = name || fn.name;
+      // run方法
+      this.run = () => {
+        try {
+          fn()
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    }
+  }
+
+  const utils = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    css: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    js: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      if (src.startsWith('/')) {
+        src = ctx.root + src.substring(1);
+      }
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function () {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    jq: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        utils.js(deps.jquery).then(fn)
+      } else {
+        fn()
+      }
+    },
+
+    onLoading: (el) => {
+      if (el) {
+        $(el).append('<div class="loading-wrap"><svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" stroke-opacity=".3" d="M12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="1.3s" values="60;0"/></path><path stroke-dasharray="15" stroke-dashoffset="15" d="M12 3C16.9706 3 21 7.02944 21 12"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.3s" values="15;0"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></path></g></svg></div>');
+      }
+    },
+    onLoadSuccess: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap').remove();
+      }
+    },
+    onLoadFailure: (el) => {
+      if (el) {
+        $(el).find('.loading-wrap svg').remove();
+        $(el).find('.loading-wrap').append('<svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path stroke-dasharray="60" stroke-dashoffset="60" d="M12 3L21 20H3L12 3Z"><animate fill="freeze" attributeName="stroke-dashoffset" dur="0.5s" values="60;0"/></path><path stroke-dasharray="6" stroke-dashoffset="6" d="M12 10V14"><animate fill="freeze" attributeName="stroke-dashoffset" begin="0.6s" dur="0.2s" values="6;0"/></path></g><circle cx="12" cy="17" r="1" fill="currentColor" fill-opacity="0"><animate fill="freeze" attributeName="fill-opacity" begin="0.8s" dur="0.4s" values="0;1"/></circle></svg>');
+        $(el).find('.loading-wrap').addClass('error');
+      }
+    },
+    request: (el, url, callback, onFailure) => {
+      const maxRetry = 3;
+      let retryCount = 0;
+
+      return new Promise((resolve, reject) => {
+        const load = () => {
+          utils.onLoading?.(el);
+
+          let timedOut = false;
+          const timeout = setTimeout(() => {
+            timedOut = true;
+            console.warn('[request] 超时:', url);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject('请求超时');
+            } else {
+              setTimeout(load, 1000);
+            }
+          }, 5000);
+
+          fetch(url).then(resp => {
+            if (timedOut) return;
+            clearTimeout(timeout);
+
+            if (!resp.ok) throw new Error('响应失败');
+            return resp;
+          }).then(data => {
+            if (timedOut) return;
+            utils.onLoadSuccess?.(el);
+            callback(data);
+            resolve(data);
+          }).catch(err => {
+            clearTimeout(timeout);
+            console.warn('[request] 错误:', err);
+
+            if (++retryCount >= maxRetry) {
+              utils.onLoadFailure?.(el);
+              onFailure?.();
+              reject(err);
+            } else {
+              setTimeout(load, 1000);
+            }
+          });
+        };
+
+        load();
+      });
+    },
+    requestWithoutLoading: (url, options = {}, maxRetry = 2, timeout = 5000) => {
+      return new Promise((resolve, reject) => {
+        let retryCount = 0;
+
+        const tryRequest = () => {
+          let timedOut = false;
+          const timer = setTimeout(() => {
+            timedOut = true;
+            if (++retryCount > maxRetry) reject('timeout');
+            else tryRequest();
+          }, timeout);
+
+          fetch(url, options)
+            .then(resp => {
+              clearTimeout(timer);
+              if (!resp.ok) throw new Error('bad response');
+              resolve(resp);
+            })
+            .catch(err => {
+              clearTimeout(timer);
+              if (++retryCount > maxRetry) reject(err);
+              else setTimeout(tryRequest, 500);
+            });
+        };
+
+        tryRequest();
+      });
+    },
+    /********************** requestAnimationFrame ********************************/
+    // 1、requestAnimationFrame 会把每一帧中的所有 DOM 操作集中起来，在一次重绘或回流中就完成，并且重绘或回流的时间间隔紧紧跟随浏览器的刷新频率，一般来说，这个频率为每秒60帧。
+    // 2、在隐藏或不可见的元素中，requestAnimationFrame 将不会进行重绘或回流，这当然就意味着更少的的 cpu，gpu 和内存使用量。
+    requestAnimationFrame: (fn) => {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+      }
+      window.requestAnimationFrame(fn)
+    },
+    dark: {},
+  };
+
+  // utils.dark.mode 当前模式 dark or light
+  // utils.dark.toggle() 暗黑模式触发器
+  // utils.dark.push(callBack[,"callBackName"]) 传入触发器回调函数
+  utils.dark.method = {
+    toggle: new RunItem(),
+  };
+  utils.dark = Object.assign(utils.dark, {
+    push: utils.dark.method.toggle.push,
+  });
+</script>
+<script>
+  const l_body = document.querySelector('.l_body');
+  const sidebar = {
+    leftbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    rightbar: () => {
+      if (l_body) {
+        l_body.toggleAttribute('rightbar');
+        l_body.removeAttribute('leftbar');
+      }
+    },
+    dismiss: () => {
+      if (l_body) {
+        l_body.removeAttribute('leftbar');
+        l_body.removeAttribute('rightbar');
+      }
+    },
+    toggleTOC: () => {
+      document.querySelector('#data-toc').classList.toggle('collapse');
+    }
+  }
+</script>
+<script type="text/javascript">
+  (() => {
+    const tagSwitchers = document.querySelectorAll('.tag-subtree.parent-tag > a > .tag-switcher-wrapper')
+    for (const tagSwitcher of tagSwitchers) {
+      tagSwitcher.addEventListener('click', (e) => {
+        const parent = e.target.closest('.tag-subtree.parent-tag')
+        parent.classList.toggle('expanded')
+        e.preventDefault()
+      })
+    }
+
+    // Get active tag from query string, then activate it.
+    const urlParams = new URLSearchParams(window.location.search)
+    const activeTag = urlParams.get('tag')
+    if (activeTag) {
+      let tag = document.querySelector(`.tag-subtree[data-tag="${activeTag}"]`)
+      if (tag) {
+        tag.querySelector('a').classList.add('active')
+        
+        while (tag) {
+          tag.classList.add('expanded')
+          tag = tag.parentElement.closest('.tag-subtree.parent-tag')
+        }
+      }
+    }
+  })()
+</script>
+
+<script async src="https://gcore.jsdelivr.net/npm/vanilla-lazyload@19.1/dist/lazyload.min.js"></script>
+<script>
+  // https://www.npmjs.com/package/vanilla-lazyload
+  // Set the options globally
+  // to make LazyLoad self-initialize
+  window.lazyLoadOptions = {
+    elements_selector: ".lazy",
+    callback_loaded: (el) => {
+      el.classList.add('loaded');
+      const wrapper = el.closest('.lazy-box');
+      const icon = wrapper?.querySelector('.lazy-icon');
+      if (icon) icon.remove();
+    }
+  };
+  // Listen to the initialization event
+  // and get the instance of LazyLoad
+  window.addEventListener(
+    "LazyLoad::Initialized",
+    function (event) {
+      window.lazyLoadInstance = event.detail.instance;
+    },
+    false
+  );
+  document.addEventListener('DOMContentLoaded', function () {
+    window.lazyLoadInstance?.update();
+  });
+
+  window.wrapLazyloadImages = (container) => {
+    if (typeof container === 'string') {
+      container = document.querySelector(container);
+    }
+    if (!container) return;
+    
+    const images = container.querySelectorAll('img');
+    images.forEach((img) => {
+      if (img.classList.contains('lazy')) return;
+
+      const src = img.getAttribute('src');
+      if (!src) return;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'lazy-box';
+
+      const newImg = img.cloneNode();
+      newImg.removeAttribute('src');
+      newImg.setAttribute('data-src', src);
+      newImg.classList.add('lazy');
+
+      const icon = document.createElement('div');
+      icon.className = 'lazy-icon';
+      if (def.loading) {
+        icon.style.backgroundImage = `url("${def.loading}")`;
+      }
+
+      wrapper.appendChild(newImg);
+      wrapper.appendChild(icon);
+
+      img.replaceWith(wrapper);
+    });
+
+    // 通知 LazyLoad 更新
+    if (window.lazyLoadInstance?.update) {
+      window.lazyLoadInstance.update();
+    }
+  }
+  
+</script>
+
+<!-- required -->
+<script src="/js/main.js?v=mu53p3cc" defer></script>
+
+<script type="text/javascript">
+  const applyTheme = (theme) => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }
+
+  const switchTheme = () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme')
+    let newTheme;
+    if (currentTheme === 'light') {
+      newTheme = 'dark'
+    } else {
+      newTheme = 'light'
+    }
+    applyTheme(newTheme)
+    window.localStorage.setItem('Stellar.theme', newTheme)
+    
+    const messages = {
+      light: `切换到浅色模式`,
+      dark: `切换到深色模式`,
+    }
+    hud?.toast?.(messages[newTheme])
+  }
+
+  (() => {
+    const theme = window.localStorage.getItem('Stellar.theme')
+    if (theme !== null) {
+      applyTheme(theme)
+    } else {
+      applyTheme('dark')
+    }
+  })()
+</script>
+
+<!-- optional -->
+
+
+
+<script defer>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.services = Object.assign({}, JSON.parse(`{"mdrender":{"js":"/js/services/mdrender.js"},"siteinfo":{"js":"/js/services/siteinfo.js","api":null},"ghinfo":{"js":"/js/services/ghinfo.js"},"rating":{"js":"/js/services/rating.js","api":"https://star-vote.xaox.cc/api/rating"},"vote":{"js":"/js/services/vote.js","api":"https://star-vote.xaox.cc/api/vote"},"sites":{"js":"/js/services/sites.js"},"friends":{"js":"/js/services/friends.js"},"friends_and_posts":{"js":"/js/services/friends_and_posts.js"},"timeline":{"js":"/js/services/timeline.js"},"fcircle":{"js":"/js/services/fcircle.js"},"weibo":{"js":"/js/services/weibo.js"},"memos":{"js":"/js/services/memos.js"},"voice":{"js":"/js/plugins/voice.js"},"video":{"js":"/js/plugins/video.js"},"download-file":{"js":"/js/plugins/download-file.js"},"twikoo":{"js":"/js/services/twikoo_latest_comment.js"},"waline":{"js":"/js/services/waline_latest_comment.js"},"artalk":{"js":"/js/services/artalk_latest_comment.js"},"giscus":{"js":"/js/services/giscus_latest_comment.js"},"contributors":{"edit_this_page":{"_posts/":null,"wiki/stellar/":"https://github.com/xaoxuu/hexo-theme-stellar-docs/blob/main/"},"js":"/js/services/contributors.js"}}`));
+    for (let id of Object.keys(ctx.services)) {
+      const js = ctx.services[id].js;
+      if (id == 'siteinfo') {
+        ctx.cardlinks = document.querySelectorAll('a.link-card[cardlink]');
+        if (ctx.cardlinks?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            setCardLink(ctx.cardlinks);
+          });
+        }
+      } else if (id == 'voice') {
+        ctx.voiceAudios = document.querySelectorAll('.voice>audio');
+        if (ctx.voiceAudios?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            createVoiceDom(ctx.voiceAudios);
+          });
+        }
+      } else if (id == 'video') {
+        ctx.videos = document.querySelectorAll('.video>video');
+        if (ctx.videos?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            videoEvents(ctx.videos);
+          });
+        }
+      } else if (id == 'download-file') {
+        ctx.files = document.querySelectorAll('.file');
+        if (ctx.files?.length > 0) {
+          utils.js(js, { defer: true }).then(function () {
+            downloadFileEvent(ctx.files);
+          });
+        }
+      } else {
+        const els = document.getElementsByClassName(`ds-${id}`);
+        if (els?.length > 0) {
+          utils.jq(() => {
+            if (id == 'timeline' || 'memos' || 'marked') {
+              utils.js(deps.marked).then(function () {
+                utils.js(js, { defer: true });
+              });
+            } else {
+              utils.js(js, { defer: true });
+            }
+          });
+        }
+      }
+    }
+
+    // chat iphone time
+    let phoneTimes = document.querySelectorAll('.chat .status-bar .time');
+
+    if (phoneTimes.length > 0) {
+      NowTime();
+      var date = new Date();
+      var sec = date.getSeconds();
+      var firstAdjustInterval = setInterval(firstAdjustTime, 1000 * (60 - sec));
+    }
+
+    function firstAdjustTime() {
+      NowTime();
+      clearInterval(firstAdjustInterval);
+      setInterval(NowTime, 1000 * 60);
+    }
+
+    function NowTime() {
+      for (let i = 0; i < phoneTimes.length; ++i) {
+        var timeSpan = phoneTimes[i];
+        var date = new Date();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        timeSpan.innerHTML = check(hour) + ":" + check(min);
+      }
+    };
+
+    function check(val) {
+      if (val < 10) {
+        return ("0" + val);
+      }
+      return (val);
+    }
+
+    // chat quote
+    const chat_quote_obverser = new IntersectionObserver((entries, observer) => {
+      entries.filter((entry) => { return entry.isIntersecting }).sort((a, b) => a.intersectionRect.y !== b.intersectionRect.y ? a.intersectionRect.y - b.intersectionRect.y : a.intersectionRect.x - b.intersectionRect.x).forEach((entry, index) => {
+          observer.unobserve(entry.target);
+          setTimeout(() => {
+            entry.target.classList.add('quote-blink');
+            setTimeout(() => {
+              entry.target.classList.remove('quote-blink');
+            }, 1000);
+          }, Math.max(100, 16) * (index + 1));
+        });
+    });
+
+    var chatQuotes = document.querySelectorAll(".chat .talk .quote");
+    chatQuotes.forEach((quote) => {
+      quote.addEventListener('click', function () {
+        var chatCellDom = document.getElementById("quote-" + quote.getAttribute("quotedCellTag"));
+        if (chatCellDom) {
+          var chatDiv = chatCellDom.parentElement;
+          var mid = chatDiv.clientHeight / 2;
+          var offsetTop = chatCellDom.offsetTop;
+          if (offsetTop > mid - chatCellDom.clientHeight / 2) {
+            chatDiv.scrollTo({
+              top: chatCellDom.offsetTop - mid + chatCellDom.clientHeight / 2,
+              behavior: "smooth"
+            });
+          } else {
+            chatDiv.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
+          }
+          chat_quote_obverser.observe(chatCellDom);
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    ctx.search = {
+      path: `/search.json`,
+    }
+    utils.js('/js/search/local-search.js', { defer: true });
+  });
+</script><script>
+  window.FPConfig = {
+    delay: 0,
+    ignoreKeywords: [],
+    maxRPS: 5,
+    hoverDelay: 25
+  };
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/flying-pages@2/flying-pages.min.js"></script><script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const swiper_api = document.getElementById('swiper-api');
+    if (swiper_api != undefined) {
+      utils.css(`https://unpkg.com/swiper@10.3/swiper-bundle.min.css`);
+      utils.js(`https://unpkg.com/swiper@10.3/swiper-bundle.min.js`, { defer: true }).then(function () {
+        const effect = swiper_api.getAttribute('effect') || '';
+        var swiper = new Swiper('.swiper#swiper-api', {
+          slidesPerView: 'auto',
+          spaceBetween: 8,
+          centeredSlides: true,
+          effect: effect,
+          rewind: true,
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
+        });
+      })
+    }
+  });
+</script>
+<script defer src="https://gcore.jsdelivr.net/npm/scrollreveal@4.0/dist/scrollreveal.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    const slideUp = {
+      distance: `12px`,
+      duration: `400`,
+      interval: `80`,
+      scale: `0.98`,
+      opacity: 0,
+      easing: "ease-out",
+      reset: false,
+      mobile: false,
+      useDelay: 'once'
+    };
+    ScrollReveal({ container: '.widgets' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_main' }).reveal('.slide-up', { ...slideUp });
+    ScrollReveal({ container: '.l_right' }).reveal('.slide-up', { ...slideUp });
+  });
+</script>
+<script defer type="text/javascript" src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', (event) => {
+    mermaid.initialize({
+      theme: "default",
+      logLevel: 3
+    });
+    mermaid.run({ querySelector: '.mermaid' });
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    window.codeElements = document.querySelectorAll('.code');
+    if (window.codeElements.length > 0) {
+      ctx.copycode = {
+        default_text: `Copy`,
+        success_text: `Copied`,
+        toast: `复制成功`,
+      };
+      utils.js('/js/plugins/copycode.js');
+    }
+  });
+</script>
+
+
+<!-- inject -->
+
+
+<!-- Custom Image Viewer -->
+<script src="/js/plugins/image-viewer.js"></script>
+
+<!-- Custom Context Menu -->
+<script src="/js/plugins/custom-context-menu.js"></script>
+
+<!-- Glitch Effect -->
+<script src="/js/plugins/glitch-effect.js"></script>
+
+<!-- Terminal Copy -->
+<script src="/js/plugins/terminal-copy.js"></script>
+
+<!-- Hotkeys -->
+<script src="/js/plugins/hotkeys.js"></script>
+
+<!-- Nav Admin - 控制台输入 admin 显示导航菜单 -->
+<script src="/js/plugins/nav-admin.js"></script>
+
+<!-- Achievements / Card System -->
+<script src="/js/plugins/achievements.js?v=mu53p3cd"></script>
+
+<!-- Special Days - 节日彩蛋系统 -->
+<script src="/js/plugins/special-days.js"></script>
+
+<!-- Music Player -->
+<script src="/js/plugins/music-player.js"></script>
+
+<!-- Offline Vault - 断网保护机制 -->
+<script src="/js/plugins/offline-vault.js"></script>
+
+<!-- 默认设置配置文件 -->
+<script src="/settings/defaults.js"></script>
+<script>
+// 将 defaults.js 的默认值应用到 localStorage 空缺项
+(function() {
+  if (!window._siteDefaults) return;
+  for (var k in window._siteDefaults) {
+    if (localStorage.getItem(k) === null) {
+      localStorage.setItem(k, window._siteDefaults[k]);
+    }
+  }
+})();
+</script>
+
+<!-- Live2D Widget - Local Version -->
+<script src="/live2d-widget/dist/autoload.js"></script>
+
+<!-- Live2D Widget 位置调整 -->
+<style>
+  #waifu {
+    position: fixed !important;
+    bottom: 0 !important;
+    right: 10px !important;
+    left: auto !important;
+    z-index: 1000 !important;
+    transform: scale(var(--waifu-scale, 1)) !important;
+    transform-origin: bottom right !important;
+    /* 不覆盖 display，由 autoload.js 和 waifu.css 控制显隐 */
+  }
+  #waifu #live2d {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toolbar {
+    position: relative !important;
+    transform: none !important;
+  }
+  #waifu-toggle {
+    display: none !important;
+  }
+</style>
+
+<!-- 点击特效 -->
+<script>
+(function() {
+  var clickEffects = {
+    current: null,
+    
+    init: function() {
+      this.current = localStorage.getItem('clickEffect') || 'none';
+      this.bindEvents();
+    },
+    
+    bindEvents: function() {
+      var self = this;
+      document.addEventListener('click', function(e) {
+        if (self.current === 'none') return;
+        if (e.target.closest('button, a, input, textarea, select, .post-card, .layout-btn')) return;
+        self.createEffect(e.clientX, e.clientY);
+      });
+      
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'clickEffect') {
+          self.current = e.newValue || 'none';
+        }
+      });
+    },
+    
+    createEffect: function(x, y) {
+      switch(this.current) {
+        case 'ripple': this.createRipple(x, y); break;
+        case 'firework': this.createFirework(x, y); break;
+        case 'particles': this.createParticles(x, y); break;
+        case 'text': this.createText(x, y); break;
+        default: break;
+      }
+    },
+    
+    createRipple: function(x, y) {
+      var ripple = document.createElement('div');
+      ripple.className = 'click-ripple';
+      ripple.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:0;height:0;border-radius:50%;background:rgba(52,152,219,0.4);transform:translate(-50%,-50%);pointer-events:none;z-index:9999;animation:rippleExpand 0.6s ease-out forwards;';
+      document.body.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 600);
+    },
+    
+    createFirework: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff'];
+      for (var i = 0; i < 12; i++) {
+        var particle = document.createElement('div');
+        var angle = (Math.PI * 2 / 12) * i;
+        var velocity = 50 + Math.random() * 30;
+        particle.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;width:6px;height:6px;border-radius:50%;background:' + colors[i % 5] + ';pointer-events:none;z-index:9999;transform:translate(-50%,-50%);';
+        document.body.appendChild(particle);
+        this.animateParticle(particle, x, y, x + Math.cos(angle) * velocity, y + Math.sin(angle) * velocity, 500);
+      }
+    },
+    
+    createParticles: function(x, y) {
+      var colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'];
+      for (var i = 0; i < 8; i++) {
+        var particle = document.createElement('div');
+        particle.innerHTML = '✨';
+        particle.style.cssText = 'position:fixed;left:' + (x + (Math.random()-0.5)*30) + 'px;top:' + (y + (Math.random()-0.5)*30) + 'px;font-size:16px;pointer-events:none;z-index:9999;animation:particleFloat 0.8s ease-out forwards;';
+        document.body.appendChild(particle);
+        setTimeout(function(p) { return function() { p.remove(); }; }(particle), 800);
+      }
+    },
+    
+    createText: function(x, y) {
+      var texts = ['666', '厉害', 'nice', '棒', '赞', '给力'];
+      var text = document.createElement('div');
+      text.innerHTML = texts[Math.floor(Math.random() * texts.length)];
+      text.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;font-size:18px;font-weight:bold;color:#3498db;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);animation:textFloat 0.8s ease-out forwards;';
+      document.body.appendChild(text);
+      setTimeout(function() { text.remove(); }, 800);
+    },
+    
+    animateParticle: function(el, startX, startY, endX, endY, duration) {
+      var startTime = performance.now();
+      function animate(currentTime) {
+        var progress = Math.min((currentTime - startTime) / duration, 1);
+        var easeOut = 1 - Math.pow(1 - progress, 3);
+        el.style.left = (startX + (endX - startX) * easeOut) + 'px';
+        el.style.top = (startY + (endY - startY) * easeOut) + 'px';
+        el.style.opacity = 1 - progress;
+        if (progress < 1) requestAnimationFrame(animate);
+        else el.remove();
+      }
+      requestAnimationFrame(animate);
+    }
+  };
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { clickEffects.init(); });
+  } else {
+    clickEffects.init();
+  }
+  
+  window.ClickEffects = clickEffects;
+})();
+</script>
+
+<style>
+@keyframes rippleExpand {
+  0% { width: 0; height: 0; opacity: 1; }
+  100% { width: 100px; height: 100px; opacity: 0; }
+}
+@keyframes particleFloat {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.5); }
+}
+@keyframes textFloat {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -80px) scale(1.2); }
+}
+</style>
+
+<!-- PWA Service Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    console.log('Service Worker 已注册，支持离线访问');
+  }).catch(function(err) {
+    console.log('Service Worker 注册失败:', err);
+  });
+}
+</script>
+
+<!-- Random Cover Image -->
+<script>
+(function() {
+  function refreshRandomCovers() {
+    var images = document.querySelectorAll('img[src*="loliapi.com"]');
+    images.forEach(function(img) {
+      var src = img.src;
+      var baseSrc = src.split('?')[0];
+      img.src = baseSrc + '?t=' + Date.now() + '&r=' + Math.random().toString(36).substr(2, 9);
+    });
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshRandomCovers);
+  } else {
+    refreshRandomCovers();
+  }
+})();
+</script>
+
+</div></body></html>
