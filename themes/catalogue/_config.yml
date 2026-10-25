@@ -10,6 +10,8 @@ nav:
     url: /categories/
   - title: 实验室
     url: /lab/
+  - title: 标签
+    url: /tags/
 
 # 首页标题
 hero:
