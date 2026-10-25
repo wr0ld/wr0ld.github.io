@@ -17,7 +17,11 @@
     (function () {
       try {
         var t = localStorage.getItem('ui-theme');
-        document.documentElement.setAttribute('data-theme', (t === 'dark') ? 'dark' : 'light');
+        var d = (t === 'dark') || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var r = document.documentElement;
+        r.setAttribute('data-theme', d ? 'dark' : 'light');
+        var fs = localStorage.getItem('ui-fs');
+        if (fs) r.setAttribute('data-fs', fs);
       } catch (e) {}
     })();
   </script>
@@ -34,5 +38,8 @@
 <%- body %>
 <%- partial('_partial/footer') %>
 <script src="<%= url_for('js/main.js') %>" defer></script>
+<% if ((page.path || '').indexOf('settings') === 0) { %>
+<script src="<%= url_for('js/settings.js') %>" defer></script>
+<% } %>
 </body>
 </html>

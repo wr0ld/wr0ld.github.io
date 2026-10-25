@@ -388,3 +388,92 @@ figure.highlight .lang {
   font: 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
   color: #5F6B73; opacity: .7; pointer-events: none;
 }
+
+/* ---------- 内容页（关于 / 设置）：说明式排版 ---------- */
+.page-body { padding-top: 16px; }
+.page-body .lede {
+  max-width: 34em; margin: 4px 0 42px;
+  font-family: var(--serif); font-size: clamp(19px, 1.75vw, 24px);
+  line-height: 1.72; color: var(--ink);
+}
+.page-body > h2 {
+  margin: 52px 0 0; padding-bottom: 12px;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--sub);
+  border-bottom: 1px solid var(--ink);
+}
+.page-body > h2:first-of-type { margin-top: 0; }
+.about-list {
+  display: grid; grid-template-columns: 132px minmax(0, 1fr);
+  margin: 0; padding: 0; border-bottom: 1px solid var(--rule);
+}
+.about-list dt {
+  padding: 16px 0 16px; font-size: 13.5px; color: var(--faint); letter-spacing: .02em;
+  border-top: 1px solid var(--hair);
+}
+.about-list dd {
+  margin: 0; padding: 15px 0 17px; font-size: 16px; line-height: 1.68; color: var(--ink);
+  border-top: 1px solid var(--hair);
+}
+.about-list dt:first-of-type, .about-list dd:first-of-type { border-top: 0; }
+.about-list dd a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule2); }
+.about-list dd a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.page-body p { max-width: 40em; }
+@media (max-width: 640px) {
+  .about-list { grid-template-columns: 1fr; }
+  .about-list dt { padding: 14px 0 2px; border-top: 1px solid var(--hair); }
+  .about-list dd { padding: 0 0 14px; border-top: 0; }
+}
+
+/* ---------- 设置页 ---------- */
+.settings { max-width: 760px; }
+.set-block { margin-bottom: 56px; }
+.set-block > h2 {
+  margin: 0 0 4px; padding-bottom: 12px;
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--sub);
+  border-bottom: 1px solid var(--ink);
+}
+.set-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  padding: 16px 0; border-bottom: 1px solid var(--hair);
+}
+.set-label { font-size: 15px; color: var(--ink); }
+.set-opts { display: flex; gap: 6px; flex-wrap: wrap; }
+.set-opts button {
+  font: 13px/1 var(--sans); letter-spacing: .02em; color: var(--sub);
+  background: none; border: 1px solid var(--rule); border-radius: 0;
+  padding: 9px 14px; cursor: pointer;
+  transition: color .16s ease, border-color .16s ease, background .16s ease;
+}
+.set-opts button:hover { color: var(--ink); border-color: var(--ink); }
+.set-opts button.on { color: #fff; background: var(--ink); border-color: var(--ink); }
+.set-row-end { margin-top: 18px; }
+
+.rank { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; padding: 22px 0 6px; }
+.rank > *, .rank ul, .rank li, .rank li a { min-width: 0; }
+.rank h3 {
+  margin: 0 0 10px; font-family: var(--sans); font-size: 12.5px; font-weight: 500;
+  letter-spacing: .08em; color: var(--faint);
+}
+.rank ul { list-style: none; margin: 0; padding: 0; }
+.rank li a {
+  display: flex; justify-content: space-between; gap: 14px;
+  padding: 8px 0; border-bottom: 1px solid var(--hair);
+  color: var(--ink); text-decoration: none; font-size: 14px; line-height: 1.55;
+}
+.rank li a:hover .rk-t { color: var(--accent); }
+.rank .rk-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank .rk-d { flex: 0 0 auto; color: var(--faint); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+
+/* 字号档位 */
+html[data-fs="s"] article p, html[data-fs="s"] article li { font-size: clamp(15.5px, 1.06vw, 17.5px); }
+html[data-fs="l"] article p, html[data-fs="l"] article li { font-size: clamp(17.5px, 1.3vw, 21px); }
+html[data-fs="xl"] article p, html[data-fs="xl"] article li { font-size: clamp(18.5px, 1.45vw, 23px); }
+html[data-fs="s"] .page-body .lede { font-size: clamp(17px, 1.5vw, 21px); }
+html[data-fs="l"] .page-body .lede { font-size: clamp(20px, 1.9vw, 26px); }
+
+@media (max-width: 640px) {
+  .set-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .rank { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+}

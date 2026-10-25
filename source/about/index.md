@@ -1,78 +1,29 @@
 ---
 title: 关于我
 layout: page
-menu_id: about
 ---
 
-<div class="about-container">
-  <div class="about-section">
-    <h2>ℹ️ 博客信息</h2>
-    <div class="info-item">
-      <span class="label">博客框架：</span>
-      <span class="value">Hexo + Stellar</span>
-    </div>
-    <div class="info-item">
-      <span class="label">作者：</span>
-      <span class="value">旧世界</span>
-    </div>
-    <div class="info-item">
-      <span class="label">GitHub：</span>
-      <span class="value"><a href="https://github.com/wr0ld" target="_blank">github.com/wr0ld</a></span>
-    </div>
-    <!-- <div class="info-item">
-      <span class="label">博客园：</span>
-      <span class="value"><a href="https://www.cnblogs.com/wrold" target="_blank">cnblogs.com/wrold</a></span>
-    </div> -->
-    <div class="info-item">
-      <span class="label">公众号：</span>
-      <span class="value">弹不出的5h3ll</span>
-    </div>
-  </div>
-</div>
+<p class="lede">安全研究员。这里记录渗透测试、代码审计与安全工具的使用过程——把每一个漏洞拆到能自己写出来的程度。</p>
 
-<style>
-.about-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
+<h2>本站</h2>
+<dl class="about-list">
+  <dt>框架</dt>
+  <dd>Hexo 7 + 自建主题（目录式排版，深浅两套配色）</dd>
+  <dt>内容</dt>
+  <dd>代码审计（CC 链、内存马、log4j、shiro、struts2、fastjson）、靶机渗透、内网渗透、安全工具</dd>
+  <dt>更新</dt>
+  <dd>不定期，写通了才发</dd>
+</dl>
 
-.about-section {
-  background: var(--card, #fff);
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-  border: 1px solid var(--border, #e0e0e0);
-}
+<h2>找到我</h2>
+<dl class="about-list">
+  <dt>GitHub</dt>
+  <dd><a href="https://github.com/wr0ld" target="_blank" rel="noopener">github.com/wr0ld</a></dd>
+  <dt>公众号</dt>
+  <dd>弹不出的5h3ll</dd>
+  <dt>订阅</dt>
+  <dd><a href="/atom.xml">RSS</a> · <a href="/archives/">全部文章归档</a></dd>
+</dl>
 
-.about-section h2 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border, #e0e0e0);
-}
-
-.info-item {
-  display: flex;
-  padding: 10px 0;
-  border-bottom: 1px dashed var(--border, #e0e0e0);
-}
-
-.info-item:last-child {
-  border-bottom: none;
-}
-
-.info-item .label {
-  font-weight: bold;
-  color: var(--text-p1);
-  min-width: 100px;
-}
-
-.info-item .value {
-  color: var(--text-p2);
-}
-
-.info-item .value a {
-  color: var(--accent);
-}
-</style>
+<h2>说明</h2>
+<p>文章均为学习记录，涉及的目标环境都在本地或授权范围内。转载注明出处即可，请勿用于未授权的测试。</p>
