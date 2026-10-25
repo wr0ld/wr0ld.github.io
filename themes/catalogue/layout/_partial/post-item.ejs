@@ -2,6 +2,5 @@
   <a href="<%= url_for(post.path) %>">
     <span class="d"><%= date(post.date, 'YYYY-MM-DD') %></span>
     <span class="t serif"><%= post.title %></span>
-    <span class="c"><%= post.categories && post.categories.length ? post.categories.toArray()[0].name : '' %></span>
   </a>
 </li>
