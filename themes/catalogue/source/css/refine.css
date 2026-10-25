@@ -296,3 +296,8 @@ nav.links .find input::-webkit-search-cancel-button { display: none; }
   nav.links .find input:focus { width: 132px; }
   .find-res { position: fixed; left: 16px; right: 16px; top: 108px; width: auto; }
 }
+
+/* 窄屏不再保留侧栏目录（正文自带的「目录」列表已够用） */
+@media (max-width: 1080px) {
+  .layout > aside.toc { display: none; }
+}

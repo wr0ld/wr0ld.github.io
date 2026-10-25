@@ -12,7 +12,9 @@
   var hasOwnToc = /<h[12][^>]*>\s*目录\s*<\/h[12]>/.test(cleanBody);
   var hasMath = /\$\$|\\\(|\\\[/.test(page.content);
   var hasMermaid = /class="language-mermaid"/.test(page.content);
-  var showAside = !!(tocHtml && tocHtml.trim().length > 20 && !hasOwnToc);
+  var showAside = !!(tocHtml && tocHtml.trim().length > 20);
+  // 去掉正文里「目录」标题自身在侧栏里留下的那一条
+  tocHtml = tocHtml.replace(/<li class="toc-item[^"]*"><a class="toc-link"[^>]*><span class="toc-text">\s*目录\s*<\/span><\/a><\/li>/g, '');
 %>
 <div class="wrap narrow">
   <div class="head">
