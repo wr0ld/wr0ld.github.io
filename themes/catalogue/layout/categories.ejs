@@ -6,21 +6,24 @@
 <div class="wrap narrow">
   <div class="page-head">
     <h1>分类</h1>
-    <p><%= roots.length %> 个大类，共 <%= site.posts.length %> 篇文章。</p>
+    <p><%= roots.length %> 个大类 · <%= subs.length %> 个子类 · 共 <%= site.posts.length %> 篇</p>
   </div>
-  <div class="cat-grid">
-    <% roots.forEach(function(c){ %>
-      <a href="<%= url_for(c.path) %>"><b><%= c.name %></b><span><%= c.length %></span></a>
+  <ul class="cat-tree">
+    <% roots.forEach(function(c){
+         var kids = subs.filter(function(s){ return s.parent === c._id; })
+                        .sort(function(a,b){ return b.length - a.length; }); %>
+      <li>
+        <a class="root" href="<%= url_for(c.path) %>">
+          <b><%= c.name %></b><span><%= c.length %></span>
+        </a>
+        <% if (kids.length) { %>
+        <p class="kids">
+          <% kids.forEach(function(k){ %>
+            <a href="<%= url_for(k.path) %>"><%= k.name %><span><%= k.length %></span></a>
+          <% }); %>
+        </p>
+        <% } %>
+      </li>
     <% }); %>
-  </div>
-  <% if (subs.length) { %>
-  <div class="page-head" style="padding-top:8px">
-    <h2 class="sec-h serif">子分类</h2>
-  </div>
-  <div class="cat-grid">
-    <% subs.sort(function(a,b){ return b.length - a.length; }).forEach(function(c){ %>
-      <a href="<%= url_for(c.path) %>"><b><%= c.name %></b><span><%= c.length %></span></a>
-    <% }); %>
-  </div>
-  <% } %>
+  </ul>
 </div>

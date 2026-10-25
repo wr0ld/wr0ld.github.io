@@ -219,3 +219,39 @@ article h3 { font-size: 19px; letter-spacing: -.01em; color: var(--ink); }
   .home-head { padding: 26px 0 16px; }
   .home-head h1 { font-size: clamp(44px, 15vw, 64px); line-height: 1.1; letter-spacing: -.026em; }
 }
+
+/* ---------- 分类页：大类带子类，做成层级而非两块并列 ---------- */
+.cat-tree {
+  list-style: none; margin: 0; padding: 8px 0 120px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0 72px;
+}
+.cat-tree > li { border-bottom: 1px solid var(--rule); }
+.cat-tree .root {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  padding: 20px 0 2px; font-family: var(--serif); font-size: 20px;
+  letter-spacing: -.01em; color: var(--ink);
+}
+.cat-tree .root span {
+  font: 13px/1 var(--sans); color: var(--faint);
+  font-variant-numeric: tabular-nums; letter-spacing: .02em;
+}
+.cat-tree .root:hover b, .cat-tree .root:hover { color: var(--accent); }
+.cat-tree .kids {
+  margin: 0 0 18px; font-size: 13.5px; line-height: 1.95; color: var(--sub);
+}
+.cat-tree .kids a { color: var(--sub); }
+.cat-tree .kids a + a::before { content: "·"; margin: 0 9px; color: var(--faint); opacity: .55; }
+.cat-tree .kids a:hover { color: var(--accent); }
+.cat-tree .kids a span { font-size: 11.5px; color: var(--faint); margin-left: 3px; vertical-align: .12em; }
+
+@media (max-width: 820px) {
+  .cat-tree { grid-template-columns: 1fr; gap: 0; padding-bottom: 80px; }
+}
+
+/* ---------- 标签云：计数改成基线小字，不用上标 ---------- */
+.tag-cloud { gap: 14px 22px; font-size: 15px; line-height: 1.6; }
+.tag-cloud sup {
+  font-size: 11.5px; vertical-align: baseline; top: 0;
+  margin-left: 5px; color: var(--faint); letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+}
