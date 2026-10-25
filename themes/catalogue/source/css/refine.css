@@ -301,3 +301,7 @@ nav.links .find input::-webkit-search-cancel-button { display: none; }
 @media (max-width: 1080px) {
   .layout > aside.toc { display: none; }
 }
+
+/* 页脚与底边留出呼吸（.wrap 的 padding 会盖掉 main.css 里 footer 的上下内边距） */
+footer.wrap { padding-top: 72px; padding-bottom: 112px; }
+@media (max-width: 700px) { footer.wrap { padding-top: 56px; padding-bottom: 84px; } }
