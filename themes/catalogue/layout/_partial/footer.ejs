@@ -1,0 +1,11 @@
+<footer class="wrap<%= page.layout === 'index' ? '' : ' narrow' %>">
+  <p class="foot-name serif"><%= config.author %></p>
+  <div class="foot-meta">
+    <span>© <%= new Date().getFullYear() %> <%= config.author %> · <%= theme.footer_note || '写点有用的东西。' %></span>
+    <span>
+      <% (theme.links || []).forEach(function(l){ %><a href="<%= l.url %>" target="_blank" rel="noopener"><%= l.title %></a> · <% }); %>
+      <a href="<%= url_for('/archives/') %>">归档</a> ·
+      <a href="<%= url_for('/settings/') %>">设置</a>
+    </span>
+  </div>
+</footer>

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="<%= config.language || 'zh-CN' %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#F1F2EF">
+  <title><%= page.title ? (page.title + ' · ' + config.author) : (config.author + ' — 安全研究笔记') %></title>
+  <meta name="description" content="<%= page.description || strip_html(page.excerpt || '').replace(/\s+/g,' ').slice(0,120) || config.description %>">
+  <meta name="author" content="<%= config.author %>">
+  <meta property="og:title" content="<%= page.title || config.author %>">
+  <meta property="og:type" content="<%= page.layout === 'post' ? 'article' : 'website' %>">
+  <meta property="og:site_name" content="<%= config.author %>">
+  <% if (page.layout === 'post') { %>
+  <meta property="article:published_time" content="<%= page.date.toISOString() %>">
+  <% } %>
+  <link rel="icon" href="<%= url_for(config.favicon || 'avatar.png') %>">
+  <link rel="stylesheet" href="<%= url_for('css/main.css') %>">
+  <% if (page.layout === 'post') { %>
+  <link rel="canonical" href="<%= full_url_for(page.path) %>">
+  <% } %>
+</head>
+<body class="layout-<%= page.layout || 'index' %>">
+<div class="progress" id="progress" aria-hidden="true"></div>
+<%- partial('_partial/header') %>
+<%- body %>
+<%- partial('_partial/footer') %>
+<script src="<%= url_for('js/main.js') %>" defer></script>
+</body>
+</html>

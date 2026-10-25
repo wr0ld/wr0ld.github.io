@@ -1,0 +1,35 @@
+<%
+  // 归档：按年份分组
+  var groups = {};
+  page.posts.each(function(post){
+    var y = date(post.date, 'YYYY');
+    (groups[y] = groups[y] || []).push(post);
+  });
+  var years = Object.keys(groups).sort().reverse();
+%>
+<div class="wrap narrow">
+  <div class="page-head">
+    <h1>归档</h1>
+    <p>共 <%= site.posts.length %> 篇，按年份倒序。</p>
+  </div>
+  <div class="archive">
+  <% years.forEach(function(y){ %>
+    <section class="year-block">
+      <div class="year-h"><b><%= y %></b><span><%= groups[y].length %> 篇</span></div>
+      <ol class="posts">
+        <% groups[y].forEach(function(post){ %>
+          <%- partial('_partial/post-item', { post: post }) %>
+        <% }); %>
+      </ol>
+    </section>
+  <% }); %>
+  </div>
+  <% if (page.total > 1) { %>
+  <nav class="pager">
+    <% if (page.prev) { %><a href="<%= url_for(page.prev_link) %>">← 上一页</a><% } %>
+    <span class="cur"><%= page.current %> / <%= page.total %></span>
+    <span class="sp"></span>
+    <% if (page.next) { %><a href="<%= url_for(page.next_link) %>">下一页 →</a><% } %>
+  </nav>
+  <% } %>
+</div>

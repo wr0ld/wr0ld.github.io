@@ -1,0 +1,65 @@
+<%
+  // 首页：首屏大字 + 近作列表 + 边栏
+  var posts = page.posts;
+  var cats = site.categories.toArray().filter(function(c){ return !c.parent; })
+              .sort(function(a,b){ return b.length - a.length; }).slice(0, 8);
+  var hero = theme.hero || {};
+  var firstPost = site.posts.sort('-date').first();
+%>
+<div class="wrap">
+  <section class="hero">
+    <h1 class="hero-title serif"><%- hero.title || '把漏洞拆到<br>能自己写出来' %></h1>
+    <div class="hero-right">
+      <p class="lede"><%- hero.lede || theme.about || '' %></p>
+      <% if (firstPost) { %>
+      <a class="go" href="<%= url_for(firstPost.path) %>"><%= hero.button_text || '从最新一篇读起 →' %></a>
+      <% } %>
+    </div>
+  </section>
+
+  <div class="body-grid">
+    <main>
+      <div class="sec-head">
+        <span><%= page.current > 1 ? '第 ' + page.current + ' 页' : '近作' %></span>
+        <span>共 <%= site.posts.length %> 篇<% if (page.total > 1) { %> · 第 <%= page.current %> / <%= page.total %> 页<% } %></span>
+      </div>
+      <ol class="posts">
+        <% posts.each(function(post){ %>
+          <%- partial('_partial/post-item', { post: post }) %>
+        <% }); %>
+      </ol>
+      <% if (page.total > 1) { %>
+      <nav class="pager">
+        <% if (page.prev) { %><a href="<%= url_for(page.prev_link) %>">← 上一页</a><% } %>
+        <span class="cur"><%= page.current %> / <%= page.total %></span>
+        <span class="sp"></span>
+        <% if (page.next) { %><a href="<%= url_for(page.next_link) %>">下一页 →</a><% } %>
+      </nav>
+      <% } %>
+    </main>
+
+    <aside>
+      <section>
+        <h2>关于</h2>
+        <p><%= theme.about || '' %></p>
+      </section>
+      <section>
+        <h2>分类</h2>
+        <ul class="tax">
+          <% cats.forEach(function(c){ %>
+          <li><a href="<%= url_for(c.path) %>"><b><%= c.name %></b><span><%= c.length %></span></a></li>
+          <% }); %>
+        </ul>
+      </section>
+      <section>
+        <h2>站外</h2>
+        <ul class="tax">
+          <% (theme.links || []).forEach(function(l){ %>
+          <li><a href="<%= l.url %>" target="_blank" rel="noopener"><b><%= l.title %></b><span>↗</span></a></li>
+          <% }); %>
+          <li><a href="<%= url_for('/atom.xml') %>"><b>RSS</b><span>↗</span></a></li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</div>

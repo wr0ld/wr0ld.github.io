@@ -1,0 +1,26 @@
+<%
+  var all = site.categories.toArray();
+  var roots = all.filter(function(c){ return !c.parent; }).sort(function(a,b){ return b.length - a.length; });
+  var subs = all.filter(function(c){ return c.parent; });
+%>
+<div class="wrap narrow">
+  <div class="page-head">
+    <h1>分类</h1>
+    <p><%= roots.length %> 个大类，共 <%= site.posts.length %> 篇文章。</p>
+  </div>
+  <div class="cat-grid">
+    <% roots.forEach(function(c){ %>
+      <a href="<%= url_for(c.path) %>"><b><%= c.name %></b><span><%= c.length %></span></a>
+    <% }); %>
+  </div>
+  <% if (subs.length) { %>
+  <div class="page-head" style="padding-top:8px">
+    <p style="margin:0;font-size:13px;color:var(--faint)">子分类</p>
+  </div>
+  <div class="cat-grid">
+    <% subs.sort(function(a,b){ return b.length - a.length; }).forEach(function(c){ %>
+      <a href="<%= url_for(c.path) %>"><b><%= c.name %></b><span><%= c.length %></span></a>
+    <% }); %>
+  </div>
+  <% } %>
+</div>

@@ -18,3 +18,6 @@ Thumbs.db
 .playwright-mcp/
 .codebuddy/
 .trae/
+
+# 设计原型与截图（工作区工具产物）
+.taste-skill/

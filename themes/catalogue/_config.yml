@@ -1,0 +1,39 @@
+# 目录式主题配置
+
+# 顶部导航
+nav:
+  - title: 文章
+    url: /
+  - title: 归档
+    url: /archives/
+  - title: 分类
+    url: /categories/
+  - title: 实验室
+    url: /lab/
+  - title: 关于
+    url: /about/
+
+# 首屏
+hero:
+  title: 代码审计与<br>渗透测试笔记
+  lede: 五十九篇实战记录，多数是把源码拆开看的那种：Struts2 的 OGNL、Tomcat 的七种内存马、RuoYi 的配置绕过，以及几个靶场里的完整链路。写下来的东西，默认给三个月后的自己看。
+  button_text: 从最新一篇读起 →
+
+# 边栏「关于」块
+about: 写渗透测试、代码审计和 Java 安全。喜欢把漏洞拆到源码级，直到能自己写出来为止。
+
+# 站外链接
+links:
+  - title: GitHub
+    url: https://github.com/wr0ld
+  - title: RSS
+    url: /atom.xml
+
+# 页脚
+footer_note: 用 Hexo 构建，部署在 GitHub Pages。
+
+# 首页每页篇数（与 _config.yml 的 index_generator 保持一致）
+per_page: 9
+
+# 文章页目录层级
+toc_depth: 2

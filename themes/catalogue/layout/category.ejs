@@ -1,0 +1,19 @@
+<div class="wrap narrow">
+  <div class="page-head">
+    <h1><%= page.category %></h1>
+    <p><%= page.posts.length %> 篇文章。</p>
+  </div>
+  <ol class="posts">
+    <% page.posts.each(function(post){ %>
+      <%- partial('_partial/post-item', { post: post }) %>
+    <% }); %>
+  </ol>
+  <% if (page.total > 1) { %>
+  <nav class="pager">
+    <% if (page.prev) { %><a href="<%= url_for(page.prev_link) %>">← 上一页</a><% } %>
+    <span class="cur"><%= page.current %> / <%= page.total %></span>
+    <span class="sp"></span>
+    <% if (page.next) { %><a href="<%= url_for(page.next_link) %>">下一页 →</a><% } %>
+  </nav>
+  <% } %>
+</div>

@@ -1,0 +1,26 @@
+<%
+  var cur = page.path || '';
+  function isOn(url){
+    if (url === '/') return (page.__index === true);
+    return cur.indexOf((url||'').replace(/^\//,'')) === 0;
+  }
+  var isHome = (page.__index === true);
+  var navItems = theme.nav || [];
+%>
+<header class="bar wrap<%= page.layout === 'index' ? '' : ' narrow' %>">
+  <a class="mark serif" href="<%= url_for('/') %>"><b><%= config.author %></b><span class="sub"> — 安全研究笔记</span></a>
+  <nav class="links">
+    <% navItems.forEach(function(item){ %>
+      <% var on = (item.url === '/' && isHome) || (item.url !== '/' && cur.indexOf(item.url.replace(/^\//,'')) === 0); %>
+      <a href="<%= url_for(item.url) %>"<%= on ? ' class="on"' : '' %>><%= item.title %></a>
+    <% }); %>
+    <a href="#" data-search-open>搜索</a>
+  </nav>
+</header>
+
+<div class="search" id="search" role="dialog" aria-modal="true" aria-label="站内搜索">
+  <div class="search-box">
+    <input id="searchInput" type="search" placeholder="标题、标签或 CVE 编号" autocomplete="off" aria-label="搜索文章">
+    <ul class="search-res" id="searchRes"></ul>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+<%
+  var words = wr_words(page.content);
+  var mins = Math.max(1, Math.round(words / 400));
+  var cats = page.categories.toArray();
+  var tocHtml = toc(page.content, { list_number: false, min_depth: 2, max_depth: theme.toc_depth || 3 });
+  // hero 已经显示标题；正文开头重复的 H1 去掉
+  var body = String(page.content || '').replace(/^\s*<h1[^>]*>([\s\S]*?)<\/h1>\s*/, function (m, inner) {
+    var t = String(inner).replace(/<[^>]+>/g, '').trim();
+    return t === String(page.title).trim() ? '' : m;
+  });
+  var hasMath = /\$\$|\\\(|\\\[/.test(page.content);
+  var hasMermaid = /class="language-mermaid"/.test(page.content);
+%>
+<div class="wrap narrow">
+  <div class="head">
+    <div>
+      <div class="meta">
+        <b><%= cats.map(function(c){ return c.name; }).join(' / ') %></b>
+        <span><%= date(page.date, 'YYYY-MM-DD') %></span>
+        <span><%= words.toLocaleString('en-US') %> 字</span>
+        <span>预计 <%= mins %> 分钟</span>
+      </div>
+      <h1><%= page.title %></h1>
+      <% var lead = wr_lead(page); if (lead) { %>
+      <p class="lead"><%= lead %></p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="layout">
+    <article id="article">
+      <%- body %>
+    </article>
+
+    <% if (tocHtml && tocHtml.trim().length > 20) { %>
+    <aside class="toc" id="toc">
+      <h2>本文目录</h2>
+      <%- tocHtml %>
+    </aside>
+    <% } %>
+  </div>
+
+  <nav class="pn">
+    <% if (page.prev) { %>
+      <a href="<%= url_for(page.prev.path) %>">
+        <div class="lbl">← 上一篇</div>
+        <div class="ttl serif"><%= page.prev.title %></div>
+      </a>
+    <% } else { %><span></span><% } %>
+    <% if (page.next) { %>
+      <a class="right" href="<%= url_for(page.next.path) %>">
+        <div class="lbl">下一篇 →</div>
+        <div class="ttl serif"><%= page.next.title %></div>
+      </a>
+    <% } %>
+  </nav>
+
+  <% if (hasMath) { %>
+  <script>
+    window.MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] }, svg: { fontCache: 'global' } };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <% } %>
+  <% if (hasMermaid) { %>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    document.querySelectorAll('pre code.language-mermaid').forEach(function(el){
+      var d = document.createElement('div');
+      d.className = 'mermaid';
+      d.textContent = el.textContent;
+      el.closest('figure') ? el.closest('figure').replaceWith(d) : el.closest('pre').replaceWith(d);
+    });
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+  <% } %>
+</div>
