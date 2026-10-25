@@ -12,6 +12,10 @@ nav:
     url: /lab/
   - title: 标签
     url: /tags/
+  - title: SRK Toolbox
+    url: /srk-toolbox/
+  - title: Payloader
+    url: /payloader/
 
 # 首页标题
 hero:
