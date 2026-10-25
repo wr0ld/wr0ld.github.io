@@ -8,6 +8,8 @@
     var t = String(inner).replace(/<[^>]+>/g, '').trim();
     return t === String(page.title).trim() ? '' : m;
   });
+  var cleanBody = body.replace(/<a[^>]*headerlink[^>]*><\/a>/g, '');
+  var hasOwnToc = /<h[12][^>]*>\s*目录\s*<\/h[12]>/.test(cleanBody);
   var hasMath = /\$\$|\\\(|\\\[/.test(page.content);
   var hasMermaid = /class="language-mermaid"/.test(page.content);
 %>
@@ -32,7 +34,7 @@
       <%- body %>
     </article>
 
-    <% if (tocHtml && tocHtml.trim().length > 20) { %>
+    <% if (tocHtml && tocHtml.trim().length > 20 && !hasOwnToc) { %>
     <aside class="toc" id="toc">
       <h2>本文目录</h2>
       <%- tocHtml %>
