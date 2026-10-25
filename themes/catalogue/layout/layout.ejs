@@ -13,8 +13,17 @@
   <% if (page.layout === 'post') { %>
   <meta property="article:published_time" content="<%= page.date.toISOString() %>">
   <% } %>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('ui-theme');
+        document.documentElement.setAttribute('data-theme', (t === 'dark') ? 'dark' : 'light');
+      } catch (e) {}
+    })();
+  </script>
   <link rel="icon" href="<%= url_for(config.favicon || 'avatar.png') %>">
   <link rel="stylesheet" href="<%= url_for('css/main.css') %>">
+  <link rel="stylesheet" href="<%= url_for('css/refine.css') %>">
   <% if (page.layout === 'post') { %>
   <link rel="canonical" href="<%= full_url_for(page.path) %>">
   <% } %>

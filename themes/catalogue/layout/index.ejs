@@ -1,22 +1,29 @@
 <%
-  // 首页：一行标题 + 文章列表，没有自述、没有侧栏
-  var posts = page.posts;
-  var all = site.posts.toArray();
-  var years = all.length
-    ? date(all[all.length - 1].date, 'YYYY') + '—' + date(all[0].date, 'YYYY')
-    : '';
+  // 首页：按年份分组的双栏索引
+  var groups = {};
+  var order = [];
+  page.posts.each(function (post) {
+    var y = date(post.date, 'YYYY');
+    if (!groups[y]) { groups[y] = []; order.push(y); }
+    groups[y].push(post);
+  });
 %>
 <div class="wrap">
   <div class="home-head">
     <h1 class="serif"><%- (theme.hero && theme.hero.title) || '代码审计与渗透测试笔记' %></h1>
-    <span class="stat">共 <%= all.length %> 篇</span>
+    <span class="stat">共 <%= site.posts.length %> 篇</span>
   </div>
 
-  <ol class="posts">
-    <% posts.each(function(post){ %>
-      <%- partial('_partial/post-item', { post: post }) %>
-    <% }); %>
-  </ol>
+  <% order.forEach(function (y) { %>
+    <section class="year-set">
+      <div class="year-bar"><b><%= y %></b><span><%= groups[y].length %> 篇</span></div>
+      <ol class="posts two">
+        <% groups[y].forEach(function (post) { %>
+          <%- partial('_partial/post-item', { post: post }) %>
+        <% }); %>
+      </ol>
+    </section>
+  <% }); %>
 
   <% if (page.total > 1) { %>
   <nav class="pager">

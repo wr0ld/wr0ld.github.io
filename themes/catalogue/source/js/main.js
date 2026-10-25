@@ -178,4 +178,52 @@
       }
     });
   }
+
+  /* ---------- 明暗切换 ---------- */
+  var toggle = document.getElementById('themeToggle');
+  if (toggle) {
+    var syncToggle = function () {
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      toggle.textContent = dark ? '\u25d1' : '\u25d0';
+      toggle.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    };
+    toggle.addEventListener('click', function () {
+      var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      var next = dark ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('ui-theme', next); } catch (e) {}
+      syncToggle();
+    });
+    syncToggle();
+  }
+
+  /* ---------- 键盘：j / k / Enter / ────────── */
+  var rows = [].slice.call(document.querySelectorAll('ol.posts a'));
+  if (rows.length) {
+    var at = -1;
+    var mark = function (i) {
+      rows.forEach(function (r) { r.classList.remove('kb'); });
+      if (i < 0) return;
+      rows[i].classList.add('kb');
+      rows[i].scrollIntoView({ block: 'nearest' });
+    };
+    document.addEventListener('keydown', function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      var tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      if (e.key === 'j') { e.preventDefault(); at = Math.min(rows.length - 1, at + 1); mark(at); }
+      else if (e.key === 'k') { e.preventDefault(); at = Math.max(0, at - 1); mark(at); }
+      else if (e.key === 'Enter' && at > -1) { rows[at].click(); }
+      else if (e.key === '/') { e.preventDefault(); if (search) { openSearch(); } }
+    });
+  }
+
+  /* ---------- 正文首段：提要 / 首字下沉 ---------- */
+  if (article) {
+    var firstP = article.querySelector(':scope > p');
+    if (firstP) {
+      var len = (firstP.textContent || '').trim().length;
+      if (len > 140) firstP.classList.add('is-lede');
+    }
+  }
 })();

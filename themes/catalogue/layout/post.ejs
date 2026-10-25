@@ -12,29 +12,30 @@
   var hasOwnToc = /<h[12][^>]*>\s*目录\s*<\/h[12]>/.test(cleanBody);
   var hasMath = /\$\$|\\\(|\\\[/.test(page.content);
   var hasMermaid = /class="language-mermaid"/.test(page.content);
+  var showAside = !!(tocHtml && tocHtml.trim().length > 20 && !hasOwnToc);
 %>
 <div class="wrap narrow">
   <div class="head">
     <div>
+      <h1><%= page.title %></h1>
       <div class="meta">
         <b><%= cats.map(function(c){ return c.name; }).join(' / ') %></b>
         <span><%= date(page.date, 'YYYY-MM-DD') %></span>
         <span><%= words.toLocaleString('en-US') %> 字</span>
         <span>预计 <%= mins %> 分钟</span>
       </div>
-      <h1><%= page.title %></h1>
       <% var lead = wr_lead(page); if (lead) { %>
       <p class="lead"><%= lead %></p>
       <% } %>
     </div>
   </div>
 
-  <div class="layout">
+  <div class="layout<%= showAside ? '' : ' alone' %>">
     <article id="article">
       <%- body %>
     </article>
 
-    <% if (tocHtml && tocHtml.trim().length > 20 && !hasOwnToc) { %>
+    <% if (showAside) { %>
     <aside class="toc" id="toc">
       <h2>本文目录</h2>
       <%- tocHtml %>

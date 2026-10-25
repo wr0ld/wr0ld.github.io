@@ -8,11 +8,14 @@
   --ink:#15171A;
   --sub:#3C3E39;
   --faint:#63655E;
-  --accent:#8E2F2A;
+  --accent:#C2410C;
   --hover:#E8E6DE;
   --code:#1B1D21;
   --note:#E6E6DF;
   --rule:#DBDCD3;
+  --body:#26282C;
+  --codebg:#E5E2D8;
+  --hair:#EAEAE3;
   --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
   --serif:"Noto Serif SC","Songti SC",Georgia,"Times New Roman",serif;
   --mono:"JetBrains Mono","Fira Code",Consolas,monospace;
@@ -30,13 +33,13 @@ a{color:inherit;text-decoration:none}
 img{max-width:100%;height:auto}
 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .wrap{max-width:1280px;margin:0 auto;padding:0 56px}
-.wrap.narrow{max-width:1180px}
+.wrap.narrow{max-width:1280px}
 
 /* 阅读进度 */
 .progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--accent);z-index:60;transition:width .08s linear}
 
 /* ---------------- 顶栏 ---------------- */
-header.bar{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:34px 0 0}
+header.bar{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding-top:34px}
 .mark{font-size:15px;letter-spacing:.02em;color:var(--sub)}
 .mark b{font-weight:600;color:var(--ink)}
 nav.links{display:flex;gap:28px;font-size:14px;color:var(--sub);flex-wrap:wrap}
@@ -48,7 +51,7 @@ nav.links a.on::after{content:"";position:absolute;left:0;right:0;bottom:-5px;he
   .mark{font-size:14px;width:100%}
   .home-head{flex-wrap:wrap;gap:8px;padding:44px 0 18px}
   .home-head .stat{padding-bottom:0}
-  nav.links{gap:16px;font-size:13.5px;width:100%;justify-content:flex-start}
+  nav.links{gap:14px;font-size:12.5px;width:100%;justify-content:flex-start;align-items:center}
 }
 
 /* ---------------- 首页标题行 ---------------- */
@@ -118,18 +121,18 @@ article h2,article h3,article h4{font-family:var(--serif);font-weight:500;scroll
 article h2{font-size:26px;line-height:1.5;margin:64px 0 16px;letter-spacing:-.005em}
 article h3{font-size:20px;margin:40px 0 10px}
 article h4{font-size:17px;margin:28px 0 8px}
-article p{margin:16px 0;font-size:17px;line-height:1.95;color:#26282C;overflow-wrap:anywhere}
+article p{margin:16px 0;font-size:17px;line-height:1.95;color:var(--body);overflow-wrap:anywhere}
 article ul,article ol{font-size:17px;line-height:1.95;padding-left:1.4em}
 article li{margin:8px 0}
 article strong{font-weight:600}
 article blockquote{margin:28px 0;padding:20px 24px;background:var(--note);border-radius:4px;
-  font-size:15.5px;line-height:1.9;color:#3A3C36}
+  font-size:15.5px;line-height:1.9;color:var(--body)}
 article blockquote p{margin:0;font-size:15.5px;color:inherit}
 article blockquote b{color:var(--accent);font-weight:600}
 article hr{border:0;border-top:1px solid var(--rule);margin:44px 0}
 
 /* 行内代码 */
-article code{font-family:var(--mono);font-size:.88em;background:#E5E2D8;padding:1.5px 5px;border-radius:3px;overflow-wrap:anywhere}
+article code{font-family:var(--mono);font-size:.88em;background:var(--codebg);padding:1.5px 5px;border-radius:3px;overflow-wrap:anywhere}
 /* 代码块（highlight.js 结构：figure.highlight / table.gutter） */
 article figure.highlight,article pre{position:relative;background:var(--code);border-radius:4px;
   margin:22px 0;max-width:100%;overflow:auto}
@@ -207,7 +210,7 @@ figure.img figcaption{margin-top:8px;font-size:13px;color:var(--faint);line-heig
   font-family:var(--sans);font-size:17px;color:var(--ink)}
 .search-box input:focus{outline:none}
 .search-res{list-style:none;margin:0;padding:6px 0;max-height:52vh;overflow:auto}
-.search-res li a{display:block;padding:12px 20px;border-bottom:1px solid #EAEAE3}
+.search-res li a{display:block;padding:12px 20px;border-bottom:1px solid var(--hair)}
 .search-res li a:hover{background:var(--hover)}
 .search-res .st{font-size:15.5px;line-height:1.5}
 .search-res .sd{font-size:12.5px;color:var(--faint);margin-top:4px}
