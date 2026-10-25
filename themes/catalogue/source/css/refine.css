@@ -667,3 +667,32 @@ body.nav-hidden .admin-only { display: none; }
   background: none; color: var(--ink); cursor: pointer;
 }
 .raw-payload-modal .modal-footer button:hover { background: var(--ink); color: var(--paper); }
+
+/* ---------- 页脚时钟 ---------- */
+.footer-time-info {
+  display: flex; align-items: center; gap: 14px; padding: 0 0 22px;
+  font-family: var(--sans) !important; font-size: 12.5px; color: var(--faint) !important;
+  border-bottom: 0 !important; margin-bottom: 22px !important;
+  font-variant-numeric: tabular-nums;
+}
+.footer-time-info .footer-clock { color: var(--ink) !important; }
+.footer-time-info > * { opacity: 1 !important; }
+.footer-time-info { opacity: 1 !important; justify-content: flex-start !important; }
+.footer-time-info .footer-divider { color: var(--hair) !important; }
+
+/* ---------- 成就通知：纸色方框，不用发光 ---------- */
+.card-notification {
+  background: var(--paper) !important;
+  border: 1px solid var(--ink) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+  font-family: var(--sans) !important;
+  min-width: 260px !important;
+}
+.card-notification .card-glow { display: none !important; }
+.card-notification .card-title { color: var(--faint) !important; font-size: 11.5px !important; letter-spacing: .06em; }
+.card-notification .card-name { color: var(--ink) !important; font-size: 14px !important; font-weight: 400 !important; }
+.card-notification .card-desc { color: var(--sub) !important; font-size: 12px !important; }
+.card-notification .card-rarity { color: var(--faint) !important; }
+.card-notification .card-icon { font-size: 22px !important; filter: none !important; }

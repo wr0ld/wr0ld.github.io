@@ -71,6 +71,13 @@ layout: page
       </div>
     </div>
     <div class="set-row">
+      <span class="set-label">页脚时钟</span>
+      <div class="set-opts">
+        <button type="button" data-clock="on">开启</button>
+        <button type="button" data-clock="off">关闭</button>
+      </div>
+    </div>
+    <div class="set-row">
       <span class="set-label">右键菜单</span>
       <div class="set-opts">
         <button type="button" data-ctx="on">开启</button>

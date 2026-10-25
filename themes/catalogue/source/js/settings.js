@@ -55,6 +55,7 @@
   renderSongs();
   syncMusic();
   syncCtx();
+  syncClock();
 
   /* 看板娘 */
   function waifuState() {
@@ -115,6 +116,22 @@
     syncCtx();
   }
 
+  function clockOn() {
+    return localStorage.getItem('timeWidget') === 'true';
+  }
+  function syncClock() {
+    var on = clockOn();
+    [].slice.call(document.querySelectorAll('[data-clock]')).forEach(function (b) {
+      b.classList.toggle('on', (b.getAttribute('data-clock') === 'on') === on);
+    });
+  }
+  function setClock(on) {
+    try { localStorage.setItem('timeWidget', on ? 'true' : 'false'); } catch (e) {}
+    var w = document.getElementById('time-widget');
+    if (w) w.style.display = on ? 'flex' : 'none';
+    syncClock();
+  }
+
   function renderSongs() {
     var ul = document.getElementById('songList');
     if (!ul) return;
@@ -132,6 +149,11 @@
   document.addEventListener('click', function (e) {
     if (e.target.id === 'openCards') {
       if (window.CardSystem && window.CardSystem.showPanel) window.CardSystem.showPanel();
+      return;
+    }
+    var kb = e.target.closest && e.target.closest('[data-clock]');
+    if (kb) {
+      setClock(kb.getAttribute('data-clock') === 'on');
       return;
     }
     var cb = e.target.closest && e.target.closest('[data-ctx]');
