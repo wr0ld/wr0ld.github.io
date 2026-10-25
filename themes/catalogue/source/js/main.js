@@ -23,6 +23,14 @@
     onScroll();
   }
 
+  /* ---------- 粘性报头 ---------- */
+  var hdr = document.querySelector('header.bar');
+  if (hdr) {
+    var mark = function () { hdr.classList.toggle('is-scrolled', window.scrollY > 8); };
+    window.addEventListener('scroll', mark, { passive: true });
+    mark();
+  }
+
   /* ---------- 目录高亮 ---------- */
   var toc = document.getElementById('toc');
   if (toc && article) {

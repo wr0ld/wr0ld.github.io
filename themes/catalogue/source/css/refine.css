@@ -477,3 +477,45 @@ html[data-fs="l"] .page-body .lede { font-size: clamp(20px, 1.9vw, 26px); }
   .set-row { flex-direction: column; align-items: flex-start; gap: 12px; }
   .rank { grid-template-columns: minmax(0, 1fr); gap: 22px; }
 }
+
+/* ---------- 观感：粘性报头 ---------- */
+header.bar {
+  position: sticky; top: 0; z-index: 45;
+  width: 100%; box-sizing: border-box;
+  background: var(--paper);
+  padding-bottom: 14px;
+  transition: box-shadow .25s ease;
+}
+header.bar.is-scrolled { box-shadow: 0 1px 0 var(--hair); }
+header.bar .mark { letter-spacing: .02em; }
+
+/* ---------- 观感：正文图片 ---------- */
+figure.img img {
+  border: 1px solid var(--hair);
+  transition: transform .5s cubic-bezier(.22, .61, .36, 1), border-color .3s ease;
+}
+figure.img:hover img { border-color: var(--rule2); }
+figure.img figcaption {
+  margin-top: 10px; text-align: center; letter-spacing: .01em;
+  font-size: 12.5px; color: var(--faint);
+}
+
+/* ---------- 观感：引用 ---------- */
+article blockquote {
+  border-left: 2px solid var(--accent);
+  border-radius: 0;
+  background: var(--note);
+  padding: 20px 26px 20px 24px;
+}
+article blockquote p { font-size: 16px; line-height: 1.85; color: var(--body); }
+
+/* ---------- 观感：目录当前项 ---------- */
+.toc a { position: relative; }
+.toc a.on { color: var(--ink); }
+.toc a.on::before {
+  content: ""; position: absolute; left: -14px; top: .62em;
+  width: 4px; height: 4px; background: var(--accent);
+}
+
+/* ---------- 观感：索引行日期跟随 ---------- */
+ol.posts.two a:hover .d { color: var(--paper); }
