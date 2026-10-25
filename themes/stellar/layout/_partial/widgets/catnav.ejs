@@ -1,0 +1,82 @@
+<%
+
+var customOrder = ['实战', '代码审计', '工具魔改', 'web', 'linux', 'windows', '笔记'];
+
+var rootCategories = [];
+site.categories.each(function(cat) {
+  if (!cat.parent) {
+    rootCategories.push(cat);
+  }
+});
+
+rootCategories.sort(function(a, b) {
+  var indexA = customOrder.indexOf(a.name);
+  var indexB = customOrder.indexOf(b.name);
+  if (indexA === -1) indexA = 999;
+  if (indexB === -1) indexB = 999;
+  return indexA - indexB;
+});
+
+function getChildCategories(parentCat) {
+  var children = [];
+  site.categories.each(function(cat) {
+    if (cat.parent && cat.parent === parentCat._id) {
+      children.push(cat);
+    }
+  });
+  if (parentCat.name === '代码审计') {
+    var codeAuditOrder = ['内存马', 'log4j', 'shiro', 'cc', 'fastjson'];
+    children.sort(function(a, b) {
+      var indexA = codeAuditOrder.indexOf(a.name);
+      var indexB = codeAuditOrder.indexOf(b.name);
+      if (indexA === -1) indexA = 999;
+      if (indexB === -1) indexB = 999;
+      return indexA - indexB;
+    });
+  }
+  return children;
+}
+
+function getPostCount(cat) {
+  if (cat.posts) {
+    if (typeof cat.posts.length === 'number') return cat.posts.length;
+    else if (cat.posts.count) return cat.posts.count;
+    else if (cat.posts.toArray) return cat.posts.toArray().length;
+  }
+  return 0;
+}
+
+function layoutDiv() {
+  if (rootCategories.length == 0) return '';
+  var el = '';
+  el += '<widget class="widget-wrapper catnav" id="data-catnav">';
+  el += '<div class="widget-header dis-select">';
+  el += '<span class="name">分类导航</span>';
+  el += '</div>';
+  el += '<div class="widget-body fs14">';
+  el += '<div class="catnav-list">';
+  rootCategories.forEach(function(cat) {
+    var children = getChildCategories(cat);
+    var hasChildren = children.length > 0;
+    el += '<div class="catnav-group">';
+    el += '<a class="catnav-link" href="#cat-' + cat.name + '" data-cat="' + cat.name + '">';
+    el += '<span class="catnav-name">' + cat.name + '</span>';
+    el += '<span class="catnav-count">' + getPostCount(cat) + '</span>';
+    el += '</a>';
+    if (hasChildren) {
+      children.forEach(function(child) {
+        el += '<a class="catnav-child" href="#cat-' + child.name + '">';
+        el += '<span class="catnav-child-name">' + child.name + '</span>';
+        el += '<span class="catnav-child-count">' + getPostCount(child) + '</span>';
+        el += '</a>';
+      });
+    }
+    el += '</div>';
+  });
+  el += '</div>';
+  el += '</div>';
+  el += '</widget>';
+  return el;
+}
+%>
+<%- layoutDiv() %>
