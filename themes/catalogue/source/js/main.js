@@ -281,3 +281,11 @@
     }
   }
 })();
+
+/* 卡牌入口（admin 菜单里的「卡牌」） */
+document.addEventListener('click', function (e) {
+  var t = e.target.closest && e.target.closest('[data-cards]');
+  if (!t) return;
+  e.preventDefault();
+  if (window.CardSystem && window.CardSystem.showPanel) window.CardSystem.showPanel();
+});

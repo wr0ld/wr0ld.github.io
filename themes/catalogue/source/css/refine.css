@@ -620,3 +620,8 @@ ol.posts.two a:hover .d { color: var(--paper); }
 .card-level-badge { background: var(--accent) !important; }
 .card-level-badge .level-icon { display: none !important; }
 .card-level-progress .level-progress-fill { background: var(--accent) !important; }
+
+/* ---------- admin 隐藏菜单 ---------- */
+.admin-only { display: none; }
+body.nav-admin-visible .admin-only { display: inline-flex; align-items: center; gap: 26px; }
+body.nav-hidden .admin-only { display: none; }

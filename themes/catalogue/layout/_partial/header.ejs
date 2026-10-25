@@ -9,6 +9,11 @@
       <% var on = (item.url === '/' && cur === 'index.html') || (item.url !== '/' && cur.indexOf(item.url.replace(/^\//,'')) === 0); %>
       <a href="<%- url_for(item.url) %>"<%- on ? ' class="on"' : '' %>><%= item.title %></a>
     <% }); %>
+    <span class="admin-only">
+      <a href="/gallery/">相册</a>
+      <a href="/games/">游戏</a>
+      <a href="#" data-cards>卡牌</a>
+    </span>
     <span class="find">
       <input id="searchInput" type="search" placeholder="搜索" autocomplete="off" aria-label="站内搜索">
       <ul class="find-res" id="searchRes"></ul>
