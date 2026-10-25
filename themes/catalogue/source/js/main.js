@@ -200,6 +200,18 @@
     });
   }
 
+  /* ---------- 表格：包一层可横向滚动的容器 ---------- */
+  var articleEl = document.querySelector('article');
+  if (articleEl) {
+    [].slice.call(articleEl.querySelectorAll('table')).forEach(function (t) {
+      if (t.closest('figure.highlight') || t.closest('.table-wrap')) return;
+      var w = document.createElement('div');
+      w.className = 'table-wrap';
+      t.parentNode.insertBefore(w, t);
+      w.appendChild(t);
+    });
+  }
+
   /* ---------- 明暗切换 ---------- */
   var toggle = document.getElementById('themeToggle');
   if (toggle) {
