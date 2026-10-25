@@ -5,136 +5,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terminal - Connection Error</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    :root {
+      --paper: #F1F2EF; --ink: #15171A; --sub: #4A4D48; --faint: #6B6E68;
+      --rule: #CFD0C9; --hair: #E2E3DD; --accent: #C2410C; --mono: ui-monospace, "JetBrains Mono", Consolas, "Courier New", monospace;
     }
+    html[data-theme="dark"] {
+      --paper: #0F1113; --ink: #E9E7E2; --sub: #B9B6AF; --faint: #82878C;
+      --rule: #2A2E32; --hair: #23272B; --accent: #F2733D;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #0c0c0c;
-      min-height: 100vh;
-      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-      color: #00ff88;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      min-height: 100vh; background: var(--paper); color: var(--ink);
+      font-family: var(--mono); font-size: 14px; line-height: 1.75;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 40px 20px; gap: 18px;
     }
+    .brand {
+      width: 100%; max-width: 880px; display: flex; justify-content: space-between;
+      align-items: baseline; font-family: var(--mono); font-size: 13px; color: var(--sub);
+    }
+    .brand .mark { color: var(--ink); letter-spacing: .04em; }
+    .brand .code { color: var(--accent); letter-spacing: .1em; }
     .terminal {
-      background: #0a0a0a;
-      border: 1px solid #333;
-      border-radius: 10px;
-      width: 100%;
-      max-width: 900px;
-      box-shadow: 0 0 50px rgba(0, 255, 136, 0.1);
-      overflow: hidden;
+      width: 100%; max-width: 880px; border: 1px solid var(--ink);
+      background: var(--paper); overflow: hidden;
     }
     .terminal-header {
-      background: linear-gradient(180deg, #2d2d2d 0%, #1a1a1a 100%);
-      padding: 12px 15px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid #333;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-bottom: 1px solid var(--ink);
+      font-size: 12.5px; color: var(--sub); letter-spacing: .04em;
     }
-    .terminal-buttons {
-      display: flex;
-      gap: 8px;
-    }
-    .terminal-btn {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-    .terminal-btn.close { background: #ff5f56; }
-    .terminal-btn.minimize { background: #ffbd2e; }
-    .terminal-btn.maximize { background: #27ca40; }
-    .terminal-title {
-      flex: 1;
-      text-align: center;
-      color: #888;
-      font-size: 13px;
-    }
-    .terminal-body {
-      padding: 20px;
-      min-height: 500px;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-    .line {
-      margin: 3px 0;
-      word-wrap: break-word;
-    }
-    .prompt {
-      color: #00ff88;
-    }
-    .path {
-      color: #00aaff;
-    }
-    .command {
-      color: #fff;
-    }
-    .error {
-      color: #ff4444;
-    }
-    .warning {
-      color: #ffaa00;
-    }
-    .success {
-      color: #00ff88;
-    }
-    .info {
-      color: #00aaff;
-    }
-    .dim {
-      color: #666;
-    }
-    .input-line {
-      display: flex;
-      align-items: center;
-      margin-top: 5px;
-    }
+    .terminal-buttons { display: none; }
+    .terminal-title { flex: 1; }
+    .terminal-title::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 9px; background: var(--accent); vertical-align: 1px; }
+    .terminal-body { padding: 22px 18px 26px; min-height: 460px; max-height: 70vh; overflow-y: auto; font-size: 13.5px; }
+    .line { white-space: pre-wrap; word-break: break-word; margin: 2px 0; }
+    .prompt { color: var(--ink); }
+    .path { color: var(--accent); }
+    .command { color: var(--sub); }
+    .info { color: var(--sub); }
+    .warning { color: var(--accent); }
+    .error { color: var(--accent); }
+    .success { color: var(--ink); }
+    .dim { color: var(--faint); }
+    .input-line { display: flex; align-items: center; gap: 0; }
     .terminal-input {
-      background: transparent;
-      border: none;
-      color: #fff;
-      font-family: inherit;
-      font-size: inherit;
-      flex: 1;
-      outline: none;
-      caret-color: #00ff88;
-    }
-    .cursor {
-      display: inline-block;
-      width: 8px;
-      height: 16px;
-      background: #00ff88;
-      animation: blink 1s step-end infinite;
-      vertical-align: text-bottom;
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+      flex: 1; background: transparent; border: 0; outline: 0; margin-left: 6px;
+      color: var(--ink); font: inherit; caret-color: var(--accent);
     }
     .ascii-art {
-      color: #ff0066;
-      font-size: 10px;
-      line-height: 1.1;
-      margin: 15px 0;
-      text-shadow: 0 0 10px rgba(255, 0, 102, 0.5);
+      font-family: var(--mono); font-size: 9px; line-height: 1.05; color: var(--faint);
+      letter-spacing: 0; margin: 10px 0 4px; overflow-x: auto;
     }
+    .foot { width: 100%; max-width: 880px; display: flex; justify-content: space-between; font-size: 12.5px; color: var(--faint); }
+    .foot a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--rule); }
+    .foot a:hover { color: var(--accent); border-bottom-color: var(--accent); }
     @media (max-width: 600px) {
-      .terminal-body {
-        font-size: 12px;
-        padding: 15px;
-      }
-      .ascii-art {
-        font-size: 6px;
-      }
+      body { padding: 22px 14px; }
+      .terminal-body { padding: 16px 12px 20px; font-size: 12.5px; min-height: 420px; }
+      .ascii-art { font-size: 6px; }
+      .brand .code { display: none; }
+      .foot { flex-direction: column; gap: 8px; }
     }
   </style>
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('ui-theme');
+        var d = (t === 'dark') || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-theme', d ? 'dark' : 'light');
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
+  <div class="brand">
+    <span class="mark">wr0ld</span>
+    <span class="code">404 NOT FOUND</span>
+  </div>
   <div class="terminal">
     <div class="terminal-header">
       <div class="terminal-buttons">
@@ -151,6 +99,10 @@
     </div>
     <div class="terminal-body" id="terminal">
     </div>
+  </div>
+  <div class="foot">
+    <span>这个地址不存在。下面是个真的终端，输入 help 看能干什么。</span>
+    <span><a href="/">回到首页</a> · <a href="/archives/">归档</a></span>
   </div>
 
   <script>
