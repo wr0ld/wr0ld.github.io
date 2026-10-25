@@ -71,6 +71,13 @@ layout: page
       </div>
     </div>
     <div class="set-row">
+      <span class="set-label">右键菜单</span>
+      <div class="set-opts">
+        <button type="button" data-ctx="on">开启</button>
+        <button type="button" data-ctx="off">关闭</button>
+      </div>
+    </div>
+    <div class="set-row">
       <span class="set-label">成就卡牌</span>
       <div class="set-opts">
         <button type="button" id="openCards">打开卡牌墙</button>

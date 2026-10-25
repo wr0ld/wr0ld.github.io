@@ -54,6 +54,7 @@
   syncWaifu();
   renderSongs();
   syncMusic();
+  syncCtx();
 
   /* 看板娘 */
   function waifuState() {
@@ -95,6 +96,25 @@
       b.classList.toggle('on', (b.getAttribute('data-music') === 'on') === on);
     });
   }
+  function ctxOn() {
+    return localStorage.getItem('customContextMenu') === 'true';
+  }
+  function syncCtx() {
+    var on = ctxOn();
+    [].slice.call(document.querySelectorAll('[data-ctx]')).forEach(function (b) {
+      b.classList.toggle('on', (b.getAttribute('data-ctx') === 'on') === on);
+    });
+  }
+  function setCtx(on) {
+    try { localStorage.setItem('customContextMenu', on ? 'true' : 'false'); } catch (e) {}
+    var c = window.CustomContextMenu;
+    if (c) {
+      if (c.loadSettings) c.loadSettings();
+      if (!on && c.hideMenu) c.hideMenu();
+    }
+    syncCtx();
+  }
+
   function renderSongs() {
     var ul = document.getElementById('songList');
     if (!ul) return;
@@ -112,6 +132,11 @@
   document.addEventListener('click', function (e) {
     if (e.target.id === 'openCards') {
       if (window.CardSystem && window.CardSystem.showPanel) window.CardSystem.showPanel();
+      return;
+    }
+    var cb = e.target.closest && e.target.closest('[data-ctx]');
+    if (cb) {
+      setCtx(cb.getAttribute('data-ctx') === 'on');
       return;
     }
     var b = e.target.closest && e.target.closest('[data-music]');
