@@ -689,6 +689,14 @@ body.nav-hidden .admin-only { display: none; }
   color: var(--ink) !important;
   font-family: var(--sans) !important;
   min-width: 260px !important;
+  top: auto !important;
+  bottom: 24px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
 }
 .card-notification .card-glow { display: none !important; }
 .card-notification .card-title { color: var(--faint) !important; font-size: 11.5px !important; letter-spacing: .06em; }
