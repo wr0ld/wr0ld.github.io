@@ -1,14 +1,41 @@
 <%
-  var tags = site.tags.toArray().sort(function(a,b){ return b.length - a.length; });
+  var tags = site.tags.toArray().sort(function (a, b) { return b.length - a.length; });
+  var counts = tags.map(function (t) { return t.length; });
+  var max = Math.max.apply(null, counts.concat([1]));
+  var min = Math.min.apply(null, counts.concat([1]));
+  var span = Math.max(1, max - min);
+  var isMain = {};
+
+  // 权重从大到小，从中位依次向两侧铺开：最重的落在中间，越轻越靠两端
+  var n = tags.length;
+  var slots = new Array(n);
+  var mid = Math.floor((n - 1) / 2);
+  var left = mid - 1;
+  var right = mid + 1;
+  tags.forEach(function (t, i) {
+    if (i === 0) { slots[mid] = t; return; }
+    if (i % 2 === 1) {
+      if (right < n) { slots[right] = t; right++; } else { slots[left] = t; left--; }
+    } else {
+      if (left >= 0) { slots[left] = t; left--; } else { slots[right] = t; right++; }
+    }
+  });
+  var ordered = slots.filter(function (x) { return !!x; });
+
+  function sizeOf(c) {
+    var r = Math.sqrt((c - min) / span);
+    return Math.round((14 + 34 * r) * 10) / 10;
+  }
 %>
 <div class="wrap narrow">
   <div class="page-head">
     <h1>标签</h1>
-    <p>共 <%= tags.length %> 个标签。</p>
+    <p>共 <%= tags.length %> 个标签，字号按文章数量变化。</p>
   </div>
   <div class="tag-cloud">
-    <% tags.forEach(function(t){ %>
-      <a href="<%= url_for(t.path) %>"><%= t.name %><sup><%= t.length %></sup></a>
+    <% ordered.forEach(function (t) { %>
+      <% var sz = sizeOf(t.length); %>
+      <a href="<%= url_for(t.path) %>" style="--sz:<%= sz %>px"<%- sz >= 26 ? ' class="big"' : '' %>><%= t.name %><sup><%= t.length %></sup></a>
     <% }); %>
   </div>
 </div>

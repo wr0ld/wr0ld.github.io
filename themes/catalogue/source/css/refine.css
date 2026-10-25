@@ -338,3 +338,26 @@ article .table-wrap tbody td code {
   font-size: 13px; padding: 1px 5px; border-radius: 2px;
   background: var(--codebg); color: var(--codefg);
 }
+
+/* ---------- 标签云：按权重放大，重心在中部 ---------- */
+.tag-cloud {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline;
+  gap: 10px 28px; max-width: 1000px; margin: 0 auto; padding: 64px 0 72px;
+}
+.tag-cloud a {
+  font-size: var(--sz, 15px); line-height: 1.1; color: var(--sub);
+  padding: 2px 0; border-bottom: 1px solid transparent;
+  transition: color .18s ease;
+}
+.tag-cloud a.big {
+  font-family: var(--serif); color: var(--ink); letter-spacing: -.02em;
+}
+.tag-cloud a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.tag-cloud sup {
+  font-size: max(9.5px, .4em); margin-left: .22em; vertical-align: super; color: var(--faint);
+  font-variant-numeric: tabular-nums; letter-spacing: 0;
+}
+@media (max-width: 860px) {
+  .tag-cloud { gap: 8px 18px; padding: 44px 0 56px; }
+  .tag-cloud a { font-size: calc(var(--sz, 15px) * .68); }
+}
