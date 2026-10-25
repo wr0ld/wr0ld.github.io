@@ -361,3 +361,30 @@ article .table-wrap tbody td code {
   .tag-cloud { gap: 8px 18px; padding: 44px 0 56px; }
   .tag-cloud a { font-size: calc(var(--sz, 15px) * .68); }
 }
+
+/* ---------- 首页 hero：右侧一组元信息 ---------- */
+.hero-meta {
+  display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end;
+  gap: 5px; padding-bottom: 10px;
+  font-family: var(--sans); font-size: 12.5px; line-height: 1.5;
+  color: var(--sub); letter-spacing: .03em; font-variant-numeric: tabular-nums;
+}
+.hero-meta b { font-family: var(--serif); font-weight: 400; font-size: 15px; color: var(--ink); }
+
+/* ---------- 正文链接：细下划线，悬停转橙 ---------- */
+article :not(pre) > a, article p a, article li a, article td a {
+  color: var(--ink); text-decoration: none;
+  border-bottom: 1px solid var(--rule2);
+  transition: border-color .18s ease, color .18s ease;
+}
+article p a:hover, article li a:hover, article td a:hover {
+  color: var(--accent); border-bottom-color: var(--accent);
+}
+
+/* ---------- 代码块语言标签 ---------- */
+figure.highlight { position: relative; }
+figure.highlight .lang {
+  position: absolute; right: 12px; bottom: 8px;
+  font: 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+  color: #5F6B73; opacity: .7; pointer-events: none;
+}

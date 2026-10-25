@@ -212,6 +212,19 @@
     });
   }
 
+  /* ---------- 代码块语言标签 ---------- */
+  [].slice.call(document.querySelectorAll('figure.highlight')).forEach(function (f) {
+    if (f.querySelector('.lang')) return;
+    var lang = (f.className || '').split(/\s+/).filter(function (c) {
+      return c && c !== 'highlight' && c.indexOf('highlight-') !== 0 && c.indexOf('lang-') !== 0;
+    })[0];
+    if (!lang || lang.length > 12) return;
+    var tag = document.createElement('span');
+    tag.className = 'lang';
+    tag.textContent = lang;
+    f.appendChild(tag);
+  });
+
   /* ---------- 明暗切换 ---------- */
   var toggle = document.getElementById('themeToggle');
   if (toggle) {

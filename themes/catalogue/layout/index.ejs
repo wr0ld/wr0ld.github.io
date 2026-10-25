@@ -11,7 +11,11 @@
 <div class="wrap">
   <div class="home-head">
     <h1 class="serif"><%- (theme.hero && theme.hero.title) || '代码审计与渗透测试笔记' %><i class="accent-dot">.</i></h1>
-    <span class="stat">共 <%= site.posts.length %> 篇</span>
+    <div class="hero-meta">
+      <span><b><%= site.posts.length %></b> 篇</span>
+      <span>最近更新 <b><%- date(page.posts.first().date, 'YYYY.MM.DD') %></b></span>
+      <span>分类 <b><%= site.categories.toArray().filter(function (c) { return !c.parent; }).length %></b> · 标签 <b><%= site.tags.length %></b></span>
+    </div>
   </div>
 
   <% if (order.length > 1) { %>
