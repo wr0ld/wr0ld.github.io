@@ -589,3 +589,34 @@ ol.posts.two a:hover .d { color: var(--paper); }
 #music-player .aplayer .aplayer-info .aplayer-controller .aplayer-bar-wrap .aplayer-bar .aplayer-thumb { background: var(--accent) !important; }
 #music-player .aplayer .aplayer-info .aplayer-controller .aplayer-volume-wrap .aplayer-volume-bar-wrap .aplayer-volume-bar .aplayer-volume { background: var(--accent) !important; }
 #music-player .aplayer .aplayer-info .aplayer-controller .aplayer-time .aplayer-icon path { fill: var(--faint); }
+
+/* ---------- 成就卡牌面板 ---------- */
+#card-panel { font-family: var(--sans) !important; }
+.card-panel-overlay { background: #0B0D0F !important; }
+.card-panel-content { font-family: var(--sans) !important; }
+.card-panel-header h2 { font-family: var(--serif) !important; font-size: 26px !important; letter-spacing: -.02em; }
+.card-share-btn {
+  background: transparent !important; border: 1px solid rgba(255,255,255,.5) !important;
+  border-radius: 0 !important; color: #fff !important; font-size: 12.5px !important;
+}
+.card-share-btn:hover { background: #fff !important; color: var(--ink) !important; }
+.card-close { font-size: 24px !important; opacity: .7; }
+.card-close:hover { opacity: 1; }
+.card-level-section { border-radius: 0 !important; background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.12); }
+.card-level-badge { border-radius: 0 !important; }
+.level-progress-bar { border-radius: 0 !important; background: rgba(255,255,255,.14) !important; }
+.level-progress-fill { border-radius: 0 !important; }
+.card-panel-filters .card-filter {
+  border-radius: 0 !important; border: 1px solid rgba(255,255,255,.28) !important;
+  background: transparent !important; color: rgba(255,255,255,.75) !important; font-size: 12.5px !important;
+}
+.card-panel-filters .card-filter.active { background: #fff !important; color: var(--ink) !important; border-color: #fff !important; }
+.card-panel-grid { gap: 1px !important; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.12); }
+.card-item { border-radius: 0 !important; background: #14171A !important; }
+.card-item:hover { background: #1B1F23 !important; }
+.card-item .card-name { font-size: 13.5px !important; }
+.card-item .card-desc, .card-item .card-flavor { color: rgba(255,255,255,.55) !important; }
+.card-panel-stats, .card-counter { font-variant-numeric: tabular-nums; }
+.card-level-badge { background: var(--accent) !important; }
+.card-level-badge .level-icon { display: none !important; }
+.card-level-progress .level-progress-fill { background: var(--accent) !important; }

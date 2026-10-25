@@ -71,6 +71,12 @@ layout: page
       </div>
     </div>
     <div class="set-row">
+      <span class="set-label">成就卡牌</span>
+      <div class="set-opts">
+        <button type="button" id="openCards">打开卡牌墙</button>
+      </div>
+    </div>
+    <div class="set-row">
       <span class="set-label">音乐播放器</span>
       <div class="set-opts">
         <button type="button" data-music="on">开启</button>

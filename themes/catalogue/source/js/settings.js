@@ -110,6 +110,10 @@
     }).join('') + '<li class="song-clear"><button type="button" id="songClear">清空全部</button></li>';
   }
   document.addEventListener('click', function (e) {
+    if (e.target.id === 'openCards') {
+      if (window.CardSystem && window.CardSystem.showPanel) window.CardSystem.showPanel();
+      return;
+    }
     var b = e.target.closest && e.target.closest('[data-music]');
     if (b) {
       var on = b.getAttribute('data-music') === 'on';
