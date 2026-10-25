@@ -93,6 +93,20 @@ index_generator:
   per_page: 20
   order_by: -date
 
+# 归档类页面不分页（归档 / 分类 / 标签），per_page: 0 表示全部渲染在同一页
+archive_generator:
+  per_page: 0
+  yearly: true
+  monthly: false
+  daily: false
+
+category_generator:
+  per_page: 0
+
+tag_generator:
+  per_page: 0
+
+
 # Category & Tag
 default_category: uncategorized
 category_map:

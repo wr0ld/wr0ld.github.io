@@ -10,20 +10,28 @@
 %>
 <div class="wrap">
   <div class="home-head">
-    <h1 class="serif"><%- (theme.hero && theme.hero.title) || '代码审计与渗透测试笔记' %></h1>
+    <h1 class="serif"><%- (theme.hero && theme.hero.title) || '代码审计与渗透测试笔记' %><i class="accent-dot">.</i></h1>
     <span class="stat">共 <%= site.posts.length %> 篇</span>
   </div>
 
-  <% order.forEach(function (y) { %>
-    <section class="year-set">
-      <div class="year-bar"><b><%= y %></b><span><%= groups[y].length %> 篇</span></div>
-      <ol class="posts two">
-        <% groups[y].forEach(function (post) { %>
-          <%- partial('_partial/post-item', { post: post }) %>
-        <% }); %>
-      </ol>
-    </section>
-  <% }); %>
+  <% if (order.length > 1) { %>
+    <% order.forEach(function (y) { %>
+      <section class="year-set">
+        <div class="year-bar"><b><%= y %></b><span><%= groups[y].length %> 篇</span></div>
+        <ol class="posts two">
+          <% groups[y].forEach(function (post) { %>
+            <%- partial('_partial/post-item', { post: post }) %>
+          <% }); %>
+        </ol>
+      </section>
+    <% }); %>
+  <% } else { %>
+    <ol class="posts two solo">
+      <% page.posts.each(function (post) { %>
+        <%- partial('_partial/post-item', { post: post }) %>
+      <% }); %>
+    </ol>
+  <% } %>
 
   <% if (page.total > 1) { %>
   <nav class="pager">

@@ -13,16 +13,24 @@
     <p>共 <%= site.posts.length %> 篇，按年份倒序。</p>
   </div>
   <div class="archive">
-  <% years.forEach(function(y){ %>
-    <section class="year-block">
-      <div class="year-h"><b><%= y %></b><span><%= groups[y].length %> 篇</span></div>
-      <ol class="posts">
-        <% groups[y].forEach(function(post){ %>
-          <%- partial('_partial/post-item', { post: post }) %>
-        <% }); %>
-      </ol>
-    </section>
-  <% }); %>
+  <% if (years.length > 1) { %>
+    <% years.forEach(function(y){ %>
+      <section class="year-block">
+        <div class="year-h"><b><%= y %></b><span><%= groups[y].length %> 篇</span></div>
+        <ol class="posts two">
+          <% groups[y].forEach(function(post){ %>
+            <%- partial('_partial/post-item', { post: post }) %>
+          <% }); %>
+        </ol>
+      </section>
+    <% }); %>
+  <% } else { %>
+    <ol class="posts two solo">
+      <% page.posts.each(function(post){ %>
+        <%- partial('_partial/post-item', { post: post }) %>
+      <% }); %>
+    </ol>
+  <% } %>
   </div>
   <% if (page.total > 1) { %>
   <nav class="pager">

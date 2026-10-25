@@ -255,3 +255,8 @@ article h3 { font-size: 19px; letter-spacing: -.01em; color: var(--ink); }
   margin-left: 5px; color: var(--faint); letter-spacing: .02em;
   font-variant-numeric: tabular-nums;
 }
+
+/* 标题后的橙色句点：整页最克制的一处强调色 */
+.home-head h1 .accent-dot {
+  font-style: normal; color: var(--accent); margin-left: .06em;
+}
