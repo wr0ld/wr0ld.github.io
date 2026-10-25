@@ -51,6 +51,99 @@
   try { fs = localStorage.getItem(KEY_F) || 'm'; } catch (e) {}
   sync('mode', currentMode());
   sync('fs', fs);
+  syncWaifu();
+  renderSongs();
+  syncMusic();
+
+  /* 看板娘 */
+  function waifuState() {
+    var v = null;
+    try { v = localStorage.getItem('waifu_show'); } catch (e) {}
+    return v === 'true';
+  }
+  function syncWaifu() {
+    var on = waifuState();
+    [].slice.call(document.querySelectorAll('[data-waifu]')).forEach(function (b) {
+      b.classList.toggle('on', (b.getAttribute('data-waifu') === 'on') === on);
+    });
+  }
+  function setWaifu(on) {
+    try { localStorage.setItem('waifu_show', on ? 'true' : 'false'); } catch (e) {}
+    var w = document.getElementById('waifu');
+    if (on) {
+      if (w) { w.style.removeProperty('display'); }
+      else if (typeof window.initWaifuWidget === 'function') { window.initWaifuWidget(); }
+    } else if (w) {
+      w.style.setProperty('display', 'none', 'important');
+    }
+    syncWaifu();
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-waifu]');
+    if (!b) return;
+    setWaifu(b.getAttribute('data-waifu') === 'on');
+  });
+
+  /* 音乐播放器 */
+  function musicOn() {
+    var mp = window.MusicPlayer;
+    return mp ? mp.isOn() : false;
+  }
+  function syncMusic() {
+    var on = musicOn();
+    [].slice.call(document.querySelectorAll('[data-music]')).forEach(function (b) {
+      b.classList.toggle('on', (b.getAttribute('data-music') === 'on') === on);
+    });
+  }
+  function renderSongs() {
+    var ul = document.getElementById('songList');
+    if (!ul) return;
+    var mp = window.MusicPlayer;
+    var list = mp ? mp.list() : [];
+    if (!list.length) {
+      ul.innerHTML = '<li class="song-empty">还没有歌曲。填上名字和音频直链，点「添加」就会出现在左下角。</li>';
+      return;
+    }
+    ul.innerHTML = list.map(function (s, i) {
+      return '<li><span class="song-i">' + (i + 1) + '</span><span class="song-n">' + (s.name || '') +
+        '</span><span class="song-a">' + (s.artist || '') + '</span><button type="button" class="song-del" data-i="' + i + '">删除</button></li>';
+    }).join('') + '<li class="song-clear"><button type="button" id="songClear">清空全部</button></li>';
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-music]');
+    if (b) {
+      var on = b.getAttribute('data-music') === 'on';
+      if (window.MusicPlayer) window.MusicPlayer.setEnabled(on);
+      syncMusic();
+      return;
+    }
+    if (e.target.id === 'songAdd') {
+      var name = document.getElementById('songName');
+      var url = document.getElementById('songUrl');
+      if (!url.value.trim()) { url.focus(); return; }
+      if (!/^https?:\/\//i.test(url.value.trim())) { url.focus(); return; }
+      if (window.MusicPlayer) window.MusicPlayer.add({ name: name.value.trim() || url.value.trim().split('/').pop(), url: url.value.trim() });
+      name.value = ''; url.value = '';
+      renderSongs(); syncMusic();
+      return;
+    }
+    if (e.target.classList && e.target.classList.contains('song-del')) {
+      var i = parseInt(e.target.getAttribute('data-i'), 10);
+      var mp = window.MusicPlayer;
+      if (mp) {
+        var list = mp.list();
+        list.splice(i, 1);
+        try { localStorage.setItem('musicPlaylist', JSON.stringify(list)); } catch (err) {}
+        mp.refresh();
+      }
+      renderSongs(); syncMusic();
+      return;
+    }
+    if (e.target.id === 'songClear') {
+      if (window.MusicPlayer) window.MusicPlayer.clear();
+      renderSongs(); syncMusic();
+    }
+  });
 
   /* 文章统计 */
   var box = document.getElementById('setRank');

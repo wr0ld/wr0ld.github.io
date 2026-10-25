@@ -61,4 +61,34 @@ layout: page
     </div>
   </section>
 
+  <section class="set-block">
+    <h2>彩蛋</h2>
+    <div class="set-row">
+      <span class="set-label">看板娘</span>
+      <div class="set-opts">
+        <button type="button" data-waifu="on">开启</button>
+        <button type="button" data-waifu="off">关闭</button>
+      </div>
+    </div>
+    <div class="set-row">
+      <span class="set-label">音乐播放器</span>
+      <div class="set-opts">
+        <button type="button" data-music="on">开启</button>
+        <button type="button" data-music="off">关闭</button>
+      </div>
+    </div>
+    <div class="set-row set-row-col">
+      <span class="set-label">添加歌曲</span>
+      <div class="song-form">
+        <input id="songName" type="text" placeholder="歌名" autocomplete="off">
+        <input id="songUrl" type="text" placeholder="音频直链（mp3 / ogg）" autocomplete="off">
+        <button type="button" id="songAdd">添加</button>
+      </div>
+    </div>
+    <div class="set-row set-row-col">
+      <span class="set-label">曲目</span>
+      <ul class="song-list" id="songList"></ul>
+    </div>
+  </section>
+
 </div>
