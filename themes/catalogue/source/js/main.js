@@ -110,11 +110,11 @@
   });
 
   /* ---------- 搜索 ---------- */
-  var search = document.getElementById('search');
   var input = document.getElementById('searchInput');
   var res = document.getElementById('searchRes');
   var dataPromise = null;
   var data = [];
+  var active = -1;
 
   function loadData() {
     if (!dataPromise) {
@@ -126,55 +126,76 @@
     return dataPromise;
   }
 
-  function openSearch() {
-    if (!search) return;
-    search.classList.add('open');
-    loadData().then(function () { input.focus(); render(''); });
-  }
-  function closeSearch() {
-    if (search) search.classList.remove('open');
-  }
-
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
     });
   }
 
+  function closeFind() {
+    if (!res) return;
+    res.classList.remove('open');
+    active = -1;
+  }
+
+  function move(dir) {
+    if (!res) return;
+    var items = [].slice.call(res.querySelectorAll('a'));
+    if (!items.length) return;
+    active = (active + dir + items.length) % items.length;
+    items.forEach(function (a, i) { a.parentNode.classList.toggle('on', i === active); });
+    items[active].scrollIntoView({ block: 'nearest' });
+  }
+
   function render(q) {
+    if (!res) return;
     q = (q || '').trim().toLowerCase();
-    var list = !q ? data.slice(0, 8) : data.filter(function (p) {
+    var list = !q ? data.slice(0, 6) : data.filter(function (p) {
       var hay = (p.title + ' ' + p.date + ' ' + (p.cats || []).join(' ') + ' ' + (p.tags || []).join(' ') + ' ' + p.text).toLowerCase();
       return hay.indexOf(q) !== -1;
-    }).slice(0, 20);
+    }).slice(0, 8);
 
     if (!list.length) {
-      res.innerHTML = '<li class="none">没有匹配的文章</li>';
+      res.innerHTML = '<li class="none">没有匹配</li>';
+      res.classList.add('open');
       return;
     }
     res.innerHTML = list.map(function (p) {
       return '<li><a href="' + rootPath + p.url + '">' +
-        '<div class="st">' + esc(p.title) + '</div>' +
-        '<div class="sd">' + esc(p.date) + (p.cats && p.cats.length ? ' · ' + esc(p.cats.join(' / ')) : '') + '</div>' +
+        '<span class="ft">' + esc(p.title) + '</span>' +
+        '<span class="fd">' + esc(p.date) + (p.cats && p.cats.length ? ' · ' + esc(p.cats.join(' / ')) : '') + '</span>' +
         '</a></li>';
     }).join('');
+    active = -1;
+    res.classList.add('open');
   }
 
-  if (search) {
+  if (input && res) {
+    input.addEventListener('focus', function () {
+      loadData().then(function () { render(input.value); });
+    });
+    input.addEventListener('input', function () {
+      loadData().then(function () { render(input.value); });
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+      else if (e.key === 'Enter') {
+        var items = [].slice.call(res.querySelectorAll('a'));
+        var target = items[active] || items[0];
+        if (target) window.location.href = target.getAttribute('href');
+      } else if (e.key === 'Escape') {
+        closeFind();
+        input.blur();
+      }
+    });
     document.addEventListener('click', function (e) {
-      var opener = e.target.closest ? e.target.closest('[data-search-open]') : null;
-      if (opener) { e.preventDefault(); openSearch(); return; }
-      if (e.target === search) closeSearch();
+      if (!e.target.closest || !e.target.closest('.find')) closeFind();
     });
     document.addEventListener('keydown', function (e) {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
-      if (e.key === 'Escape') closeSearch();
-    });
-    input.addEventListener('input', function () { render(input.value); });
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        var first = res.querySelector('a');
-        if (first) window.location.href = first.getAttribute('href');
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        input.focus();
       }
     });
   }

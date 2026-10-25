@@ -9,14 +9,10 @@
       <% var on = (item.url === '/' && cur === 'index.html') || (item.url !== '/' && cur.indexOf(item.url.replace(/^\//,'')) === 0); %>
       <a href="<%- url_for(item.url) %>"<%- on ? ' class="on"' : '' %>><%= item.title %></a>
     <% }); %>
-    <a href="#" data-search-open>搜索</a>
+    <span class="find">
+      <input id="searchInput" type="search" placeholder="搜索" autocomplete="off" aria-label="站内搜索">
+      <ul class="find-res" id="searchRes"></ul>
+    </span>
     <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换明暗">◐</button>
   </nav>
 </header>
-
-<div class="search" id="search" role="dialog" aria-modal="true" aria-label="站内搜索">
-  <div class="search-box">
-    <input id="searchInput" type="search" placeholder="标题、标签或 CVE 编号" autocomplete="off" aria-label="搜索文章">
-    <ul class="search-res" id="searchRes"></ul>
-  </div>
-</div>

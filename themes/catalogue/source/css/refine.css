@@ -205,7 +205,8 @@ body::after {
   background: radial-gradient(120% 80% at 50% 0%, transparent 55%, rgba(0,0,0,.28) 100%);
 }
 html[data-theme="light"] body::after { background: radial-gradient(120% 80% at 50% 0%, transparent 60%, rgba(0,0,0,.05) 100%); }
-header.bar, .wrap, .search { position: relative; z-index: 1; }
+header.bar { position: relative; z-index: 40; }
+.wrap { position: relative; z-index: 1; }
 
 /* 标题悬停：下划线自左展开 */
 ol.posts.two a .t { position: relative; transition: color .16s ease; }
@@ -259,4 +260,39 @@ article h3 { font-size: 19px; letter-spacing: -.01em; color: var(--ink); }
 /* 标题后的橙色句点：整页最克制的一处强调色 */
 .home-head h1 .accent-dot {
   font-style: normal; color: var(--accent); margin-left: .06em;
+}
+
+/* ---------- 搜索：并入导航行，不再单独占一层弹窗 ---------- */
+nav.links .find { position: relative; display: flex; align-items: center; margin-left: 6px; }
+nav.links .find input {
+  width: 74px; border: 0; border-bottom: 1px solid transparent; background: none;
+  font: 13px/1.7 var(--sans); letter-spacing: .02em; color: var(--ink);
+  padding: 2px 0 3px; transition: width .24s cubic-bezier(.2,.7,.2,1), border-color .2s ease;
+}
+nav.links .find input::placeholder { color: var(--faint); }
+nav.links .find input:hover { border-bottom-color: var(--rule); }
+nav.links .find input:focus { width: 196px; border-bottom-color: var(--ink); outline: none; }
+nav.links .find input::-webkit-search-cancel-button { display: none; }
+
+.find-res {
+  position: absolute; top: calc(100% + 14px); right: 0; z-index: 60;
+  width: min(430px, 74vw); max-height: 62vh; overflow: auto;
+  margin: 0; padding: 4px 0; list-style: none;
+  background: var(--paper); border: 1px solid var(--rule);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .10);
+  display: none;
+}
+.find-res.open { display: block; }
+.find-res li { margin: 0; }
+.find-res li a { display: block; padding: 10px 16px 11px; color: var(--ink); }
+.find-res li a:hover, .find-res li.on a { background: var(--hover); }
+.find-res .ft { display: block; font-family: var(--serif); font-size: 15px; line-height: 1.45; }
+.find-res .fd { display: block; margin-top: 2px; font-size: 12px; color: var(--faint); font-variant-numeric: tabular-nums; }
+.find-res .none { padding: 14px 16px; font-size: 13px; color: var(--faint); }
+
+@media (max-width: 680px) {
+  nav.links .find { margin-left: 0; }
+  nav.links .find input { width: 64px; }
+  nav.links .find input:focus { width: 132px; }
+  .find-res { position: fixed; left: 16px; right: 16px; top: 108px; width: auto; }
 }
