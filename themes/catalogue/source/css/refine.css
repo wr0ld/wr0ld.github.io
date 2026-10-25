@@ -704,3 +704,10 @@ body.nav-hidden .admin-only { display: none; }
 .card-notification .card-desc { color: var(--sub) !important; font-size: 12px !important; }
 .card-notification .card-rarity { color: var(--faint) !important; }
 .card-notification .card-icon { font-size: 22px !important; filter: none !important; }
+
+/* ---------- 目录不被吸顶报头挡住 ---------- */
+.toc { top: 104px; }
+article h2, article h3, article h4 { scroll-margin-top: 112px; }
+@media (max-width: 1080px) {
+  article h2, article h3, article h4 { scroll-margin-top: 84px; }
+}
