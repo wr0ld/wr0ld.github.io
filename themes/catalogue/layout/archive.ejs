@@ -1,36 +1,37 @@
 <%
-  // 归档：按年份分组
-  var groups = {};
+  // 归档：先按年，再按月分组
+  var years = {};
   page.posts.each(function(post){
     var y = date(post.date, 'YYYY');
-    (groups[y] = groups[y] || []).push(post);
+    var m = date(post.date, 'MM');
+    years[y] = years[y] || { months: {}, count: 0 };
+    years[y].months[m] = years[y].months[m] || [];
+    years[y].months[m].push(post);
+    years[y].count++;
   });
-  var years = Object.keys(groups).sort().reverse();
+  var yearKeys = Object.keys(years).sort().reverse();
 %>
 <div class="wrap narrow">
   <div class="page-head">
     <h1>归档</h1>
-    <p>共 <%= site.posts.length %> 篇，按年份倒序。</p>
+    <p>共 <%= site.posts.length %> 篇，按年月倒序。</p>
   </div>
   <div class="archive">
-  <% if (years.length > 1) { %>
-    <% years.forEach(function(y){ %>
-      <section class="year-block">
-        <div class="year-h"><b><%= y %></b><span><%= groups[y].length %> 篇</span></div>
-        <ol class="posts two">
-          <% groups[y].forEach(function(post){ %>
-            <%- partial('_partial/post-item', { post: post }) %>
-          <% }); %>
-        </ol>
-      </section>
-    <% }); %>
-  <% } else { %>
-    <ol class="posts two solo">
-      <% page.posts.each(function(post){ %>
-        <%- partial('_partial/post-item', { post: post }) %>
+  <% yearKeys.forEach(function(y){ %>
+    <section class="year-block">
+      <div class="year-h"><b><%= y %></b><span><%= years[y].count %> 篇</span></div>
+      <% Object.keys(years[y].months).sort().reverse().forEach(function(m){ %>
+        <div class="month-block">
+          <div class="month-h"><span><%= m %> 月</span><i></i><em><%= years[y].months[m].length %> 篇</em></div>
+          <ol class="posts two">
+            <% years[y].months[m].forEach(function(post){ %>
+              <%- partial('_partial/post-item', { post: post, dayOnly: true }) %>
+            <% }); %>
+          </ol>
+        </div>
       <% }); %>
-    </ol>
-  <% } %>
+    </section>
+  <% }); %>
   </div>
   <% if (page.total > 1) { %>
   <nav class="pager">

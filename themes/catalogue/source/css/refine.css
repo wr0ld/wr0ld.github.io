@@ -735,3 +735,17 @@ article h2, article h3, article h4 { scroll-margin-top: 112px; }
 /* ---------- 仅 admin 可见的设置区块 ---------- */
 .admin-only-block { display: none; }
 body.nav-admin-visible .admin-only-block { display: block; }
+
+/* ---------- 归档：年月两层 ---------- */
+.month-block { margin: 0 0 38px; }
+.month-block:last-child { margin-bottom: 8px; }
+.month-h {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 0 6px; font-size: 12px; color: var(--faint);
+  letter-spacing: .08em;
+}
+.month-h span { flex: 0 0 auto; }
+.month-h i { flex: 1 1 auto; height: 1px; background: var(--hair); }
+.month-h em { flex: 0 0 auto; font-style: normal; font-size: 11.5px; color: var(--faint); }
+.month-block ol.posts.two .d { color: var(--sub); }
+.year-block .month-block:first-of-type .month-h i { background: var(--rule); }
