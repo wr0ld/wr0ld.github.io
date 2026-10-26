@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#F1F2EF">
+  <title>wr0ld — 安全研究笔记</title>
+  <meta name="description" content="wr0ld 的个人博客，记录技术学习与生活点滴">
+  <meta name="author" content="wr0ld">
+  <meta property="og:title" content="wr0ld">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="wr0ld">
+  
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('ui-theme');
+        var d = (t === 'dark') || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var r = document.documentElement;
+        r.setAttribute('data-theme', d ? 'dark' : 'light');
+        var fs = localStorage.getItem('ui-fs');
+        if (fs) r.setAttribute('data-fs', fs);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="/avatar.png">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/refine.css">
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+<body class="layout-page">
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="bar wrap">
+  <a class="mark serif" href="/">wr0ld</a>
+  <nav class="links">
+    
+      
+      <a href="/">文章</a>
+    
+      
+      <a href="/archives/">归档</a>
+    
+      
+      <a href="/categories/">分类</a>
+    
+      
+      <a href="/tags/">标签</a>
+    
+      
+      <a href="/srk-toolbox/">SRK Toolbox</a>
+    
+      
+      <a href="/payloader/">Payloader</a>
+    
+    <span class="admin-only">
+      <a href="/lab/">实验室</a>
+      <a href="/gallery/">相册</a>
+      <a href="/games/">游戏</a>
+      <a href="#" data-cards>卡牌</a>
+    </span>
+    <span class="find">
+      <input id="searchInput" type="search" placeholder="搜索" autocomplete="off" aria-label="站内搜索">
+      <ul class="find-res" id="searchRes"></ul>
+    </span>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换明暗">◐</button>
+  </nav>
+</header>
+
+<div class="wrap narrow">
+  <div class="page-head">
+    <h1></h1>
+  </div>
+  <div class="page-body" id="page-body">
+    <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>离线 - wr0ld's Blog</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    
+    .offline-container {
+      text-align: center;
+      padding: 40px;
+      max-width: 500px;
+    }
+    
+    .offline-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+    
+    .offline-title {
+      font-size: 28px;
+      margin-bottom: 16px;
+      color: #e74c3c;
+    }
+    
+    .offline-message {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #bdc3c7;
+      margin-bottom: 30px;
+    }
+    
+    .offline-code {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      color: #3498db;
+      margin-bottom: 30px;
+      border-left: 4px solid #3498db;
+    }
+    
+    .retry-btn {
+      background: #3498db;
+      color: #fff;
+      border: none;
+      padding: 12px 32px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .retry-btn:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+    
+    .cache-info {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">📡</div>
+    <h1 class="offline-title">[!] Connection Lost</h1>
+    <div class="offline-code">Accessing local cache...</div>
+    <p class="offline-message">
+      您当前处于离线状态，部分内容可能无法正常显示。<br>
+      请检查您的网络连接后重试。
+    </p>
+    <button class="retry-btn" onclick="location.reload()">🔄 重新连接</button>
+    <p class="cache-info">
+      💡 提示：您之前访问过的页面已被缓存，可以离线浏览。
+    </p>
+  </div>
+  
+  <script>
+    window.addEventListener('online', function() {
+      location.reload();
+    });
+  </script>
+</body>
+</html>
+
+  </div>
+</div>
+
+<footer class="wrap">
+  <div class="foot-meta">
+    <span>&copy; 2026 wr0ld</span>
+    <span>
+      <a href="/archives/">归档</a>
+      &middot; <a href="https://github.com/wr0ld" target="_blank" rel="noopener">GitHub</a> &middot; <a href="/atom.xml" target="_blank" rel="noopener">RSS</a> 
+      &middot; <a href="/settings/">设置</a>
+    </span>
+  </div>
+</footer>
+
+<script src="/js/main.js" defer></script>
+<script src="/vendor/live2d/autoload.js" defer></script>
+<script src="/js/player.js" defer></script>
+<script src="/js/plugins/achievements.js" defer></script>
+<script src="/js/plugins/nav-admin.js" defer></script>
+<script src="/js/plugins/custom-context-menu.js" defer></script>
+
+</body>
+</html>

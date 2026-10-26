@@ -2330,9 +2330,9 @@
       var html = '<div class="card-panel-overlay"></div><div class="card-panel-content">';
       
       html += '<div class="card-panel-header">';
-      html += '<h2>🃏 卡牌收集</h2>';
+      html += '<h2>卡牌收集</h2>';
       html += '<div class="card-header-actions">';
-      html += '<button class="card-share-btn" onclick="CardSystem.generateShareCard()">📤 分享成就</button>';
+      html += '<button class="card-share-btn" onclick="CardSystem.generateShareCard()">分享成就</button>';
       html += '<span class="card-close">&times;</span>';
       html += '</div></div>';
       
@@ -2351,8 +2351,8 @@
       html += '</div></div>';
       
       html += '<div class="card-panel-stats">';
-      html += '<span>📊 收集进度: ' + this.obtainedCards + '/' + this.totalCards + '</span>';
-      html += '<span>⏱️ 停留时间: ' + Math.floor(this.readTime / 60) + '分钟</span>';
+      html += '<span>收集进度 ' + this.obtainedCards + '/' + this.totalCards + '</span>';
+      html += '<span>停留时间 ' + Math.floor(this.readTime / 60) + '分钟</span>';
       html += '</div>';
       
       html += '<div class="card-panel-filters">';

@@ -31,7 +31,7 @@
       if (visible) {
         setVisible(false);
         console.log(
-          '%c 🔒 导航菜单已隐藏 %c | 输入 admin 重新显示',
+          '%c 导航菜单已隐藏 %c | 输入 admin 重新显示',
           'color: #e74c3c; font-size: 14px; font-weight: bold;',
           'color: #888; font-size: 12px;'
         );
@@ -39,7 +39,7 @@
       } else {
         setVisible(true);
         console.log(
-          '%c 🎮 导航菜单已显示 %c | 输入 admin 隐藏',
+          '%c 导航菜单已显示 %c | 输入 admin 隐藏',
           'color: #2ecc71; font-size: 14px; font-weight: bold;',
           'color: #888; font-size: 12px;'
         );

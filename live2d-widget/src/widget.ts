@@ -239,13 +239,8 @@ function initWidget(config: string | Config) {
     setTimeout(() => {
       toggle?.classList.add('waifu-toggle-active');
     }, 0);
-  } else if (localStorage.getItem('waifu_show') === 'true') {
-    loadWidget(config as Config);
   } else {
-    toggle?.setAttribute('first-time', 'true');
-    setTimeout(() => {
-      toggle?.classList.add('waifu-toggle-active');
-    }, 0);
+    loadWidget(config as Config);
   }
 }
 

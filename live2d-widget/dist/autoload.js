@@ -1,9 +1,15 @@
 /*!
- * Live2D Widget - Local Version
+ * Live2D Widget
+ * https://github.com/stevenjoezhang/live2d-widget
  */
 
-const live2d_path = '/live2d-widget/dist/';
+// Recommended to use absolute path for live2d_path parameter
+// live2d_path 参数建议使用绝对路径
+const live2d_path = 'https://fastly.jsdelivr.net/npm/live2d-widgets@1.0.0-rc.6/dist/';
+// const live2d_path = '/dist/';
 
+// Method to encapsulate asynchronous resource loading
+// 封装异步加载资源的方法
 function loadExternalResource(url, type) {
   return new Promise((resolve, reject) => {
     let tag;
@@ -26,12 +32,13 @@ function loadExternalResource(url, type) {
   });
 }
 
-// 统一的初始化函数，支持多次调用
-var _waifuInitialized = false;
-async function initWaifuWidget() {
-  if (_waifuInitialized) return;
-  _waifuInitialized = true;
+(async () => {
+  // If you are concerned about display issues on mobile devices, you can use screen.width to determine whether to load
+  // 如果担心手机上显示效果不佳，可以根据屏幕宽度来判断是否加载
+  // if (screen.width < 768) return;
 
+  // Avoid cross-origin issues with image resources
+  // 避免图片资源跨域问题
   const OriginalImage = window.Image;
   window.Image = function(...args) {
     const img = new OriginalImage(...args);
@@ -39,115 +46,43 @@ async function initWaifuWidget() {
     return img;
   };
   window.Image.prototype = OriginalImage.prototype;
-
+  // Load waifu.css and waifu-tips.js
+  // 加载 waifu.css 和 waifu-tips.js
   await Promise.all([
     loadExternalResource(live2d_path + 'waifu.css', 'css'),
     loadExternalResource(live2d_path + 'waifu-tips.js', 'js')
   ]);
-
+  // For detailed usage of configuration options, see README.en.md
+  // 配置选项的具体用法见 README.md
   initWidget({
     waifuPath: live2d_path + 'waifu-tips.json',
-    cdnPath: 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/',
+    // cdnPath: 'https://fastly.jsdelivr.net/gh/fghrsh/live2d_api/',
     cubism2Path: live2d_path + 'live2d.min.js',
     cubism5Path: 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js',
     tools: ['hitokoto', 'asteroids', 'switch-model', 'switch-texture', 'photo', 'info', 'quit'],
-    logLevel: 'error',
+    logLevel: 'warn',
     drag: false,
   });
-
-  // 初始化完成后应用保存的缩放值
-  setTimeout(function() {
-    var waifu = document.getElementById('waifu');
-    if (waifu) {
-      var show = localStorage.getItem('waifu_show');
-      if (show === 'false') {
-        waifu.classList.add('waifu-hidden');
-        waifu.classList.remove('waifu-active');
-        waifu.style.setProperty('display', 'none', 'important');
-      } else {
-        waifu.classList.add('waifu-active');
-        waifu.classList.remove('waifu-hidden');
-        waifu.style.removeProperty('display');
-      }
-      // 应用保存的缩放值
-      var savedZoom = parseInt(localStorage.getItem('waifu_zoom')) || 100;
-      if (savedZoom !== 100) {
-        waifu.style.setProperty('--waifu-scale', (savedZoom / 100).toString());
-      }
-    }
-  }, 800);
-}
-
-(async () => {
-  var showWaifu = localStorage.getItem('waifu_show');
-  if (showWaifu !== 'true') {
-    console.log('Live2D: 看板娘已禁用，可在设置中开启');
-    return;
-  }
-  await initWaifuWidget();
 })();
 
-window.addEventListener('storage', function(e) {
-  if (e.key === 'waifu_show') {
-    var waifu = document.getElementById('waifu');
-    if (e.newValue === 'true') {
-      if (!waifu) {
-        // Widget 尚未加载，动态初始化
-        initWaifuWidget();
-      } else {
-        waifu.classList.remove('waifu-hidden');
-        waifu.classList.add('waifu-active');
-        waifu.style.removeProperty('display');
-        // 应用保存的缩放
-        var savedZoom = parseInt(localStorage.getItem('waifu_zoom')) || 100;
-        waifu.style.setProperty('--waifu-scale', (savedZoom / 100).toString());
-      }
-    } else if (e.newValue === 'false') {
-      if (waifu) {
-        waifu.classList.add('waifu-hidden');
-        waifu.classList.remove('waifu-active');
-        waifu.style.setProperty('display', 'none', 'important');
-      }
-    }
-  } else if (e.key === 'waifu_zoom') {
-    // 实时响应缩放变化
-    var waifu = document.getElementById('waifu');
-    if (waifu) {
-      var zoom = parseInt(e.newValue) || 100;
-      waifu.style.setProperty('--waifu-scale', (zoom / 100).toString());
-    }
-  }
-});
+console.log(`\n%cLive2D%cWidget%c\n`, 'padding: 8px; background: #cd3e45; font-weight: bold; font-size: large; color: white;', 'padding: 8px; background: #ff5450; font-size: large; color: #eee;', '');
 
-window.addEventListener('error', function(e) {
-  if (e.message && (e.message.includes('hitTest') || e.message.includes('Cannot read properties of null'))) {
-    e.preventDefault();
-    return false;
-  }
-}, true);
-
-console.log('\n%cLive2D%cWidget%c - Local Version\n', 'padding: 8px; background: #cd3e45; font-weight: bold; font-size: large; color: white;', 'padding: 8px; background: #ff5450; font-size: large; color: #eee;', '');
-
-window.switchWaifuModel = function(modelId, textureId) {
-  var currentModelId = parseInt(localStorage.getItem('modelId')) || 0;
-  var currentTextureId = parseInt(localStorage.getItem('modelTexturesId')) || 0;
-  
-  if (currentModelId === modelId && currentTextureId === (textureId || 0)) {
-    return false;
-  }
-  
-  localStorage.setItem('modelId', modelId);
-  localStorage.setItem('modelTexturesId', textureId || 0);
-  
-  var canvas = document.getElementById('live2d');
-  if (canvas) {
-    canvas.style.opacity = '0.3';
-    canvas.style.transition = 'opacity 0.3s';
-  }
-  
-  setTimeout(function() {
-    location.reload();
-  }, 300);
-  
-  return true;
-};
+/*
+く__,.ヘヽ.        /  ,ー､ 〉
+         ＼ ', !-─‐-i  /  /´
+         ／｀ｰ'       L/／｀ヽ､
+       /   ／,   /|   ,   ,       ',
+     ｲ   / /-‐/  ｉ  L_ ﾊ ヽ!   i
+      ﾚ ﾍ 7ｲ｀ﾄ   ﾚ'ｧ-ﾄ､!ハ|   |
+        !,/7 '0'     ´0iソ|    |
+        |.从"    _     ,,,, / |./    |
+        ﾚ'| i＞.､,,__  _,.イ /   .i   |
+          ﾚ'| | / k_７_/ﾚ'ヽ,  ﾊ.  |
+            | |/i 〈|/   i  ,.ﾍ |  i  |
+           .|/ /  ｉ：    ﾍ!    ＼  |
+            kヽ>､ﾊ    _,.ﾍ､    /､!
+            !'〈//｀Ｔ´', ＼ ｀'7'ｰr'
+            ﾚ'ヽL__|___i,___,ンﾚ|ノ
+                ﾄ-,/  |___./
+                'ｰ'    !_,.:
+*/

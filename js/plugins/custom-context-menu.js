@@ -38,20 +38,20 @@
       this.menu.className = 'custom-context-menu';
       this.menu.innerHTML = 
         '<div class="menu-item" data-action="base64">' +
-          '<span class="menu-icon">🔐</span>' +
+          '' +
           '<span class="menu-text">Base64 Encode</span>' +
         '</div>' +
         '<div class="menu-item" data-action="exploitdb">' +
-          '<span class="menu-icon">🔍</span>' +
+          '' +
           '<span class="menu-text">Search in Exploit-DB</span>' +
         '</div>' +
         '<div class="menu-item" data-action="raw">' +
-          '<span class="menu-icon">📄</span>' +
+          '' +
           '<span class="menu-text">View Raw Payload</span>' +
         '</div>' +
         '<div class="menu-divider"></div>' +
         '<div class="menu-item" data-action="copy">' +
-          '<span class="menu-icon">📋</span>' +
+          '' +
           '<span class="menu-text">Copy Code</span>' +
         '</div>';
       
