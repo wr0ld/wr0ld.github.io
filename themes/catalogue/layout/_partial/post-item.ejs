@@ -1,6 +1,6 @@
 <li>
   <a href="<%= url_for(post.path) %>">
-    <span class="d"><%= date(post.date, dayOnly ? 'DD' : 'MM-DD') %></span>
+    <span class="d"><%= date(post.date, (typeof dayOnly !== 'undefined' && dayOnly) ? 'DD' : 'MM-DD') %></span>
     <span class="t serif"><%= post.title %></span>
   </a>
 </li>
