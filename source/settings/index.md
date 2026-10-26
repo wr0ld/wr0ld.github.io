@@ -61,7 +61,7 @@ layout: page
     </div>
   </section>
 
-  <section class="set-block">
+  <section class="set-block admin-only-block">
     <h2>彩蛋</h2>
     <div class="set-row">
       <span class="set-label">看板娘</span>
