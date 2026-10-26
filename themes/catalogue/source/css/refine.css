@@ -675,7 +675,6 @@ body.nav-hidden .admin-only { display: none; }
   bottom: 16px !important;
   transform: translateX(-50%) !important;
   z-index: 54 !important;
-  display: flex !important;
   align-items: center;
   justify-content: center !important;
   gap: 12px;
@@ -732,3 +731,7 @@ article h2, article h3, article h4 { scroll-margin-top: 112px; }
 @media (max-width: 1080px) {
   article h2, article h3, article h4 { scroll-margin-top: 84px; }
 }
+
+/* ---------- 仅 admin 可见的设置区块 ---------- */
+.admin-only-block { display: none; }
+body.nav-admin-visible .admin-only-block { display: block; }

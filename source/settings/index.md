@@ -38,7 +38,7 @@ layout: page
     </dl>
   </section>
 
-  <section class="set-block">
+  <section class="set-block admin-only-block">
     <h2>工具</h2>
     <dl class="about-list">
       <dt>测试工具</dt>
