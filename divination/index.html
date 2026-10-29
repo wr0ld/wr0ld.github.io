@@ -53,6 +53,9 @@
       
       <a href="/payloader/">Payloader</a>
     
+      
+      <a href="/divination/" class="on">占卜</a>
+    
     <span class="admin-only">
       <a href="/lab/">实验室</a>
       <a href="/gallery/">相册</a>
@@ -72,503 +75,243 @@
     <h1>占卜</h1>
   </div>
   <div class="page-body" id="page-body">
-    
-<div class="divination-container">
-  <h1>🔮 神秘占卜</h1>
-  
-  <div class="divination-types">
-    <div class="divination-card" onclick="startDivination('code')">
-      <div class="card-icon">💻</div>
-      <h3>代码占卜</h3>
-      <p>极简主义，终端风格命运解读</p>
-    </div>
-    
-    <div class="divination-card" onclick="startDivination('tarot')">
-      <div class="card-icon">🃏</div>
-      <h3>塔罗牌占卜</h3>
-      <p>探索命运的指引，解读未来的奥秘</p>
-    </div>
-    
-    <div class="divination-card" onclick="startDivination('fortune')">
-      <div class="card-icon">🎋</div>
-      <h3>每日运势</h3>
-      <p>查看今日运势，把握每一天</p>
-    </div>
-    
-    <div class="divination-card" onclick="startDivination('ball')">
-      <div class="card-icon">🎱</div>
-      <h3>魔法球</h3>
-      <p>问是或否，魔法球会给你答案</p>
-    </div>
-    
-    <div class="divination-card" onclick="startDivination('lucky')">
-      <div class="card-icon">🍀</div>
-      <h3>幸运指数</h3>
-      <p>测试今天的幸运值</p>
-    </div>
+    <style>
+    .page-body:has(#tarot){max-width:none}
+  </style>
+
+<div class="tt" id="tarot">
+  <div class="tt-cols">
+    <section class="tt-col tt-col-deck">
+      <h2 class="tt-col-h">抽牌</h2>
+      <button class="tt-fan" id="tt-fan" type="button" aria-label="抽一张牌">
+        <span class="tt-back"></span>
+      </button>
+      <p class="tt-count" id="tt-count">已抽 0 次</p>
+    </section>
+    <section class="tt-col tt-col-card">
+      <div class="tt-flip" id="tt-flip" aria-hidden="true">
+        <div class="tt-side tt-rev"><span class="tt-back"></span></div>
+        <div class="tt-side tt-face"><img id="tt-img" alt="" loading="lazy"></div>
+      </div>
+    </section>
+    <section class="tt-col tt-col-read">
+      <h2 class="tt-col-h">解读</h2>
+      <div class="tt-read is-empty" id="tt-read">
+        <div class="tt-num" id="tt-num"></div>
+        <h3 class="tt-name" id="tt-name"></h3>
+        <div class="tt-en" id="tt-en"></div>
+        <p class="tt-meaning" id="tt-meaning"></p>
+        <dl class="tt-facts">
+          <dt>逆位</dt><dd id="tt-rev-meaning"></dd>
+          <dt>关键词</dt><dd id="tt-keys"></dd>
+        </dl>
+      </div>
+    </section>
   </div>
-  
-  <div class="divination-result" id="divinationResult" style="display: none;">
-    <div class="result-content" id="resultContent"></div>
-    <button class="retry-btn" onclick="hideResult()">重新占卜</button>
-  </div>
+  <section class="tt-history">
+    <div class="tt-hist-head">
+      <h2 class="tt-col-h">抽过的牌</h2>
+    </div>
+    <ol class="tt-hist" id="tt-hist"></ol>
+  </section>
 </div>
 
 <style>
-.divination-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-.divination-container h1 {
-  text-align: center;
-  font-size: 2.5em;
-  margin-bottom: 40px;
-  color: var(--theme, #3498db);
-}
-
-.divination-types {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 15px;
-  margin-bottom: 30px;
-  justify-content: center;
-}
-
-@media (max-width: 900px) {
-  .divination-types {
-    flex-wrap: wrap;
-  }
-  .divination-card {
-    flex: 1 1 calc(45% - 15px) !important;
-  }
-}
-
-@media (max-width: 600px) {
-  .divination-card {
-    flex: 1 1 100% !important;
-  }
-}
-
-.divination-card {
-  flex: 1;
-  min-width: 0;
-  background: var(--card, #1a1a2e);
-  border: 2px solid var(--border, #2a2a3e);
-  border-radius: 16px;
-  padding: 20px 15px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.divination-card:hover {
-  border-color: var(--theme, #3498db);
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(52, 152, 219, 0.2);
-}
-
-.card-icon {
-  font-size: 48px;
-  margin-bottom: 15px;
-}
-
-.divination-card h3 {
-  margin: 0 0 10px;
-  font-size: 1.3em;
-  color: var(--text, #fff);
-}
-
-.divination-card p {
-  margin: 0;
-  color: var(--text-p3, #888);
-  font-size: 0.9em;
-}
-
-.divination-result {
-  background: var(--card, #1a1a2e);
-  border: 2px solid var(--theme, #3498db);
-  border-radius: 16px;
-  padding: 40px;
-  text-align: center;
-  animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.result-content {
-  margin-bottom: 30px;
-}
-
-.result-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-}
-
-.result-title {
-  font-size: 1.5em;
-  color: var(--theme, #3498db);
-  margin-bottom: 15px;
-}
-
-.result-text {
-  font-size: 1.1em;
-  color: var(--text, #fff);
-  line-height: 1.6;
-}
-
-.retry-btn {
-  background: var(--theme, #3498db);
-  color: #fff;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 8px;
-  font-size: 1em;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.retry-btn:hover {
-  background: #2980b9;
-  transform: scale(1.05);
-}
-
-/* 代码占卜样式 */
-.code-divination {
-  background: #0d1117;
-  border-radius: 12px;
-  overflow: hidden;
-  text-align: left;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-}
-
-.code-header {
-  background: #161b22;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-bottom: 1px solid #30363d;
-}
-
-.code-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.code-dot.red { background: #ff5f56; }
-.code-dot.yellow { background: #ffbd2e; }
-.code-dot.green { background: #27c93f; }
-
-.code-title {
-  margin-left: 12px;
-  color: #8b949e;
-  font-size: 13px;
-}
-
-.code-body {
-  padding: 20px;
-  color: #c9d1d9;
-  font-size: 14px;
-  line-height: 1.8;
-}
-
-.code-line {
-  margin: 4px 0;
-}
-
-.code-comment { color: #8b949e; }
-.code-keyword { color: #ff7b72; }
-.code-string { color: #a5d6ff; }
-.code-function { color: #d2a8ff; }
-.code-variable { color: #ffa657; }
-.code-number { color: #79c0ff; }
-.code-operator { color: #ff7b72; }
-
-.code-cursor {
-  display: inline-block;
-  width: 8px;
-  height: 18px;
-  background: #58a6ff;
-  animation: blink 1s infinite;
-  vertical-align: middle;
-  margin-left: 2px;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-.code-output {
-  margin-top: 16px;
-  padding: 12px;
-  background: #161b22;
-  border-radius: 6px;
-  border-left: 3px solid #3fb950;
-}
-
-.code-output-line {
-  color: #3fb950;
-  margin: 4px 0;
-}
-
-.code-output-line.warning {
-  color: #d29922;
-}
-
-.code-output-line.info {
-  color: #58a6ff;
-}
-
-.daily-notice {
-  background: rgba(255, 193, 7, 0.2);
-  border: 1px solid #ffc107;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  color: #ffc107;
-  font-size: 14px;
-  text-align: center;
-}
-</style>
+    .tt{width:100%;max-width:100%}
+    .tt-cols{display:grid;grid-template-columns:minmax(164px,180px) 264px minmax(0,1fr);gap:56px;align-items:start;width:100%;max-width:100%;justify-self:center}
+    .tt-col-card{min-width:0}
+    .tt-col-h{margin:0 0 16px;font-size:13px;font-weight:400;color:var(--faint);letter-spacing:.06em}
+    .tt-col-deck{display:flex;flex-direction:column;align-items:center;text-align:center}
+    .tt-fan{position:relative;width:152px;height:227px;border:0;background:none;padding:0;cursor:pointer;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+    .tt-fan:hover{transform:translateY(-8px)}
+    .tt-fan:active{transform:translateY(-2px)}
+    .tt-fan.is-done{cursor:default;opacity:.55;filter:grayscale(.2)}
+    .tt-fan.is-done:hover,.tt-fan.is-done:active{transform:none}
+    .tt-today{margin:34px 0 0;font-size:13px;color:var(--faint);font-variant-numeric:tabular-nums;min-height:19px}
+    .tt-today.is-done{color:var(--accent)}
+    .tt-back{position:absolute;inset:0;display:block;border:1px solid var(--ink);border-radius:2px;background:linear-gradient(135deg,transparent 48.6%,var(--ink) 48.6%,var(--ink) 51.4%,transparent 51.4%) 0 0/12px 12px,linear-gradient(45deg,transparent 48.6%,var(--ink) 48.6%,var(--ink) 51.4%,transparent 51.4%) 0 0/12px 12px,var(--paper);box-shadow:5px 5px 0 -1px var(--paper),5px 5px 0 0 var(--rule),10px 10px 0 -1px var(--paper),10px 10px 0 0 var(--rule)}
+    .tt-flip{position:relative;margin:0 auto;width:244px;height:357px;perspective:1400px;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.2,.7,.2,1);transform:rotateY(180deg)}
+    .tt-flip.open{transform:rotateY(0)}
+    .tt-side{position:absolute;inset:0;backface-visibility:hidden;border:1px solid var(--ink);border-radius:2px;overflow:hidden}
+    .tt-rev{transform:rotateY(180deg);background:var(--paper)}
+    .tt-face img{display:block;width:100%;height:100%;object-fit:cover}
+    .tt-read{min-width:0;padding-top:2px}
+    .tt-read.is-empty{opacity:.35}
+    .tt-num{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:.08em;min-height:19px}
+    .tt-name{margin:6px 0 4px;font-family:var(--serif);font-weight:500;font-size:clamp(24px,2.6vw,32px);letter-spacing:-.02em;min-height:38px}
+    .tt-en{font-size:12.5px;color:var(--faint);letter-spacing:.06em;text-transform:uppercase;min-height:17px}
+    .tt-meaning{margin:18px 0 0;font-size:16px;line-height:1.8;color:var(--body);max-width:30em;min-height:58px}
+    .tt-facts{display:grid;grid-template-columns:52px minmax(0,1fr);gap:9px 16px;margin:20px 0 0;padding-top:16px;border-top:1px solid var(--rule);font-size:14px}
+    .tt-facts dt{color:var(--faint)}
+    .tt-facts dd{margin:0;color:var(--sub)}
+    .tt-history{margin-top:52px;padding-top:24px;border-top:1px solid var(--ink)}
+    .tt-hist-head{display:flex;align-items:baseline;justify-content:space-between;gap:20px}
+    .tt-hist-head .tt-col-h{margin:0}
+    .tt-hist{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:20px 14px;list-style:none;margin:20px 0 0;padding:0}
+    .tt-hist li{min-width:0;cursor:pointer}
+    .tt-hist .thumb{display:block;width:100%;aspect-ratio:13/19;border:1px solid var(--rule);border-radius:2px;background-size:cover;background-position:center;transition:border-color .2s,transform .2s}
+    .tt-hist li:hover .thumb{border-color:var(--ink);transform:translateY(-3px)}
+    .tt-hist .cap{margin:7px 0 0;font-size:12.5px;color:var(--sub);line-height:1.4}
+    .tt-hist .cap em{display:block;font-style:normal;color:var(--faint);font-size:11.5px;font-family:var(--mono)}
+    .tt-hist .none{font-size:13px;color:var(--faint);grid-column:1/-1}
+    @media (max-width:900px){
+      .tt-cols{grid-template-columns:170px 200px minmax(0,1fr);gap:26px}
+      .tt-fan{width:140px;height:209px}
+      .tt-flip{width:200px;height:292px}
+    }
+    @media (max-width:700px){
+      .tt-cols{grid-template-columns:130px minmax(0,1fr);gap:20px 18px}
+      .tt-col-read{grid-column:1/-1}
+      .tt-fan{width:118px;height:176px}
+      .tt-flip{width:130px;height:190px}
+      .tt-meaning{font-size:15.5px}
+      .tt-hist{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:16px 10px}
+    }
+  </style>
 
 <script>
-var codeFortunes = [
-  {
-    fortune: '大吉',
-    advice: '今日代码编译一次通过，Bug自动修复',
-    lucky: ['VSCode', 'Chrome DevTools', 'Stack Overflow'],
-    avoid: ['IE浏览器', '旧版jQuery', '过度优化']
-  },
-  {
-    fortune: '中吉',
-    advice: '今日适合重构代码，技术债务将减少',
-    lucky: ['Git', 'Docker', '单元测试'],
-    avoid: ['复制粘贴代码', '忽略警告', '跳过测试']
-  },
-  {
-    fortune: '小吉',
-    advice: '今日适合学习新技术，文档将清晰易懂',
-    lucky: ['官方文档', 'GitHub Issues', '技术博客'],
-    avoid: ['闭门造车', '忽视版本号', '盲目追新']
-  },
-  {
-    fortune: '吉',
-    advice: '今日适合写文档，团队协作顺畅',
-    lucky: ['Markdown', '代码审查', '敏捷开发'],
-    avoid: ['临时需求', '需求变更', '紧急上线']
-  },
-  {
-    fortune: '末吉',
-    advice: '今日需谨慎提交，建议多写测试用例',
-    lucky: ['回滚代码', '备份', 'Code Review'],
-    avoid: ['周五部署', '删库跑路', 'rm -rf']
-  },
-  {
-    fortune: '凶',
-    advice: '今日不宜写核心代码，建议只做代码审查',
-    lucky: ['摸鱼', '喝咖啡', '看文档'],
-    avoid: ['修改生产环境', '重构核心模块', '信任用户输入']
+(function () {
+  var CARDS = [
+    { n: 0, cn: '愚者', en: 'The Fool', up: '起点本身就是答案。行李很轻，路还很长，允许自己先出发再问为什么。', rev: '不是勇敢，是没看清。先补齐底线，再谈冒险。', keys: '开始 · 自由 · 天真' },
+    { n: 1, cn: '魔术师', en: 'The Magician', up: '手上的资源已经够了，缺的是把它们连起来的那个动作。', rev: '话多过手。小心用技巧掩盖没想清楚的部分。', keys: '创造 · 表达 · 掌控' },
+    { n: 2, cn: '女祭司', en: 'The High Priestess', up: '答案在没被说出口的那一层。安静一会儿比再查一遍更有用。', rev: '把直觉压成了偏见，或者故意不看某件事。', keys: '直觉 · 沉默 · 内里' },
+    { n: 3, cn: '女皇', en: 'The Empress', up: '该让它长了。照看剩下的部分，比重新开一个更有价值。', rev: '过度照料变成了负担，或者只顾输出忘了补给。', keys: '生长 · 丰饶 · 照料' },
+    { n: 4, cn: '皇帝', en: 'The Emperor', up: '把边界和规则先定下来，事情才开始有形状。', rev: '规则太多或者太硬，人已经被结构吃掉了。', keys: '秩序 · 边界 · 责任' },
+    { n: 5, cn: '教皇', en: 'The Hierophant', up: '先按成法走一遍，理解之后再谈打破。', rev: '形式留下了，意义走了。该问一句「为什么还是这样」。', keys: '传统 · 教导 · 体系' },
+    { n: 6, cn: '恋人', en: 'The Lovers', up: '这不是感情题，是价值题：选一边，另一边就会安静下来。', rev: '两边都不放，于是两边都不算数。', keys: '选择 · 契合 · 价值' },
+    { n: 7, cn: '战车', en: 'The Chariot', up: '方向一旦定了，速度反而不用急；意志就是让它别偏的那只手。', rev: '被推着走，而不是自己在走。', keys: '推进 · 意志 · 方向' },
+    { n: 8, cn: '力量', en: 'Strength', up: '真正的力量是让那头兽愿意待在你身边，不是把它关起来。', rev: '压住的东西会以别的形式回来。', keys: '勇气 · 耐心 · 驯服' },
+    { n: 9, cn: '隐士', en: 'The Hermit', up: '一个人待着不是退场，是把杂音关掉，找回自己的判断。', rev: '独处变成了躲藏。门该开了。', keys: '独处 · 内省 · 提灯' },
+    { n: 10, cn: '命运之轮', en: 'Wheel of Fortune', up: '轮子在转，此刻的位置不是终局。抓机会，但别把运气当能力。', rev: '同样的循环又走了一遍，说明某个条件没改。', keys: '流转 · 时机 · 循环' },
+    { n: 11, cn: '正义', en: 'Justice', up: '把账算清楚，先算自己的那一份。', rev: '结论早就有了，只是缺一个理由。', keys: '公正 · 因果 · 衡量' },
+    { n: 12, cn: '倒吊人', en: 'The Hanged Man', up: '停下来是主动的选择。换个角度看，卡住的地方可能就是入口。', rev: '停太久了，等待成了借口。', keys: '悬置 · 换位 · 甘愿' },
+    { n: 13, cn: '死神', en: 'Death', up: '有些东西已经结束了，承认它，新的部分才有位置。', rev: '不肯放手，于是拖着一段已经死掉的东西。', keys: '结束 · 蜕变 · 清理' },
+    { n: 14, cn: '节制', en: 'Temperance', up: '配比，而不是加码。把两极一点点调到一个能工作的中间。', rev: '极端之间的来回摇摆，正在消耗真正的力气。', keys: '调和 · 节奏 · 分寸' },
+    { n: 15, cn: '恶魔', en: 'The Devil', up: '你被绑住的锁链是松的。承认那点沉溺，它就没那么有力。', rev: '开始看清那个习惯，绳子正在变松。', keys: '沉溺 · 束缚 · 欲望' },
+    { n: 16, cn: '塔', en: 'The Tower', up: '塌掉的是本来就撑不住的部分。重建从承认这一点开始。', rev: '明知会塌还在加砖。小一点的崩落好过大的一次。', keys: '突变 · 崩塌 · 觉醒' },
+    { n: 17, cn: '星星', en: 'The Star', up: '风暴之后的那点安静。不用急，先把水倒回池子里。', rev: '希望被耗光了，需要从很小的、能做成的事开始。', keys: '希望 · 疗愈 · 指引' },
+    { n: 18, cn: '月亮', en: 'The Moon', up: '看到的不是全部。此阶段判断力打折，别据梦下结论。', rev: '雾在散。之前吓到你的东西有了解释。', keys: '幻象 · 潜意识 · 迷雾' },
+    { n: 19, cn: '太阳', en: 'The Sun', up: '照单全收的时刻。把成果摆出来，别急着谦虚。', rev: '光被挡住了一点，但并没有熄灭。', keys: '明亮 · 成功 · 坦然' },
+    { n: 20, cn: '审判', en: 'Judgement', up: '一次自我复核：过去的部分被重新调用，为了让你回应现在的召唤。', rev: '一味自责，听不见那个召唤。', keys: '召唤 · 复盘 · 重生' },
+    { n: 21, cn: '世界', en: 'The World', up: '一个圈走完了。给它一个结尾，再决定要不要再来一圈。', rev: '差最后一步没走完，所以总觉得悬着。', keys: '完成 · 圆满 · 归位' }
+  ];
+
+  var KEY = 'tarot_history';
+  var KEY_DAY = 'tarot_day';
+  var deck = document.getElementById('tt-fan');
+  var flip = document.getElementById('tt-flip');
+  var img = document.getElementById('tt-img');
+  var read = document.getElementById('tt-read');
+  var histOl = document.getElementById('tt-hist');
+  var countEl = document.getElementById('tt-count');
+  var last = -1;
+  var history = [];
+  var today = '';
+
+  function todayKey() {
+    var d = new Date();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
-];
+  function drawnToday() {
+    for (var i = 0; i < history.length; i++) {
+      if (history[i].k === today) return history[i];
+    }
+    return null;
+  }
 
-var tarotCards = [
-  { name: '愚者', meaning: '新的开始，无限可能，冒险精神', icon: '🃏' },
-  { name: '魔术师', meaning: '创造力，技能，自信', icon: '🎩' },
-  { name: '女祭司', meaning: '直觉，神秘，智慧', icon: '🌙' },
-  { name: '女皇', meaning: '丰饶，母性，创造', icon: '👑' },
-  { name: '皇帝', meaning: '权威，领导，稳定', icon: '⚔️' },
-  { name: '教皇', meaning: '传统，信仰，指引', icon: '📿' },
-  { name: '恋人', meaning: '爱情，选择，和谐', icon: '💕' },
-  { name: '战车', meaning: '胜利，意志，决心', icon: '🏎️' },
-  { name: '力量', meaning: '勇气，耐心，内在力量', icon: '🦁' },
-  { name: '隐士', meaning: '内省，寻求，智慧', icon: '🏔️' },
-  { name: '命运之轮', meaning: '变化，机遇，转折', icon: '🎡' },
-  { name: '正义', meaning: '公正，真相，因果', icon: '⚖️' },
-  { name: '倒吊人', meaning: '牺牲，等待，新视角', icon: '🔄' },
-  { name: '死神', meaning: '结束，转变，重生', icon: '💀' },
-  { name: '节制', meaning: '平衡，调和，耐心', icon: '⚗️' },
-  { name: '恶魔', meaning: '诱惑，束缚，物质', icon: '😈' },
-  { name: '高塔', meaning: '突变，觉醒，毁灭', icon: '🗼' },
-  { name: '星星', meaning: '希望，灵感，平静', icon: '⭐' },
-  { name: '月亮', meaning: '幻觉，恐惧，潜意识', icon: '🌙' },
-  { name: '太阳', meaning: '成功，活力，快乐', icon: '☀️' },
-  { name: '审判', meaning: '觉醒，重生，召唤', icon: '📯' },
-  { name: '世界', meaning: '完成，成就，圆满', icon: '🌍' }
-];
+  function pad(n) { return (n < 10 ? '0' : '') + n }
+  function src(n) { return '/tarot-data/' + pad(n + 1) + '.jpg' }
 
-var fortunes = [
-  { level: '大吉', text: '今日运势极佳，万事顺遂！把握机会，大胆行动！', color: '#ff6b6b' },
-  { level: '中吉', text: '今日运势良好，适合开展新计划。保持积极心态！', color: '#ffa502' },
-  { level: '小吉', text: '今日运势平稳，小心行事可获小成。', color: '#ffd700' },
-  { level: '吉', text: '今日运势尚可，稳中求进为上策。', color: '#2ed573' },
-  { level: '末吉', text: '今日运势一般，需谨慎行事，避免冲动。', color: '#3498db' },
-  { level: '凶', text: '今日运势欠佳，宜静不宜动，多加小心。', color: '#9b59b6' }
-];
+  function load() {
+    try { history = JSON.parse(localStorage.getItem(KEY) || '[]') } catch (e) { history = [] }
+    if (!Array.isArray(history)) history = [];
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(history.slice(-60))) } catch (e) {}
+  }
 
-var ballAnswers = [
-  '是的，毫无疑问',
-  '绝对是这样',
-  '很有可能',
-  '前景看好',
-  '是的',
-  '迹象指向是',
-  '不确定，再问一次',
-  '现在不好说',
-  '无法预测',
-  '暂时不是',
-  '我的回答是否定的',
-  '不太可能',
-  '前景不太乐观',
-  '不是',
-  '绝对不是'
-];
+  function syncDeck() {
+    var todayRec = drawnToday();
+    if (todayRec) {
+      deck.classList.add('is-done');
+      deck.setAttribute('aria-disabled', 'true');
+      countEl.classList.add('is-done');
+      countEl.textContent = '今天已经抽过 · 明天再来';
+    } else {
+      deck.classList.remove('is-done');
+      deck.removeAttribute('aria-disabled');
+      countEl.classList.remove('is-done');
+      countEl.textContent = '已抽 ' + history.length + ' 次';
+    }
+    return todayRec;
+  }
 
-function startDivination(type) {
-  var today = new Date().toDateString();
-  var lastDivination = localStorage.getItem('divination_' + type + '_date');
-  
-  if (lastDivination === today) {
-    var lastResult = localStorage.getItem('divination_' + type + '_result');
-    if (lastResult) {
-      document.getElementById('resultContent').innerHTML = lastResult;
-      document.getElementById('divinationResult').style.display = 'block';
-      
-      var notice = document.createElement('div');
-      notice.className = 'daily-notice';
-      notice.innerHTML = '⚠️ 今日已占卜，结果不变';
-      document.getElementById('resultContent').prepend(notice);
+  function renderHistory() {
+    syncDeck();
+    if (!history.length) {
+      histOl.innerHTML = '<li class="none">还没有记录，抽一张试试。</li>';
       return;
     }
+    histOl.innerHTML = history.slice().reverse().map(function (h) {
+      var c = CARDS[h.i];
+      return '<li data-n="' + c.n + '"><span class="thumb" style="background-image:url(' + src(c.n) + ')"></span><p class="cap">' + c.cn + '<em>' + h.t + '</em></p></li>';
+    }).join('');
+    Array.prototype.forEach.call(histOl.querySelectorAll('li[data-n]'), function (li) {
+      li.addEventListener('click', function () { show(+li.getAttribute('data-n'), false) });
+    });
   }
-  
-  var result = '';
-  
-  switch(type) {
-    case 'code':
-      result = drawCodeFortune();
-      break;
-    case 'tarot':
-      result = drawTarot();
-      break;
-    case 'fortune':
-      result = drawFortune();
-      break;
-    case 'ball':
-      result = drawBall();
-      break;
-    case 'lucky':
-      result = drawLucky();
-      break;
+
+  function render(card) {
+    document.getElementById('tt-num').textContent = pad(card.n) + ' / 22';
+    document.getElementById('tt-name').textContent = card.cn;
+    document.getElementById('tt-en').textContent = card.en;
+    document.getElementById('tt-meaning').textContent = card.up;
+    document.getElementById('tt-rev-meaning').textContent = card.rev;
+    document.getElementById('tt-keys').textContent = card.keys;
+    img.src = src(card.n);
+    img.alt = card.cn + '（' + card.en + '）';
   }
-  
-  localStorage.setItem('divination_' + type + '_date', today);
-  localStorage.setItem('divination_' + type + '_result', result);
-  
-  document.getElementById('resultContent').innerHTML = result;
-  document.getElementById('divinationResult').style.display = 'block';
-}
 
-function drawCodeFortune() {
-  var fortune = codeFortunes[Math.floor(Math.random() * codeFortunes.length)];
-  var now = new Date();
-  var timestamp = now.getFullYear() + '-' + 
-    String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-    String(now.getDate()).padStart(2, '0') + ' ' + 
-    String(now.getHours()).padStart(2, '0') + ':' + 
-    String(now.getMinutes()).padStart(2, '0') + ':' + 
-    String(now.getSeconds()).padStart(2, '0');
-  
-  return `
-    <div class="code-divination">
-      <div class="code-header">
-        <span class="code-dot red"></span>
-        <span class="code-dot yellow"></span>
-        <span class="code-dot green"></span>
-        <span class="code-title">destiny.sh — bash</span>
-      </div>
-      <div class="code-body">
-        <div class="code-line"><span class="code-comment">#!/bin/bash</span></div>
-        <div class="code-line"><span class="code-comment"># 命运解析脚本 v1.0</span></div>
-        <div class="code-line"><span class="code-comment"># ${timestamp}</span></div>
-        <div class="code-line"></div>
-        <div class="code-line"><span class="code-variable">FORTUNE</span><span class="code-operator">=</span><span class="code-string">"${fortune.fortune}"</span></div>
-        <div class="code-line"><span class="code-variable">ADVICE</span><span class="code-operator">=</span><span class="code-string">"${fortune.advice}"</span></div>
-        <div class="code-line"></div>
-        <div class="code-line"><span class="code-keyword">echo</span> <span class="code-string">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span></div>
-        <div class="code-line"><span class="code-keyword">echo</span> <span class="code-string">"今日运势: $FORTUNE"</span></div>
-        <div class="code-line"><span class="code-keyword">echo</span> <span class="code-string">"━━━━━━━━━━━━━━━━━━━━━━━━━━━━"</span></div>
-        <div class="code-line"></div>
-        <div class="code-line"><span class="code-comment"># 幸运工具</span></div>
-        <div class="code-line"><span class="code-variable">LUCKY_TOOLS</span><span class="code-operator">=</span>(<span class="code-string">"${fortune.lucky.join('" "')}"</span>)</div>
-        <div class="code-line"></div>
-        <div class="code-line"><span class="code-comment"># 需避免</span></div>
-        <div class="code-line"><span class="code-variable">AVOID</span><span class="code-operator">=</span>(<span class="code-string">"${fortune.avoid.join('" "')}"</span>)</div>
-        <div class="code-line"></div>
-        <div class="code-output">
-          <div class="code-output-line">[+] 运势解析完成</div>
-          <div class="code-output-line">[+] 建议: ${fortune.advice}</div>
-          <div class="code-output-line info">[i] 幸运工具: ${fortune.lucky.join(', ')}</div>
-          <div class="code-output-line warning">[!] 需避免: ${fortune.avoid.join(', ')}</div>
-        </div>
-        <div class="code-line"><span class="code-cursor"></span></div>
-      </div>
-    </div>
-  `;
-}
-
-function drawTarot() {
-  var card = tarotCards[Math.floor(Math.random() * tarotCards.length)];
-  return `
-    <div class="result-icon">${card.icon}</div>
-    <div class="result-title">你抽到了：${card.name}</div>
-    <div class="result-text">${card.meaning}</div>
-  `;
-}
-
-function drawFortune() {
-  var fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-  return `
-    <div class="result-icon">🎋</div>
-    <div class="result-title" style="color: ${fortune.color}">${fortune.level}</div>
-    <div class="result-text">${fortune.text}</div>
-  `;
-}
-
-function drawBall() {
-  var answer = ballAnswers[Math.floor(Math.random() * ballAnswers.length)];
-  return `
-    <div class="result-icon">🎱</div>
-    <div class="result-title">魔法球的回答</div>
-    <div class="result-text">${answer}</div>
-  `;
-}
-
-function drawLucky() {
-  var lucky = Math.floor(Math.random() * 100) + 1;
-  var stars = '';
-  for (var i = 0; i < Math.ceil(lucky / 10); i++) {
-    stars += '⭐';
+  function pick() {
+    var i = Math.floor(Math.random() * CARDS.length);
+    if (i === last) { i = (i + 1 + Math.floor(Math.random() * (CARDS.length - 1))) % CARDS.length }
+    return i;
   }
-  return `
-    <div class="result-icon">🍀</div>
-    <div class="result-title">今日幸运值</div>
-    <div class="result-text" style="font-size: 2em; color: #ffd700;">${lucky}%</div>
-    <div class="result-text">${stars}</div>
-  `;
-}
 
-function hideResult() {
-  document.getElementById('divinationResult').style.display = 'none';
-}
+  function stamp() {
+    var d = new Date();
+    return pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function show(n, record) {
+    last = n;
+    read.classList.remove('is-empty');
+    // 先无动画地复位到背面，再触发翻转，保证每次抽牌动画时长一致
+    flip.style.transition = 'none';
+    flip.classList.remove('open');
+    void flip.offsetWidth;
+    render(CARDS[n]);
+    flip.style.transition = '';
+    setTimeout(function () { flip.classList.add('open') }, 20);
+    if (record !== false) {
+      history.push({ i: n, t: stamp(), k: today });
+      save();
+      renderHistory();
+    }
+  }
+
+  deck.addEventListener('click', function () {
+    if (drawnToday()) return;
+    show(pick(), true);
+  });
+
+  load();
+  today = todayKey();
+  renderHistory();
+  var todayRec = drawnToday();
+  if (todayRec) show(todayRec.i, false);
+})();
 </script>
-
 
   </div>
 </div>
